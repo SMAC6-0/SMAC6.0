@@ -92,10 +92,10 @@ class MotorController(Node):
 
     def init_motors(self):
         self.motor_1 = self.servo_bus.get_servo(1)
-        # self.motor_2 = self.servo_bus.get_servo(2)
-        # self.motor_3 = self.servo_bus.get_servo(3)
-        # self.motor_4 = self.servo_bus.get_servo(4)
-        # self.motor_5 = self.servo_bus.get_servo(5)
+        self.motor_2 = self.servo_bus.get_servo(2)
+        self.motor_3 = self.servo_bus.get_servo(3)
+        self.motor_4 = self.servo_bus.get_servo(4)
+        self.motor_5 = self.servo_bus.get_servo(5)
 
         self.time_to_move = 2
 
