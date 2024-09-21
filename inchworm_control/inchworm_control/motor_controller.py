@@ -10,6 +10,7 @@ from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
 
 class MotorController(Node):
+
     def __init__(self):
         super().__init__('motor_controller')
         self.publisher_ = self.create_publisher(Float32, 'step_status', 10)
@@ -20,6 +21,7 @@ class MotorController(Node):
             10)
         self.subscription
 
+        # if error on this line, unplug the ttl and reconnect, errors may occur if multiple usb ports are active
         self.servo_bus = ServoBus('/dev/ttyUSB0')  # /dev/ttyUSB0 is port for RP /dev/ttylUSB0 or USB1 for cambria(switches randomly)
         # self.servo_bus = ServoBus('/dev/ttyAMA0')  
         self.get_logger().info('Node starting')
@@ -106,6 +108,7 @@ class MotorController(Node):
         sleep(time)
     
     # STEP DEFINITIONS 
+    # foot is the motor that's on the ground
     def step_forward(self, foot):
         print('stepping forward')
         if foot == 1: 
@@ -427,10 +430,13 @@ class MotorController(Node):
         elif foot == 5:
             pass
 
+    """ 
+
+    """
     def step_down_1(self, foot):
         print("stepping down 1")
         if foot == 1:
-            # First part of the movement
+            # First part of the movement, gripping the ground/block and ungripping it 
             activate_servo(self.servo1)
             release_servo(self.servo2)
 
@@ -448,7 +454,7 @@ class MotorController(Node):
             # self.motor_5.move_time_write(self.motor_5.pos_read()-15,1)
             # sleep(1)
 
-            theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(3, 0, 4.5, 1)
+            theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(3, 0, 4.5, foot)
             self.move_to(theta2, theta3, theta4+15, self.time_to_move)
 
             self.turn("left", 90)
@@ -727,16 +733,27 @@ class MotorController(Node):
         self.motor_2.move_time_write(self.motor_2.pos_read()+15, 1)
         sleep(1)
 
-# servo angle of 0 is activated, 180 released
+"""
+Fuctions to control the servo motor using PWM
+"""
+# Activates the servo by moving it to 0 degrees (or an initial position)
 def activate_servo(servo_id):
+    # Set duty cycle to move servo to 0° position (2 corresponds to 0° for servos)
     servo_id.ChangeDutyCycle(2+(0/18))
+    # Pause to allow servo to reach position
     time.sleep(0.7)
+    # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
 
+# Releases the servo by moving it to 180 degrees (or a fully released position)
 def release_servo(servo_id):
+    # Set duty cycle to move servo to 180° position (12 corresponds to 180° for servos)
     servo_id.ChangeDutyCycle(2+(180/18))
+    # Pause to allow servo to reach position
     time.sleep(0.5)
+    # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
+
 
 def main(args=None):
     rclpy.init(args=args)
