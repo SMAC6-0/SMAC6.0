@@ -116,33 +116,40 @@ class MotorController(Node):
             theta4 += 20
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             
+            print('Yaho first leg moved up ------------------------')
             # move forward
             theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(6.2,0,2,1)
             theta4 += 20
             self.move_to(theta2, theta3, theta4, self.time_to_move)
+            print('Yaho first leg moved forward ------------------------')
 
             # move down
             theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(6.2,0,0,1)
             self.move_to(theta2, theta3, theta4+5, self.time_to_move)
             activate_servo(self.servo2)
+            print('Yaho first leg moved down ------------------------')
         
             ## following leg
             #angle back leg to remove from magnetic connection
             self.pick_up_back_leg()
+            print('Yaho second leg retracted ------------------------')
 
             # Take the step up 
             theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(6,0,2,5)
             self.move_to(theta2, theta3, theta4, self.time_to_move)
+            print('Yaho second leg moved up ------------------------')
 
             # Take the step forward
             theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(3,0,3,5)
             theta2 -= 20
             self.move_to(theta2, theta3, theta4, self.time_to_move)
+            print('Yaho second leg moved forward ------------------------')
 
             # Get ready to put the step down 
             theta1, theta2, theta3, theta4, theta5 = inverseKinematicsMQP(3.1,0,0,5)
             self.move_to(theta2-3, theta3, theta4-5, self.time_to_move)
             activate_servo(self.servo1)
+            print('Yaho second leg moved down ------------------------')
 
         elif foot == 5:
             pass
