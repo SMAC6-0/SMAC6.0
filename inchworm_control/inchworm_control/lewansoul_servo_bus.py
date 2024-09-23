@@ -191,7 +191,7 @@ class ServoBus:
     def __init__(
             self,
             port: Optional[str] = None,
-            timeout: float = 5.0,
+            timeout: float = 8.0,
             baudrate: int = 115200,
             serial_conn=None,
             on_enter_power_on: bool = False,

@@ -17,7 +17,7 @@ def shift_to_origin(blocks_placed):
         position[2] -= smallest_y
 
 # converts blocks_placed into a 3D array of blocks
-def prepare_world_data(blocks_placed, world_size=(20,20,20)):
+def prepare_world_data(blocks_placed, world_size=(20,80,20)):
     world_data = np.zeros(world_size)
     for block in blocks_placed:
         # Convert the Vec3 positions to integer indices

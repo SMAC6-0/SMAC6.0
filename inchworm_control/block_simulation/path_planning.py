@@ -1,8 +1,8 @@
 from enum import Enum
 import copy
-from config import BD_LOC
+from config import BD_LOC, LARGE_BUILD
 
-grid_size = 20  # Define the size of your grid
+grid_size = 50  # Define the size of your grid
 grid2 = [[[0 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
 blocks_no_longer_walkable = []
 
@@ -125,28 +125,36 @@ def bfs_3d(grid, start, goal):
         if is_goal_reached_3d(current_node, goal_node):
             return rework_path_3d(current_node, holding_block), steps
 
+        if LARGE_BUILD:
+            for dr, dc, dd in [(0, 1, 0), (1, 0, 0), (0, -1, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),
+                        (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),  
+                        (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),  
+                        (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
+                        (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), 
+                        (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]:
+                r, c, d = current_node.row + dr, current_node.col + dc, current_node.depth + dd
+                if is_valid_position_3d(grid, (r, c, d)) and not grid[r][c][d] and not visited[r][c][d]:
+                    visited[r][c][d] = True
+                    neighbor = Node(r, c, d, False)
+                    neighbor.parent = current_node
+                    queue.append(neighbor)
+
+        else:
         # This is no diagonal movement
-        for dr, dc, dd in [ (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),   # left right forward back
-                            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), # change in x and z but no change in y 
-                            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), # 2 block step down 
-                            (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1), #2 block step down 
-                            (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1)  # change in x and z but no change in y 
+            for dr, dc, dd in [ (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),   # left right forward back
+                                (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), # change in x and z but no change in y 
+                                (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), # 2 block step down 
+                                (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1), #2 block step down 
+                                (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),  # change in x and z but no change in y 
+                            ]: # (0, 1, 0), (0, -1, 0) up and down 
 
-                         ]: # (0, 1, 0), (0, -1, 0) up and down 
 
-        # 26 connected edges search     
-        # for dr, dc, dd in [(0, 1, 0), (1, 0, 0), (0, -1, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),  # Orthogonal directions
-        #                 (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),  # Edge-diagonal on same level
-        #                 (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),  # Edge-diagonal with one level difference
-        #                 (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
-        #                 (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1),  # Corner-diagonal directions
-        #                 (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]:
-            r, c, d = current_node.row + dr, current_node.col + dc, current_node.depth + dd
-            if is_valid_position_3d(grid, (r, c, d)) and not grid[r][c][d] and not visited[r][c][d]:
-                visited[r][c][d] = True
-                neighbor = Node(r, c, d, False)
-                neighbor.parent = current_node
-                queue.append(neighbor)
+                r, c, d = current_node.row + dr, current_node.col + dc, current_node.depth + dd
+                if is_valid_position_3d(grid, (r, c, d)) and not grid[r][c][d] and not visited[r][c][d]:
+                    visited[r][c][d] = True
+                    neighbor = Node(r, c, d, False)
+                    neighbor.parent = current_node
+                    queue.append(neighbor)
 
     # return a negative number if no path found
     print("No path found using BFS in 3D")
