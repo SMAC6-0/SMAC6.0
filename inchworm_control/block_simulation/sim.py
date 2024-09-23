@@ -13,11 +13,13 @@ import copy
 
 app = Ursina()
 
+# stltovoxel /Users/canguven/Downloads/tower.stl /Users/canguven/Downloads/yarrak.xyz  --resolution 50
+
 # Variables
 sky_texture = load_texture("Assets/Textures/skybox.png")
 white_block_texture = load_texture("Assets/Textures/white_block.png")
-smart_block_texture = load_texture("Assets/Textures/smart_block.png")
-smart_block_texture_step = load_texture("Assets/Textures/smart_block_step.png")
+smart_block_texture = load_texture("Assets/Textures/smart_block_new.png")
+smart_block_texture_step = load_texture("Assets/Textures/smart_block_step_new.png")
 smart_block_texture_red = load_texture("Assets/Textures/smart_block_red_outline.png")
 smart_block_texture_blue = load_texture("Assets/Textures/smart_block_blue_outline.png")
 smart_block_texture_yellow = load_texture("Assets/Textures/smart_block_yellow_outline.png")
@@ -37,6 +39,7 @@ last_colored_block_2 = None
 last_block_original_texture_2 = None
 window.exit_button.visible = False
 key_g_pressed = False  
+key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed = False
 placed_block = None 
@@ -55,7 +58,7 @@ prev_point = point
 
 # Updates every frame
 def update():
-    global blocks_placed, key_g_pressed, key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
+    global blocks_placed, key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -69,6 +72,27 @@ def update():
     
     if not held_keys["g"]:
         key_g_pressed = False
+
+    if held_keys["t"] and not key_t_pressed:
+        # To use this function, just pass the path to your 'empire.xyz' file
+        # file_path = '/Users/canguven/Downloads/yarrak.xyz'
+        # UPDATE THE FILES HERE
+        simplify_and_ensure_connectivity('/Users/canguven/Downloads/empire.xyz', '/Users/canguven/Downloads/empire2.xyz', grid_size=10)
+        coordinates = read_and_place_voxels_from_file('/Users/canguven/Downloads/empire2.xyz')
+        # pyramid_coordinates = generate_pyramid(5)
+        # # Spawn cubes for each coordinate in the pyramid
+        # for x, y, z in pyramid_coordinates:
+        #     spawn_cube(x, y, z,'')  # Replace
+        #     cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture) 
+        #     blocks_placed.append(cube.position) 
+        for x, y, z in coordinates:
+            spawn_cube(x, y, z,'')  # Replace
+            cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
+            blocks_placed.append(cube.position) 
+        key_t_pressed = True  # Set the flag to True after printing
+    
+    if not held_keys["t"]:
+        key_t_pressed = False
 
     # Search(Look) for structures
     if held_keys["l"]:
@@ -156,6 +180,8 @@ def update():
         prev_point = point
         key_n_pressed = False
 
+
+
 # writes steps to a txt file              
 def step_getter(steps):
     complete_steps = copy.deepcopy(steps)
@@ -223,6 +249,46 @@ class Sky(Entity):
 
 # HELPER FUNCTIONS
         
+def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):
+    """
+    Simplifies an XYZ file and ensures each voxel is at least connected to one other voxel.
+
+    Parameters:
+    - input_file_path: Path to the input XYZ file.
+    - output_file_path: Path to the output simplified XYZ file.
+    - grid_size: Size of the grid cell for downsampling and connectivity checks.
+    """
+    voxel_grid = {}  # Use a dictionary to represent a sparse grid
+    with open(input_file_path, 'r') as file:
+        for line in file:
+            x, y, z = map(float, line.strip().split())
+            # Convert coordinates to a grid position
+            grid_pos = (round(x / grid_size), round(y / grid_size), round(z / grid_size))
+            
+            # Check for connectivity: Ensure at least one neighbor exists
+            neighbors = [
+                (grid_pos[0] + dx, grid_pos[1] + dy, grid_pos[2] + dz)
+                for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)
+                if not (dx == dy == dz == 0)  # Exclude the voxel itself
+            ]
+            if any(neighbor in voxel_grid for neighbor in neighbors):
+                voxel_grid[grid_pos] = True
+            else:
+                # If no neighbors, check if it's the first voxel; if so, add it anyway to start the connectivity chain
+                if not voxel_grid:
+                    voxel_grid[grid_pos] = True
+
+    # Write the simplified and connected voxels to the output file
+    with open(output_file_path, 'w') as file:
+        for grid_pos in voxel_grid.keys():
+            # Convert grid positions back to coordinates
+            x, y, z = [coord * grid_size for coord in grid_pos]
+            file.write(f"{x} {y} {z}\n")
+
+# Example usage
+# simplify_and_ensure_connectivity('path/to/your/original_file.xyz', 'path/to/your/simplified_file.xyz', grid_size=10)
+
+        
 # Generates a quarter section of a 10-by-10 pyramid of blocks
 def generate_pyramid(base_size):
     pyramid = []
@@ -234,6 +300,27 @@ def generate_pyramid(base_size):
             for z in range(base_size - y):
                 pyramid.append((x+10, y+1, z+10))
     return pyramid
+
+def read_and_place_voxels_from_file(file_path):
+    coordinates_from_file = []
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Split the line into coordinates and convert them to integers
+            x, y, z = [int(float(coord)) for coord in line.strip().split()]
+            
+            # Your voxel placement logic here
+            # Replace `spawn_cube` and `Voxel` with your actual function and class names
+            # Assuming `spawn_cube` is a function to call for placing the cube, which you might or might not need
+            # spawn_cube(x, y, z, '')  # Uncomment and use if needed
+            # cube = Voxel(position=Vec3(x, y, z), texture=smart_block_texture)
+            coordinates_from_file.append(((x/10)-60, z/10,(y/10)+20))
+            # blocks_placed.append(coordinates_from_file)
+
+    return coordinates_from_file
+
+
+
 
 # Checks the color of the block at the specified position
 # This is used to simulate the steping on a already placed block and def check_block_color(x, y, z):
@@ -262,7 +349,7 @@ def check_block_color(x, y, z):
         elif existing_cube_texture == smart_block_texture_yellow: 
                 block_color = smart_block_texture_step_yellow
         elif existing_cube_texture == smart_block_texture_step: 
-                block_color = smart_block_texture_step
+                block_color = smart_block_texture
         elif existing_cube_texture == smart_block_texture_step_red:
                 block_color = smart_block_texture_step_red
         elif existing_cube_texture == smart_block_texture_step_green:
@@ -271,6 +358,9 @@ def check_block_color(x, y, z):
                 block_color = smart_block_texture_step_blue
         elif existing_cube_texture == smart_block_texture_step_yellow:      
                 block_color = smart_block_texture_step_yellow
+        elif existing_cube_texture == smart_block_outline:      
+                block_color = smart_block_texture
+
         else:
                 print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
@@ -317,8 +407,8 @@ if DEMO:
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))
 else:
-     for z in range(20): # 5
-        for x in range(20): # 6 
+     for z in range(21): # 5
+        for x in range(21): # 6 
             voxel = Voxel(position = (x, 0, z))
 
 def look_at(target_pos, player_pos):

@@ -520,30 +520,80 @@ def simplify_steps(PAST_LOC, complete_path, complete_steps):
 # -a list of all the path coords for all the structures like [[(x1, y1, z1), (x2, y2, z2), ...], [(x1, y1, z1), (x2, y2, z2), ...], ...]
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
 def dev_total_path_steps(structures, misc_blocks):
-    grid = initialize_grid_with_structures(20)
+    grid = initialize_grid_with_structures(50)
     update_grid_with_structure(grid, BD_LOC)
     complete_path = []
     complete_steps = []
     list_of_goals = []
+    print('misc_blocks',misc_blocks)
 
-    for structure in structures:
-        # get path coords for each coord in the structure
-        # should go from current location to block depot, then from block depot to block until last block in structure
-        list_of_structure_coords = structure[1]
-        for coord in list_of_structure_coords:
+    if not structures:
+        print("No known structures.")
+    else:
+        print("looking for known structures.")
+
+        for structure in structures:
+            # get path coords for each coord in the structure
+            # should go from current location to block depot, then from block depot to block until last block in structure
+            list_of_structure_coords = structure[1]
+            for coord in list_of_structure_coords:
+                PAST_LOC = copy.deepcopy(CURRENT_LOC)
+                print("corod: ", coord)
+                # get path and steps from current location to block depot
+                bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC)
+                print("bd_path: ", bd_path)
+                # pop the first value in list of path coords to remove repeat coords
+                bd_path.pop(0)
+
+                # edit the coordinate for simulation purposes
+                x, z, y = coord
+                new_coord = [x, z-1, y]
+
+                # add the new coordinate to the list of goals
+                list_of_goals.append(new_coord)
+                
+                # get path and steps from current location to coordinate in structure
+                block_path, block_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, new_coord)
+                # update grid to indicate that the placed block can now be walked on
+                grid = update_grid_with_structure(grid, coord)
+
+                # pop the first value in list of path coords to remove repeat coords
+                block_path.pop(0)
+                
+                # get the second to last location in the block_path
+                PAST_LOC = block_path[-2][0]
+
+                complete_path.extend(bd_path)
+                complete_path.extend(block_path)
+
+                complete_steps.extend(bd_steps)
+                complete_steps.extend(block_steps)
+
+                # simplify the step after placing if it is the demo and it's not the last block in the structure
+                if DEMO == True and coord != list_of_structure_coords[-1]:
+                    complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps)
+    if not misc_blocks:
+        print("No misc_block.")
+    else:
+        print("looking for misc_block.")
+        # at this point, we have paths and stepa for each block in each structure, but not the miscellanous blocks
+        # search for path and steps for each miscellanous block, and add it to the complete path and steps
+        for coord in misc_blocks:
             PAST_LOC = copy.deepcopy(CURRENT_LOC)
-            print("corod: ", coord)
-            # get path and steps from current location to block depot
+
+            # get path and steps from current location to block depot  
             bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC)
-            print("bd_path: ", bd_path)
+
             # pop the first value in list of path coords to remove repeat coords
-            bd_path.pop(0)
+            try:
+                bd_path.pop(0)
+            except IndexError:
+                print('bd_path:', bd_path)
 
             # edit the coordinate for simulation purposes
             x, z, y = coord
             new_coord = [x, z-1, y]
 
-            # add the new coordinate to the list of goals
             list_of_goals.append(new_coord)
             
             # get path and steps from current location to coordinate in structure
@@ -553,53 +603,15 @@ def dev_total_path_steps(structures, misc_blocks):
 
             # pop the first value in list of path coords to remove repeat coords
             block_path.pop(0)
-            
-            # get the second to last location in the block_path
-            PAST_LOC = block_path[-2][0]
 
             complete_path.extend(bd_path)
             complete_path.extend(block_path)
 
             complete_steps.extend(bd_steps)
-            complete_steps.extend(block_steps)
+            complete_steps.extend(block_steps)  
 
-            # simplify the step after placing if it is the demo and it's not the last block in the structure
-            if DEMO == True and coord != list_of_structure_coords[-1]:
+            # simplify the step after placing if it is the demo
+            if DEMO == True:
                 complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps)
-
-    # at this point, we have paths and stepa for each block in each structure, but not the miscellanous blocks
-    # search for path and steps for each miscellanous block, and add it to the complete path and steps
-    for coord in misc_blocks:
-        PAST_LOC = copy.deepcopy(CURRENT_LOC)
-
-        # get path and steps from current location to block depot  
-        bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC)
-
-        # pop the first value in list of path coords to remove repeat coords
-        bd_path.pop(0)
-
-        # edit the coordinate for simulation purposes
-        x, z, y = coord
-        new_coord = [x, z-1, y]
-
-        list_of_goals.append(new_coord)
-        
-        # get path and steps from current location to coordinate in structure
-        block_path, block_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, new_coord)
-        # update grid to indicate that the placed block can now be walked on
-        grid = update_grid_with_structure(grid, coord)
-
-        # pop the first value in list of path coords to remove repeat coords
-        block_path.pop(0)
-
-        complete_path.extend(bd_path)
-        complete_path.extend(block_path)
-
-        complete_steps.extend(bd_steps)
-        complete_steps.extend(block_steps)  
-
-         # simplify the step after placing if it is the demo
-        if DEMO == True:
-            complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps)
 
     return complete_path, complete_steps, list_of_goals
