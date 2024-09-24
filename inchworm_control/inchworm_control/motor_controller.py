@@ -49,7 +49,7 @@ class MotorController(Node):
         GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
         GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
 
-        # Set up PWM (Pulse Width Modulation) for the two servos, with a frequency of 50Hz
+        # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
         self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
         self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
 
@@ -97,8 +97,9 @@ class MotorController(Node):
             action = self.step_actions.get(msg.data)
 
             if action:
-                # If a valid action is found, execute the action with which_foot_motor (1 for this case)
+                # If a valid action (step) is found, execute the action with which_foot_motor (1 for this case)
                 action(1)
+                # TODO: Determine when which_foot_motor == 5 is passed into the step functions 
             else:
                 # Log a warning if the action is not recognized
                 self.get_logger().warn('Unknown command: %s' % msg.data)
@@ -118,24 +119,55 @@ class MotorController(Node):
 
 
     def init_motors(self):
+        """
+        Retrieves and initializes motors from the servo bus.
+        """
         self.motor_1 = self.servo_bus.get_servo(1)
         self.motor_2 = self.servo_bus.get_servo(2)
         self.motor_3 = self.servo_bus.get_servo(3)
         self.motor_4 = self.servo_bus.get_servo(4)
         self.motor_5 = self.servo_bus.get_servo(5)
 
-        self.time_to_move = 1.5
+        self.time_to_move = 1.5 # Set the time over which the motors will move.
 
     def move_to(self, theta2, theta3, theta4, time):
+        """
+        Move motors to specified angles over a given time duration.
+
+        Args:
+            theta2 (float): Target angle for motor 2.
+            theta3 (float): Target angle for motor 3.
+            theta4 (float): Target angle for motor 4.
+            time (float): Duration to reach the target angles (in seconds).
+        """
+        # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
+
+        # Pause the program to allow the motors to finish moving. 
         sleep(time)
     
-    # STEP DEFINITIONS 
-    def step_forward(self, foot):
+    ## STEP DEFINITIONS
+    """
+    The basic procedure of the step functions is:  
+    1. Call it, specifying the foot motor
+    TODO: Look into if which_foot_motor is EVER equal to 5, and hence if the if statements checking which_foot_motor are irrelevant 
+    My thoughts are that it mayyy be relevant if trying to make inchworm movement bidirectional?
+    2. Move gripper servos to attach/deattach 
+    3. Use inverse kinematics to move to a series of specific positions that make the movement possible 
+    """ 
+
+    def step_forward(self, which_foot_motor):
+        """
+        Step forward leading with the specified foot motor. Handles the stepping motion by activating servos 
+        and moving the robotic leg through various angles using inverse kinematics. 
+
+        Args:
+            which_foot_motor (int): The foot motor to activate (1 for the first foot, 5 for the second).
+        """
         print('stepping forward')
-        if foot == 1: 
+        if which_foot_motor == 1: 
             activate_servo(self.servo1)
             sleep(1)
             activate_servo(self.servo1)
@@ -161,35 +193,20 @@ class MotorController(Node):
             ## following leg
             #angle back leg to remove from magnetic connection
             self.bring_back_leg_to_block(1, 0)
-            # self.pick_up_back_leg()
 
-            # # Take the step up 
-            # theta1, theta2, theta3, theta4, theta5 = inverseKinematics(6,0,2,5)
-            # self.move_to(theta2, theta3, theta4, self.time_to_move)
-
-            # # Take the step forward
-            # theta1, theta2, theta3, theta4, theta5 = inverseKinematics(3,0,3,5)
-            # theta2 -= 20
-            # self.move_to(theta2, theta3, theta4, self.time_to_move)
-
-            # # Get ready to put the step down 
-            # theta1, theta2, theta3, theta4, theta5 = inverseKinematics(3.8,0,-0.2,5)
-            # self.move_to(theta2+5, theta3, theta4-8, 2)
-            # activate_servo(self.servo1)
-
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def step_forward_block(self, foot):
+    def step_forward_block(self, which_foot_motor):
         print('stepping forward with block')
 
         #If foot 1, base is motor 1 
-        if foot == 1: 
+        if which_foot_motor == 1: 
             self.bring_block_forward(1)
             self.bring_back_leg_to_block(1, 1)
 
         # If foot 5, base is
-        elif foot == 5:
+        elif which_foot_motor == 5:
             ##move first 
             # move up
             # this first part currently does not act well because the servo does not fully actuate and the leg gets caught on the other leg
@@ -217,9 +234,9 @@ class MotorController(Node):
         else:
             ValueError('are you stupid there is only 1 and 5????')
 
-    def step_left(self, foot):
+    def step_left(self, which_foot_motor):
         print('stepping left')
-        if foot == 1: 
+        if which_foot_motor == 1: 
             release_servo(self.servo2)
             activate_servo(self.servo1)
 
@@ -257,16 +274,16 @@ class MotorController(Node):
             self.move_to(theta2+5, theta3, theta4, self.time_to_move)
             activate_servo(self.servo1)
         
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def step_right(self, foot):
+    def step_right(self, which_foot_motor):
         print('stepping right')
         pass
 
-    def step_left_block(self, foot):
+    def step_left_block(self, which_foot_motor):
         print('stepping left with a block')
-        if foot == 1:
+        if which_foot_motor == 1:
             self.lift_up_block(1,5) # 3.3, 0, 
             # activate_servo(self.servo1)
             # activate_servo(self.servo2)
@@ -318,22 +335,22 @@ class MotorController(Node):
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             activate_servo(self.servo1)
         
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def step_right_block(self, foot):
+    def step_right_block(self, which_foot_motor):
         print('stepping right with a block')
 
-        if foot == 1:
+        if which_foot_motor == 1:
             pass
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def grab_up_forward(self, foot):
+    def grab_up_forward(self, which_foot_motor):
         print('grabbing up forward')
 
-        if foot == 1: 
+        if which_foot_motor == 1: 
             activate_servo(self.servo1)
             release_servo(self.servo2)
             sleep(1)
@@ -354,15 +371,15 @@ class MotorController(Node):
             self.bring_back_leg_to_block(1,1)
 
         # If foot 5, base is motor 5
-        elif foot == 5:
+        elif which_foot_motor == 5:
            pass
 
         else:
             ValueError('are you stupid there is only 1 and 5????')
 
-    def grab_up_left(self, foot):
+    def grab_up_left(self, which_foot_motor):
         print("grabbing up left")
-        if foot == 1:
+        if which_foot_motor == 1:
             #lift up
             #turn
             release_servo(self.servo2)
@@ -408,22 +425,22 @@ class MotorController(Node):
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             activate_servo(self.servo1)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
         
-    def place_forward(self, foot):
+    def place_forward(self, which_foot_motor):
         print("placing forward")
-        if foot == 1:
+        if which_foot_motor == 1:
             activate_servo(self.servo1)
             self.step_forward_block(1)
             release_servo(self.servo2)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def place_up_forward(self, foot):
+    def place_up_forward(self, which_foot_motor):
         print("placing up forward")
-        if foot == 1:
+        if which_foot_motor == 1:
             activate_servo(self.servo1)
             self.lift_up_block(1,8)
 
@@ -438,12 +455,12 @@ class MotorController(Node):
             self.bring_back_leg_to_block2(1, 2)
             release_servo(self.servo2)
         
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
     
-    def place_up_2_forward(self, foot):
+    def place_up_2_forward(self, which_foot_motor):
         print("placing up 2 forward")
-        if foot == 1:
+        if which_foot_motor == 1:
             
             activate_servo(self.servo1)
             activate_servo(self.servo2)
@@ -460,12 +477,12 @@ class MotorController(Node):
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(6,0,9,1)
             self.move_to(theta2, theta3, theta4, 1)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def step_down_1(self, foot):
+    def step_down_1(self, which_foot_motor):
         print("stepping down 1")
-        if foot == 1:
+        if which_foot_motor == 1:
             # First part of the movement
             activate_servo(self.servo1)
             release_servo(self.servo2)
@@ -532,12 +549,12 @@ class MotorController(Node):
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             # self.step_forward(1)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def step_down_2(self, foot):
+    def step_down_2(self, which_foot_motor):
         print("stepping down 2")
-        if foot == 1:
+        if which_foot_motor == 1:
             # apply angle to lift front foot off
             # First part of the movement
             activate_servo(self.servo1)
@@ -598,12 +615,12 @@ class MotorController(Node):
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(0, 3.25, 0, 5)
             self.move_to(theta2, theta3, theta4, self.time_to_move)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def lift_up_block(self, foot, target):
+    def lift_up_block(self, which_foot_motor, target):
         print("lifting up")
-        if foot == 1:
+        if which_foot_motor == 1:
             # print(self.motor_2.vin_read())
             activate_servo(self.servo1)
             activate_servo(self.servo2)
@@ -614,7 +631,7 @@ class MotorController(Node):
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(3.3,0,target,1)
             self.move_to(theta2, theta3, theta4+15, 2)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
     def lift_up(self, target):
@@ -634,8 +651,8 @@ class MotorController(Node):
             self.move_to(theta2, theta3, theta4+20, 1) 
             # print("4")
 
-    def bring_block_forward(self, foot):
-        if foot == 1:
+    def bring_block_forward(self, which_foot_motor):
+        if which_foot_motor == 1:
             self.lift_up_block(1,7)
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(6,0,7,1)
             self.move_to(theta2, theta3, theta4+15, 2)
@@ -643,10 +660,10 @@ class MotorController(Node):
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(6.25,0,3,1)
             self.move_to(theta2, theta3, theta4+7.5, 2)
 
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass
 
-    def bring_back_leg_to_block(self, foot, level):
+    def bring_back_leg_to_block(self, which_foot_motor, level):
         # offset = 25
         # if level == 1:
         #     target = -3
@@ -664,7 +681,7 @@ class MotorController(Node):
             target = -6
             offset = 15
 
-        if foot == 1:
+        if which_foot_motor == 1:
             self.pick_up_back_leg()
             # move the back leg up
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(6,0,(target+1),5)
@@ -678,10 +695,10 @@ class MotorController(Node):
             self.move_to(theta2, theta3, theta4, 3)
 
             activate_servo(self.servo1)
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass       
 
-    def bring_back_leg_to_block2(self, foot, level):
+    def bring_back_leg_to_block2(self, which_foot_motor, level):
         offset = 25
         if level == 1:
             target = -3
@@ -689,7 +706,7 @@ class MotorController(Node):
             target = -6
             offset = 15
 
-        if foot == 1:
+        if which_foot_motor == 1:
             # self.pick_up_back_leg()
             release_servo(self.servo1)
             self.motor_2.move_time_write(self.motor_2.pos_read()+5, 1)
@@ -705,7 +722,7 @@ class MotorController(Node):
             theta1, theta2, theta3, theta4, theta5 = inverseKinematics(3.2,0,target,5)
             self.move_to(theta2, theta3, theta4, 3)
             activate_servo(self.servo1)
-        elif foot == 5:
+        elif which_foot_motor == 5:
             pass  
 
     def turn(self, direction, degree = 50):

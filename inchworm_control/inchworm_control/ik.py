@@ -118,6 +118,10 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     theta4 = math.degrees(-theta4)
     theta5 = math.degrees(theta5)
 
+    # Multiply by -1 to make the math work out 
+    theta2 *= -1
+    theta3 *= -1
+
     # storing all the theta values in a list 
     theta_values = [theta1, theta2, theta3, theta4, theta5] 
 
