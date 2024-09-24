@@ -39,15 +39,15 @@ def apply_offsets(theta_values, motor_offsets):
         theta_values[4] + motor_offsets['theta5_offset']
     ]
 
-def inverseKinematics(Px, Py, Pz, which_motor):
+def inverseKinematics(Px, Py, Pz, which_foot_motor):
     """
     Calculates inverse kinematics for inchworm robot and adjusts motor angles using offsets.
     
     Args:
-        Px (float): X coordinate of the end-effector corresponding to which_motor.
-        Py (float): Y coordinate of the end-effector corresponding to which_motor.
-        Pz (float): Z coordinate of the end-effector corresponding to which_motor.
-        which_motor (int): Motor identifier (1 or 5) corresponding to the foot.
+        Px (float): X coordinate of the end-effector corresponding to which_foot_motor.
+        Py (float): Y coordinate of the end-effector corresponding to which_foot_motor.
+        Pz (float): Z coordinate of the end-effector corresponding to which_foot_motor.
+        which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
     
     Returns:
         list: A list of joint angles [theta1, theta2, theta3, theta4, theta5] adjusted for motor offsets.
@@ -83,7 +83,7 @@ def inverseKinematics(Px, Py, Pz, which_motor):
     theta3 = math.acos(cosTheta3) - math.pi
     
     # Depending on which motor (leg) is used, calculate the angles differently
-    if which_motor == 1:
+    if which_foot_motor == 1:
         theta1 = math.atan2(Py, Px)
 
         # Solve joints 2
@@ -96,7 +96,7 @@ def inverseKinematics(Px, Py, Pz, which_motor):
         # Joint 5 doesn't affect the pose 
         theta5 = 0
 
-    elif which_motor == 5:
+    elif which_foot_motor == 5:
         theta5 = math.atan2(Py, Px)
 
         # Solve joints 4

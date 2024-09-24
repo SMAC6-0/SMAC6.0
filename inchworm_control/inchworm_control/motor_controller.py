@@ -12,17 +12,31 @@ from time import sleep
 
 class MotorController(Node):
     def __init__(self):
+        """
+        Initialization method for the motor controller node.
+
+        Initializes ROS2 publisher, subscriber, GPIO pins, motor angles, and step actions for the inchworm robot.
+        """
+        # Initialize the ROS2 node with the name 'motor_controller'
         super().__init__('motor_controller')
+
+        # Create a publisher for the 'step_status' topic, which sends Float32 messages
         self.publisher_ = self.create_publisher(Float32, 'step_status', 10)
+
+        # Create a subscriber for the 'motor_command' topic, which listens for String messages
+        # The messages are handled by the listener_callback method
         self.subscription = self.create_subscription(
             String,
             'motor_command',
             self.listener_callback,
             10)
-        self.subscription
+        # self.subscription
 
-        self.servo_bus = ServoBus('/dev/ttyUSB0')  # /dev/ttyUSB0 is port for RP /dev/ttylUSB0 or USB1 for cambria(switches randomly)
-        # self.servo_bus = ServoBus('/dev/ttyAMA0')  
+        # Initialize the connection to the servo motor bus over a USB-TTL connection
+        # Note: The RPi should be connected to the bottom-left USB port and no other USB devices should be connected
+        # If the connection fails, try disconnecting and reconnecting the USB port
+    
+        self.servo_bus = ServoBus('/dev/ttyUSB0')  
         self.get_logger().info('Node starting')
 
         # init motors
@@ -30,18 +44,29 @@ class MotorController(Node):
 
         # init servos
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(11,GPIO.OUT)
-        GPIO.setup(13,GPIO.OUT)
+
+        # Initialize GPIO pins 11 and 13 for controlling the gripper servos
+        GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
+        GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
+
+        # Set up PWM (Pulse Width Modulation) for the two servos, with a frequency of 50Hz
         self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
-        self.servo2 = GPIO.PWM(13,50) # pin 13 for servo1, pulse 50Hz
+        self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
+
+        # Start PWM with an initial duty cycle of 0 (no movement)
         self.servo1.start(0)
         self.servo2.start(0)
-        # MOTOR CANNOT GO NEGATIVE 
-        
-        # init motor angles
-        print(self.motor_1.pos_read(), self.motor_2.pos_read(), self.motor_3.pos_read(), self.motor_4.pos_read(), self.motor_5.pos_read())
-        # print(self.motor_1.pos_read())
 
+        # Note: Motors are not allowed to have negative positions
+        
+        print("----------------Intial Motor Angles-----------------------")
+        print(self.motor_1.pos_read(), 
+            self.motor_2.pos_read(), 
+            self.motor_3.pos_read(), 
+            self.motor_4.pos_read(), 
+            self.motor_5.pos_read())
+
+         # Initialize a dictionary mapping possible step actions to corresponding methods
         self.step_actions = {
             'STEP_FORWARD': self.step_forward,
             'STEP_FORWARD_BLOCK': self.step_forward_block,
@@ -60,24 +85,37 @@ class MotorController(Node):
         }
 
     def listener_callback(self, msg):
+        """
+        Callback function for the motor_command subscriber.
+
+        Processes incoming commands, executes the corresponding step action, and publishes the step status.
+        Throws errors for failure of command execution.
+        """
         self.get_logger().info('Received command to "%s' % msg.data)
         try:
+            # Get the step action from the step_actions dictionary based on the received message
             action = self.step_actions.get(msg.data)
 
             if action:
+                # If a valid action is found, execute the action with which_foot_motor (1 for this case)
                 action(1)
             else:
+                # Log a warning if the action is not recognized
                 self.get_logger().warn('Unknown command: %s' % msg.data)
             sleep(1)
             
-            # publish step status. 0.0 means step sucessful, 1.0 means step error
+            # Create a new Float32 message to publish the step status
+            # 0.0 indicates the step was successful, 1.0 indicates an error occurred
             msg = Float32()
             msg.data = 0.0
+            
+            # Publish the step status to the 'step_status' topic
             self.publisher_.publish(msg)
             self.get_logger().info('Publishing: "%s"' % msg.data)
             
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
+
 
     def init_motors(self):
         self.motor_1 = self.servo_bus.get_servo(1)
