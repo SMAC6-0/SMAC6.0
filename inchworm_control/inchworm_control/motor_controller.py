@@ -820,13 +820,30 @@ class MotorController(Node):
 
 # servo angle of 0 is activated, 180 released
 def activate_servo(servo_id):
+    """
+    Activate the servo motor so that the gripper latches onto the surface. 
+    Args:
+        servo_id: The servo motor object to be activated. 
+    """
+    # Set duty cycle to move servo to 0° position (2 corresponds to 0° for most servos)
     servo_id.ChangeDutyCycle(2+(0/18))
-    time.sleep(0.7)
+    # Pause to allow servo to reach position
+    time.sleep(1)
+    # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
 
+# Releases the servo by moving it to 180 degrees (or a fully released position)
 def release_servo(servo_id):
+    """
+    Release the servo motor so that the gripper detached from the surface. 
+    Args:
+        servo_id: The servo motor object to be released. 
+    """
+    # Set duty cycle to move servo to 180° position (12 corresponds to 180° for most servos)
     servo_id.ChangeDutyCycle(2+(180/18))
-    time.sleep(0.5)
+    # Pause to allow servo to reach position
+    time.sleep(1)
+    # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
 
 def main(args=None):
