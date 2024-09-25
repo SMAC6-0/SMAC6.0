@@ -171,10 +171,10 @@ class MotorController(Node):
         print('stepping forward')
         if which_foot_motor == 1: 
             activate_servo(self.servo1)
-            sleep(1)
-            activate_servo(self.servo1)
-            release_servo(self.servo2)
-            sleep(1)
+            # sleep(1)
+            # activate_servo(self.servo1)
+            # release_servo(self.servo2)
+            # sleep(1)
             release_servo(self.servo2)
             # move up
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(3,0,2,1)
