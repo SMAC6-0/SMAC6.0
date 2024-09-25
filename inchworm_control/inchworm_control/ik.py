@@ -62,7 +62,7 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     L_ENDEFFECTOR = 3.125  # Joint 5 to EE
 
     # extract the motor offsets from the yaml file
-    inchworm_motor_offsets = load_inchworm_motor_offsets('inchworm_motor_config.yaml')
+    inchworm_motor_offsets = load_inchworm_motor_offsets('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
 
     # adjust Z axis of the end-effector 
     Pz_adjusted = -Pz
