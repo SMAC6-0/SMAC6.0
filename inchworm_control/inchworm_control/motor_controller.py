@@ -166,28 +166,27 @@ class MotorController(Node):
         and moving the robotic leg through various angles using inverse kinematics. 
 
         Args:
-            which_foot_motor (int): The foot motor to activate (1 for the first foot, 5 for the second).
+            which_foot_motor (int): The foot motor to activate (1 for the leading foot, 5 for the following).
         """
         print('stepping forward')
         if which_foot_motor == 1: 
+            # Deatach leading foot, attach following foot 
             activate_servo(self.servo1)
-            # sleep(1)
-            # activate_servo(self.servo1)
-            # release_servo(self.servo2)
-            # sleep(1)
             release_servo(self.servo2)
-            # move up
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(3,0,2,1)
-            theta4 += 15
+            # Move the leading foot up
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(3,0,2, which_foot_motor)
+            theta4 += 15 # adjust EE to point straight down 
+            # TODO: implement trajectory planning 
+            # TODO: instead of hard coded values, establish constant heights or "levels" (as in bring_back_leg_to_block)
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             
-            # move forward
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,2,1)
+            # Move the leading foot forward
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,2, which_foot_motor)
             theta4 += 20
             self.move_to(theta2, theta3, theta4, self.time_to_move)
 
             # move down
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,0,1)
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,0, which_foot_motor)
             self.move_to(theta2, theta3, theta4+5, 1.5)
             activate_servo(self.servo2)
             sleep(1)
@@ -666,12 +665,6 @@ class MotorController(Node):
             pass
 
     def bring_back_leg_to_block(self, which_foot_motor, level):
-        # offset = 25
-        # if level == 1:
-        #     target = -3
-        # else: 
-        #     target = -6
-        #     offset = 15
         offset2 = 0
         offset = -25
         if level == 1:
