@@ -64,6 +64,8 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     # extract the motor offsets from the yaml file
     inchworm_motor_offsets = load_inchworm_motor_offsets('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
 
+    print("motor offsets: ", inchworm_motor_offsets)
+
     # adjust Z axis of the end-effector 
     Pz_adjusted = -Pz
 
@@ -118,16 +120,18 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     theta4 = math.degrees(-theta4)
     theta5 = math.degrees(theta5)
 
-
+    theta3 *= -1
     # storing all the theta values in a list 
     theta_values = [theta1, theta2, theta3, theta4, theta5] 
+
+    
 
     # adjusting the theta values with inchworm motor offsets
     theta_values = apply_offsets(theta_values, inchworm_motor_offsets)
     
     # Multiply by -1 to make the math work out 
-    theta2 *= -1
-    theta3 *= -1
+    # theta2 *= -1
+    theta_values[1] *= -1
 
     # return the theta values
     return theta_values
