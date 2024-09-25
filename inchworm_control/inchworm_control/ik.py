@@ -32,11 +32,11 @@ def apply_offsets(theta_values, motor_offsets):
         list: A list of adjusted joint angles with the corresponding offsets applied.
     """
     return [
-        theta_values[0] + motor_offsets['theta1_offset'],
-        theta_values[1] + motor_offsets['theta2_offset'],
-        theta_values[2] + motor_offsets['theta3_offset'],
-        theta_values[3] + motor_offsets['theta4_offset'],
-        theta_values[4] + motor_offsets['theta5_offset']
+        theta_values[0] + motor_offsets['theta1'],
+        theta_values[1] + motor_offsets['theta2'],
+        theta_values[2] + motor_offsets['theta3'],
+        theta_values[3] + motor_offsets['theta4'],
+        theta_values[4] + motor_offsets['theta5']
     ]
 
 def inverseKinematics(Px, Py, Pz, which_foot_motor):
