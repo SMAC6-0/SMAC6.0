@@ -38,7 +38,7 @@ def update_grid_with_structure(grid, structure):
             structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
                         position in the grid. This is a single block. 
     Returns:
-        list: An updated 3D list (grid) where the floor & structure is walkable and the cell beneath it is not. 
+        list: An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
     global blocks_no_longer_walkable
     # for structure in structures:        
@@ -182,11 +182,17 @@ def bfs_3d(grid, start, goal):
     print("No path found using BFS in 3D")
     return [], -1
 
-# Calculates BFS search to find path from start_coords to end_coord on grid
-# Returns a list of coordinates of each block of the path
-# this BFS will look for vertical paths
 def bfs_3d_vertical(grid, start, goal): 
-    """"""
+    """
+    Calculates BFS search to find path from start_coords to end_coord on grid. 
+    This BFS will look for vertical paths.
+
+    Args:
+            start (tuple): A tuple containing the (x, z, y) coordinates of the start of the path. 
+            goal (tuple): A tuple containing the (x, z, y) coordinates of the end of the path. 
+    Returns:
+        list: A list of coordinates of each block of the path
+    """ 
 
     # if it goal is the Block Depot then it is not holding a block
     holding_block = True
