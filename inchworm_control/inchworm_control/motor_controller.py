@@ -734,7 +734,7 @@ class MotorController(Node):
 
     def pick_up_back_leg(self):
         release_servo(self.servo1)
-        self.motor_2.move_time_write(self.motor_2.pos_read()+15, 1)
+        self.motor_2.move_time_write(self.motor_2.pos_read()+18, 1)
         sleep(1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
