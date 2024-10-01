@@ -179,15 +179,18 @@ class MotorController(Node):
             # TODO: implement trajectory planning 
             # TODO: instead of hard coded values, establish constant heights or "levels" (as in bring_back_leg_to_block)
             self.move_to(theta2, theta3, theta4, self.time_to_move)
+            print("Moved the leading foot up")
             
             # Move the leading foot forward
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,2, which_foot_motor)
             theta4 += 20
             self.move_to(theta2, theta3, theta4, self.time_to_move)
+            print("Moved the leading foot forward")
 
             # Move the leading foot down 
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6.2,0,0, which_foot_motor)
             self.move_to(theta2, theta3, theta4+5, 1.5)
+            print("Moved the leading foot down")
             activate_servo(self.servo2)
             # sleep(1)
             # activate_servo(self.servo2)
@@ -620,18 +623,23 @@ class MotorController(Node):
 
         if which_foot_motor == 1:
             self.pick_up_back_leg()
+
             # move the back leg up
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6,0,(target+1),5)
             self.move_to(theta2-offset, theta3-10, theta4, 3)
+            print("Moved back leg up")
             sleep(1)
             # move the back leg in
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(3.2,0,(target+1),5)
             self.move_to(theta2, theta3, theta4, 3)
+            print("Moved the back leg in")
             # move the back leg down
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(3.2+offset2,0,target,5)
             self.move_to(theta2, theta3, theta4, 3)
+            print("Moved the back leg down")
 
             activate_servo(self.servo1)
+            print("Activated back leg's servo")
         elif which_foot_motor == 5:
             pass       
 
@@ -735,6 +743,7 @@ class MotorController(Node):
     def pick_up_back_leg(self):
         release_servo(self.servo1)
         self.motor_2.move_time_write(self.motor_2.pos_read()+18, 1)
+        print("Ran pick_up_back_leg")
         sleep(1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
