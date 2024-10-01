@@ -193,6 +193,7 @@ class MotorController(Node):
             # activate_servo(self.servo2)
             ## Move the following foot forward 
             #angle back leg to remove from magnetic connection
+            # TODO: the func is jankey. As in the following leg is having trouble moving and it's dragging it's feet
             self.bring_back_leg_to_block(which_foot_motor, 0)
 
         elif which_foot_motor == 5:
@@ -620,7 +621,7 @@ class MotorController(Node):
         if which_foot_motor == 1:
             self.pick_up_back_leg()
             # move the back leg up
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6,0,(target+1),5)
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(6,0,(target+3),5)
             self.move_to(theta2-offset, theta3-10, theta4, 3)
             sleep(1)
             # move the back leg in

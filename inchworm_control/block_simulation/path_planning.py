@@ -194,7 +194,7 @@ def bfs_3d_vertical(grid, start, goal):
         list: A list of coordinates of each block of the path
     """ 
 
-    # if it goal is the Block Depot then it is not holding a block
+    # If the goal is the Block Depot then the inchworm is not holding a block
     holding_block = True
     if goal == BD_LOC:
         holding_block = False
