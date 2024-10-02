@@ -2,13 +2,24 @@ from enum import Enum
 import copy
 from config import BD_LOC, LARGE_BUILD
 
-grid_size = 50  # Define the size of your grid
+grid_size = 50  # Define the size of your grid in one direction 
+# Then, use this dimension to create a 3D list representing the cubical workspace where every cell is 0, representing that all those cells are walkable 
+# To reference values in this list, call grid2[x][z][y]
 grid2 = [[[0 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
+#grid2 is never used. TODO: delete??
 blocks_no_longer_walkable = []
 
 def initialize_grid_with_structures(grid_size):
-    # Initialize an empty grid with all cells as obstacles
-    grid = [[[1 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
+    """
+    Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
+
+    Args:
+            grid_size (int): The size of the workspace, as a grid.
+    Returns:
+        list: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
+    """ 
+    #Initialize an empty 3D grid with all cells represented as obstacles
+    grid = [[[1 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)] # 3D list full of ones, equal to the grid size 
 
     # Make the bottom layer (z=0) walkable
     for x in range(grid_size):
@@ -18,6 +29,17 @@ def initialize_grid_with_structures(grid_size):
     return grid
 
 def update_grid_with_structure(grid, structure):
+    """
+    Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
+
+    Args:
+            grid (list): A 3D list representing the workspace, where each element indicates whether
+                        the corresponding cell is walkable (0) or not (1). 
+            structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                        position in the grid. This is a single block. 
+    Returns:
+        list: An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+    """ 
     global blocks_no_longer_walkable
     # for structure in structures:        
     x, z, y = structure  # Ensure the order matches your design
@@ -31,12 +53,12 @@ def update_grid_with_structure(grid, structure):
 
 def bfs_vertical_path(grid, path_start, path_end):
     global blocks_no_longer_walkable
-    # for structure in structures:        
     x, z, y = path_end  # Ensure the order matches your design
 
     # add all the blocks directly under path_end in blocks_no_longer_walkable to the grid as walkable
     prev_grid = copy.deepcopy(grid)
 
+    # If the end of the path is within the grid / workspace. 
     if 0 <= x < grid_size and 0 <= y < grid_size and 0 <= z < grid_size:
         for i in range(z):
             grid[x][z-i][y] = 0  # Mark as walkable
@@ -160,12 +182,19 @@ def bfs_3d(grid, start, goal):
     print("No path found using BFS in 3D")
     return [], -1
 
-# Calculates BFS search to find path from start_coords to end_coord on grid
-# Returns a list of coordinates of each block of the path
-# this BFS will look for vertical paths
-def bfs_3d_vertical(grid, start, goal):
+def bfs_3d_vertical(grid, start, goal): 
+    """
+    Calculates BFS search to find path from start_coords to end_coord on grid. 
+    This BFS will look for vertical paths.
 
-    # if it goal is the Block Depot then it is not holding a block
+    Args:
+            start (tuple): A tuple containing the (x, z, y) coordinates of the start of the path. 
+            goal (tuple): A tuple containing the (x, z, y) coordinates of the end of the path. 
+    Returns:
+        list: A list of coordinates of each block of the path
+    """ 
+
+    # If the goal is the Block Depot then the inchworm is not holding a block
     holding_block = True
     if goal == BD_LOC:
         holding_block = False

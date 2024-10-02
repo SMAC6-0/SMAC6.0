@@ -43,7 +43,7 @@ class StepPublisher(Node):
         try:
             # successful step
             if step_status == 0.0:
-                self.get_logger().info("movement complete")
+                self.get_logger().info("Movement Complete")
                 # steps is a list of tuples like (<step type>, holding_block)
                 # if holding block is true, it is holding a block for this step
                 msg = String()
