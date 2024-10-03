@@ -77,8 +77,8 @@ class IkTest(Node):
         """
         self.get_logger().info('Received command to "%s' % msg.data)
         try:
-            str = msg.data
-            positions = str.split(', ')
+            pos = msg.data
+            positions = pos.split(', ')
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(positions[1], positions[2], positions[3], positions[4])
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             
