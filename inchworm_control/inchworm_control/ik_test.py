@@ -79,7 +79,7 @@ class IkTest(Node):
         try:
             str = msg.data
             positions = str.split(', ')
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(positions[0], positions[1], positions[2], positions[3])
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(positions[1], positions[2], positions[3], positions[4])
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             
         except Exception as e:
