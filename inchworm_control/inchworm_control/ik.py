@@ -39,7 +39,7 @@ def apply_offsets(theta_values, motor_offsets):
         theta_values[4] + motor_offsets['theta5']
     ]
 
-def inverseKinematics(Px, Py, Pz, which_foot_motor):
+def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     """
     Calculates inverse kinematics for inchworm robot and adjusts motor angles using offsets.
     
@@ -47,6 +47,8 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
         Px (float): X coordinate of the end-effector corresponding to which_foot_motor.
         Py (float): Y coordinate of the end-effector corresponding to which_foot_motor.
         Pz (float): Z coordinate of the end-effector corresponding to which_foot_motor.
+        alpha (float): The angle of the wrist joint (motor 2 or 4) w.r.t. the horizontal plane. 
+            0 radians for horizontal, pi/2 radians for pointing down.
         which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
     
     Returns:
@@ -67,8 +69,10 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     print("motor offsets: ", inchworm_motor_offsets)
 
     # Calculate the pose in the XZ-plane 
-    Wx = math.sqrt(Px**2 + Py**2)
-    Wz = -Pz 
+    Wx = math.sqrt(Px**2 + Py**2) # distance from robot origin to EE positiion
+    Wz = -Pz # This is because the z axis of the EE points down. 
+    r_4 = Wx - (L4+L_ENDEFFECTOR)*math.cos(alpha) # distance from base foot frame to motor 4 (or 2, if which_foot_motor = 5)
+    s = Wz + (L4 + L_ENDEFFECTOR) * math.sin(alpha) - (L_BASE + L1)  # Distance from joint 2 to the EE. 
 
     # Joint 2 to the center of the wrist 
     D = math.sqrt(Wx**2 + Wz**2)
@@ -76,6 +80,14 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
     # Check if the position is reachable
     if D > (L2 + L3):
         raise ValueError('ERROR: Position is not reachable')
+    
+    #theta 1 TODO: comment this section up, compare to whats w/in the if statements below
+    y = math.sqrt(1 - (Px/Wx)^2)
+    if (Py < 0):
+        theta1 = math.atan2(-y, Px/Wx)
+    else:
+        theta1 = math.atan2(y, Px/Wx) 
+    
 
     # Solve for theta3 using the law of cosines (angle between joints 2 and 3)
     cosTheta3 = (L2**2 + L3**2 - D**2) / (2 * L2 * L3)
