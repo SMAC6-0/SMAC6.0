@@ -66,12 +66,9 @@ def inverseKinematics(Px, Py, Pz, which_foot_motor):
 
     print("motor offsets: ", inchworm_motor_offsets)
 
-    # adjust Z axis of the end-effector 
-    Pz_adjusted = -Pz
-
     # Calculate the pose in the XZ-plane 
     Wx = math.sqrt(Px**2 + Py**2)
-    Wz = Pz_adjusted 
+    Wz = -Pz 
 
     # Joint 2 to the center of the wrist 
     D = math.sqrt(Wx**2 + Wz**2)
