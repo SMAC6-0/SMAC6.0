@@ -48,7 +48,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         Py (float): Y coordinate of the end-effector corresponding to which_foot_motor.
         Pz (float): Z coordinate of the end-effector corresponding to which_foot_motor.
         alpha (float): The angle of the wrist joint (motor 2 or 4) w.r.t. the horizontal plane. 
-            0 radians for horizontal, pi/2 radians for pointing down.
+            0 deg for horizontal, 90 deg for pointing down.
         which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
     
     Returns:
@@ -66,8 +66,11 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # extract the motor offsets from the yaml file
     inchworm_motor_offsets = load_inchworm_motor_offsets('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
 
-    print("motor offsets: ", inchworm_motor_offsets)
+    # print("motor offsets: ", inchworm_motor_offsets)
 
+    # Convert alpha angle from radians to degrees 
+    alpha = math.radians(alpha)
+    
     # Calculate the pose in the XZ-plane 
     Wx = math.sqrt(Px**2 + Py**2) # distance from robot origin to EE positiion
     Wz = -Pz # This is because the z axis of the EE points down. 
