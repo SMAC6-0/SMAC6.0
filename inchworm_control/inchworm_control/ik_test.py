@@ -117,6 +117,14 @@ class IkTest(Node):
         # Pause the program to allow the motors to finish moving. 
         sleep(time)
 
+        print("----------------After Motor Angles-----------------------")
+        print(self.motor_1.pos_read(), 
+            self.motor_2.pos_read(), 
+            self.motor_3.pos_read(), 
+            self.motor_4.pos_read(), 
+            self.motor_5.pos_read())
+
+
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
