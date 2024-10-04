@@ -147,9 +147,11 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # theta3 *= -1
     # storing all the theta values in a list 
     theta_values = [theta1, theta2, theta3, theta4, theta5] 
+    print("theta_values: ", theta_values)
 
     # adjusting the theta values with inchworm motor offsets
-    theta_values = apply_offsets(theta_values, inchworm_motor_offsets)
+    theta_values_offsets = apply_offsets(theta_values, inchworm_motor_offsets)
+    print("theta_values after motor offsets: ", theta_values_offsets)
     
     # Multiply by -1 to make the math work out 
     # theta_values[1] *= -1
