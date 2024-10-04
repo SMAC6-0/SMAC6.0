@@ -80,67 +80,76 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # Check if the position is reachable
     if D > (L2 + L3):
         raise ValueError('ERROR: Position is not reachable')
-    
-    #theta 1 TODO: comment this section up, compare to whats w/in the if statements below
-    y = math.sqrt(1 - (Px/Wx)^2)
-    if (Py < 0):
-        theta1 = math.atan2(-y, Px/Wx)
-    else:
-        theta1 = math.atan2(y, Px/Wx) 
+
+    # Intermediate angles and sides
+    c = math.sqrt(r_4**2 + s**2)
+    D = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
+    H = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi)
+
+    if(D**2 > 1) | (H**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
+        raise ValueError("out of bounds bleh :P")
     
 
-    # Solve for theta3 using the law of cosines (angle between joints 2 and 3)
-    cosTheta3 = (L2**2 + L3**2 - D**2) / (2 * L2 * L3)
-    theta3 = math.acos(cosTheta3) - math.pi
-    
+    beta = math.atan2(math.sqrt(1 - D**2), D)
+    phi =  math.atan2(math.sqrt(1 - H**2), H) 
+    gamma = math.atan2(s, r_4)
+
+    theta3 = round(math.pi/2 - phi, 2) # Theta3 is not dependent on which_foot
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
+        #theta 1
+        y = math.sqrt(1 - (Px/Wx)**2) 
+        if (Py < 0):
+            theta1 = math.atan2(-y, Px/Wx)
+        else:
+            theta1 = math.atan2(y, Px/Wx) 
+    
         theta1 = math.atan2(Py, Px)
 
-        # Solve joints 2
-        cosTheta2 = (L2**2 + D**2 - L3**2) / (2 * L2 * D)
-        theta2 = math.atan2(Wz, Wx) - math.acos(cosTheta2)
-
-        # joint 4
-        theta4 = -theta2 + theta3
+        
+        # Final joint angles
+        theta2 = round(math.pi/2 - (beta + gamma), 2)
+        theta4 = round(alpha - theta2 - theta3, 2)
 
         # Joint 5 doesn't affect the pose 
         theta5 = 0
 
     elif which_foot_motor == 5:
+        #theta 5
+        y = math.sqrt(1 - (Px/Wx)**2) 
+        if (Py < 0):
+            theta5 = math.atan2(-y, Px/Wx)
+        else:
+            theta5 = math.atan2(y, Px/Wx) 
+    
         theta5 = math.atan2(Py, Px)
 
-        # Solve joints 4
-        cosTheta4 = (L2**2 + D**2 - L3**2) / (2 * L2 * D)
-        theta4 = math.atan2(Wz, Wx) - math.acos(cosTheta4)
+        
+        # Final joint angles
+        theta4 = round(math.pi/2 - (beta + gamma), 2)
+        theta2 = round(alpha - theta4 - theta3, 2)
 
-        # joint 2
-        theta2 = -theta4 + theta3
-
-        # Joint 1 doesn't affect the pose 
+        # Joint 5 doesn't affect the pose 
         theta1 = 0
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
 
     # Convert radians to degrees
     theta1 = math.degrees(theta1)
-    theta2 = math.degrees(-theta2)
+    theta2 = math.degrees(theta2)
     theta3 = math.degrees(theta3)
-    theta4 = math.degrees(-theta4)
+    theta4 = math.degrees(theta4)
     theta5 = math.degrees(theta5)
 
-    theta3 *= -1
+    # theta3 *= -1
     # storing all the theta values in a list 
     theta_values = [theta1, theta2, theta3, theta4, theta5] 
-
-    
 
     # adjusting the theta values with inchworm motor offsets
     theta_values = apply_offsets(theta_values, inchworm_motor_offsets)
     
     # Multiply by -1 to make the math work out 
-    # theta2 *= -1
-    theta_values[1] *= -1
+    # theta_values[1] *= -1
 
     # return the theta values
     return theta_values

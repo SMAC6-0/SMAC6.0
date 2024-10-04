@@ -79,7 +79,7 @@ class IkTest(Node):
         try:
             pos = msg.data
             positions = pos.split(', ')
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]))
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
             self.move_to(theta2, theta3, theta4, self.time_to_move)
             
         except Exception as e:
@@ -109,6 +109,7 @@ class IkTest(Node):
             time (float): Duration to reach the target angles (in seconds).
         """
         # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
+        # TODO: take in theta1 and theta5 as well
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
