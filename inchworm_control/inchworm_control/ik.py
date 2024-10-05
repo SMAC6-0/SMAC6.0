@@ -76,6 +76,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     maxDistArmZ = L_BASE + L1 + L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in z axis
     maxDistArmXY = L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in x or y axis
 
+    print("right before max dist check")
     # throws error if coordinate is too far for the robot to reach
     if(Px > maxDistArmXY | Py > maxDistArmXY | Pz > maxDistArmZ): 
         ValueError("NOOOO MY LEGS ARE TOO SHORT :(")
@@ -96,9 +97,11 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     #     raise ValueError('ERROR: Position is not reachable')
 
     # Intermediate angles and sides
+    print("right before cos(angle) calculations")
     c = math.sqrt(r_4**2 + s**2) # 3D distance between Joints 2 & 4 
     cos_beta = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
     cos_phi = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi) where phi is the angle at Joint 3, between L2 & L3 
+    print(" ruight before out of bo")
 
     if(cos_beta**2 > 1) or (cos_phi**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
         raise ValueError("out of bounds bleh :P")
