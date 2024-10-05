@@ -62,6 +62,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     L3 = 6.625      # Joint 3 to Joint 4
     L4 = 1          # Joint 4 to Joint 5
     L_ENDEFFECTOR = 3.125  # Joint 5 to EE
+    J2_J4_XDIST = 2.95 # Distance between Joints 2 and 4 when the inchworm is in the home configuration (when the legs are next to each other)
 
     # extract the motor offsets from the yaml file
     inchworm_motor_offsets = load_inchworm_motor_offsets('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
@@ -70,35 +71,46 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
 
     # Convert alpha angle from radians to degrees 
     alpha = math.radians(alpha)
+
+    # error catching: Robot cannot reach the point
+    maxDistArmZ = L_BASE + L1 + L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in z axis
+    maxDistArmXY = L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in x or y axis
+
+    # throws error if coordinate is too far for the robot to reach
+    if(Px > maxDistArmXY | Py > maxDistArmXY | Pz > maxDistArmZ): 
+        ValueError("NOOOO MY LEGS ARE TOO SHORT :(")
+
     
     # See inverse kinematics derivation in the SMAC 6.0 Google Drive folder 
     # Calculate the pose in the XZ-plane 
-    r = math.sqrt(Px**2 + Py**2) # distance along the ground from robot origin to EE positiion 
+    r = math.sqrt(Px**2 + Py**2) # distance along the ground (z=0) from robot origin to EE positiion 
     # Wz = -Pz # This is because the z axis of the EE points down. NOt applicable to the math done by SMAC6 
     r_4 = r - (L4+L_ENDEFFECTOR)*math.cos(alpha) # distance from base foot frame (robot origin) to motor 4 (or 2, if which_foot_motor = 5) along r 
-    s = Pz + (L4 + L_ENDEFFECTOR) * math.sin(alpha) - (L_BASE + L1)  # Distance from joint 2 to the EE. 
+    s = Pz + (L4 + L_ENDEFFECTOR) * math.sin(alpha) - (L_BASE + L1)  # Vertical (z) distance from joint 2 to joint 4. 
 
-    # Joint 2 to the center of the wrist 
-    D = math.sqrt(r**2 + Pz**2)
+    # # Joint 2 to the center of the wrist 
+    # D = math.sqrt(r**2 + Pz**2)
 
-    # Check if the position is reachable
-    if D > (L2 + L3):
-        raise ValueError('ERROR: Position is not reachable')
+    # # Check if the position is reachable
+    # if D > (L2 + L3):
+    #     raise ValueError('ERROR: Position is not reachable')
 
     # Intermediate angles and sides
-    c = math.sqrt(r_4**2 + s**2)
-    D = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
-    H = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi)
+    c = math.sqrt(r_4**2 + s**2) # 3D distance between Joints 2 & 4 
+    cos_beta = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
+    cos_phi = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi) where phi is the angle at Joint 3, between L2 & L3 
 
-    if(D**2 > 1) | (H**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
+    if(cos_beta**2 > 1) | (cos_phi**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
         raise ValueError("out of bounds bleh :P")
     
 
-    beta = math.atan2(math.sqrt(1 - D**2), D)
-    phi =  math.atan2(math.sqrt(1 - H**2), H) 
-    gamma = math.atan2(s, r_4)
+    beta = math.atan2(math.sqrt(1 - cos_beta**2), cos_beta) # the angle at joint 2 between L2 & c 
+    phi =  math.atan2(math.sqrt(1 - cos_phi**2), cos_phi) # the angle at joint 3, between L2 & L3
+    gamma = math.atan2(s, r_4) # at joint 2, the angle between c & the "r axis"
 
-    theta3 = round(math.pi/2 - phi, 2) # Theta3 is not dependent on which_foot
+    angle_offset = math.pi/2 - math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
+
+    theta3 = round(math.pi - phi + angle_offset, 2) # Theta3 is not dependent on which_foot
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
         #theta 1
@@ -107,12 +119,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
             theta1 = math.atan2(-y, Px/r)
         else:
             theta1 = math.atan2(y, Px/r) 
-    
-        theta1 = math.atan2(Py, Px)
-
         
         # Final joint angles
-        theta2 = round(math.pi/2 - (beta + gamma), 2)
+        theta2 = round(math.pi/2 - (beta + gamma + angle_offset), 2)
         theta4 = round(alpha - theta2 - theta3, 2)
 
         # Joint 5 doesn't affect the pose 
@@ -140,9 +149,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
 
     # Convert radians to degrees
     theta1 = math.degrees(theta1)
-    theta2 = math.degrees(-theta2)
+    theta2 = math.degrees(theta2)
     theta3 = math.degrees(theta3)
-    theta4 = math.degrees(-theta4)
+    theta4 = math.degrees(theta4)
     theta5 = math.degrees(theta5)
 
     # theta3 *= -1
