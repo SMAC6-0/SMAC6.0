@@ -71,6 +71,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # Convert alpha angle from radians to degrees 
     alpha = math.radians(alpha)
     
+    # See inverse kinematics derivation in the SMAC 6.0 Google Drive folder 
     # Calculate the pose in the XZ-plane 
     r = math.sqrt(Px**2 + Py**2) # distance along the ground from robot origin to EE positiion 
     # Wz = -Pz # This is because the z axis of the EE points down. NOt applicable to the math done by SMAC6 
