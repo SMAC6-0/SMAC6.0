@@ -100,7 +100,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     cos_beta = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
     cos_phi = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi) where phi is the angle at Joint 3, between L2 & L3 
 
-    if(cos_beta**2 > 1) | (cos_phi**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
+    if(cos_beta**2 > 1) or (cos_phi**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
         raise ValueError("out of bounds bleh :P")
     
 
