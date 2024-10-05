@@ -72,13 +72,13 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     alpha = math.radians(alpha)
     
     # Calculate the pose in the XZ-plane 
-    Wx = math.sqrt(Px**2 + Py**2) # distance from robot origin to EE positiion
-    Wz = -Pz # This is because the z axis of the EE points down. 
-    r_4 = Wx - (L4+L_ENDEFFECTOR)*math.cos(alpha) # distance from base foot frame to motor 4 (or 2, if which_foot_motor = 5)
-    s = Wz + (L4 + L_ENDEFFECTOR) * math.sin(alpha) - (L_BASE + L1)  # Distance from joint 2 to the EE. 
+    r = math.sqrt(Px**2 + Py**2) # distance along the ground from robot origin to EE positiion 
+    # Wz = -Pz # This is because the z axis of the EE points down. NOt applicable to the math done by SMAC6 
+    r_4 = r - (L4+L_ENDEFFECTOR)*math.cos(alpha) # distance from base foot frame (robot origin) to motor 4 (or 2, if which_foot_motor = 5) along r 
+    s = Pz + (L4 + L_ENDEFFECTOR) * math.sin(alpha) - (L_BASE + L1)  # Distance from joint 2 to the EE. 
 
     # Joint 2 to the center of the wrist 
-    D = math.sqrt(Wx**2 + Wz**2)
+    D = math.sqrt(r**2 + Pz**2)
 
     # Check if the position is reachable
     if D > (L2 + L3):
@@ -101,11 +101,11 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
         #theta 1
-        y = math.sqrt(1 - (Px/Wx)**2) 
+        y = math.sqrt(1 - (Px/r)**2) 
         if (Py < 0):
-            theta1 = math.atan2(-y, Px/Wx)
+            theta1 = math.atan2(-y, Px/r)
         else:
-            theta1 = math.atan2(y, Px/Wx) 
+            theta1 = math.atan2(y, Px/r) 
     
         theta1 = math.atan2(Py, Px)
 
@@ -119,11 +119,11 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
 
     elif which_foot_motor == 5:
         #theta 5
-        y = math.sqrt(1 - (Px/Wx)**2) 
+        y = math.sqrt(1 - (Px/r)**2) 
         if (Py < 0):
-            theta5 = math.atan2(-y, Px/Wx)
+            theta5 = math.atan2(-y, Px/r)
         else:
-            theta5 = math.atan2(y, Px/Wx) 
+            theta5 = math.atan2(y, Px/r) 
     
         theta5 = math.atan2(Py, Px)
 
