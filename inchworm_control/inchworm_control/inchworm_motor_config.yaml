@@ -1,6 +1,6 @@
 motor_offsets: 
-  theta1: 138
-  theta2: 130
-  theta3: 173
-  theta4: 116
-  theta5: 145
+  theta1: 138.0
+  theta2: 130.0
+  theta3: 173.0
+  theta4: 116.0
+  theta5: 145.0
