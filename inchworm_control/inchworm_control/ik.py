@@ -111,9 +111,13 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     phi =  math.atan2(math.sqrt(1 - cos_phi**2), cos_phi) # the angle at joint 3, between L2 & L3
     gamma = math.atan2(s, r_4) # at joint 2, the angle between c & the "r axis"
 
-    angle_offset = math.pi/2 - math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
 
-    theta3 = round(math.pi - phi + angle_offset, 2) # Theta3 is not dependent on which_foot
+    # angle offsets for theta2, theta3 and theta4
+    sigma = math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
+    theta2_4_offset = math.pi/2 - sigma
+    
+
+    theta3 = round(math.pi - phi, 2) # Theta3 is not dependent on which_foot
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
         #theta 1
@@ -124,7 +128,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
             theta1 = math.atan2(y, Px/r) 
         
         # Final joint angles
-        theta2 = round(math.pi/2 - (beta + gamma + angle_offset), 2)
+        theta2 = round(math.pi/2 - (beta + gamma), 2)
         theta4 = round(alpha - theta2 - theta3, 2)
 
         # Joint 5 doesn't affect the pose 
@@ -138,7 +142,6 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         else:
             theta5 = math.atan2(y, Px/r) 
     
-        theta5 = math.atan2(Py, Px)
 
         
         # Final joint angles
