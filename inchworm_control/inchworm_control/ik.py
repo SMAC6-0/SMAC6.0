@@ -78,7 +78,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
 
     print("right before max dist check")
     # throws error if coordinate is too far for the robot to reach
-    if(Px > maxDistArmXY | Py > maxDistArmXY | Pz > maxDistArmZ): 
+    if(Px > maxDistArmXY or Py > maxDistArmXY or Pz > maxDistArmZ): 
         ValueError("NOOOO MY LEGS ARE TOO SHORT :(")
 
     
