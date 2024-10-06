@@ -2,7 +2,7 @@ import math
 import random
 import yaml
 
-def load_inchworm_motor_offsets(config_file):
+def load_inchworm_motor_offsets_bounds(config_file):
     """
     Loads motor offsets for an inchworm robot from a YAML configuration file.
     
@@ -18,7 +18,7 @@ def load_inchworm_motor_offsets(config_file):
         config = yaml.safe_load(file)
     
     # Return the motor offsets from the configuration dictionary
-    return config['motor_offsets']
+    return config['motor_offsets'], config['motor_bounds']
 
 def apply_offsets(theta_values, motor_offsets):
     """
@@ -38,6 +38,22 @@ def apply_offsets(theta_values, motor_offsets):
         theta_values[3] + motor_offsets['theta4'],
         theta_values[4] + motor_offsets['theta5']
     ]
+
+def check_motor_bounds(theta_values, motor_bounds):
+    """
+    Compares the inputted motor values to the bounds to ensure that the robot does not try to move to 
+    a position that is impossible (because the link gets in the way). Raises an error if motor values 
+    are unsafe
+
+    Args:
+        theta_values (list): A list of calculated joint angles [theta1, theta2, theta3, theta4, theta5].
+        motor_bounds (dict): A dictionary containing motor bounds for each joint.
+    """
+    if not (theta_values[1] > motor_bounds['joint2_outer_bound'] and theta_values[1] < motor_bounds['joint2_inner_bound'] and
+            theta_values[2] > motor_bounds['joint3_outer_bound'] and theta_values[2] < motor_bounds['joint3_inner_bound'] and
+            theta_values[3] < motor_bounds['joint4_outer_bound'] and theta_values[3] > motor_bounds['joint4_inner_bound']):
+        ValueError("Motor values out of safe bounds")
+        
 
 def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     """
@@ -65,8 +81,8 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     J2_J4_XDIST = 2.95 # Distance between Joints 2 and 4 when the inchworm is in the home configuration (when the legs are next to each other)
 
     # extract the motor offsets from the yaml file
-    inchworm_motor_offsets = load_inchworm_motor_offsets('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
-
+    inchworm_motor_offsets, inchworm_motor_bounds = load_inchworm_motor_offsets_bounds('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
+        
     # print("motor offsets: ", inchworm_motor_offsets)
 
     # Convert alpha angle from radians to degrees 
@@ -170,6 +186,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # adjusting the theta values with inchworm motor offsets
     theta_values = apply_offsets(theta_values, inchworm_motor_offsets)
     print("theta_values after motor offsets: ", theta_values)
+
+    # check if the theta values are within the bounds
+    check_motor_bounds(theta_values, inchworm_motor_bounds)
     
     # Multiply by -1 to make the math work out 
     # theta_values[1] *= -1
