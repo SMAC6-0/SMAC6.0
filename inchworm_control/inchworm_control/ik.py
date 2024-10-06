@@ -126,12 +126,12 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     beta = math.atan2(math.sqrt(1 - cos_beta**2), cos_beta) # the angle at joint 2 between L2 & c 
     phi =  math.atan2(math.sqrt(1 - cos_phi**2), cos_phi) # the angle at joint 3, between L2 & L3
     gamma = math.atan2(s, r_4) # at joint 2, the angle between c & the "r axis"
-
-
+    
     # angle offsets for theta2, theta3 and theta4
     sigma = math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
     theta2_4_offset = math.pi/2 - sigma
-    
+    print("beta, phi, gamma, sigma: ", beta, phi, gamma, sigma)
+
 
     theta3 = round(math.pi - phi, 2) # Theta3 is not dependent on which_foot
     # Depending on which motor (leg) is used, calculate the angles differently
@@ -169,11 +169,12 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
 
+    print("theta values in radians: ", theta1, theta2, theta3, theta4, theta5)
     # Convert radians to degrees
     theta1 = math.degrees(theta1)
-    theta2 = math.degrees(-theta2)
+    theta2 = math.degrees(theta2)
     theta3 = math.degrees(theta3)
-    theta4 = math.degrees(-theta4)
+    theta4 = math.degrees(theta4)
     theta5 = math.degrees(theta5)
 
     print("Calculating Offsets")
@@ -181,7 +182,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # theta3 *= -1
     # storing all the theta values in a list 
     theta_values = [theta1, theta2, theta3, theta4, theta5] 
-    print("theta_values: ", theta_values)
+    print("theta_values in deg: ", theta_values)
 
     # adjusting the theta values with inchworm motor offsets
     theta_values = apply_offsets(theta_values, inchworm_motor_offsets)
