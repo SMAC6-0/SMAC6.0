@@ -92,7 +92,6 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     maxDistArmZ = L_BASE + L1 + L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in z axis
     maxDistArmXY = L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in x or y axis
 
-    print("right before max dist check")
     # throws error if coordinate is too far for the robot to reach
     if(Px > maxDistArmXY or Py > maxDistArmXY or Pz > maxDistArmZ): 
         ValueError("NOOOO MY LEGS ARE TOO SHORT :(")
@@ -113,11 +112,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     #     raise ValueError('ERROR: Position is not reachable')
 
     # Intermediate angles and sides
-    print("right before cos(angle) calculations")
     c = math.sqrt(r_4**2 + s**2) # 3D distance between Joints 2 & 4 
     cos_beta = (L2**2 + c**2 - L3**2) / (2 * L2 *  c) #  = cos(beta)
     cos_phi = (L2**2 + L3**2 - c**2) / (2 * L2 * L3) # = cos(phi) where phi is the angle at Joint 3, between L2 & L3 
-    print(" ruight before out of bo")
 
     if(cos_beta**2 > 1) or (cos_phi**2 > 1): # prevents imaginary numbers from happening later, aka prevent out of workspace
         raise ValueError("out of bounds bleh :P")
@@ -128,13 +125,12 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     gamma = math.atan2(s, r_4) # at joint 2, the angle between c & the "r axis"
     
     # angle offsets for theta2, theta3 and theta4
-    sigma = math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
-    theta2_4_offset = math.pi/2 - sigma
-    print("beta, phi, gamma, sigma: ", beta, phi, gamma, sigma)
+    # sigma = math.acos((L2**2 + J2_J4_XDIST**2 - L3**2) / (2 * L2 *  J2_J4_XDIST))
+    # theta2_4_offset = math.pi/2 - sigma
+    print("beta, phi, gamma, sigma: ", beta, phi, gamma)
 
 
-    theta3 = round(phi, 2) # Theta3 is not dependent on which_foot
-    theta3_prime = round(math.pi - phi)
+    theta3 = round(math.pi - phi, 2) # Theta3 is not dependent on which_foot
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
         #theta 1
@@ -145,9 +141,8 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
             theta1 = math.atan2(y, Px/r) 
         
         # Final joint angles
-        theta2_prime = round(math.pi/2 - (beta + gamma), 2)
-        theta2 = round(math.pi/2 + beta + gamma)
-        theta4 = round(theta2_prime + theta3_prime - alpha - math.pi/2, 2) 
+        theta2 = round(math.pi/2 - beta - gamma, 2)
+        theta4 = round(theta2 + theta3 - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
         theta5 = 0
