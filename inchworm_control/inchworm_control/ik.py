@@ -133,7 +133,8 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     print("beta, phi, gamma, sigma: ", beta, phi, gamma, sigma)
 
 
-    theta3 = round(math.pi - phi, 2) # Theta3 is not dependent on which_foot
+    theta3 = round(phi, 2) # Theta3 is not dependent on which_foot
+    theta3_prime = round(math.pi - phi)
     # Depending on which motor (leg) is used, calculate the angles differently
     if which_foot_motor == 1:
         #theta 1
@@ -144,8 +145,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
             theta1 = math.atan2(y, Px/r) 
         
         # Final joint angles
-        theta2 = round(math.pi/2 - (beta + gamma), 2)
-        theta4 = round(alpha - theta2 - theta3, 2)
+        theta2_prime = round(math.pi/2 - (beta + gamma), 2)
+        theta2 = round(math.pi/2 + beta + gamma)
+        theta4 = round(theta2_prime + theta3_prime - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
         theta5 = 0
