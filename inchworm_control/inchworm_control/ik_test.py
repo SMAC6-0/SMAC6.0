@@ -81,10 +81,10 @@ class IkTest(Node):
             positions = pos.split(', ')
             self.get_logger().info("IK command receiving/splitting successful")
             print("positions: ", positions)
-            # [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
             # print("IK calculations successful")
-            # self.move_to(theta2, theta3, theta4, 10)
-            self.move_to(float(positions[0]), float(positions[1]), float(positions[2]), 10)
+            self.move_to(theta2, theta3, theta4, 10)
+            # self.move_to(float(positions[0]), float(positions[1]), float(positions[2]), 10)
 
             
         except Exception as e:
