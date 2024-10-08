@@ -83,7 +83,7 @@ class IkTest(Node):
             if(float(positions[4]) == 1):
                 print("Activating Servo1")
                 activate_servo(self.servo1)
-                release_servo(self.serov2)
+                release_servo(self.servo2)
             elif float(positions[4]) == 5:
                 print("Activating Servo2")
                 release_servo(self.servo1)
