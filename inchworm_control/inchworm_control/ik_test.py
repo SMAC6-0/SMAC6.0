@@ -80,7 +80,7 @@ class IkTest(Node):
             pos = msg.data
             positions = pos.split(', ')
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
-            self.move_to(theta1, theta2, theta3, theta4, theta5, 5)
+            self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
 
             
         except Exception as e:
