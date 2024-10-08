@@ -80,15 +80,7 @@ class IkTest(Node):
             pos = msg.data
             positions = pos.split(', ')
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
-            # if(float(positions[4]) == 1):
-            #     print("Activating Servo1")
-            #     activate_servo(self.servo1)
-            #     release_servo(self.servo2)
-            # elif float(positions[4]) == 5:
-            #     print("Activating Servo2")
-            #     release_servo(self.servo1)
-            #     activate_servo(self.servo2)
-            self.move_to(theta2, theta3, theta4, 5)
+            self.move_to(theta1, theta2, theta3, theta4, theta5, 5)
 
             
         except Exception as e:
@@ -107,7 +99,7 @@ class IkTest(Node):
 
         self.time_to_move = 1.5 # Set the time over which the motors will move.
 
-    def move_to(self, theta2, theta3, theta4, time):
+    def move_to(self, theta1, theta2, theta3, theta4, theta5, time):
         """
         Move motors to specified angles over a given time duration.
 
@@ -119,9 +111,11 @@ class IkTest(Node):
         """
         # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
         # TODO: take in theta1 and theta5 as well
+        self.motor_1.move_time_write(theta1, time)
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
+        self.motor_5.move_time_write(theta5, time)
 
         # Pause the program to allow the motors to finish moving. 
         sleep(time)
