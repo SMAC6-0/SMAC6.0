@@ -80,14 +80,14 @@ class IkTest(Node):
             pos = msg.data
             positions = pos.split(', ')
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
-            if(float(positions[4]) == 1):
-                print("Activating Servo1")
-                activate_servo(self.servo1)
-                release_servo(self.servo2)
-            elif float(positions[4]) == 5:
-                print("Activating Servo2")
-                release_servo(self.servo1)
-                activate_servo(self.servo2)
+            # if(float(positions[4]) == 1):
+            #     print("Activating Servo1")
+            #     activate_servo(self.servo1)
+            #     release_servo(self.servo2)
+            # elif float(positions[4]) == 5:
+            #     print("Activating Servo2")
+            #     release_servo(self.servo1)
+            #     activate_servo(self.servo2)
             self.move_to(theta2, theta3, theta4, 5)
 
             
