@@ -1,9 +1,9 @@
 motor_offsets: 
-  theta1: 135.0
-  theta2: 105.0
-  theta3: 28.0
-  theta4: 128.0
-  theta5: 145.0
+  theta1: 137.0
+  theta2: 107.0
+  theta3: 26.0
+  theta4: 126.0
+  theta5: 150.0
 
 motor_bounds:
   joint1_outer_bound: 
