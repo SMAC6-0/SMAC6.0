@@ -2,9 +2,14 @@
 from inchworm_control.ik import inverseKinematics
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32, String
-# for servo
-import RPi.GPIO as GPIO
+from std_msgs.msg import Float32, String      # if(float(positions[4]) == 1):
+            #     print("Activating Servo1")
+            #     activate_servo(self.servo1)
+            #     release_servo(self.servo2)
+            # elif float(positions[4]) == 5:
+            #     print("Activating Servo2")
+            #     release_servo(self.servo1)
+            #     activate_servo(self.servo2)
 GPIO.setwarnings(False)
 import time
 from inchworm_control.lewansoul_servo_bus import ServoBus
@@ -111,10 +116,14 @@ class IkTest(Node):
         """
         # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
         # TODO: take in theta1 and theta5 as well
-        self.motor_1.move_time_write(theta1, time)
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
+
+        # Pause the program to allow the motors to finish moving. 
+        sleep(time)
+
+        self.motor_1.move_time_write(theta1, time)
         self.motor_5.move_time_write(theta5, time)
 
         # Pause the program to allow the motors to finish moving. 
