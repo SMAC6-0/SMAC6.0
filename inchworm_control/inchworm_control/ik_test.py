@@ -81,9 +81,9 @@ class IkTest(Node):
             positions = pos.split(', ')
             [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
             if(bool(positions[5])):
-                IkTest.activate_servo(self.servo1)
+                activate_servo(self.servo1)
             else:
-                IkTest.release_servo(self.servo1)
+                release_servo(self.servo1)
             self.move_to(theta2, theta3, theta4, 5)
 
             
