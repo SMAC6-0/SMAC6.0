@@ -114,8 +114,8 @@ class IkTest(Node):
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
-        # Pause the program to allow the motors to finish moving. 
-        sleep(time)
+        # # Pause the program to allow the motors to finish moving. 
+        # sleep(time)
         self.motor_1.move_time_write(theta1, time)
         self.motor_5.move_time_write(theta5, time)
 
