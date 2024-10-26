@@ -65,6 +65,9 @@ class IkTest(Node):
             self.motor_3.pos_read(), 
             self.motor_4.pos_read(), 
             self.motor_5.pos_read())
+        
+        # Constant, the width of the blocks 
+        self.CUBE_WIDTH = 3 
 
         
 
@@ -79,10 +82,12 @@ class IkTest(Node):
         try:
             pos = msg.data
             positions = pos.split(', ')
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3]), float(positions[4]))
+            
+            [inputX, inputY, inputZ] = self.adjust_positions(float(positions[0]), float(positions[1]), float(positions[2]))
+            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(inputX, inputY, inputZ, float(positions[3]), float(positions[4]))
+            
             self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
 
-            
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
 
@@ -99,6 +104,22 @@ class IkTest(Node):
 
         self.time_to_move = 1.5 # Set the time over which the motors will move.
 
+    def adjust_positions(self, goal_X: float, goal_Y: float, goal_Z: float): 
+        """
+        Helper function to adjust the goal EE position to a format digestable for the inverse kinematics.
+
+        Args:
+            goal_X (float): the desired X position in number of blocks. 
+            goal_Y (float): the desired Y position in number of blocks. 
+            goal_Z (float): the desired Z position in number of blocks. 
+        """
+        inputX = self.CUBE_WIDTH * 1.144 * goal_X + 0.1242
+        inputY = self.CUBE_WIDTH * 1.1595 * goal_Y + 0.0249
+        inputZ = self.CUBE_WIDTH * 1.0786 * goal_Z - 0.0432
+
+        return [inputX, inputY, inputZ]
+        
+    
     def move_to(self, theta1, theta2, theta3, theta4, theta5, time):
         """
         Move motors to specified angles over a given time duration.
