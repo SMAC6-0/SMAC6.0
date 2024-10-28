@@ -137,8 +137,8 @@ class IkTest(Node):
             travelTime (float): the time taken for the movement
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
-        current_pos = np.transpose(current_pos)
-        final_pos = np.transpose(final_pos)
+        current_pos = np.transpose(np.asarray(current_pos))
+        final_pos = np.transpose(np.asarray(final_pos))
 
         print("Current_pos", current_pos)
         print("final_pos", final_pos)
