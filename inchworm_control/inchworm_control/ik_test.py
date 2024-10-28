@@ -186,66 +186,66 @@ class IkTest(Node):
             self.motor_4.pos_read(), 
             self.motor_5.pos_read())
 
-def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
-    """
-    Calculates current joint positions based on trajectory coefficients and current time.
-    
-    Args:
-        trajCoeffs (tuple): trajectory coefficients generated from [4x6 double] quintic_trajectory(), for 5 joints
-        totTime (double): total amount of time it takes for trajectory to reach target position
-        which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
-    """
-    timeMat = np.zeros(1,1)
-    trajMat = np.zeros(1,5)
-    zeroVec = np.zeros(1,5)
-    newTrajCoeffs = trajCoeffs    
-    time = 0
-
-    # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
-    # matrix, add 2 zeroVec to make them 5x6
-
-    if(len(trajCoeffs[0]) == 5):
-        newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
-    
-    tic = time.perf_counter()
-
-    print("in Run Trajectory")
-    while(time < totTime):
-        # toc = time.perf_counter()
-
-        # Calculate coeffs accepts 6x5
-        x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time + newTrajCoeffs[2][0]*pow(time,2) + newTrajCoeffs[3][0]*pow(time,3) + newTrajCoeffs[4][0]*pow(time,4) + newTrajCoeffs[5][0]*pow(time,5)
-        y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time + newTrajCoeffs[2][1]*pow(time,2) + newTrajCoeffs[3][1]*pow(time,3) + newTrajCoeffs[4][1]*pow(time,4) + newTrajCoeffs[5][1]*pow(time,5)
-        z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time + newTrajCoeffs[2][2]*pow(time,2) + newTrajCoeffs[3][2]*pow(time,3) + newTrajCoeffs[4][2]*pow(time,4) + newTrajCoeffs[5][2]*pow(time,5)
-        # alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
-        alpha = 90
-        # theta5 = newTrajCoeffs[0][4] + newTrajCoeffs[1][4]*time + newTrajCoeffs[2][4]*pow(time,2) + newTrajCoeffs[3][4]*pow(time,3) + newTrajCoeffs[4][4]*pow(time,4) + newTrajCoeffs[5][4]*pow(time,5)
+    def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
+        """
+        Calculates current joint positions based on trajectory coefficients and current time.
         
-        pos = [x, y, z] #  The modified position
+        Args:
+            trajCoeffs (tuple): trajectory coefficients generated from [4x6 double] quintic_trajectory(), for 5 joints
+            totTime (double): total amount of time it takes for trajectory to reach target position
+            which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
+        """
+        timeMat = np.zeros(1,1)
+        trajMat = np.zeros(1,5)
+        zeroVec = np.zeros(1,5)
+        newTrajCoeffs = trajCoeffs    
+        time = 0
 
-        print("pos   ", pos)
+        # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
+        # matrix, add 2 zeroVec to make them 5x6
 
-        # running the inverseKinematics to get the joint angles
-        [x, y, z] = self.adjust_positions(x, y, z)
-        joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
-        trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
-
-
-        print("joint_ang   ", joint_ang)
-        print("trajMat   ", trajMat)
+        if(len(trajCoeffs[0]) == 5):
+            newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
         
-        self.move_joints(joint_ang, 0.5) # running the motors to get to the point
+        tic = time.perf_counter()
 
-        print("moved joints")
-        timeMat = np.concatenate((timeMat, time), axis=0) # stores time data
-        # tic resets the timing of timeMat, so travel time and the number
-        # of loop iterations is considered to keep timing conssitent
-        sleep(1/10)
-        toc = time.perf_counter()
-        time = toc - tic
-    
-    print("trajectory ran YIPEEE")
-    return np.concatenate((timeMat, trajMat), axis=1)
+        print("in Run Trajectory")
+        while(time < totTime):
+            # toc = time.perf_counter()
+
+            # Calculate coeffs accepts 6x5
+            x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time + newTrajCoeffs[2][0]*pow(time,2) + newTrajCoeffs[3][0]*pow(time,3) + newTrajCoeffs[4][0]*pow(time,4) + newTrajCoeffs[5][0]*pow(time,5)
+            y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time + newTrajCoeffs[2][1]*pow(time,2) + newTrajCoeffs[3][1]*pow(time,3) + newTrajCoeffs[4][1]*pow(time,4) + newTrajCoeffs[5][1]*pow(time,5)
+            z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time + newTrajCoeffs[2][2]*pow(time,2) + newTrajCoeffs[3][2]*pow(time,3) + newTrajCoeffs[4][2]*pow(time,4) + newTrajCoeffs[5][2]*pow(time,5)
+            # alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
+            alpha = 90
+            # theta5 = newTrajCoeffs[0][4] + newTrajCoeffs[1][4]*time + newTrajCoeffs[2][4]*pow(time,2) + newTrajCoeffs[3][4]*pow(time,3) + newTrajCoeffs[4][4]*pow(time,4) + newTrajCoeffs[5][4]*pow(time,5)
+            
+            pos = [x, y, z] #  The modified position
+
+            print("pos   ", pos)
+
+            # running the inverseKinematics to get the joint angles
+            [x, y, z] = self.adjust_positions(x, y, z)
+            joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
+            trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
+
+
+            print("joint_ang   ", joint_ang)
+            print("trajMat   ", trajMat)
+            
+            self.move_joints(joint_ang, 0.5) # running the motors to get to the point
+
+            print("moved joints")
+            timeMat = np.concatenate((timeMat, time), axis=0) # stores time data
+            # tic resets the timing of timeMat, so travel time and the number
+            # of loop iterations is considered to keep timing conssitent
+            sleep(1/10)
+            toc = time.perf_counter()
+            time = toc - tic
+        
+        print("trajectory ran YIPEEE")
+        return np.concatenate((timeMat, trajMat), axis=1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
