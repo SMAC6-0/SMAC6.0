@@ -23,7 +23,7 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
     print("inside quintic_trajectory")
     bMat = [[q0], [v0], [a0], [qf], [vf], [af]]
     
-    print("bMat: ", bMat)
+    print("bMat shape : ", np.shape(bMat))
     coefMat = [[1,      t0,     pow(t0,2),      pow(t0,3),          pow(t0,4),          pow(t0,5)],           # Row vector = coefficients of q0
                 [0,     1,      2*t0,           3*pow(t0,2),        4*pow(t0,3),        5*pow(t0,4)],         # Row vector = coefficients of v0
                 [0,     0,      2,              6*t0,               2*pow(t0,2),        20*pow(t0,3)],        # Row vector = coefficients of a0
@@ -32,9 +32,9 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
                 [0,     0,      2,              6*tf,               12*pow(tf,2),       20*pow(tf,3)]]        # Row vector = coefficients of vf  
     print("after quintic traj coefMat: ", coefMat) 
     coefInvMat = np.linalg.inv(coefMat)
-    print("before @ symbol")
+    print("coefInvMat shape: ", np.shape(coefInvMat))
     newCoefMat = coefInvMat @ bMat; 
-    print("newCoefMat: ", newCoefMat)
+    print("newCoefMat shape: ", newCoefMat)
     return newCoefMat
 
 

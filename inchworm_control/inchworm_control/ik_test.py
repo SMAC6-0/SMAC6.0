@@ -132,7 +132,7 @@ class IkTest(Node):
         Move the robot end effector between one location and another using quintic trajectory. 
 
         Args: 
-            current_pos (list): the current position of the EE
+            current_pos (list): the current position of the EE as a 1x4 vector
             final_pos (list): the final location of the EE
             travelTime (float): the time taken for the movement
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
@@ -151,6 +151,7 @@ class IkTest(Node):
         q_t = [x, y, z, alpha]
 
         print("Q_T", q_t)
+        print("q_t shape: ", np.shape(q_t))
 
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, which_foot_motor)
@@ -195,34 +196,43 @@ class IkTest(Node):
             totTime (double): total amount of time it takes for trajectory to reach target position
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
+
+        print("in Run Trajectory")
         timeMat = np.zeros(1,1)
         trajMat = np.zeros(1,5)
         zeroVec = np.zeros(1,5)
         newTrajCoeffs = trajCoeffs    
         time = 0
+        print("trajCoeffs size: ", np.shape(trajCoeffs))
+        print("timeMat size: ", np.shape(timeMat))
+        print("zeroVec size: ", np.shape(zeroVec))
 
+        print("before if trajCoeff == 5 ")
         # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
         # matrix, add 2 zeroVec to make them 5x6
 
         if(len(trajCoeffs[0]) == 5):
             newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
         
+        print("newTrajCoeffs size: ", np.shape(newTrajCoeffs))
+        
         tic = time.perf_counter()
+        print("tic", tic)
 
-        print("in Run Trajectory")
+        print("before while loop")
         while(time < totTime):
             # toc = time.perf_counter()
 
+            print("in while loop")
             # Calculate coeffs accepts 6x5
             x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time + newTrajCoeffs[2][0]*pow(time,2) + newTrajCoeffs[3][0]*pow(time,3) + newTrajCoeffs[4][0]*pow(time,4) + newTrajCoeffs[5][0]*pow(time,5)
             y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time + newTrajCoeffs[2][1]*pow(time,2) + newTrajCoeffs[3][1]*pow(time,3) + newTrajCoeffs[4][1]*pow(time,4) + newTrajCoeffs[5][1]*pow(time,5)
             z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time + newTrajCoeffs[2][2]*pow(time,2) + newTrajCoeffs[3][2]*pow(time,3) + newTrajCoeffs[4][2]*pow(time,4) + newTrajCoeffs[5][2]*pow(time,5)
-            # alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
-            alpha = 90
-            # theta5 = newTrajCoeffs[0][4] + newTrajCoeffs[1][4]*time + newTrajCoeffs[2][4]*pow(time,2) + newTrajCoeffs[3][4]*pow(time,3) + newTrajCoeffs[4][4]*pow(time,4) + newTrajCoeffs[5][4]*pow(time,5)
+            alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
+            # alpha = 90
             
             pos = [x, y, z] #  The modified position
-
+            print("pos size: ", np.shape(pos))
             print("pos   ", pos)
 
             # running the inverseKinematics to get the joint angles
