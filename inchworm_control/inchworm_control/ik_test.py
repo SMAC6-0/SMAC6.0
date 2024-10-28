@@ -140,6 +140,8 @@ class IkTest(Node):
         current_pos = np.transpose(current_pos)
         final_pos = np.transpose(final_pos)
 
+        print("Current_pos", current_pos)
+        print("final_pos", final_pos)
         # trajectory planning to move from above object to on object
         x = quintic_trajectory(0,travelTime, current_pos[0][0], final_pos[0][0], 0, 0, 0, 0) #  X
         y = quintic_trajectory(0,travelTime, current_pos[1][0], final_pos[1][0], 0, 0, 0, 0) # Y
@@ -148,8 +150,11 @@ class IkTest(Node):
 
         q_t = [x, y, z, alpha]
 
+        print("Q_T", q_t)
+
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, which_foot_motor)
+        print("run_trajectory YYAYY")
         
     
     
@@ -203,6 +208,8 @@ def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
         newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
     
     tic = time.perf_counter()
+
+    print("in Run Trajectory")
     while(time < totTime):
         # toc = time.perf_counter()
 
@@ -216,12 +223,20 @@ def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
         
         pos = [x, y, z] #  The modified position
 
+        print("pos   ", pos)
+
         # running the inverseKinematics to get the joint angles
         [x, y, z] = self.adjust_positions(x, y, z)
         joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
         trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
+
+
+        print("joint_ang   ", joint_ang)
+        print("trajMat   ", trajMat)
         
         self.move_joints(joint_ang, 0.5) # running the motors to get to the point
+
+        print("moved joints")
         timeMat = np.concatenate((timeMat, time), axis=0) # stores time data
         # tic resets the timing of timeMat, so travel time and the number
         # of loop iterations is considered to keep timing conssitent
@@ -229,6 +244,7 @@ def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
         toc = time.perf_counter()
         time = toc - tic
     
+    print("trajectory ran YIPEEE")
     return np.concatenate((timeMat, trajMat), axis=1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
