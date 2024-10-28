@@ -4,7 +4,7 @@ import yaml
 import numpy as np
 import time
 
-def quintic_trajectory(self, t0, tf, q0, qf, v0, vf, a0, af): 
+def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af): 
     """
     Calculates the position of a single joint using quintic trajectory planning. 
     
