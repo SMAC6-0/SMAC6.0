@@ -92,8 +92,8 @@ class IkTest(Node):
             # self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
 
             # Trajectory planning
-            self.move_to([1,0,0], [1,0,1], 2, 1) # move 1 block up from board to safe location.
-            self.move_to([1,0,1], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
+            self.move_to([1,0,0, 90], [1,0,1, 90], 2, 1) # move 1 block up from board to safe location.
+            self.move_to([1,0,1, 90], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
 
 
         except Exception as e:
