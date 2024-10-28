@@ -202,7 +202,7 @@ class IkTest(Node):
         trajMat = np.zeros((1,5))
         zeroVec = np.zeros((1,5))
         newTrajCoeffs = trajCoeffs    
-        time = 0
+        time_s = 0
         print("trajCoeffs size: ", np.shape(trajCoeffs))
         print("timeMat size: ", np.shape(timeMat))
         print("zeroVec size: ", np.shape(zeroVec))
@@ -220,15 +220,15 @@ class IkTest(Node):
         print("tic", tic)
 
         print("before while loop")
-        while(time < totTime):
+        while(time_s < totTime):
             # toc = time.perf_counter()
 
             print("in while loop")
             # Calculate coeffs accepts 6x5
-            x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time + newTrajCoeffs[2][0]*pow(time,2) + newTrajCoeffs[3][0]*pow(time,3) + newTrajCoeffs[4][0]*pow(time,4) + newTrajCoeffs[5][0]*pow(time,5)
-            y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time + newTrajCoeffs[2][1]*pow(time,2) + newTrajCoeffs[3][1]*pow(time,3) + newTrajCoeffs[4][1]*pow(time,4) + newTrajCoeffs[5][1]*pow(time,5)
-            z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time + newTrajCoeffs[2][2]*pow(time,2) + newTrajCoeffs[3][2]*pow(time,3) + newTrajCoeffs[4][2]*pow(time,4) + newTrajCoeffs[5][2]*pow(time,5)
-            alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
+            x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time_s + newTrajCoeffs[2][0]*pow(time_s,2) + newTrajCoeffs[3][0]*pow(time_s,3) + newTrajCoeffs[4][0]*pow(time_s,4) + newTrajCoeffs[5][0]*pow(time_s,5)
+            y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time_s + newTrajCoeffs[2][1]*pow(time_s,2) + newTrajCoeffs[3][1]*pow(time_s,3) + newTrajCoeffs[4][1]*pow(time_s,4) + newTrajCoeffs[5][1]*pow(time_s,5)
+            z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
+            alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time_s + newTrajCoeffs[2][3]*pow(time_s,2) + newTrajCoeffs[3][3]*pow(time_s,3) + newTrajCoeffs[4][3]*pow(time_s,4) + newTrajCoeffs[5][3]*pow(time_s,5)
             # alpha = 90
             
             pos = [x, y, z] #  The modified position
@@ -247,12 +247,12 @@ class IkTest(Node):
             self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
             print("moved joints")
-            timeMat = np.concatenate((timeMat, time), axis=0) # stores time data
+            timeMat = np.concatenate((timeMat, time_s), axis=0) # stores time data
             # tic resets the timing of timeMat, so travel time and the number
             # of loop iterations is considered to keep timing conssitent
             sleep(1/10)
             toc = time.perf_counter()
-            time = toc - tic
+            time_s = toc - tic
         
         print("trajectory ran YIPEEE")
         return np.concatenate((timeMat, trajMat), axis=1)
