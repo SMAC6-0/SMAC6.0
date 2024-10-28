@@ -93,7 +93,7 @@ class IkTest(Node):
 
             # Trajectory planning
             self.move_to([1,0,0], [1,0,1], 2, 1) # move 1 block up from board to safe location.
-            self.move_to([1,0,1], [positions[0], positions[1], positions[2]], 2, 1)
+            self.move_to([1,0,1], [float(positions[0]), float(positions[1]), float(positions[2])], 2, 1)
 
 
         except Exception as e:
@@ -132,8 +132,8 @@ class IkTest(Node):
         Move the robot end effector between one location and another using quintic trajectory. 
 
         Args: 
-            current_pos (tuple): the current position of the EE
-            final_pos (tuple): the final location of the EE
+            current_pos (list): the current position of the EE
+            final_pos (list): the final location of the EE
             travelTime (float): the time taken for the movement
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
