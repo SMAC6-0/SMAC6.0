@@ -85,10 +85,16 @@ class IkTest(Node):
             pos = msg.data
             positions = pos.split(', ')
             
-            [inputX, inputY, inputZ] = self.adjust_positions(float(positions[0]), float(positions[1]), float(positions[2]))
-            [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(inputX, inputY, inputZ, float(positions[3]), float(positions[4]))
+
+            # [inputX, inputY, inputZ] = self.adjust_positions(float(positions[0]), float(positions[1]), float(positions[2]))
+            # [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(inputX, inputY, inputZ, float(positions[3]), float(positions[4]))
             
-            self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
+            # self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
+
+            # Trajectory planning
+            self.move_to([1,0,0], [1,0,1], 2, 1) # move 1 block up from board to safe location.
+            self.move_to([1,0,1], [positions[0], positions[1], positions[2]], 2, 1)
+
 
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
@@ -121,8 +127,33 @@ class IkTest(Node):
 
         return [inputX, inputY, inputZ]
         
+    def move_to(self, current_pos, final_pos, travelTime, which_foot_motor): 
+        """
+        Move the robot end effector between one location and another using quintic trajectory. 
+
+        Args: 
+            current_pos (tuple): the current position of the EE
+            final_pos (tuple): the final location of the EE
+            travelTime (float): the time taken for the movement
+            which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
+        """
+        current_pos = np.transpose(current_pos)
+        final_pos = np.transpose(final_pos)
+
+        # trajectory planning to move from above object to on object
+        x = quintic_trajectory(0,travelTime, current_pos(1,1), final_pos(1,1), 0, 0, 0, 0) #  X
+        y = quintic_trajectory(0,travelTime, current_pos(2,1), final_pos(2,1), 0, 0, 0, 0) # Y
+        z = quintic_trajectory(0,travelTime, current_pos(3,1), final_pos(3,1), 0, 0, 0, 0) # Z
+        alpha = quintic_trajectory(0,travelTime, current_pos(4,1), final_pos(4,1), 0, 0, 0, 0) # Alpha
+
+        q_t = [x, y, z, alpha]
+
+        # run trajectory for task space
+        self.run_trajectory(q_t, travelTime, which_foot_motor)
+        
     
-    def move_to(self, joint_angles, time):
+    
+    def move_joints(self, joint_angles, time):
         """
         Move motors to specified angles over a given time duration.
 
@@ -152,11 +183,11 @@ class IkTest(Node):
 
 def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
     """
-    Calculates current joint positions based on trajectory coefficients and current time
+    Calculates current joint positions based on trajectory coefficients and current time.
     
     Args:
-        trajCoeffs (tuple) - trajectory coefficients generated from [4x6 double] quintic_trajectory(), for 5 joints
-        totTime (double) - total amount of time it takes for trajectory to reach target position
+        trajCoeffs (tuple): trajectory coefficients generated from [4x6 double] quintic_trajectory(), for 5 joints
+        totTime (double): total amount of time it takes for trajectory to reach target position
         which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
     """
     timeMat = np.zeros(1,1)
@@ -179,16 +210,18 @@ def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
         x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time + newTrajCoeffs[2][0]*pow(time,2) + newTrajCoeffs[3][0]*pow(time,3) + newTrajCoeffs[4][0]*pow(time,4) + newTrajCoeffs[5][0]*pow(time,5)
         y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time + newTrajCoeffs[2][1]*pow(time,2) + newTrajCoeffs[3][1]*pow(time,3) + newTrajCoeffs[4][1]*pow(time,4) + newTrajCoeffs[5][1]*pow(time,5)
         z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time + newTrajCoeffs[2][2]*pow(time,2) + newTrajCoeffs[3][2]*pow(time,3) + newTrajCoeffs[4][2]*pow(time,4) + newTrajCoeffs[5][2]*pow(time,5)
-        alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
+        # alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time + newTrajCoeffs[2][3]*pow(time,2) + newTrajCoeffs[3][3]*pow(time,3) + newTrajCoeffs[4][3]*pow(time,4) + newTrajCoeffs[5][3]*pow(time,5)
+        alpha = 90
         # theta5 = newTrajCoeffs[0][4] + newTrajCoeffs[1][4]*time + newTrajCoeffs[2][4]*pow(time,2) + newTrajCoeffs[3][4]*pow(time,3) + newTrajCoeffs[4][4]*pow(time,4) + newTrajCoeffs[5][4]*pow(time,5)
         
         pos = [x, y, z] #  The modified position
 
         # running the inverseKinematics to get the joint angles
+        [x, y, z] = self.adjust_positions(x, y, z)
         joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
         trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
         
-        self.move_to(joint_ang, 0.5) # running the interpolate jp to get to the point
+        self.move_joints(joint_ang, 0.5) # running the motors to get to the point
         timeMat = np.concatenate((timeMat, time), axis=0) # stores time data
         # tic resets the timing of timeMat, so travel time and the number
         # of loop iterations is considered to keep timing conssitent
