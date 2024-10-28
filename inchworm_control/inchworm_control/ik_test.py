@@ -141,10 +141,10 @@ class IkTest(Node):
         final_pos = np.transpose(final_pos)
 
         # trajectory planning to move from above object to on object
-        x = quintic_trajectory(0,travelTime, current_pos(1,1), final_pos(1,1), 0, 0, 0, 0) #  X
-        y = quintic_trajectory(0,travelTime, current_pos(2,1), final_pos(2,1), 0, 0, 0, 0) # Y
-        z = quintic_trajectory(0,travelTime, current_pos(3,1), final_pos(3,1), 0, 0, 0, 0) # Z
-        alpha = quintic_trajectory(0,travelTime, current_pos(4,1), final_pos(4,1), 0, 0, 0, 0) # Alpha
+        x = quintic_trajectory(0,travelTime, current_pos[0][0], final_pos[0][0], 0, 0, 0, 0) #  X
+        y = quintic_trajectory(0,travelTime, current_pos[1][0], final_pos[1][0], 0, 0, 0, 0) # Y
+        z = quintic_trajectory(0,travelTime, current_pos[2][0], final_pos[2][0], 0, 0, 0, 0) # Z
+        alpha = quintic_trajectory(0,travelTime, current_pos[3][0], final_pos[3][0], 0, 0, 0, 0) # Alpha
 
         q_t = [x, y, z, alpha]
 
