@@ -141,6 +141,7 @@ class MotorController(Node):
             time (float): Duration to reach the target angles (in seconds).
         """
         # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
+        # TODO: take in theta1 and theta5 as well
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
