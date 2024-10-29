@@ -148,7 +148,7 @@ class IkTest(Node):
         z = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # Z
         alpha = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # Alpha
 
-        q_t = np.concatenate((x, y, z, alpha), axis=0)
+        q_t = np.concatenate((x, y, z, alpha), axis=1)
 
         print("Q_T", q_t)
         print("q_t shape: ", np.shape(q_t)) # 6x4 mat
