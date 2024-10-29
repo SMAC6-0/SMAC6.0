@@ -199,8 +199,8 @@ class IkTest(Node):
 
         print("in Run Trajectory")
         timeMat = np.zeros((1,1))
-        trajMat = np.zeros((1,5))
-        zeroVec = np.zeros((1,5))
+        trajMat = np.zeros((1,4))
+        zeroVec = np.zeros((1,4))
         newTrajCoeffs = trajCoeffs    
         time_s = 0
         print("trajCoeffs size: ", np.shape(trajCoeffs))
