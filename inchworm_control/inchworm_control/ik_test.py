@@ -11,6 +11,7 @@ import time
 from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
 import numpy as np
+from enum import ENUM
 
 class IkTest(Node):
     def __init__(self):
@@ -68,8 +69,25 @@ class IkTest(Node):
             self.motor_4.pos_read(), 
             self.motor_5.pos_read())
         
+        # Initialize a dictionary mapping possible step actions to corresponding methods
+        self.step_actions = {
+            'STEP_FORWARD': self.step_forward
+            # 'STEP_FORWARD_BLOCK': self.step_forward_block,
+            # 'STEP_LEFT': self.step_left,
+            # 'STEP_RIGHT': self.step_right,
+            # 'STEP_LEFT_BLOCK': self.step_left_block,
+            # 'STEP_RIGHT_BLOCK': self.step_right_block,
+            # 'GRAB_UP_FORWARD': self.grab_up_forward, 
+            # 'GRAB_UP_LEFT': self.grab_up_left, 
+            # 'PLACE_FORWARD_BLOCK': self.place_forward,
+            # 'PLACE_UP_FORWARD_BLOCK': self.place_up_forward,
+            # 'PLACE_UP_2_FORWARD_BLOCK': self.place_up_2_forward,
+            # 'SIMPLIFIED_POS_1_DOWN_1': self.step_down_1,
+            # 'SIMPLIFIED_POS_1_DOWN_2': self.step_down_2
+            # Add more mappings as needed
+        }      
 
-        
+
 
     def listener_callback(self, msg):
         """
@@ -186,6 +204,44 @@ class IkTest(Node):
             toc = time.perf_counter()
             time_s = toc - tic
         
+    """
+    The territory of movesets begins now...
+    """
+
+    class EE_direction(Enum):
+        DOWN = 90
+        UP = 0
+
+    home_position = [1, 0, 0, EE_direction.DOWN]
+    above_home = [1, 0, 0.5, EE_direction.DOWN]
+    block_interface_time = 1
+    travel_time = 2
+
+    def step_forward(self, which_foot_motor): 
+        self.latch_detach(which_foot_motor)
+
+        # move up from board to safe location
+        self.move_to(self.home_position, self.above_home, self.block_interface_time, which_foot_motor) 
+        
+        # Move from location above home forward
+        goal = [1, 0, 0.5, self.EE_direction.DOWN]
+        self.move_to(self.above_home, goal, self.travel_time, which_foot_motor)
+        goal[2] = 0
+        self.move_to(goal, self.home_position, self.block_interface_time, which_foot_motor)
+
+    def latch_detach(self, which_foot_motor):
+        if (which_foot_motor == 1): # 1 is the pivot foot
+            # detach the leading leg
+            release_servo(self.servo2)
+
+            # activate the servo of the following leg
+            activate_servo(self.servo1)
+        elif (which_foot_motor == 5): # 5 is the pivot foot
+            # detach the leading leg
+            release_servo(self.servo1)
+
+            # activate the servo of the following leg
+            activate_servo(self.servo2)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
@@ -214,7 +270,7 @@ def release_servo(servo_id):
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
-    servo_id.ChangeDutyCycle(0)
+    servo_id.ChangeDutyCycle(0) 
 
 def main(args=None):
     rclpy.init(args=args)
