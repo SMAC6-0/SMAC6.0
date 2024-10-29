@@ -4,15 +4,15 @@ import yaml
 import numpy as np
 import time
 
-def quintic_trajectory(t0: float, tf: float, q0: tuple, qf: tuple, v0: float, vf: float, a0: float, af: float): 
+def quintic_trajectory(t0: float, tf: float, q0: float, qf: float, v0: float, vf: float, a0: float, af: float): 
     """
     Calculates the position of a single joint using quintic trajectory planning. 
     
     Args:
         t0 (float64): Start time (usually 0). 
         tf (float64): End time. 
-        q0 (tuple): Start position of the end effector (x, y, z, alpha). 
-        qf (tuple): End position of the end effector (x, y, z, alpha).
+        q0 (float64): Start position of the end effector (x, y, z, or alpha). 
+        qf (float64): End position of the end effector (x, y, z, or alpha).
         v0 (float64): Starting velocity (usually 0). 
         vf (float64): Ending velocity (usually 0). 
         a0 (float64): Starting acceleration (usually 0). 

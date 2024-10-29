@@ -92,6 +92,7 @@ class IkTest(Node):
             # Trajectory planning
             self.move_to([1,0,0, 90], [1,0,1, 90], 2, 1) # move 1 block up from board to safe location.
             self.move_to([1,0,1, 90], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
+            self.move_to([float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], [float(positions[0]), float(positions[1]), 0, float(positions[3])], 2, 1)
 
 
         except Exception as e:
@@ -124,25 +125,16 @@ class IkTest(Node):
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
 
-        print("Current_pos: ", current_pos)
-        print("final_pos: ", final_pos)
-
-        # trajectory planning to move from above object to on object
-        q0 = quintic_trajectory(0,travelTime, current_pos[0], final_pos[0], 0, 0, 0, 0) #  X
-        q1 = quintic_trajectory(0,travelTime, current_pos[1], final_pos[1], 0, 0, 0, 0) # Y
-        q2 = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # Z
-        q3 = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # Alpha
+        # trajectory planning to move from above object to on object. each is a 6x1 matrix
+        q0 = quintic_trajectory(0,travelTime, current_pos[0], final_pos[0], 0, 0, 0, 0) # matrix for x 
+        q1 = quintic_trajectory(0,travelTime, current_pos[1], final_pos[1], 0, 0, 0, 0) # matrix for y
+        q2 = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # matrix for z 
+        q3 = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # matrix for alpha 
 
         q_t = np.concatenate((q0, q1, q2, q3), axis=1) # 6x4 mat
 
-        print("Q_T", q_t)
-        print("q_t shape: ", np.shape(q_t)) 
-
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, which_foot_motor)
-        print("run_trajectory YYAYY")
-        
-    
     
     def move_joints(self, joint_angles, time):
         """
@@ -177,23 +169,20 @@ class IkTest(Node):
         Calculates current joint positions based on trajectory coefficients and current time.
         
         Args:
-            trajCoeffs (tuple): trajectory coefficients generated from [4x6 double] quintic_trajectory(), for 5 joints
+            trajCoeffs (list): [6x4 float] trajectory coefficients generated from quintic_trajectory()
             totTime (double): total amount of time it takes for trajectory to reach target position
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
-        newTrajCoeffs = trajCoeffs    # 6x4 matrix 
         time_s = 0
         
         tic = time.perf_counter()
 
         while(time_s < totTime):
-
-            print("in while loop")
             # Calculate coeffs accepts 6x4
-            x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time_s + newTrajCoeffs[2][0]*pow(time_s,2) + newTrajCoeffs[3][0]*pow(time_s,3) + newTrajCoeffs[4][0]*pow(time_s,4) + newTrajCoeffs[5][0]*pow(time_s,5)
-            y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time_s + newTrajCoeffs[2][1]*pow(time_s,2) + newTrajCoeffs[3][1]*pow(time_s,3) + newTrajCoeffs[4][1]*pow(time_s,4) + newTrajCoeffs[5][1]*pow(time_s,5)
-            z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
-            alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time_s + newTrajCoeffs[2][3]*pow(time_s,2) + newTrajCoeffs[3][3]*pow(time_s,3) + newTrajCoeffs[4][3]*pow(time_s,4) + newTrajCoeffs[5][3]*pow(time_s,5)
+            x = trajCoeffs[0][0] + trajCoeffs[1][0]*time_s + trajCoeffs[2][0]*pow(time_s,2) + trajCoeffs[3][0]*pow(time_s,3) + trajCoeffs[4][0]*pow(time_s,4) + trajCoeffs[5][0]*pow(time_s,5)
+            y = trajCoeffs[0][1] + trajCoeffs[1][1]*time_s + trajCoeffs[2][1]*pow(time_s,2) + trajCoeffs[3][1]*pow(time_s,3) + trajCoeffs[4][1]*pow(time_s,4) + trajCoeffs[5][1]*pow(time_s,5)
+            z = trajCoeffs[0][2] + trajCoeffs[1][2]*time_s + trajCoeffs[2][2]*pow(time_s,2) + trajCoeffs[3][2]*pow(time_s,3) + trajCoeffs[4][2]*pow(time_s,4) + trajCoeffs[5][2]*pow(time_s,5)
+            alpha = trajCoeffs[0][3] + trajCoeffs[1][3]*time_s + trajCoeffs[2][3]*pow(time_s,2) + trajCoeffs[3][3]*pow(time_s,3) + trajCoeffs[4][3]*pow(time_s,4) + trajCoeffs[5][3]*pow(time_s,5)
                      
             # running the inverseKinematics to get the joint angles
             joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
@@ -204,7 +193,6 @@ class IkTest(Node):
             toc = time.perf_counter()
             time_s = toc - tic
         
-        print("trajectory ran YIPEEE")
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
