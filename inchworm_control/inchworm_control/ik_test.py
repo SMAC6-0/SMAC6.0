@@ -198,22 +198,22 @@ class IkTest(Node):
         """
 
         print("in Run Trajectory")
-        timeMat = np.zeros((1,1))
+        # timeMat = np.zeros((1,1))
         trajMat = np.zeros((1,4))
         zeroVec = np.zeros((1,4))
         newTrajCoeffs = trajCoeffs    
         time_s = 0
         print("trajCoeffs size: ", np.shape(trajCoeffs))
-        print("timeMat size: ", np.shape(timeMat))
+        # print("timeMat size: ", np.shape(timeMat))
         print("zeroVec size: ", np.shape(zeroVec))
 
-        print("before if trajCoeff == 5 ")
+        # print("before if trajCoeff == 5 ")
         # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
         # matrix, add 2 zeroVec to make them 5x6
 
-        if(len(trajCoeffs[0]) == 4):
-            newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
-            print("concatenated")
+        # if(len(trajCoeffs[0]) == 4):
+        #     newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
+        #     print("concatenated")
         
         print("newTrajCoeffs size: ", np.shape(newTrajCoeffs))
         
@@ -225,7 +225,7 @@ class IkTest(Node):
             # toc = time.perf_counter()
 
             print("in while loop")
-            # Calculate coeffs accepts 6x5
+            # Calculate coeffs accepts 6x4
             x = newTrajCoeffs[0][0] + newTrajCoeffs[1][0]*time_s + newTrajCoeffs[2][0]*pow(time_s,2) + newTrajCoeffs[3][0]*pow(time_s,3) + newTrajCoeffs[4][0]*pow(time_s,4) + newTrajCoeffs[5][0]*pow(time_s,5)
             y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time_s + newTrajCoeffs[2][1]*pow(time_s,2) + newTrajCoeffs[3][1]*pow(time_s,3) + newTrajCoeffs[4][1]*pow(time_s,4) + newTrajCoeffs[5][1]*pow(time_s,5)
             z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
@@ -234,13 +234,16 @@ class IkTest(Node):
             print("x, y, z, alpha: ", x, " ", y," ", z, " ", alpha)
             
             pos = [x, y, z] #  The modified position
+            pos = np.concatenate((x, y, z), axis=1)
             print("pos size: ", np.shape(pos))
             print("pos   ", pos)
 
             # running the inverseKinematics to get the joint angles
             [x, y, z] = self.adjust_positions(x, y, z)
             joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
-            trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
+            
+            
+            # trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
 
 
             print("joint_ang   ", joint_ang)
@@ -249,7 +252,7 @@ class IkTest(Node):
             self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
             print("moved joints")
-            timeMat = np.concatenate((timeMat, time_s), axis=0) # stores time data
+            # timeMat = np.concatenate((timeMat, time_s), axis=0) # stores time data
             # tic resets the timing of timeMat, so travel time and the number
             # of loop iterations is considered to keep timing conssitent
             sleep(1/10)
@@ -257,7 +260,7 @@ class IkTest(Node):
             time_s = toc - tic
         
         print("trajectory ran YIPEEE")
-        return np.concatenate((timeMat, trajMat), axis=1)
+        # return np.concatenate((timeMat, trajMat), axis=1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
