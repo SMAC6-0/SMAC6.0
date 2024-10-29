@@ -83,12 +83,6 @@ class IkTest(Node):
             pos = msg.data
             positions = pos.split(', ')
             
-
-            # [inputX, inputY, inputZ] = self.adjust_positions(float(positions[0]), float(positions[1]), float(positions[2]))
-            # [theta1, theta2, theta3, theta4, theta5] = inverseKinematics(inputX, inputY, inputZ, float(positions[3]), float(positions[4]))
-            
-            # self.move_to(theta1, theta2, theta3, theta4, theta5, 2)
-
             # Trajectory planning
             self.move_to([1,0,0, 90], [1,0,1, 90], 2, 1) # move 1 block up from board to safe location.
             self.move_to([1,0,1, 90], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
@@ -118,14 +112,15 @@ class IkTest(Node):
 
         Args: 
             current_pos (list): the current position of the EE as a 1x4 vector
-            final_pos (list): the final location of the EE
+            final_pos (list): the final location of the EE as a 1x4 vector
             travelTime (float): the time taken for the movement
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
 
-        # trajectory planning to move from above object to on object. each is a 6x1 matrix
+        # trajectory planning to move from above object to on object. each is a 6x1 matrix 
+        # the last 4 inputs are 0 to make movement more precise (vel & accel = 0) as the EE approaches the goal
         q0 = quintic_trajectory(0,travelTime, current_pos[0], final_pos[0], 0, 0, 0, 0) # matrix for x 
         q1 = quintic_trajectory(0,travelTime, current_pos[1], final_pos[1], 0, 0, 0, 0) # matrix for y
         q2 = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # matrix for z 
@@ -149,8 +144,6 @@ class IkTest(Node):
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
-        # # Pause the program to allow the motors to finish moving. 
-        # sleep(time)
         self.motor_1.move_time_write(theta1, time)
         self.motor_5.move_time_write(theta5, time)
 
