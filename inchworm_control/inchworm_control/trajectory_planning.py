@@ -18,7 +18,7 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
         a0 (float64): Starting acceleration (usually 0). 
         af (float64): Ending acceleration (usually 0). 
     Returns:
-        list: Returns a coefficient matrix as a list of float64. 
+        list: Returns a 6x1 coefficient matrix as a list of float64. 
     """
     print("inside quintic_trajectory")
     bMat = [[q0], [v0], [a0], [qf], [vf], [af]] # 6x1 matrix
@@ -33,7 +33,7 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
     print("after quintic traj, coefMat shape: ", np.shape(coefMat)) 
     coefInvMat = np.linalg.inv(coefMat) # 6x6 matrix 
     print("coefInvMat shape: ", np.shape(coefInvMat))
-    newCoefMat = coefInvMat @ bMat; # @ is matrix multiplication. 
+    newCoefMat = coefInvMat @ bMat; # @ is matrix multiplication. 6x1 matrix
     print("newCoefMat shape: ", np.shape(newCoefMat))
     return newCoefMat
 

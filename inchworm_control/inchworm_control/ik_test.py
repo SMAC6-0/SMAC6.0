@@ -148,7 +148,7 @@ class IkTest(Node):
         z = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # Z
         alpha = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # Alpha
 
-        q_t = np.concatenate((x, y, z, alpha), axis=1)
+        q_t = np.concatenate((x, y, z, alpha), axis=0)
 
         print("Q_T", q_t)
         print("q_t shape: ", np.shape(q_t)) # 6x4 mat
@@ -211,8 +211,9 @@ class IkTest(Node):
         # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
         # matrix, add 2 zeroVec to make them 5x6
 
-        if(len(trajCoeffs[0]) == 5):
+        if(len(trajCoeffs[0]) == 4):
             newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
+            print("concatenated")
         
         print("newTrajCoeffs size: ", np.shape(newTrajCoeffs))
         
@@ -230,6 +231,7 @@ class IkTest(Node):
             z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
             alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time_s + newTrajCoeffs[2][3]*pow(time_s,2) + newTrajCoeffs[3][3]*pow(time_s,3) + newTrajCoeffs[4][3]*pow(time_s,4) + newTrajCoeffs[5][3]*pow(time_s,5)
             # alpha = 90
+            print("x, y, z, alpha: ", x, " ", y," ", z, " ", alpha)
             
             pos = [x, y, z] #  The modified position
             print("pos size: ", np.shape(pos))
