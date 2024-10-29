@@ -68,8 +68,6 @@ class IkTest(Node):
             self.motor_4.pos_read(), 
             self.motor_5.pos_read())
         
-        # Constant, the width of the blocks 
-        self.CUBE_WIDTH = 3 
 
         
 
@@ -112,20 +110,6 @@ class IkTest(Node):
 
         self.time_to_move = 1.5 # Set the time over which the motors will move.
 
-    def adjust_positions(self, goal_X: float, goal_Y: float, goal_Z: float): 
-        """
-        Helper function to adjust the goal EE position to a format digestable for the inverse kinematics.
-
-        Args:
-            goal_X (float): the desired X position in number of blocks. 
-            goal_Y (float): the desired Y position in number of blocks. 
-            goal_Z (float): the desired Z position in number of blocks. 
-        """
-        inputX = self.CUBE_WIDTH * 1.144 * goal_X + 0.1242
-        inputY = self.CUBE_WIDTH * 1.1595 * goal_Y + 0.0249
-        inputZ = self.CUBE_WIDTH * 1.0786 * goal_Z - 0.0432
-
-        return [inputX, inputY, inputZ]
         
     def move_to(self, current_pos, final_pos, travelTime, which_foot_motor): 
         """
@@ -140,18 +124,19 @@ class IkTest(Node):
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
 
-        print("Current_pos", current_pos)
-        print("final_pos", final_pos)
-        # trajectory planning to move from above object to on object
-        x = quintic_trajectory(0,travelTime, current_pos[0], final_pos[0], 0, 0, 0, 0) #  X
-        y = quintic_trajectory(0,travelTime, current_pos[1], final_pos[1], 0, 0, 0, 0) # Y
-        z = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # Z
-        alpha = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # Alpha
+        print("Current_pos: ", current_pos)
+        print("final_pos: ", final_pos)
 
-        q_t = np.concatenate((x, y, z, alpha), axis=1)
+        # trajectory planning to move from above object to on object
+        q0 = quintic_trajectory(0,travelTime, current_pos[0], final_pos[0], 0, 0, 0, 0) #  X
+        q1 = quintic_trajectory(0,travelTime, current_pos[1], final_pos[1], 0, 0, 0, 0) # Y
+        q2 = quintic_trajectory(0,travelTime, current_pos[2], final_pos[2], 0, 0, 0, 0) # Z
+        q3 = quintic_trajectory(0,travelTime, current_pos[3], final_pos[3], 0, 0, 0, 0) # Alpha
+
+        q_t = np.concatenate((q0, q1, q2, q3), axis=1) # 6x4 mat
 
         print("Q_T", q_t)
-        print("q_t shape: ", np.shape(q_t)) # 6x4 mat
+        print("q_t shape: ", np.shape(q_t)) 
 
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, which_foot_motor)
@@ -196,33 +181,12 @@ class IkTest(Node):
             totTime (double): total amount of time it takes for trajectory to reach target position
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
-
-        print("in Run Trajectory")
-        # timeMat = np.zeros((1,1))
-        trajMat = np.zeros((1,4))
-        zeroVec = np.zeros((1,4))
-        newTrajCoeffs = trajCoeffs    
+        newTrajCoeffs = trajCoeffs    # 6x4 matrix 
         time_s = 0
-        print("trajCoeffs size: ", np.shape(trajCoeffs))
-        # print("timeMat size: ", np.shape(timeMat))
-        print("zeroVec size: ", np.shape(zeroVec))
-
-        # print("before if trajCoeff == 5 ")
-        # modify trajCoeffs and make it 5x6 matrix. If it's a 5x4
-        # matrix, add 2 zeroVec to make them 5x6
-
-        # if(len(trajCoeffs[0]) == 4):
-        #     newTrajCoeffs = np.concatenate((newTrajCoeffs , zeroVec, zeroVec), axis=0) # Concatenate vertically 
-        #     print("concatenated")
-        
-        print("newTrajCoeffs size: ", np.shape(newTrajCoeffs))
         
         tic = time.perf_counter()
-        print("tic", tic)
 
-        print("before while loop")
         while(time_s < totTime):
-            # toc = time.perf_counter()
 
             print("in while loop")
             # Calculate coeffs accepts 6x4
@@ -230,36 +194,17 @@ class IkTest(Node):
             y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time_s + newTrajCoeffs[2][1]*pow(time_s,2) + newTrajCoeffs[3][1]*pow(time_s,3) + newTrajCoeffs[4][1]*pow(time_s,4) + newTrajCoeffs[5][1]*pow(time_s,5)
             z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
             alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time_s + newTrajCoeffs[2][3]*pow(time_s,2) + newTrajCoeffs[3][3]*pow(time_s,3) + newTrajCoeffs[4][3]*pow(time_s,4) + newTrajCoeffs[5][3]*pow(time_s,5)
-            print("x, y, z, alpha: ", x, " ", y," ", z, " ", alpha)
-            
-            pos = [x, y, z] #  The modified position
-            # pos = np.concatenate((x, y, z), axis=1)
-            print("pos size: ", np.shape(pos))
-            print("pos   ", pos)
-
+                     
             # running the inverseKinematics to get the joint angles
-            [x, y, z] = self.adjust_positions(x, y, z)
             joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
-            
-            
-            # trajMat = np.concatenate((trajMat, [pos, alpha]), axis=0) # Storing the x, y, z position and alpha
-
-
-            print("joint_ang   ", joint_ang)
-            print("trajMat   ", trajMat)
             
             self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
-            print("moved joints")
-            # timeMat = np.concatenate((timeMat, time_s), axis=0) # stores time data
-            # tic resets the timing of timeMat, so travel time and the number
-            # of loop iterations is considered to keep timing conssitent
             sleep(1/10)
             toc = time.perf_counter()
             time_s = toc - tic
         
         print("trajectory ran YIPEEE")
-        # return np.concatenate((timeMat, trajMat), axis=1)
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
