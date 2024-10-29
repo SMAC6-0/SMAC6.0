@@ -230,11 +230,10 @@ class IkTest(Node):
             y = newTrajCoeffs[0][1] + newTrajCoeffs[1][1]*time_s + newTrajCoeffs[2][1]*pow(time_s,2) + newTrajCoeffs[3][1]*pow(time_s,3) + newTrajCoeffs[4][1]*pow(time_s,4) + newTrajCoeffs[5][1]*pow(time_s,5)
             z = newTrajCoeffs[0][2] + newTrajCoeffs[1][2]*time_s + newTrajCoeffs[2][2]*pow(time_s,2) + newTrajCoeffs[3][2]*pow(time_s,3) + newTrajCoeffs[4][2]*pow(time_s,4) + newTrajCoeffs[5][2]*pow(time_s,5)
             alpha = newTrajCoeffs[0][3] + newTrajCoeffs[1][3]*time_s + newTrajCoeffs[2][3]*pow(time_s,2) + newTrajCoeffs[3][3]*pow(time_s,3) + newTrajCoeffs[4][3]*pow(time_s,4) + newTrajCoeffs[5][3]*pow(time_s,5)
-            # alpha = 90
             print("x, y, z, alpha: ", x, " ", y," ", z, " ", alpha)
             
             pos = [x, y, z] #  The modified position
-            pos = np.concatenate((x, y, z), axis=1)
+            # pos = np.concatenate((x, y, z), axis=1)
             print("pos size: ", np.shape(pos))
             print("pos   ", pos)
 
