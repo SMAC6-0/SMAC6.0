@@ -8,7 +8,7 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
     """
     Calculates the position of a single joint using quintic trajectory planning. 
     
-    Args: 
+    Args:
         t0 (float64): Start time (usually 0). 
         tf (float64): End time. 
         q0 (tuple): Start position of the end effector (x, y, z, alpha). 
@@ -17,11 +17,11 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
         vf (float64): Ending velocity (usually 0). 
         a0 (float64): Starting acceleration (usually 0). 
         af (float64): Ending acceleration (usually 0). 
-    Returns: 
+    Returns:
         list: Returns a coefficient matrix as a list of float64. 
     """
     print("inside quintic_trajectory")
-    bMat = [[q0], [v0], [a0], [qf], [vf], [af]]
+    bMat = [[q0], [v0], [a0], [qf], [vf], [af]] # 6x1 matrix
     
     print("bMat shape : ", np.shape(bMat))
     coefMat = [[1,      t0,     pow(t0,2),      pow(t0,3),          pow(t0,4),          pow(t0,5)],           # Row vector = coefficients of q0
@@ -30,11 +30,11 @@ def quintic_trajectory(t0, tf, q0, qf, v0, vf, a0, af):
                 [1,     tf,     pow(tf,2),      pow(tf,3),          pow(tf,4),          pow(tf,5)],           # Row vector = coefficients of qf
                 [0,     1,      2*tf,           3*pow(tf,2),        4*pow(tf,3),        5*pow(tf,4)],         # Row vector = coefficients of af
                 [0,     0,      2,              6*tf,               12*pow(tf,2),       20*pow(tf,3)]]        # Row vector = coefficients of vf  
-    print("after quintic traj coefMat: ", coefMat) 
-    coefInvMat = np.linalg.inv(coefMat)
+    print("after quintic traj, coefMat shape: ", np.shape(coefMat)) 
+    coefInvMat = np.linalg.inv(coefMat) # 6x6 matrix 
     print("coefInvMat shape: ", np.shape(coefInvMat))
-    newCoefMat = coefInvMat @ bMat; 
-    print("newCoefMat shape: ", newCoefMat)
+    newCoefMat = coefInvMat @ bMat; # @ is matrix multiplication. 
+    print("newCoefMat shape: ", np.shape(newCoefMat))
     return newCoefMat
 
 
