@@ -12,6 +12,7 @@ from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
 import numpy as np
 from enum import Enum
+import copy
 
 class EE_direction(Enum):
     DOWN = 90
@@ -233,8 +234,10 @@ class IkTest(Node):
         print("move from ", HOME_POSITION, " ", ABOVE_HOME)
         # Move from location above home forward 
         goal = [2, 0, 0, EE_direction.DOWN.value]
-        above_goal = goal
+        print ("goal is: ", goal)
+        above_goal = copy.deepcopy(goal)
         above_goal[2] = 0.5
+        print("did goal survive? goal is: ", goal)
 
         # Move forward and hover over the goal overhead position 
         self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, which_foot_motor)
