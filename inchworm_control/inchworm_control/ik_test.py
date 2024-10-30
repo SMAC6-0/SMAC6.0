@@ -242,7 +242,10 @@ class IkTest(Node):
         
         # Move from above goal to the goal position
         self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, which_foot_motor)
-        print("move from ", ABOVE_HOME, " ", above_goal)
+        print("move from ", above_goal, " ", goal)
+
+        print("-------------- Front leg is in place")
+        sleep(3)
         
         # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
