@@ -11,7 +11,7 @@ import time
 from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
 import numpy as np
-from enum import ENUM
+from enum import Enum
 
 class IkTest(Node):
     def __init__(self):
