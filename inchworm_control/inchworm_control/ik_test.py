@@ -215,8 +215,8 @@ class IkTest(Node):
     The territory of movesets begins now...
     """
 
-    home_position = [1, 0, 0, int(EE_direction.DOWN)]
-    above_home = [1, 0, 0.5, int(EE_direction.DOWN)]
+    home_position = [1, 0, 0, EE_direction.DOWN.value]
+    above_home = [1, 0, 0.5, EE_direction.DOWN.value]
     block_interface_time = 1
     travel_time = 2
 
@@ -224,50 +224,63 @@ class IkTest(Node):
         # Start moving leading foot 
         which_foot_motor = 1 # the pivot foot 
         self.latch_detach(which_foot_motor) 
+        print("Latched detached")
+        
 
         # EE moves straight up from board to "safe" location above the 
         self.move_to(self.home_position, self.above_home, self.block_interface_time, which_foot_motor) 
-        
+        print("move from ", self.home_position, " ", self.above_home)
         # Move from location above home forward 
-        goal = [2, 0, 0, self.EE_direction.DOWN]
+        goal = [2, 0, 0, EE_direction.DOWN.value]
         above_goal = goal
         above_goal[2] = 0.5
 
         # Move forward and hover over the goal overhead position 
         self.move_to(self.above_home, above_goal, self.travel_time, which_foot_motor)
+        print("move from ", self.above_home, " ", self.above_goal)
         
         # Move from above goal to the goal position
         self.move_to(above_goal, goal, self.block_interface_time, which_foot_motor)
+        print("move from ", self.above_home, " ", self.above_goal)
         
         # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
         which_foot_motor = 5 # now the pivot foot is 5
         self.latch_detach(which_foot_motor)
+        print("latch and detach for ", which_foot_motor)
         
         # EE moves straight up from board to "safe" location above the 
         self.move_to(goal, above_goal, self.block_interface_time, which_foot_motor) 
+        print("move from ", goal, " ", above_goal)
         
         # Move forward and hover over the goal overhead position 
         self.move_to(above_goal, self.above_home, self.travel_time, which_foot_motor)
+        print("move from ", above_goal, " ", self.above_home)
         
         # Move from above goal to the goal position
         self.move_to(self.above_home, self.home_position, self.block_interface_time, which_foot_motor)
+        print("move from ", self.above_home, " ", self.home_position)
         
       
         
     def latch_detach(self, which_foot_motor):
         if (which_foot_motor == 1): # 1 is the pivot foot
+            # activate the servo of the following leg
+            activate_servo(self.servo1)
+            print("servo1 attached")
+            
             # detach the leading leg
             release_servo(self.servo2)
 
-            # activate the servo of the following leg
-            activate_servo(self.servo1)
+            print("Servo2 detached")          
         elif (which_foot_motor == 5): # 5 is the pivot foot
+             # activate the servo of the following leg
+            activate_servo(self.servo2)
+            print("servo2 attached")
+            
             # detach the leading leg
             release_servo(self.servo1)
-
-            # activate the servo of the following leg
-            activate_servo(self.servo2)
+            print("Servo1 detached")         
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
