@@ -70,7 +70,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float):
         """
         inputX = CUBE_WIDTH * 1.144 * goal_X + 0.1242
         inputY = CUBE_WIDTH * 1.1595 * goal_Y + 0.0249
-        inputZ = CUBE_WIDTH * 1.0786 * goal_Z - 0.0432
+        inputZ = CUBE_WIDTH * 1.0786 * goal_Z - 0.25
 
         return [inputX, inputY, inputZ]
         
