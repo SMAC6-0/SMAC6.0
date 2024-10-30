@@ -215,8 +215,8 @@ class IkTest(Node):
     The territory of movesets begins now...
     """
 
-    home_position = [1, 0, 0, EE_direction.DOWN]
-    above_home = [1, 0, 0.5, EE_direction.DOWN]
+    home_position = [1, 0, 0, int(EE_direction.DOWN)]
+    above_home = [1, 0, 0.5, int(EE_direction.DOWN)]
     block_interface_time = 1
     travel_time = 2
 
