@@ -217,18 +217,41 @@ class IkTest(Node):
     block_interface_time = 1
     travel_time = 2
 
-    def step_forward(self, which_foot_motor): 
-        self.latch_detach(which_foot_motor)
+    def step_forward(self): 
+        # Start moving leading foot 
+        which_foot_motor = 1 # the pivot foot 
+        self.latch_detach(which_foot_motor) 
 
-        # move up from board to safe location
+        # EE moves straight up from board to "safe" location above the 
         self.move_to(self.home_position, self.above_home, self.block_interface_time, which_foot_motor) 
         
-        # Move from location above home forward
-        goal = [1, 0, 0.5, self.EE_direction.DOWN]
-        self.move_to(self.above_home, goal, self.travel_time, which_foot_motor)
-        goal[2] = 0
-        self.move_to(goal, self.home_position, self.block_interface_time, which_foot_motor)
+        # Move from location above home forward 
+        goal = [2, 0, 0, self.EE_direction.DOWN]
+        above_goal = goal
+        above_goal[2] = 0.5
 
+        # Move forward and hover over the goal overhead position 
+        self.move_to(self.above_home, above_goal, self.travel_time, which_foot_motor)
+        
+        # Move from above goal to the goal position
+        self.move_to(above_goal, goal, self.block_interface_time, which_foot_motor)
+        
+        # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
+        # Next, the following foot moves 
+        which_foot_motor = 5 # now the pivot foot is 5
+        self.latch_detach(which_foot_motor)
+        
+        # EE moves straight up from board to "safe" location above the 
+        self.move_to(goal, above_goal, self.block_interface_time, which_foot_motor) 
+        
+        # Move forward and hover over the goal overhead position 
+        self.move_to(above_goal, self.above_home, self.travel_time, which_foot_motor)
+        
+        # Move from above goal to the goal position
+        self.move_to(self.above_home, self.home_position, self.block_interface_time, which_foot_motor)
+        
+      
+        
     def latch_detach(self, which_foot_motor):
         if (which_foot_motor == 1): # 1 is the pivot foot
             # detach the leading leg
