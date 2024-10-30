@@ -16,6 +16,11 @@ from enum import Enum
 class EE_direction(Enum):
     DOWN = 90
     UP = 0
+
+HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value]
+ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value]
+BLOCK_INTERFACING_TIME = 1
+TRAVEL_TIME = 2
     
 class IkTest(Node):
     def __init__(self):
@@ -215,10 +220,6 @@ class IkTest(Node):
     The territory of movesets begins now...
     """
 
-    home_position = [1, 0, 0, EE_direction.DOWN.value]
-    above_home = [1, 0, 0.5, EE_direction.DOWN.value]
-    block_interface_time = 1
-    travel_time = 2
 
     def step_forward(self): 
         # Start moving leading foot 
@@ -228,20 +229,20 @@ class IkTest(Node):
         
 
         # EE moves straight up from board to "safe" location above the 
-        self.move_to(self.home_position, self.above_home, self.block_interface_time, which_foot_motor) 
-        print("move from ", self.home_position, " ", self.above_home)
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, which_foot_motor) 
+        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
         # Move from location above home forward 
         goal = [2, 0, 0, EE_direction.DOWN.value]
         above_goal = goal
         above_goal[2] = 0.5
 
         # Move forward and hover over the goal overhead position 
-        self.move_to(self.above_home, above_goal, self.travel_time, which_foot_motor)
-        print("move from ", self.above_home, " ", self.above_goal)
+        self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", above_goal)
         
         # Move from above goal to the goal position
-        self.move_to(above_goal, goal, self.block_interface_time, which_foot_motor)
-        print("move from ", self.above_home, " ", self.above_goal)
+        self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", above_goal)
         
         # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
@@ -250,21 +251,21 @@ class IkTest(Node):
         print("latch and detach for ", which_foot_motor)
         
         # EE moves straight up from board to "safe" location above the 
-        self.move_to(goal, above_goal, self.block_interface_time, which_foot_motor) 
+        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, which_foot_motor) 
         print("move from ", goal, " ", above_goal)
         
         # Move forward and hover over the goal overhead position 
-        self.move_to(above_goal, self.above_home, self.travel_time, which_foot_motor)
-        print("move from ", above_goal, " ", self.above_home)
+        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, which_foot_motor)
+        print("move from ", above_goal, " ", ABOVE_HOME)
         
         # Move from above goal to the goal position
-        self.move_to(self.above_home, self.home_position, self.block_interface_time, which_foot_motor)
-        print("move from ", self.above_home, " ", self.home_position)
+        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
         
       
         
     def latch_detach(self, which_foot_motor):
-        if (which_foot_motor == 1): # 1 is the pivot foot
+        if (which_foot_motor == 5): # 5 is the pivot foot
             # activate the servo of the following leg
             activate_servo(self.servo1)
             print("servo1 attached")
@@ -273,7 +274,7 @@ class IkTest(Node):
             release_servo(self.servo2)
 
             print("Servo2 detached")          
-        elif (which_foot_motor == 5): # 5 is the pivot foot
+        elif (which_foot_motor == 1): # 1 is the pivot foot
              # activate the servo of the following leg
             activate_servo(self.servo2)
             print("servo2 attached")
