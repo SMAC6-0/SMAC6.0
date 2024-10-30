@@ -110,15 +110,6 @@ class IkTest(Node):
                 self.get_logger().warn('Unknown command: %s' % msg.data)
             sleep(1)
             
-            # Create a new Float32 message to publish the step status
-            # 0.0 indicates the step was successful, 1.0 indicates an error occurred
-            msg = Float32()
-            msg.data = 0.0
-            
-            # Publish the step status to the 'step_status' topic
-            self.publisher_.publish(msg)
-            self.get_logger().info('Publishing: "%s"' % msg.data)
-            
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
 
