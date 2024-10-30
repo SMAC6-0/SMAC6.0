@@ -98,15 +98,27 @@ class IkTest(Node):
         """
         self.get_logger().info('Received command to "%s' % msg.data)
         try:
-            pos = msg.data
-            positions = pos.split(', ')
+            # Get the step action from the step_actions dictionary based on the received message
+            action = self.step_actions.get(msg.data)
+
+            if action:
+                # If a valid action (step) is found, execute the action with which_foot_motor (1 for this case)
+                action()
+                # TODO: Determine when which_foot_motor == 5 is passed into the step functions 
+            else:
+                # Log a warning if the action is not recognized
+                self.get_logger().warn('Unknown command: %s' % msg.data)
+            sleep(1)
             
-            # Trajectory planning
-            self.move_to([1,0,0, 90], [1,0,1, 90], 2, 1) # move 1 block up from board to safe location.
-            self.move_to([1,0,1, 90], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
-            self.move_to([float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], [float(positions[0]), float(positions[1]), 0, float(positions[3])], 2, 1)
-
-
+            # Create a new Float32 message to publish the step status
+            # 0.0 indicates the step was successful, 1.0 indicates an error occurred
+            msg = Float32()
+            msg.data = 0.0
+            
+            # Publish the step status to the 'step_status' topic
+            self.publisher_.publish(msg)
+            self.get_logger().info('Publishing: "%s"' % msg.data)
+            
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
 
