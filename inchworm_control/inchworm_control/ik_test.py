@@ -13,6 +13,10 @@ from time import sleep
 import numpy as np
 from enum import Enum
 
+class EE_direction(Enum):
+    DOWN = 90
+    UP = 0
+    
 class IkTest(Node):
     def __init__(self):
         """
@@ -210,10 +214,6 @@ class IkTest(Node):
     """
     The territory of movesets begins now...
     """
-
-    class EE_direction(Enum):
-        DOWN = 90
-        UP = 0
 
     home_position = [1, 0, 0, EE_direction.DOWN]
     above_home = [1, 0, 0.5, EE_direction.DOWN]
