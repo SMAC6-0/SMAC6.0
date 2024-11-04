@@ -169,7 +169,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # Convert radians to degrees
     theta1 = math.degrees(theta1)
     theta2 = math.degrees(theta2)
-    theta3 = - math.degrees(theta3)
+    theta3 = math.degrees(-theta3)
     theta4 = math.degrees(theta4)
     theta5 = math.degrees(theta5)
 
