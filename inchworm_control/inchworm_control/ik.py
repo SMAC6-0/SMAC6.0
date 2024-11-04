@@ -159,7 +159,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     
         # Final joint angles
         theta2 = - round(math.pi/2 - beta - gamma, 2)
-        theta4 = - round(theta2 + theta3 - alpha - math.pi/2, 2) 
+        theta4 = - round(-theta2 + theta3 - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
         theta1 = theta5
