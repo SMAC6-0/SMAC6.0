@@ -153,13 +153,14 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         #theta 5
         y = math.sqrt(1 - (Px/r)**2) 
         if (Py < 0):
-            theta5 = -math.atan2(-y, Px/r)
+            theta5 = math.atan2(-y, Px/r)
         else:
-            theta5 = - math.atan2(y, Px/r) 
+            theta5 = math.atan2(y, Px/r) 
     
         # Final joint angles
-        theta4 = - round(math.pi/2 - (beta + gamma), 2)
-        theta2 = - round(theta4 + theta3 - alpha - math.pi/2, 2)
+        theta4 = round(math.pi/2 - (beta + gamma), 2)
+        
+        theta2 = round(-(theta4 + theta3) + alpha + math.pi/2, 2)
 
         # Joint 5 doesn't affect the pose 
         theta1 = theta5
