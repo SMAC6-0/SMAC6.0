@@ -159,8 +159,9 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     
         # Final joint angles
         theta4 = round(math.pi/2 - (beta + gamma), 2)
-        
-        theta2 = round(-(theta4 + theta3) + alpha + math.pi/2, 2)
+
+    
+        theta2 = round(- theta4 - theta3 + alpha + math.pi/2, 2)
 
         # Joint 5 doesn't affect the pose 
         theta1 = theta5
@@ -183,6 +184,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
     # check if the theta values are within the bounds
     check_motor_bounds(theta_values, inchworm_motor_bounds)
     
+    print ("In IK theta values: ", theta_values)
     
     # return the theta values
     return theta_values
