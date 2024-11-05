@@ -158,7 +158,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
             theta5 = math.atan2(y, Px/r) 
     
         # Final joint angles
-        theta4 = round(math.pi/2 - (beta + gamma), 2)
+        theta4 = -round(math.pi/2 - (beta + gamma), 2)
 
     
         theta2 = round(- theta4 - theta3 + alpha + math.pi/2, 2)
