@@ -155,14 +155,14 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         if (Py < 0):
             theta5 = -math.atan2(-y, Px/r)
         else:
-            theta5 = m-ath.atan2(y, Px/r) 
+            theta5 = - math.atan2(y, Px/r) 
     
         # Final joint angles
-        theta4 = r-ound(math.pi/2 - (beta + gamma), 2)
-        theta2 = r-ound(theta4 + theta3 - alpha - math.pi/2, 2)
+        theta4 = - round(math.pi/2 - (beta + gamma), 2)
+        theta2 = - round(theta4 + theta3 - alpha - math.pi/2, 2)
 
         # Joint 5 doesn't affect the pose 
-        theta1 = t-heta5
+        theta1 = theta5
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
 
