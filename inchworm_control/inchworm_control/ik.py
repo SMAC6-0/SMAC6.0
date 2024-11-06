@@ -101,7 +101,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
 
     # extract the motor offsets from the yaml file
     inchworm_motor_offsets, inchworm_motor_bounds = load_inchworm_motor_offsets_bounds('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
-    [Px, Py, Pz] = adjust_positions(Px, Py, Pz)    
+    # [Px, Py, Pz] = adjust_positions(Px, Py, Pz)    
     
     # Convert alpha angle from radians to degrees 
     alpha = math.radians(alpha)
