@@ -76,8 +76,8 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, which_foot_mot
         elif (which_foot_motor == 5):
             inputX = CUBE_WIDTH * 1.0158 * goal_X - 0.0059
             inputY = CUBE_WIDTH * 1.0101 * goal_Y - 0.0204
-            inputZ = CUBE_WIDTH * -0.0233 * goal_Z**2 + CUBE_WIDTH * 1.2747 * goal_Z + 0.4137
-
+            inputZ = (-0.0233 * (CUBE_WIDTH * goal_Z)**2) + (CUBE_WIDTH * 1.2747 * goal_Z) + 0.4137
+        
         return [inputX, inputY, inputZ]
         
 
