@@ -147,7 +147,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         theta4 = round(theta2 + theta3 - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
-        theta5 = theta1
+        theta5 = 0
 
     elif which_foot_motor == 5:
         #theta 5
@@ -162,7 +162,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         theta2 = round(theta4 + theta3 - alpha - math.pi/2, 2)
 
         # Joint 5 doesn't affect the pose 
-        theta1 = theta5
+        theta1 = 0
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
 

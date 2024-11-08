@@ -247,6 +247,8 @@ class MotorController(Node):
             ValueError('are you stupid there is only 1 and 5????')
 
     def step_left(self, which_foot_motor):
+        
+
         print('stepping left')
         if which_foot_motor == 1: 
             release_servo(self.servo2)
