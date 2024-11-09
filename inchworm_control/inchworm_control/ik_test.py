@@ -18,8 +18,11 @@ class EE_direction(Enum):
     DOWN = 90
     UP = 0
 
-HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value]
-ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value]
+HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value] # home position of the IW (next to each other)
+ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value] # above home position of the IW (next to each other). We use this for trajectory planning
+BLOCK_HOME_POSITION = [1, 0, 1, EE_direction.DOWN.value]  # home position of the IW with a block
+BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value] # above home position of the IW  with a block. We use this for trajectory planning
+
 BLOCK_INTERFACING_TIME = 1
 TRAVEL_TIME = 2
     
@@ -234,168 +237,136 @@ class IkTest(Node):
     """
 
     def step_forward(self): 
+        # positions
+        goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
+        above_goal = copy.deepcopy(goal)
+        above_goal[2] += 0.5
+
         # Start moving leading foot 
         pivot_foot = 1 # the pivot foot 
         self.latch_detach(pivot_foot) 
-        print("Latched detached")
         
-        # EE moves straight up from board to "safe" location above the 
+        # EE moves straight up from board to just above the home
         self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
-        # Move from location above home forward 
-        goal = [2, 0, 0, EE_direction.DOWN.value]
-        print ("goal is: ", goal)
-        above_goal = copy.deepcopy(goal)
-        above_goal[2] = 0.5
-        print("did goal survive? goal is: ", goal)
 
-        # Move forward and hover over the goal overhead position 
+        # Move forward and hover over the goal position 
         self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", above_goal)
         
         # Move from above goal to the goal position
         self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", above_goal, " ", goal)
 
-        print("-------------- Front leg is in place")
-        sleep(3)
+        print("-------------- Front leg is in place--------------")
+        sleep(2)
         
         # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
         pivot_foot = 5 # now the pivot foot is 5
         self.latch_detach(pivot_foot)
-        print("latch and detach for ", pivot_foot)
         
-        # EE moves straight up from board to "safe" location above the 
+        # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
         self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", goal, " ", above_goal)
         
-        # Move forward and hover over the goal overhead position 
+        # Move backwards and hover over the home position 
         self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
-        print("move from ", above_goal, " ", ABOVE_HOME)
         
-        # Move from above goal to the goal position
+        # Move from above home to the home position
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
         print("Movement complete: STEP_FORWARD")
 
-    # TODO: clarify turn vs step in function name 
-    # sakshi it's okay. It's a step towards the left direction
     def step_left(self): 
         # positions 
-        leading_foot_goal = [0, 2, 0, EE_direction.DOWN.value]
-        above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
-        above_leading_foot_goal[2] = 0.5
-
-        
-
-        # Start moving leading foot 
-        # gripper activated RAHHHH
         pivot_foot = 1 # the pivot foot 
-        self.latch_detach(pivot_foot) 
-        print("Latched detached")
-        
-        # EE moves straight up from board to "safe" location above the home position
-        # lift the front feet from the board
-        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
-        # print("move from ", HOME_POSITION, " ", ABOVE_HOME)
-        
-        # Move from location above home to left (hover)
-        
 
-        self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", above_goal)
+        # turn 2 blocks on the left, this is from the perspective of pivot foot. Depending on the pivot foot it could be +/-2
+        leading_foot_goal = [0, 2, 0, EE_direction.DOWN.value] 
+        above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
+        above_leading_foot_goal[2] += 0.5
+
+        # gripper activated RAHHHH
+        self.latch_detach(pivot_foot) 
         
-        # Move from above goal to the goal position
-        self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", above_goal, " ", goal)
+        # Leading foot moves straight up from board to "safe" location above the home position
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
+        
+        # Move from above the home position and turn 2 blocks on the left (hover)
+        self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
+
+        # Move down to the leading goal position
+        self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("-------------- Front leg is in place")
-        sleep(3)
+        sleep(1)
         
-        # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
+        # At this point, leading foot is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
-
         # gripper activated RAHHHH
         pivot_foot = 5 # now the pivot foot is 5
         self.latch_detach(pivot_foot)
-        print("latch and detach for ", pivot_foot)
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
         following_foot_goal = [2, 0, 0, EE_direction.DOWN.value]
-        print ("goal is: ", following_foot_goal)
         above_following_foot_goal = copy.deepcopy(following_foot_goal)
-        above_following_foot_goal[2] = 0.5
-        print("did goal survive? goal is: ", following_foot_goal)
+        above_following_foot_goal[2] += 0.5
 
         # lift the back feet from the board       
-        # EE moves straight up from board to "safe" location above the 
+        # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
         self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", following_foot_goal, " ", above_following_foot_goal)
         
-        # rotate the back feet
+        # rotate the back feet while coming to the home position (hover)
         self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
-        print("move from ", above_following_foot_goal, " ", ABOVE_HOME)
         
         # put the back feet on the board
-        # Move from above goal to the goal position
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
         print("movement complete: STEP_LEFT")
 
     def step_right(self): 
-        # Start moving leading foot 
-        # gripper activated RAHHHH
+        # positions 
         pivot_foot = 1 # the pivot foot 
-        self.latch_detach(pivot_foot) 
-        print("Latched detached")
-        
-        # EE moves straight up from board to "safe" location above the home position
-        # lift the front feet from the board
-        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
-        
-        # Move from location above home to left (hover)
-        goal = [0, -2, 0, EE_direction.DOWN.value]
-        print ("goal is: ", goal)
-        above_goal = copy.deepcopy(goal)
-        above_goal[2] = 0.5
-        print("did goal survive? goal is: ", goal)
 
-        self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", above_goal)
+        # turn 2 blocks on the right, this is from the perspective of pivot foot. Depending on the pivot foot it could be +/-2
+        leading_foot_goal = [0, -2, 0, EE_direction.DOWN.value] 
+        above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
+        above_leading_foot_goal[2] += 0.5
+
+        # gripper activated RAHHHH
+        self.latch_detach(pivot_foot) 
         
-        # Move from above goal to the goal position
-        self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", above_goal, " ", goal)
+        # Leading foot moves straight up from board to "safe" location above the home position
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
+        
+        # Move from above the home position and turn 2 blocks on the right (hover)
+        self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
+
+        # Move down to the leading goal position
+        self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("-------------- Front leg is in place")
-        sleep(3)
-        
-        # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
-        # Next, the following foot moves 
+        sleep(1)
 
+        # At this point, leading foot is back on the ground, with 1 grid cell between it and the other foot 
+        # Next, the following foot moves 
         # gripper activated RAHHHH
         pivot_foot = 5 # now the pivot foot is 5
         self.latch_detach(pivot_foot)
-        print("latch and detach for ", pivot_foot)
+
+        # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
+        # goal must be adjusted. 
+        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value]
+        above_following_foot_goal = copy.deepcopy(following_foot_goal)
+        above_following_foot_goal[2] += 0.5
 
         # lift the back feet from the board       
-        # EE moves straight up from board to "safe" location above the 
-        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", goal, " ", above_goal)
+        # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
+        self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
         
-        # rotate the back feet
-        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
-        print("move from ", above_goal, " ", ABOVE_HOME)
+        # rotate the back feet while coming to the home position (hover)
+        self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
         
         # put the back feet on the board
-        # Move from above goal to the goal position
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
-        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
         print("movement complete: STEP_RIGHT")
     
