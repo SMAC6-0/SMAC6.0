@@ -283,7 +283,7 @@ class IkTest(Node):
     def step_left(self): 
         # Start moving leading foot 
         # gripper activated RAHHHH
-        which_foot_motor = 5 # the pivot foot 
+        which_foot_motor = 1 # the pivot foot 
         self.latch_detach(which_foot_motor) 
         print("Latched detached")
         
@@ -313,7 +313,7 @@ class IkTest(Node):
         # Next, the following foot moves 
 
         # gripper activated RAHHHH
-        which_foot_motor = 1 # now the pivot foot is 5
+        which_foot_motor = 5 # now the pivot foot is 5
         self.latch_detach(which_foot_motor)
         print("latch and detach for ", which_foot_motor)
 
@@ -336,7 +336,7 @@ class IkTest(Node):
     def step_right(self): 
         # Start moving leading foot 
         # gripper activated RAHHHH
-        which_foot_motor = 5 # the pivot foot 
+        which_foot_motor = 1 # the pivot foot 
         self.latch_detach(which_foot_motor) 
         print("Latched detached")
         
@@ -366,7 +366,7 @@ class IkTest(Node):
         # Next, the following foot moves 
 
         # gripper activated RAHHHH
-        which_foot_motor = 1 # now the pivot foot is 5
+        which_foot_motor = 5 # now the pivot foot is 5
         self.latch_detach(which_foot_motor)
         print("latch and detach for ", which_foot_motor)
 
