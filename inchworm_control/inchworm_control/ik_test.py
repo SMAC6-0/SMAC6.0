@@ -88,7 +88,6 @@ class IkTest(Node):
             self.move_to([1,0,1, 90], [float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], 2, 1)
             self.move_to([float(positions[0]), float(positions[1]), float(positions[2]), float(positions[3])], [float(positions[0]), float(positions[1]), 0, float(positions[3])], 2, 1)
 
-
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
 
