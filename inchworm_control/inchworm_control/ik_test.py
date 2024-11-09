@@ -276,6 +276,8 @@ class IkTest(Node):
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
         print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
+        print("Movement complete: STEP_FORWARD")
+
     # TODO: clarify turn vs step in function name 
     # sakshi it's okay 
     def step_left(self): 
@@ -291,7 +293,7 @@ class IkTest(Node):
         print("move from ", HOME_POSITION, " ", ABOVE_HOME)
         
         # Move from location above home to left (hover)
-        goal = [0, -1, 0, EE_direction.DOWN.value]
+        goal = [0, -2, 0, EE_direction.DOWN.value]
         print ("goal is: ", goal)
         above_goal = copy.deepcopy(goal)
         above_goal[2] = 0.5
@@ -315,20 +317,21 @@ class IkTest(Node):
         self.latch_detach(which_foot_motor)
         print("latch and detach for ", which_foot_motor)
 
+        # lift the back feet from the board       
+        # EE moves straight up from board to "safe" location above the 
+        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, which_foot_motor) 
+        print("move from ", goal, " ", above_goal)
+        
+        # rotate the back feet
+        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, which_foot_motor)
+        print("move from ", above_goal, " ", ABOVE_HOME)
+        
+        # put the back feet on the board
+        # Move from above goal to the goal position
+        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
-        # # lift the back feet from the board       
-        # # EE moves straight up from board to "safe" location above the 
-        # self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, which_foot_motor) 
-        # print("move from ", goal, " ", above_goal)
-        
-        # # rotate the back feet
-        # # self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, which_foot_motor)
-        # # print("move from ", above_goal, " ", ABOVE_HOME)
-        
-        # # put the back feet on the board
-        # # Move from above goal to the goal position
-        # # self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
-        # # print("move from ", ABOVE_HOME, " ", HOME_POSITION)
+        print("movement complete: STEP_LEFT")
 
     def step_right(self): 
         # Start moving leading foot 
