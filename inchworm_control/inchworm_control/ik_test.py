@@ -239,7 +239,6 @@ class IkTest(Node):
         self.latch_detach(pivot_foot) 
         print("Latched detached")
         
-
         # EE moves straight up from board to "safe" location above the 
         self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
         print("move from ", HOME_POSITION, " ", ABOVE_HOME)
@@ -284,6 +283,13 @@ class IkTest(Node):
     # TODO: clarify turn vs step in function name 
     # sakshi it's okay. It's a step towards the left direction
     def step_left(self): 
+        # positions 
+        leading_foot_goal = [0, 2, 0, EE_direction.DOWN.value]
+        above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
+        above_leading_foot_goal[2] = 0.5
+
+        
+
         # Start moving leading foot 
         # gripper activated RAHHHH
         pivot_foot = 1 # the pivot foot 
@@ -293,14 +299,10 @@ class IkTest(Node):
         # EE moves straight up from board to "safe" location above the home position
         # lift the front feet from the board
         self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
+        # print("move from ", HOME_POSITION, " ", ABOVE_HOME)
         
         # Move from location above home to left (hover)
-        goal = [0, 2, 0, EE_direction.DOWN.value]
-        print ("goal is: ", goal)
-        above_goal = copy.deepcopy(goal)
-        above_goal[2] = 0.5
-        print("did goal survive? goal is: ", goal)
+        
 
         self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
         print("move from ", ABOVE_HOME, " ", above_goal)
@@ -320,14 +322,22 @@ class IkTest(Node):
         self.latch_detach(pivot_foot)
         print("latch and detach for ", pivot_foot)
 
+        # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
+        # goal must be adjusted. 
+        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value]
+        print ("goal is: ", following_foot_goal)
+        above_following_foot_goal = copy.deepcopy(following_foot_goal)
+        above_following_foot_goal[2] = 0.5
+        print("did goal survive? goal is: ", following_foot_goal)
+
         # lift the back feet from the board       
         # EE moves straight up from board to "safe" location above the 
-        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
-        print("move from ", goal, " ", above_goal)
+        self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
+        print("move from ", following_foot_goal, " ", above_following_foot_goal)
         
         # rotate the back feet
-        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
-        print("move from ", above_goal, " ", ABOVE_HOME)
+        self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+        print("move from ", above_following_foot_goal, " ", ABOVE_HOME)
         
         # put the back feet on the board
         # Move from above goal to the goal position
@@ -390,19 +400,20 @@ class IkTest(Node):
         print("movement complete: STEP_RIGHT")
     
     # def step_forward_block(self): 
+    #     block = True
     #     HOME_POSITION_BLOCK = [1, 0, 1, EE_direction.DOWN.value]
     #     ABOVE_HOME_BLOCK = [1, 0, 1.5, EE_direction.DOWN.value]
-    #     goal_leading_foot = [2, 0, 1, EE_direction.DOWN.value]
-    #     above_goal_leading_foot = copy.deepcopy(goal_leading_foot)
-    #     above_goal_leading_foot[2] += 0.5
+    #     goal_pivot_foot = [2, 0, 1, EE_direction.DOWN.value]
+    #     above_goal_pivot_foot = copy.deepcopy(goal_pivot_foot)
+    #     above_goal_pivot_foot[2] += 0.5
 
-    #     goal_following_foot = [2, 0, 1, EE_direction.DOWN.value]
-    #     above_goal_leading_foot = copy.deepcopy(goal_leading_foot)
-    #     above_goal_leading_foot[2] += 0.5
+    #     goal_following_foot = [2, 0, 0, EE_direction.DOWN.value]
+    #     above_goal_following_foot = copy.deepcopy(goal_pivot_foot)
+    #     above_goal_following_foot[2] += 0.5
 
     #     # Start moving leading foot 
     #     pivot_foot = 1 # the pivot foot 
-    #     self.latch_detach(pivot_foot) 
+    #     self.latch_detach(pivot_foot, block) 
     #     print("Latched detached")
         
     #     # EE moves straight up from board to "safe" location along with the block 
@@ -410,12 +421,12 @@ class IkTest(Node):
     #     print("move from ", HOME_POSITION_BLOCK, " ", ABOVE_HOME_BLOCK)
 
     #     # Move forward and hover over the goal overhead position 
-    #     self.move_to(ABOVE_HOME_BLOCK, above_goal_leading_foot, TRAVEL_TIME, pivot_foot)
-    #     print("move from ", ABOVE_HOME_BLOCK, " ", above_goal_leading_foot)
+    #     self.move_to(ABOVE_HOME_BLOCK, above_goal_pivot_foot, TRAVEL_TIME, pivot_foot)
+    #     print("move from ", ABOVE_HOME_BLOCK, " ", above_goal_pivot_foot)
         
     #     # Move from above goal to the goal position
-    #     self.move_to(above_goal_leading_foot, goal_leading_foot, BLOCK_INTERFACING_TIME, pivot_foot)
-    #     print("move from ", above_goal_leading_foot, " ", goal_leading_foot)
+    #     self.move_to(above_goal_pivot_foot, goal_pivot_foot, BLOCK_INTERFACING_TIME, pivot_foot)
+    #     print("move from ", above_goal_pivot_foot, " ", goal_pivot_foot)
 
     #     print("-------------- Front leg is in place")
     #     sleep(3)
@@ -440,27 +451,33 @@ class IkTest(Node):
 
     #     print("Movement complete: STEP_FORWARD")
 
-    def latch_detach(self, pivot_foot):
+    def latch_detach(self, pivot_foot, block = False):
         if (pivot_foot == 5): # 5 is the pivot foot
             # activate the servo of the following leg
             activate_servo(self.servo1)
             print("servo1 attached")
             
-            # detach the leading leg
-            release_servo(self.servo2)
-
-            print("Servo2 detached")          
+            if (block):
+                # activate the servo of the leading leg because it's holding a block
+                activate_servo(self.servo2)
+                print("Servo2 attached") 
+            else:
+                # detach the leading leg
+                release_servo(self.servo2)
+                print("Servo2 detached")          
         elif (pivot_foot == 1): # 1 is the pivot foot
              # activate the servo of the following leg
             activate_servo(self.servo2)
             print("servo2 attached")
-            
-            # detach the leading leg
-            release_servo(self.servo1)
-            print("Servo1 detached")      
 
-
-       
+            if (block):
+                # activate the servo of the leading leg because it's holding a block
+                activate_servo(self.servo1)
+                print("Servo1 attached")
+            else:
+                # detach the leading leg
+                release_servo(self.servo1)
+                print("Servo1 detached")     
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
 # servo angle of 0 is activated, 180 released
