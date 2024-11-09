@@ -204,6 +204,7 @@ class IkTest(Node):
             trajCoeffs (list): [6x4 float] trajectory coefficients generated from quintic_trajectory()
             totTime (double): total amount of time it takes for trajectory to reach target position
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
+            fix_EE_orientation (bool): True if the EE rotation is being reset to 0. 
         """
         time_s = 0
         
