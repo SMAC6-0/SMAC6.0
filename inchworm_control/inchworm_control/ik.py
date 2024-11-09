@@ -82,7 +82,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
         return [inputX, inputY, inputZ]
         
 
-def inverseKinematics(Px, Py, Pz, alpha, pivot_foot, fix_EE_orientation):
+def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bool):
     """
     Calculates inverse kinematics for inchworm robot and adjusts motor angles using offsets.
     
@@ -174,7 +174,10 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot, fix_EE_orientation):
         theta2 = - round(-theta4 + theta3 - alpha - math.pi/2, 2)
 
         # Joint 1 doesn't affect the pose 
-        theta1 = 0
+        if (fix_EE_orientation): 
+            theta1 = 0
+        else: 
+            theta1 = theta5
 
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
