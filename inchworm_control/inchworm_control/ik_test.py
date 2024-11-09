@@ -147,6 +147,14 @@ class IkTest(Node):
             travelTime (float): the time taken for the movement
             which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
         """
+        # This conditional makes it so that the EE does NOT rotate when the EE is moving straight up/down.  
+        # This check is essential to make sure that the wires do not get tangled as the inchworm turns. 
+        # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
+        if (current_pos[0]==final_pos[0] & current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
+            fix_EE_orientation = False # do not rotate the EE (motors 1 or 5)
+        else: 
+            fix_EE_orientation = True # rotate the EE (motors 1 or 5)
+
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
 
@@ -160,7 +168,7 @@ class IkTest(Node):
         q_t = np.concatenate((q0, q1, q2, q3), axis=1) # 6x4 mat
 
         # run trajectory for task space
-        self.run_trajectory(q_t, travelTime, which_foot_motor)
+        self.run_trajectory(q_t, travelTime, which_foot_motor, fix_EE_orientation)
     
     def move_joints(self, joint_angles, time):
         """
@@ -188,7 +196,7 @@ class IkTest(Node):
             self.motor_4.pos_read(), 
             self.motor_5.pos_read())
 
-    def run_trajectory(self, trajCoeffs, totTime, which_foot_motor):
+    def run_trajectory(self, trajCoeffs, totTime, which_foot_motor, fix_EE_orientation):
         """
         Calculates current joint positions based on trajectory coefficients and current time.
         
@@ -209,7 +217,7 @@ class IkTest(Node):
             alpha = trajCoeffs[0][3] + trajCoeffs[1][3]*time_s + trajCoeffs[2][3]*pow(time_s,2) + trajCoeffs[3][3]*pow(time_s,3) + trajCoeffs[4][3]*pow(time_s,4) + trajCoeffs[5][3]*pow(time_s,5)
                      
             # running the inverseKinematics to get the joint angles
-            joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor) # the joint angles
+            joint_ang = inverseKinematics(x, y, z, alpha, which_foot_motor, fix_EE_orientation) # the joint angles
             
             self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
@@ -267,6 +275,8 @@ class IkTest(Node):
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
         print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
+    # TODO: clarify turn vs step in function name 
+    # sakshi it's okay 
     def step_left(self): 
         # Start moving leading foot 
         # gripper activated RAHHHH

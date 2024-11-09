@@ -75,7 +75,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float):
         return [inputX, inputY, inputZ]
         
 
-def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
+def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor, fix_EE_orientation):
     """
     Calculates inverse kinematics for inchworm robot and adjusts motor angles using offsets.
     
@@ -86,6 +86,7 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         alpha (float): The angle of the wrist joint (motor 2 or 4) w.r.t. the horizontal plane. 
             0 deg for horizontal, 90 deg for pointing down.
         which_foot_motor (int): Motor identifier (1 or 5) corresponding to the foot.
+        fix_EE_orientation (bool): True if the EE rotation is being reset to 0. 
     
     Returns:
         list: A list of joint angles [theta1, theta2, theta3, theta4, theta5] adjusted for motor offsets.
@@ -147,7 +148,10 @@ def inverseKinematics(Px, Py, Pz, alpha, which_foot_motor):
         theta4 = round(theta2 + theta3 - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
-        theta5 = 0
+        if (fix_EE_orientation): 
+            theta5 = 0
+        else: 
+            theta5 = theta1
 
     elif which_foot_motor == 5:
         #theta 5
