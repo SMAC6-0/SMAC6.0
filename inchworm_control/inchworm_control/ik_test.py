@@ -97,7 +97,9 @@ class IkTest(Node):
             # Inchworm movements with one block
             'STEP_FORWARD_BLOCK': self.step_forward_block,
             'STEP_LEFT_BLOCK': self.step_left_block,
-            # 'STEP_RIGHT_BLOCK': self.step_right_block,
+            'STEP_RIGHT_BLOCK': self.step_right_block,
+            'PLACE_BLOCK_FRONT': self.place_block_front, 
+            'GRAB_BLOCK': self.grab_block
             # 'GRAB_UP_FORWARD': self.grab_up_forward, 
             # 'GRAB_UP_LEFT': self.grab_up_left, 
             # 'PLACE_FORWARD_BLOCK': self.place_forward,
@@ -524,6 +526,13 @@ class IkTest(Node):
         self.move_to(PIVOT_ON_BLOCK_ABOVE_HOME, PIVOT_ON_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("movement complete: STEP_RIGHT_BLOCK")
+
+    # placement of blocks
+    def place_block_front(self, block_level):
+        pass
+
+    def grab_block(self):
+        pass
 
     def latch_detach(self, pivot_foot, block = False):
         if (pivot_foot == 5): # 5 is the pivot foot
