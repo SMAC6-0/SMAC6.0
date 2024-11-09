@@ -18,10 +18,15 @@ class EE_direction(Enum):
     DOWN = 90
     UP = 0
 
-HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value] # home position of the IW (next to each other)
-ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value] # above home position of the IW (next to each other). We use this for trajectory planning
-BLOCK_HOME_POSITION = [1, 0, 1, EE_direction.DOWN.value]  # home position of the IW with a block
-BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value] # above home position of the IW  with a block. We use this for trajectory planning
+HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value] # home position of the IW (next to each other). Applies for either pivot foot
+ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value] # above home position of the IW (next to each other). We use this for trajectory planning Applies for either pivot foot
+
+PIVOT_OFF_BLOCK_HOME_POSITION = [1, 0, 1, EE_direction.DOWN.value]  # home position of the IW with a block. From perspective of the pivot foot that's not holding the block
+PIVOT_OFF_BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value] # above home position of the IW  with a block. From perspective of the pivot foot that's not holding the block
+
+PIVOT_ON_BLOCK_HOME_POSITION = [1, 0, -1, EE_direction.DOWN.value]  # From perspective of the pivot foot that's on the block
+PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value] # From perspective of the pivot foot that's on the block
+
 
 BLOCK_INTERFACING_TIME = 1
 TRAVEL_TIME = 2
@@ -370,57 +375,52 @@ class IkTest(Node):
 
         print("movement complete: STEP_RIGHT")
     
-    # def step_forward_block(self): 
-    #     block = True
-    #     HOME_POSITION_BLOCK = [1, 0, 1, EE_direction.DOWN.value]
-    #     ABOVE_HOME_BLOCK = [1, 0, 1.5, EE_direction.DOWN.value]
-    #     goal_pivot_foot = [2, 0, 1, EE_direction.DOWN.value]
-    #     above_goal_pivot_foot = copy.deepcopy(goal_pivot_foot)
-    #     above_goal_pivot_foot[2] += 0.5
+    def step_forward_block(self): 
+        block = True # this latching should account for block
+        
+        # positions
+        leading_foot_goal = [2, 0, 1, EE_direction.DOWN.value]
+        leading_foot_above_goal = copy.deepcopy(leading_foot_goal)
+        leading_foot_above_goal[2] += 0.5
 
-    #     goal_following_foot = [2, 0, 0, EE_direction.DOWN.value]
-    #     above_goal_following_foot = copy.deepcopy(goal_pivot_foot)
-    #     above_goal_following_foot[2] += 0.5
+        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value]
+        following_foot_above_goal = copy.deepcopy(following_foot_goal)
+        following_foot_above_goal[2] += 0.5
 
-    #     # Start moving leading foot 
-    #     pivot_foot = 1 # the pivot foot 
-    #     self.latch_detach(pivot_foot, block) 
-    #     print("Latched detached")
-        
-    #     # EE moves straight up from board to "safe" location along with the block 
-    #     self.move_to(HOME_POSITION_BLOCK, ABOVE_HOME_BLOCK, BLOCK_INTERFACING_TIME, pivot_foot) 
-    #     print("move from ", HOME_POSITION_BLOCK, " ", ABOVE_HOME_BLOCK)
+        # attach and detach the servos. both the servos should be attached (one in the block and the other on the board)
+        pivot_foot = 1 # the pivot foot 
+        self.latch_detach(pivot_foot, block)         
 
-    #     # Move forward and hover over the goal overhead position 
-    #     self.move_to(ABOVE_HOME_BLOCK, above_goal_pivot_foot, TRAVEL_TIME, pivot_foot)
-    #     print("move from ", ABOVE_HOME_BLOCK, " ", above_goal_pivot_foot)
-        
-    #     # Move from above goal to the goal position
-    #     self.move_to(above_goal_pivot_foot, goal_pivot_foot, BLOCK_INTERFACING_TIME, pivot_foot)
-    #     print("move from ", above_goal_pivot_foot, " ", goal_pivot_foot)
+        # Start moving leading foot account for the block height
+        # Leading foot moves straight up from board to "safe" location with the block 
+        self.move_to(PIVOT_OFF_BLOCK_HOME_POSITION, PIVOT_OFF_BLOCK_ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
 
-    #     print("-------------- Front leg is in place")
-    #     sleep(3)
+        # Move forward and hover over the goal overhead position for the leading foot
+        self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, leading_foot_above_goal, TRAVEL_TIME, pivot_foot)
         
-    #     # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
-    #     # Next, the following foot moves 
-    #     pivot_foot = 5 # now the pivot foot is 5
-    #     self.latch_detach(pivot_foot)
-    #     print("latch and detach for ", pivot_foot)
-        
-    #     # EE moves straight up from board to "safe" location with no block attached to it 
-    #     self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
-    #     print("move from ", goal, " ", above_goal)
-        
-    #     # Move forward and hover over the goal overhead position 
-    #     self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
-    #     print("move from ", above_goal, " ", ABOVE_HOME)
-        
-    #     # Move from above goal to the goal position
-    #     self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
-    #     print("move from ", ABOVE_HOME, " ", HOME_POSITION)
+        # Move down to the goal position
+        self.move_to(leading_foot_above_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
-    #     print("Movement complete: STEP_FORWARD")
+        print("-------------- Front leg is in place")
+        sleep(3)
+        
+        # At this point, leading foot with the block is back on the ground, with 1 grid cell between it and the other foot 
+        # Next, the following foot moves 
+
+        # attach and detach the servo (account for the block!!)
+        pivot_foot = 5 # now the pivot foot is 5
+        self.latch_detach(pivot_foot, block)
+        
+        # Following foot moves straight up from board to "safe" location with no block attached to it 
+        self.move_to(following_foot_goal, following_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        # Move forward and hover over the home position account for the block
+        self.move_to(following_foot_above_goal, PIVOT_ON_BLOCK_ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+        
+        # Move down to the board
+        self.move_to(PIVOT_ON_BLOCK_ABOVE_HOME, PIVOT_ON_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        print("Movement complete: STEP_FORWARD_BLOCK")
 
     def latch_detach(self, pivot_foot, block = False):
         if (pivot_foot == 5): # 5 is the pivot foot
