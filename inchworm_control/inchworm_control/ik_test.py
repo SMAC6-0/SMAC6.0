@@ -279,8 +279,61 @@ class IkTest(Node):
         print("Movement complete: STEP_FORWARD")
 
     # TODO: clarify turn vs step in function name 
-    # sakshi it's okay 
+    # sakshi it's okay. It's a step towards the left direction
     def step_left(self): 
+        # Start moving leading foot 
+        # gripper activated RAHHHH
+        which_foot_motor = 5 # the pivot foot 
+        self.latch_detach(which_foot_motor) 
+        print("Latched detached")
+        
+        # EE moves straight up from board to "safe" location above the home position
+        # lift the front feet from the board
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, which_foot_motor) 
+        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
+        
+        # Move from location above home to left (hover)
+        goal = [0, 2, 0, EE_direction.DOWN.value]
+        print ("goal is: ", goal)
+        above_goal = copy.deepcopy(goal)
+        above_goal[2] = 0.5
+        print("did goal survive? goal is: ", goal)
+
+        self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", above_goal)
+        
+        # Move from above goal to the goal position
+        self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, which_foot_motor)
+        print("move from ", above_goal, " ", goal)
+
+        print("-------------- Front leg is in place")
+        sleep(3)
+        
+        # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
+        # Next, the following foot moves 
+
+        # gripper activated RAHHHH
+        which_foot_motor = 1 # now the pivot foot is 5
+        self.latch_detach(which_foot_motor)
+        print("latch and detach for ", which_foot_motor)
+
+        # lift the back feet from the board       
+        # EE moves straight up from board to "safe" location above the 
+        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, which_foot_motor) 
+        print("move from ", goal, " ", above_goal)
+        
+        # rotate the back feet
+        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, which_foot_motor)
+        print("move from ", above_goal, " ", ABOVE_HOME)
+        
+        # put the back feet on the board
+        # Move from above goal to the goal position
+        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
+        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
+
+        print("movement complete: STEP_LEFT")
+
+    def step_right(self): 
         # Start moving leading foot 
         # gripper activated RAHHHH
         which_foot_motor = 5 # the pivot foot 
@@ -331,55 +384,7 @@ class IkTest(Node):
         self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
         print("move from ", ABOVE_HOME, " ", HOME_POSITION)
 
-        print("movement complete: STEP_LEFT")
-
-    def step_right(self): 
-        # Start moving leading foot 
-        which_foot_motor = 1 # the pivot foot 
-        self.latch_detach(which_foot_motor) 
-        print("Latched detached")
-        
-        # EE moves straight up from board to "safe" location above the home position
-        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, which_foot_motor) 
-        print("move from ", HOME_POSITION, " ", ABOVE_HOME)
-        
-        # Move from location above home forward 
-        goal = [0, -1, 0, EE_direction.DOWN.value]
-        print ("goal is: ", goal)
-        above_goal = copy.deepcopy(goal)
-        above_goal[2] = 0.5
-        print("did goal survive? goal is: ", goal)
-
-        # Move forward and hover over the goal overhead position 
-        self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, which_foot_motor)
-        print("move from ", ABOVE_HOME, " ", above_goal)
-        
-        # Move from above goal to the goal position
-        self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, which_foot_motor)
-        print("move from ", above_goal, " ", goal)
-
-        print("-------------- Front leg is in place")
-        sleep(3)
-        
-        # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
-        # Next, the following foot moves 
-        which_foot_motor = 5 # now the pivot foot is 5
-        self.latch_detach(which_foot_motor)
-        print("latch and detach for ", which_foot_motor)
-        
-        # EE moves straight up from board to "safe" location above the 
-        self.move_to(goal, above_goal, BLOCK_INTERFACING_TIME, which_foot_motor) 
-        print("move from ", goal, " ", above_goal)
-        
-        # Move forward and hover over the goal overhead position 
-        self.move_to(above_goal, ABOVE_HOME, TRAVEL_TIME, which_foot_motor)
-        print("move from ", above_goal, " ", ABOVE_HOME)
-        
-        # Move from above goal to the goal position
-        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, which_foot_motor)
-        print("move from ", ABOVE_HOME, " ", HOME_POSITION)
-        
-      
+        print("movement complete: STEP_RIGHT")
         
     def latch_detach(self, which_foot_motor):
         if (which_foot_motor == 5): # 5 is the pivot foot
