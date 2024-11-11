@@ -14,21 +14,25 @@ import numpy as np
 from enum import Enum
 import copy
 
+# Control which direction the end effector is pointing relative to the world frame. 
 class EE_direction(Enum):
     DOWN = 90
-    UP = 0
+    UP = 0  # This points horizontally away from the inchworm 
 
-HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value] # home position of the IW (next to each other). Applies for either pivot foot
-ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value] # above home position of the IW (next to each other). We use this for trajectory planning Applies for either pivot foot
+# Common positions the inchworm must travel to, with the format of [x, y, z, EE_direction] relative to the frame of the inchworm pivot foot. (units: num blocks, deg) 
+# The home position is when the inchworm is NOT holding any blocks
+HOME_POSITION = [1, 0, 0, EE_direction.DOWN.value] # When both feet are next to each other. Applies for either pivot foot
+ABOVE_HOME = [1, 0, 0.5, EE_direction.DOWN.value] # "ABOVE" positions are for trajectory planning, moving the inchworm straight up 
 
-PIVOT_OFF_BLOCK_HOME_POSITION = [1, 0, 1, EE_direction.DOWN.value]  # home position of the IW with a block. From perspective of the pivot foot that's not holding the block
-PIVOT_OFF_BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value] # above home position of the IW  with a block. From perspective of the pivot foot that's not holding the block
+# The following home positions are when the inchworm is holding a block. 
+PIVOT_OFF_BLOCK_HOME_POSITION = [1, 0, 1, EE_direction.DOWN.value] # From perspective of the pivot foot, which is NOT holding the block. The other foot is on the block. 
+PIVOT_OFF_BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value]
 
-PIVOT_ON_BLOCK_HOME_POSITION = [1, 0, -1, EE_direction.DOWN.value]  # From perspective of the pivot foot that's on the block
-PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value] # From perspective of the pivot foot that's on the block
+PIVOT_ON_BLOCK_HOME_POSITION = [1, 0, -1, EE_direction.DOWN.value]  # From perspective of the pivot foot, which is on the block
+PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value]
 
 
-BLOCK_INTERFACING_TIME = 1
+BLOCK_INTERFACING_TIME = 1 # sec 
 TRAVEL_TIME = 2
     
 class IkTest(Node):
@@ -148,14 +152,13 @@ class IkTest(Node):
         self.motor_4 = self.servo_bus.get_servo(4)
         self.motor_5 = self.servo_bus.get_servo(5)
 
-        self.time_to_move = 1.5 # Set the time over which the motors will move.
-
         
-    def move_to(self, current_pos, final_pos, travelTime, pivot_foot): 
+    def move_to(self, current_pos: list, final_pos: list, travelTime: float, pivot_foot: int): 
         """
         Move the robot end effector between one location and another using quintic trajectory. 
+        The 1x4 vectors are in the format [x, y, z, EE_angle] (block coords in IW frame & deg from horizontal in world frame).
 
-        Args: 
+        Args:
             current_pos (list): the current position of the EE as a 1x4 vector
             final_pos (list): the final location of the EE as a 1x4 vector
             travelTime (float): the time taken for the movement
@@ -192,7 +195,6 @@ class IkTest(Node):
             joint_angles(list): theta1, theta2, theta3, theta4, theta5 in degrees
             time (float): Duration to reach the target angles (in seconds).
         """
-        # TODO: Look into whether it's worth calling self.time_to_move here rather than passing in time as a parameter.
         [theta1, theta2, theta3, theta4, theta5] = joint_angles
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
@@ -242,16 +244,25 @@ class IkTest(Node):
         
     """
     The territory of movesets begins now...
+
+    Basic Procedure: 
+    1. Movement is called through subscription to ROS topic. 
+    2. Use trajectory planning to move leading foot in straight lines: up, to above goal, down to goal. 
+    3. Move the following foot towards other foot. 
     """
 
     def step_forward(self): 
+        """
+        Move both feet forward, leading with foot with motor 5. Handles the stepping motion by activating servos 
+        and moving the robotic leg through various angles using trajectory planning & inverse kinematics.
+        """
         # positions
         goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
         above_goal = copy.deepcopy(goal)
         above_goal[2] += 0.5
 
         # Start moving leading foot 
-        pivot_foot = 1 # the pivot foot 
+        pivot_foot = 1 
         self.latch_detach(pivot_foot) 
         
         # EE moves straight up from board to just above the home
@@ -265,10 +276,11 @@ class IkTest(Node):
 
         print("-------------- Front leg is in place--------------")
         sleep(2)
+        # TODO: after testing, remove ALL these prints & sleeps
         
         # At this point, leading foot (@ motor 5) is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
-        pivot_foot = 5 # now the pivot foot is 5
+        pivot_foot = 5 
         self.latch_detach(pivot_foot)
         
         # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
@@ -283,6 +295,11 @@ class IkTest(Node):
         print("Movement complete: STEP_FORWARD")
 
     def step_left(self): 
+        """
+        Turn to be 2 blocks to the left of the pivot foot, then step, leading with foot with motor 5. Handles the 
+        stepping motion by activating servos and moving the robotic leg through various angles using trajectory planning 
+        & inverse kinematics.
+        """
         # positions 
         pivot_foot = 1 # the pivot foot 
 
@@ -308,17 +325,16 @@ class IkTest(Node):
         
         # At this point, leading foot is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
-        # gripper activated RAHHHH
         pivot_foot = 5 # now the pivot foot is 5
         self.latch_detach(pivot_foot)
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value]
+        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         above_following_foot_goal = copy.deepcopy(following_foot_goal)
         above_following_foot_goal[2] += 0.5
 
-        # lift the back feet from the board       
+        # lift the back foot from the board       
         # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
         self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
         
@@ -331,6 +347,11 @@ class IkTest(Node):
         print("movement complete: STEP_LEFT")
 
     def step_right(self): 
+        """
+        Turn to be 2 blocks to the right of the pivot foot, then step, leading with foot with motor 5. Handles the 
+        stepping motion by activating servos and moving the robotic leg through various angles using trajectory planning 
+        & inverse kinematics.
+        """
         # positions 
         pivot_foot = 1 # the pivot foot 
 
@@ -362,7 +383,7 @@ class IkTest(Node):
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value]
+        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         following_foot_above_goal = copy.deepcopy(following_foot_goal)
         following_foot_above_goal[2] += 0.5
 
@@ -381,20 +402,22 @@ class IkTest(Node):
     # Movements with Block
 
     def step_forward_block(self): 
-        block = True # this latching should account for block
+        """
+        Move both feet forward, leading with foot with motor 5. Leading foot is holding a block and stepping with it. 
+        """
         
         # positions
         leading_foot_goal = [2, 0, 1, EE_direction.DOWN.value]
         leading_foot_above_goal = copy.deepcopy(leading_foot_goal)
         leading_foot_above_goal[2] += 0.5
 
-        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value]
+        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         following_foot_above_goal = copy.deepcopy(following_foot_goal)
         following_foot_above_goal[2] += 0.5
 
         # attach and detach the servos. both the servos should be attached (one in the block and the other on the board)
         pivot_foot = 1 # the pivot foot 
-        self.latch_detach(pivot_foot, block)         
+        self.latch_detach(pivot_foot, block=True)         
 
         # Start moving leading foot account for the block height
         # Leading foot moves straight up from board to "safe" location with the block 
@@ -414,7 +437,7 @@ class IkTest(Node):
 
         # attach and detach the servo (account for the block!!)
         pivot_foot = 5 # now the pivot foot is 5
-        self.latch_detach(pivot_foot, block)
+        self.latch_detach(pivot_foot, block=True)
         
         # Following foot moves straight up from board to "safe" location with no block attached to it 
         self.move_to(following_foot_goal, following_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
@@ -428,7 +451,10 @@ class IkTest(Node):
         print("Movement complete: STEP_FORWARD_BLOCK")
 
     def step_left_block(self): 
-        block = True # this latching should account for block
+        """
+        Turn to be 2 blocks to the left of the pivot foot, then step, leading with foot with motor 5. 
+        Leading foot is holding a block and stepping with it.
+        """
         pivot_foot = 1 # the pivot foot 
 
         # positions 
@@ -438,7 +464,7 @@ class IkTest(Node):
         leading_foot_above_goal[2] += 0.5
 
         # gripper activated RAHHHH
-        self.latch_detach(pivot_foot, block) 
+        self.latch_detach(pivot_foot, block=True) 
         
         # Start moving leading foot account for the block height
         # Leading foot moves straight up from board to "safe" location with the block 
@@ -457,11 +483,11 @@ class IkTest(Node):
         # Next, the following foot moves 
         # gripper activated RAHHHH
         pivot_foot = 5 # now the pivot foot is 5
-        self.latch_detach(pivot_foot, block)
+        self.latch_detach(pivot_foot, block=True)
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value]
+        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         following_foot_above_goal = copy.deepcopy(following_foot_goal)
         following_foot_above_goal[2] += 0.5
 
@@ -478,7 +504,10 @@ class IkTest(Node):
         print("movement complete: STEP_LEFT_BLOCK")
 
     def step_right_block(self): 
-        block = True # this latching should account for block
+        """
+        Turn to be 2 blocks to the right of the pivot foot, then step, leading with foot with motor 5. 
+        Leading foot is holding a block and stepping with it.
+        """
         pivot_foot = 1 # the pivot foot 
 
         # positions 
@@ -488,7 +517,7 @@ class IkTest(Node):
         leading_foot_above_goal[2] += 0.5
 
         # gripper activated RAHHHH
-        self.latch_detach(pivot_foot, block) 
+        self.latch_detach(pivot_foot, block=True) 
         
         # Start moving leading foot account for the block height
         # Leading foot moves straight up from board to "safe" location with the block 
@@ -507,11 +536,11 @@ class IkTest(Node):
         # Next, the following foot moves 
         # gripper activated RAHHHH
         pivot_foot = 5 # now the pivot foot is 5
-        self.latch_detach(pivot_foot, block)
+        self.latch_detach(pivot_foot, block=True)
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value]
+        following_foot_goal = [2, 0, -1, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         following_foot_above_goal = copy.deepcopy(following_foot_goal)
         following_foot_above_goal[2] += 0.5
 
@@ -528,8 +557,13 @@ class IkTest(Node):
         print("movement complete: STEP_RIGHT_BLOCK")
 
     # placement of blocks
-    def place_block_front(self, block_level):
-        # assuming that you need to place a block one cell ahead, block height is layers so 1, 2 and 3 (the physical constraints of the IW)
+    def place_block_front(self, block_level: int):
+        """ 
+        Place the held block at the specified level, one grid cell in front of the current position of the leading foot. 
+
+        Args:
+            block_level (int): Desired block placement level. 1, 2, or 3, based on the physical constraints of the IW
+        """
 
         # positions
         leading_foot_goal = [2, 0, block_level, EE_direction.DOWN.value]
@@ -537,10 +571,9 @@ class IkTest(Node):
         leading_foot_above_goal[2] += 0.5
 
         # activate both servo 
-        block = True # this latching should account for block
         # attach and detach the servos. both the servos should be attached (one in the block and the other on the board)
         pivot_foot = 1 # the pivot foot 
-        self.latch_detach(pivot_foot, block)         
+        self.latch_detach(pivot_foot, block=True)         
 
         # Start moving leading foot account for the block height
         # Leading foot moves straight up from board to "safe" location with the block 
@@ -558,22 +591,25 @@ class IkTest(Node):
         print("-------------- Placed block YIPEEEE-------------------")
         sleep(3)
         
-        # At this point, the block has been placed, now the inchworm needs to come back to the home position
+        # TODO: make sure IW communicates w block & structure before detaching 
+        # # At this point, the block has been placed, now the inchworm needs to come back to the home position
 
-        # lift the leading feet high enough to detach from the block magnets 
-        self.move_to(leading_foot_goal, leading_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+        # # lift the leading feet high enough to detach from the block magnets 
+        # self.move_to(leading_foot_goal, leading_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
-        # hover the leading foot over the home position
-        self.move_to(leading_foot_above_goal, PIVOT_OFF_BLOCK_ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+        # # hover the leading foot over the home position
+        # self.move_to(leading_foot_above_goal, PIVOT_OFF_BLOCK_ABOVE_HOME, TRAVEL_TIME, pivot_foot)
 
-        # put the feet back on the ground
-        self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, PIVOT_OFF_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot) 
+        # # put the feet back on the ground
+        # self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, PIVOT_OFF_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot) 
 
-        print("movement complete: PLACE_BLOCK_FRONT")
+        # print("movement complete: PLACE_BLOCK_FRONT")
 
 
     def pick_up_block(self):
-        # assuming that you need to place a block one cell ahead, block height is layers so 1, 2 and 3 (the physical constraints of the IW)
+        """ 
+        Pick up a block that is in front of the inchworm, assuming that there is only 1 block level. 
+        """
         
         # positions
         leading_foot_goal = [2, 0, 1, EE_direction.DOWN.value]
@@ -614,7 +650,14 @@ class IkTest(Node):
         print("movement complete: PICK_UP_BLOCK")
         
 
-    def latch_detach(self, pivot_foot, block = False):
+    def latch_detach(self, pivot_foot: int, block = False):
+        """
+        Latch the pivot foot onto the surface and detach the other foot. 
+        
+        Args:
+            pivot_foot (int): The inchworm's pivot foot. 
+            block (bool): True if the inchworm is holding onto a block. Makes sure the block stays latched. 
+        """
         if (pivot_foot == 5): # 5 is the pivot foot
             # activate the servo of the following leg
             activate_servo(self.servo1)
