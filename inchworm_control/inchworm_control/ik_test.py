@@ -94,12 +94,12 @@ class IkTest(Node):
             'STEP_LEFT': self.step_left,
             'STEP_RIGHT': self.step_right,
 
-            # Inchworm movements with one block
+            # Inchworm movements when holding one block
             'STEP_FORWARD_BLOCK': self.step_forward_block,
             'STEP_LEFT_BLOCK': self.step_left_block,
             'STEP_RIGHT_BLOCK': self.step_right_block,
             'PLACE_BLOCK_FRONT': self.place_block_front, 
-            'GRAB_BLOCK': self.grab_block
+            'PICK_UP_BLOCK': self.pick_up_block
             # 'GRAB_UP_FORWARD': self.grab_up_forward, 
             # 'GRAB_UP_LEFT': self.grab_up_left, 
             # 'PLACE_FORWARD_BLOCK': self.place_forward,
@@ -572,7 +572,7 @@ class IkTest(Node):
         print("movement complete: PLACE_BLOCK_FRONT")
 
 
-    def grab_block(self):
+    def pick_up_block(self):
         # assuming that you need to place a block one cell ahead, block height is layers so 1, 2 and 3 (the physical constraints of the IW)
         
         # positions
@@ -611,7 +611,7 @@ class IkTest(Node):
         # put the feet back on the ground with the block
         self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, PIVOT_OFF_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot) 
 
-        print("movement complete: GRAB_BLOCK")
+        print("movement complete: PICK_UP_BLOCK")
         
 
     def latch_detach(self, pivot_foot, block = False):
