@@ -529,10 +529,90 @@ class IkTest(Node):
 
     # placement of blocks
     def place_block_front(self, block_level):
-        pass
+        # assuming that you need to place a block one cell ahead, block height is layers so 1, 2 and 3 (the physical constraints of the IW)
+
+        # positions
+        leading_foot_goal = [2, 0, block_level, EE_direction.DOWN.value]
+        leading_foot_above_goal = copy.deepcopy(leading_foot_goal)
+        leading_foot_above_goal[2] += 0.5
+
+        # activate both servo 
+        block = True # this latching should account for block
+        # attach and detach the servos. both the servos should be attached (one in the block and the other on the board)
+        pivot_foot = 1 # the pivot foot 
+        self.latch_detach(pivot_foot, block)         
+
+        # Start moving leading foot account for the block height
+        # Leading foot moves straight up from board to "safe" location with the block 
+        self.move_to(PIVOT_OFF_BLOCK_HOME_POSITION, PIVOT_OFF_BLOCK_ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        # Move forward and hover over the goal overhead position for the leading foot
+        self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, leading_foot_above_goal, TRAVEL_TIME, pivot_foot)
+        
+        # Move down to the goal position and place the block 
+        self.move_to(leading_foot_above_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        # release the servo holding the block
+        self.latch_detach(pivot_foot)
+
+        print("-------------- Placed block YIPEEEE-------------------")
+        sleep(3)
+        
+        # At this point, the block has been placed, now the inchworm needs to come back to the home position
+
+        # lift the leading feet high enough to detach from the block magnets 
+        self.move_to(leading_foot_goal, leading_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        # hover the leading foot over the home position
+        self.move_to(leading_foot_above_goal, PIVOT_OFF_BLOCK_ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+
+        # put the feet back on the ground
+        self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, PIVOT_OFF_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        print("movement complete: PLACE_BLOCK_FRONT")
+
 
     def grab_block(self):
-        pass
+        # assuming that you need to place a block one cell ahead, block height is layers so 1, 2 and 3 (the physical constraints of the IW)
+        
+        # positions
+        leading_foot_goal = [2, 0, 1, EE_direction.DOWN.value]
+        leading_foot_above_goal = copy.deepcopy(leading_foot_goal)
+        leading_foot_above_goal[2] += 0.5
+
+        # attach and detach the servos. both the servos should be attached (one in the block and the other on the board)
+        pivot_foot = 1 # the pivot foot 
+        self.latch_detach(pivot_foot)         
+
+        # Start moving leading foot from the board
+        # Leading foot moves straight up from board to "safe" location with the block 
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        # Leading foot hovers over the block overhead position
+        self.move_to(ABOVE_HOME, leading_foot_above_goal, TRAVEL_TIME, pivot_foot)
+        
+        # Move down to the block 
+        self.move_to(leading_foot_above_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        # attach the servo holding the block
+        self.latch_detach(pivot_foot, block=True)
+
+        print("-------------- GRABED block YIPEEEE-------------------")
+        sleep(3)
+        
+        # At this point, the block has been grabed, now the inchworm needs to come back to the home position with the block
+
+        # lift the leading foot with the block 
+        self.move_to(leading_foot_goal, leading_foot_above_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        # hover the leading foot with the block over the home position
+        self.move_to(leading_foot_above_goal, PIVOT_OFF_BLOCK_ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+
+        # put the feet back on the ground with the block
+        self.move_to(PIVOT_OFF_BLOCK_ABOVE_HOME, PIVOT_OFF_BLOCK_HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        print("movement complete: GRAB_BLOCK")
+        
 
     def latch_detach(self, pivot_foot, block = False):
         if (pivot_foot == 5): # 5 is the pivot foot
