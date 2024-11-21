@@ -1,7 +1,7 @@
 import copy
 from enum import Enum
 from path_planning import *
-from config import BD_LOC, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
+from config import BD_LOC1, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
 
 # converts the list of coords from bfs to a list of inchworm movements
 # returns the list of path coordinates and the list of steps from start to end
@@ -17,7 +17,7 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 
     # if the start is the Block Depot, it is holding a block
     holding_block = False
-    if(path_start == BD_LOC):
+    if(path_start == BD_LOC1):
         holding_block = True
 
     steps = []
@@ -27,7 +27,7 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
         next_coord = path_coords[i + 1][0] 
 
         # offset to handle the inchworm's position when it's on the block depot
-        if current_coord == BD_LOC:
+        if current_coord == BD_LOC1:
             x, z, y = current_coord
             current_coord = [x, z-1, y]
 
@@ -35,7 +35,7 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
         movement_direction, new_orientation = get_direction(current_coord, next_coord)
 
         # if the next coord is the block depot, the next step should be a grabbing step
-        if next_coord == BD_LOC:
+        if next_coord == BD_LOC1:
             steps.append(("GRAB_{movement_direction}", holding_block))
             
         # if the next coordinate is the goal(and not BD), then we need to place the block
@@ -207,9 +207,9 @@ def determine_helper_blocks(grid, path_start, path_end):
 def simplify_steps(PAST_LOC, complete_path, complete_steps):
     global CURRENT_LOC, CURRENT_ORIENTATION
     # Case 1 and 3 
-    if CURRENT_LOC[0] < BD_LOC[0]:
+    if CURRENT_LOC[0] < BD_LOC1[0]:
         new_start = [PAST_LOC[0]+2, PAST_LOC[1], PAST_LOC[2]]
-    elif CURRENT_LOC[0] > BD_LOC[0]:
+    elif CURRENT_LOC[0] > BD_LOC1[0]:
         new_start = [PAST_LOC[0]-2, PAST_LOC[1], PAST_LOC[2]]
     else:
         print("you are already on the block depot") 
@@ -233,7 +233,7 @@ def simplify_steps(PAST_LOC, complete_path, complete_steps):
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
 def dev_total_path_steps(structures, misc_blocks):
     grid = initialize_grid_with_structures(50)
-    update_grid_with_structure(grid, BD_LOC)
+    update_grid_with_structure(grid, BD_LOC1)
     complete_path = []
     complete_steps = []
     list_of_goals = []
@@ -252,7 +252,7 @@ def dev_total_path_steps(structures, misc_blocks):
                 PAST_LOC = copy.deepcopy(CURRENT_LOC)
                 print("corod: ", coord)
                 # get path and steps from current location to block depot
-                bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC)
+                bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC1)
                 print("bd_path: ", bd_path)
                 # pop the first value in list of path coords to remove repeat coords
                 bd_path.pop(0)
@@ -294,7 +294,7 @@ def dev_total_path_steps(structures, misc_blocks):
             PAST_LOC = copy.deepcopy(CURRENT_LOC)
 
             # get path and steps from current location to block depot  
-            bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC)
+            bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC1)
 
             # pop the first value in list of path coords to remove repeat coords
             try:

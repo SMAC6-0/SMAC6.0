@@ -1,6 +1,6 @@
 from enum import Enum
 import copy
-from config import BD_LOC, GRID_SIZE
+from config import *
 
 class GridStatus(Enum):
     WALKABLE = 0
@@ -25,34 +25,43 @@ class Node:
     def __lt__(self, other):
         return self.f < other.f # node comparing for priority queue
     
-def initialize_grid_with_structures(grid_size = GRID_SIZE, bd_loc = None):
+def initialize_grid_with_structures():
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
 
-    Args:
-        GRID_SIZE (int): The size of the workspace, as a grid.
     Returns:
-        list: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
+        grid [list]: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """
-    grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
+    # Initialize an empty 3D grid with all cells represented as NOT_WALKABLE
+    grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] 
 
-    # Make the bottom layer (z=0) walkable
-    for x in range(grid_size):
-        for y in range(grid_size):
+    # Make the bottom layer (z = 0) WALKABLE
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
             grid[x][0][y] = GridStatus.WALKABLE.value
-            
-    if bd_loc:
-        mark_block_depot(grid, bd_loc)
+    
+    # Finish initializing grid with block depot locations
+    grid = mark_block_depot(grid)
+    
     return grid
 
-def mark_block_depot(grid, bd_loc = BD_LOC):
-    x, y, z = bd_loc
-    if 0 <= x < len(grid) and 0 <= y < len(grid[0]) and 0 <= z < len(grid[0][0]):
-        grid[x][z][y] = GridStatus.WALKABLE.value
-        if z - 1 >= 0:
-            grid[x][z - 1][y] = GridStatus.NOT_WALKABLE.value
-    else:
-        print(f"Error: BD_LOC {bd_loc} is out of bounds") 
+def mark_block_depot(grid):
+    """
+    Initalize all block depots in grid. This is configured in config.py
+    
+    Args:
+        grid [list]: A 3D list of the workspace
+
+    Returns:
+        grid [list]: A 3D list of the workspace with the supply depot.
+    """
+    for i in BD_LOCS[i]:
+        x, z, y = BD_LOCS[i]
+        if is_in_bounds(grid, BD_LOCS[i]):
+            grid[x][z][y] = GridStatus.SUPPLY_DEPOT.value
+        else:
+            raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
+    return grid
     
 def set_inchworm_path(grid, x, z, y, inchworm_id):
     grid[x][z][y] = GridStatus.INCHWORM_PATH.value
@@ -103,6 +112,10 @@ def is_valid_position_3d(grid, x, z, y):
         is_obs = grid[x][z][y] != GridStatus.WALKABLE.value
         return Node(x, z, y, is_obs=is_obs)
     return None
+
+def is_in_bounds(grid, coords):
+    x, y, z = coords
+    return 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0])
 
 def is_goal_reached_3d(curr_node, goal_node):
     return (curr_node.x == goal_node.x and 

@@ -1,6 +1,6 @@
 from enum import Enum
 import copy
-from config import BD_LOC, LARGE_BUILD, GRID_SIZE
+from config import BD_LOC1, LARGE_BUILD, GRID_SIZE
 
 blocks_no_longer_walkable = []
 
@@ -8,12 +8,10 @@ def initialize_grid_with_structures():
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
 
-    Args:
-        None
     Returns:
         grid (list): A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """ 
-    #Initialize an empty 3D grid with all cells represented as obstacles
+    # Initialize an empty 3D grid with all cells represented as obstacles
     grid = [[[1 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # 3D list full of ones, equal to the grid size 
 
     # Make the bottom layer (z=0) walkable
@@ -123,7 +121,7 @@ def start_search_3d(grid, start, goal):
 def bfs_3d(grid, start, goal):
     # if it goal is the Block Depot then it is not holding a block
     holding_block = True
-    if goal == BD_LOC:
+    if goal == BD_LOC1:
         holding_block = False 
 
     if not is_valid_start_goal_3d(grid, start, goal):
@@ -191,7 +189,7 @@ def bfs_3d_vertical(grid, start, goal):
 
     # If the goal is the Block Depot then the inchworm is not holding a block
     holding_block = True
-    if goal == BD_LOC:
+    if goal == BD_LOC1:
         holding_block = False
 
 

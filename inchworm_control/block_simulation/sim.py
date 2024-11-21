@@ -8,7 +8,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
 from path_conversion import * 
-from config import CURRENT_LOC, BD_LOC, DEMO
+from config import CURRENT_LOC, BD_LOC1, DEMO
 import copy 
 
 app = Ursina()
@@ -101,7 +101,7 @@ def update():
 
     # Generate paths and inchworm steps
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n')
+        spawn_cube(BD_LOC1[0], BD_LOC1[1], BD_LOC1[2], 'n')
         sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
         coords_to_spawn, path_steps , goal= dev_total_path_steps(found_structures, sorted_list)
         step_getter(path_steps)
