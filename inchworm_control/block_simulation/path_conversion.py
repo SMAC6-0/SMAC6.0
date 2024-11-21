@@ -36,11 +36,11 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 
         # if the next coord is the block depot, the next step should be a grabbing step
         if next_coord == BD_LOC:
-            steps.append("GRAB_{movement_direction}", holding_block)
+            steps.append(("GRAB_{movement_direction}", holding_block))
             
         # if the next coordinate is the goal(and not BD), then we need to place the block
         elif next_coord == path_end:
-            steps.append("PLACE_{movement_direction}", holding_block)
+            steps.append(("PLACE_{movement_direction}", holding_block))
             # once it places the block, the currnt location will be on top of where the block is
             x, z, y = next_coord
             next_coord = [x, z+1, y]

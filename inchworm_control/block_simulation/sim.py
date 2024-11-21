@@ -42,6 +42,7 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed = False
+key_esc_pressed = False
 placed_block = None 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
@@ -58,7 +59,7 @@ prev_point = point
 
 # Updates every frame
 def update():
-    global blocks_placed, key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
+    global blocks_placed, key_g_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_esc_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -111,9 +112,6 @@ def update():
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
-        
-    if held_keys["q"]:
-        stop_simulation()
 
     if held_keys["n"] and not key_n_pressed and coords_to_spawn:
         (point, holding_block) = coords_to_spawn.pop(0)  # Get the next point
@@ -183,8 +181,6 @@ def update():
         prev_point = point
         key_n_pressed = False
 
-
-
 # writes steps to a txt file              
 def step_getter(steps):
     complete_steps = copy.deepcopy(steps)
@@ -224,7 +220,9 @@ class Voxel(Button):
         )
 
     # What happens to blocks on inputs
-    def input(self,key):
+    def input(self, key):
+        global key_esc_pressed
+        
         if self.hovered:
             if key == "left mouse down":
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
@@ -237,6 +235,13 @@ class Voxel(Button):
                 except Exception as e: 
                     print("Block not found")
                 destroy(self)
+                
+        if key == "escape":
+            if not key_esc_pressed:
+                stop_simulation()
+                key_esc_pressed = True
+            elif key == "escape up":
+                key_esc_pressed - False
 
 # Skybox
 class Sky(Entity):
@@ -370,7 +375,7 @@ def check_block_color(x, y, z):
     return block_color
 
 def stop_simulation():
-    print("User pressed 'q'. Stopping simulation...")
+    print("User pressed 'ESC'. Stopping simulation...")
     application.quit()
 
 # spawns a cude in the simulation at the specified position and with the specified color
