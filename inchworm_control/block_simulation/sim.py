@@ -111,6 +111,9 @@ def update():
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
+        
+    if held_keys["q"]:
+        stop_simulation()
 
     if held_keys["n"] and not key_n_pressed and coords_to_spawn:
         (point, holding_block) = coords_to_spawn.pop(0)  # Get the next point
@@ -365,6 +368,10 @@ def check_block_color(x, y, z):
                 print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
     return block_color
+
+def stop_simulation():
+    print("User pressed 'q'. Stopping simulation...")
+    application.quit()
 
 # spawns a cude in the simulation at the specified position and with the specified color
 def spawn_cube(x, y, z, color_index):

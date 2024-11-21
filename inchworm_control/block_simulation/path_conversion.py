@@ -1,6 +1,7 @@
 import copy
 from enum import Enum
 from path_planning import *
+from map_data import *
 from config import BD_LOC, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
 
 # converts the list of coords from bfs to a list of inchworm movements
@@ -58,430 +59,63 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 # given the movement direction, returns the step to take
 def update_steps(movement_direction):
 
-    if(CURRENT_ORIENTATION == InchwormOrientation.NORTH):
-        if(movement_direction == 'FORWARD'):
-            return "STEP_FORWARD"
-        elif(movement_direction == 'BACK'):
-            return "STEP_BACK"
-        elif(movement_direction == 'LEFT'): 
-            return "STEP_LEFT"
-        elif(movement_direction == 'RIGHT'):
-            return "STEP_RIGHT"
-        elif(movement_direction == 'UP'):
-            return "CLIMB_UP"
-        elif(movement_direction == 'DOWN'):
-            return "CLIMB_DOWN"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return "STEP_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return "STEP_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return "STEP_UP"
-        # elif(movement_direction == 'DIAGONAL_UP_BACK'):
-        #     return STEP_BACK
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return "STEP_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return "STEP_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return "STEP_DOWN"
-        # elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-        #     return STEP_BACK
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return "STEP_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return "STEP_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return "STEP_UP_2"
-        # elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-        #     return STEP_BACK_2
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return "STEP_DOWN_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-            return "STEP_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return "STEP_DOWN_2"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-        #     return STEP_BACK_2
+    step_mappings = {
+        "NORTH": {
+            "FORWARD": "STEP_FORWARD", "BACK": "STEP_BACK", "LEFT": "STEP_LEFT", "RIGHT": "STEP_RIGHT",
+            "UP": "CLIMB_UP", "DOWN": "CLIMB_DOWN", "DIAGONAL_UP_RIGHT": "STEP_UP_RIGHT", 
+            "DIAGONAL_UP_LEFT": "STEP_UP_LEFT", "DIAGONAL_UP_FORWARD": "STEP_UP",
+            "DIAGONAL_DOWN_RIGHT": "STEP_DOWN_RIGHT", "DIAGONAL_DOWN_LEFT": "STEP_DOWN_LEFT",
+            "DIAGONAL_DOWN_FORWARD": "STEP_DOWN", "DIAGONAL_UP_2_RIGHT": "STEP_UP_2_RIGHT", 
+            "DIAGONAL_UP_2_LEFT": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_FORWARD": "STEP_UP_2",
+            "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2_RIGHT", "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2_LEFT",
+            "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2"
 
-    elif(CURRENT_ORIENTATION == InchwormOrientation.SOUTH):
-        if(movement_direction == 'FORWARD'):
-            return "STEP_BACK"
-        elif(movement_direction == 'BACK'):
-            return "STEP_FORWARD"
-        elif(movement_direction == 'LEFT'): 
-            return "STEP_RIGHT"
-        elif(movement_direction == 'RIGHT'):
-            return "STEP_LEFT"
-        elif(movement_direction == 'UP'):
-            return "CLIMB_UP"
-        elif(movement_direction == 'DOWN'):
-            return "CLIMB_DOWN"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return "STEP_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return "STEP_UP_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-        #     return STEP_UP
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return "STEP_UP"
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return "STEP_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return "STEP_DOWN_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-        #     return STEP_DOWN
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return "STEP_DOWN"
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return "STEP_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return "STEP_UP_2_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-        #     return STEP_UP_2
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return "STEP_UP_2"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return "STEP_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return "STEP_DOWN_2_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-        #     return STEP_DOWN_2
-        
-    elif(CURRENT_ORIENTATION == InchwormOrientation.EAST):
-        if(movement_direction == 'FORWARD'):
-            return "STEP_LEFT"
-        elif(movement_direction == 'BACK'):
-            return "STEP_RIGHT"
-        elif(movement_direction == 'LEFT'): 
-            return "STEP_BACK"
-        elif(movement_direction == 'RIGHT'):
-            return "STEP_FORWARD"
-        elif(movement_direction == 'UP'):
-            return "CLIMB_UP"
-        elif(movement_direction == 'DOWN'):
-            return "CLIMB_DOWN"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return "STEP_UP"
-        # elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-        #     return STEP_UP_RIGHT
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return "STEP_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return "STEP_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return "STEP_DOWN"
-        # elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-        #     return STEP_DOWN_RIGHT
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return "STEP_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return "STEP_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return "STEP_UP_2"
-        # elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-        #     return STEP_UP_2_RIGHT
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return "STEP_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return "STEP_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return "STEP_DOWN_2"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-        #     return STEP_DOWN_2_RIGHT
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return "STEP_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-            return "STEP_DOWN_2_RIGHT"
-        
-    elif(CURRENT_ORIENTATION == InchwormOrientation.WEST):
-        if(movement_direction == 'FORWARD'):
-            return "STEP_RIGHT"
-        elif(movement_direction == 'BACK'):
-            return "STEP_LEFT"
-        elif(movement_direction == 'LEFT'): 
-            return "STEP_FORWARD"
-        elif(movement_direction == 'RIGHT'):
-            return "STEP_BACK"
-        elif(movement_direction == 'UP'):
-            return "CLIMB_UP"
-        elif(movement_direction == 'DOWN'):
-            return "CLIMB_DOWN"
-        # elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-        #     return STEP_UP
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return "STEP_UP"
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return "STEP_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return "STEP_UP_LEFT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-        #     return  STEP_DOWN
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return "STEP_DOWN"
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return "STEP_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return "STEP_DOWN_LEFT"
-        # elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-        #     return STEP_UP_2
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return "STEP_UP_2"
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return "STEP_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return "STEP_UP_2_LEFT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-        #     return  STEP_DOWN_2
-        elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-            return "STEP_DOWN_2"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return "STEP_DOWN_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-            return "STEP_DOWN_2_LEFT"
-    else:
-        print("ERROR: invalid orientation")
+            # movements that are iffy
+            # "DIAGONAL_UP_BACK": STEP_BACK, "DIAGONAL_DOWN_BACK": STEP_BACK
+            # "DIAGONAL_UP_2_BACK": STEP_BACK_2, "DIAGONAL_DOWN_2_BACK": STEP_BACK_2"
+        },
+        "SOUTH": {
+            "FORWARD": "STEP_BACK", "BACK": "STEP_FORWARD", "LEFT": "STEP_RIGHT", "RIGHT": "STEP_LEFT",
+            "UP": "CLIMB_UP", "DOWN": "CLIMB_DOWN", "DIAGONAL_UP_RIGHT": "STEP_UP_LEFT", "DIAGONAL_UP_LEFT": "STEP_UP_RIGHT",
+            "DIAGONAL_UP_BACK": "STEP_UP", "DIAGONAL_DOWN_RIGHT": "STEP_DOWN_LEFT",
+            "DIAGONAL_DOWN_LEFT": "STEP_DOWN_RIGHT", "DIAGONAL_DOWN_BACK": "STEP_DOWN",
+            "DIAGONAL_UP_2_RIGHT": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_LEFT": "STEP_UP_2_RIGHT",
+            "DIAGONAL_UP_2_BACK": "STEP_UP_2", "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2_LEFT",
+            "DIAGONAL_DOWN_LEFT": "STEP_DOWN_2_RIGHT"
 
-# given the movement direction, returns the step to take, but with a manipulation action attached to it (grab/place)
-def update_manipulation_step(movement_direction, manipulation):
-    # manipulation is either "GRAB" or "PLACE"
+            # movements that are iffy
+            # DIAGONAL_UP_FORWARD": "STEP_UP", "DIAGONAL_DOWN_FORWARD": "STEP_DOWN",
+            # "DIAGONAL_UP_2_FORWARD": "STEP_UP_2", "DIAGONAL_DOWN_2_FORWARD": STEP_DOWN_2
+        },
+        "EAST": {
+            "FORWARD": "STEP_LEFT", "BACK": "STEP_RIGHT", "LEFT": "STEP_BACK", "RIGHT": "STEP_FORWARD",
+            "UP": "CLIMB_UP", "DOWN": "CLIMB_DOWN", "DIAGONAL_UP_RIGHT": "STEP_UP",
+            "DIAGONAL_UP_FORWARD": "STEP_UP_LEFT", "DIAGONAL_UP_BACK": "STEP_UP_RIGHT",
+            "DIAGONAL_DOWN_RIGHT": "STEP_DOWN", "DIAGONAL_DOWN_FORWARD": "STEP_DOWN_LEFT",
+            "DIAGONAL_DOWN_BACK": "STEP_DOWN_RIGHT", "DIAGONAL_UP_2_RIGHT": "STEP_UP_2",
+            "DIAGONAL_UP_2_FORWARD": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_BACK": "STEP_UP_2_RIGHT",
+            "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2", "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2_LEFT",
+            "DIAGONAL_DOWN_2_BACK": "STEP_DOWN_2_RIGHT"
 
-    if(CURRENT_ORIENTATION == InchwormOrientation.NORTH):
-        if(movement_direction == 'FORWARD'):
-            return manipulation + "_FORWARD"
-        elif(movement_direction == 'LEFT'): 
-            return manipulation + "_LEFT"
-        elif(movement_direction == 'RIGHT'):
-            return manipulation + "_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return manipulation + "_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return manipulation + "_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return manipulation + "_UP_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_UP_BACK'):
-        #     return STEP_BACK
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return manipulation + "_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return manipulation + "_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return manipulation + "_DOWN_FORWARD"
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return manipulation + "_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return manipulation + "_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return manipulation + "_UP_2_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-        #     return STEP_BACK_2
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return manipulation + "_DOWN_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-            return manipulation + "_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return manipulation + "_DOWN_2_FORWARD"
+            # movements that are iffy
+            # "DIAGONAL_UP_LEFT": "STEP_UP_RIGHT", "DIAGONAL_DOWN_LEFT": "STEP_DOWN_RIGHT",
+            # "DIAGONAL_UP_2_LEFT": "STEP_UP_2_RIGHT", "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2_RIGHT"
+        },
+        "WEST": {
+            "FORWARD": "STEP_RIGHT", "BACK": "STEP_LEFT", "LEFT": "STEP_FORWARD", "RIGHT": "STEP_BACK",
+            "UP": "CLIMB_UP", "DOWN": "CLIMB_DOWN", "DIAGONAL_UP_LEFT": "STEP_UP", 
+            "DIAGONAL_UP_FORWARD": "STEP_UP_RIGHT", "DIAGONAL_UP_BACK": "STEP_UP_LEFT",
+            "DIAGONAL_DOWN_LEFT": "STEP_DOWN", "DIAGONAL_DOWN_FORWARD": "STEP_DOWN_RIGHT",
+            "DIAGONAL_DOWN_BACK": "STEP_DOWN_LEFT", "DIAGONAL_UP_2_LEFT": "STEP_UP_2",
+            "DIAGONAL_UP_2_FORWARD": "STEP_UP_2_RIGHT", "DIAGONAL_UP_2_BACK": "STEP_UP_2_LEFT",
+            "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2", "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2_RIGHT",
+            "DIAGONAL_DOWN_2_BACK": "STEP_DOWN_2_LEFT"
 
-    elif(CURRENT_ORIENTATION == InchwormOrientation.SOUTH):
-        if(movement_direction == 'BACK'):
-            return manipulation + "_FORWARD"
-        elif(movement_direction == 'LEFT'): 
-            return manipulation + "_RIGHT"
-        elif(movement_direction == 'RIGHT'):
-            return manipulation + "_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return manipulation + "_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return manipulation + "_UP_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-        #     return STEP_UP
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return manipulation + "_UP_FORWARD"
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return manipulation + "_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return manipulation + "_DOWN_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-        #     return STEP_DOWN
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return manipulation + "_DOWN_FORWARD"
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return manipulation + "_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return manipulation + "_UP_2_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-        #     return STEP_UP_2
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return manipulation + "_UP_2_FORWARD"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return manipulation + "_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-            return manipulation + "_DOWN_2_RIGHT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-        #     return STEP_DOWN_2
-        elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-            return manipulation + "_DOWN_2_FORWARD"
-        
-    elif(CURRENT_ORIENTATION == InchwormOrientation.EAST):
-        if(movement_direction == 'FORWARD'):
-            return manipulation + "_LEFT"
-        elif(movement_direction == 'BACK'):
-            return manipulation + "_RIGHT"
-        elif(movement_direction == 'RIGHT'):
-            return manipulation + "_FORWARD"
-        elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-            return manipulation + "_UP_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-        #     return STEP_UP_RIGHT
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return manipulation + "_UP_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return manipulation + "_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-            return manipulation + "_DOWN_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-        #     return STEP_DOWN_RIGHT
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return manipulation + "_DOWN_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return manipulation + "_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-            return manipulation + "_UP_2_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-        #     return STEP_UP_2_RIGHT
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return manipulation + "_UP_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return manipulation + "_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-            return manipulation + "_DOWN_2_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-        #     return STEP_DOWN_2_RIGHT
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return manipulation + "_DOWN_2_LEFT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-            return manipulation + "_DOWN_2_RIGHT"
-        
-    elif(CURRENT_ORIENTATION == InchwormOrientation.WEST):
-        if(movement_direction == 'FORWARD'):
-            return manipulation + "_RIGHT"
-        elif(movement_direction == 'BACK'):
-            return manipulation + "_LEFT"
-        elif(movement_direction == 'LEFT'): 
-            return manipulation + "_FORWARD"
-        # elif(movement_direction == 'DIAGONAL_UP_RIGHT'):
-        #     return STEP_UP
-        elif(movement_direction == 'DIAGONAL_UP_LEFT'):
-            return manipulation + "_UP_FORWARD"
-        elif(movement_direction == 'DIAGONAL_UP_FORWARD'):
-            return manipulation + "_UP_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_BACK'):
-            return manipulation + "_UP_LEFT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_RIGHT'):
-        #     return  STEP_DOWN
-        elif(movement_direction == 'DIAGONAL_DOWN_LEFT'):
-            return manipulation + "_DOWN_FORWARD"
-        elif(movement_direction == 'DIAGONAL_DOWN_FORWARD'):
-            return manipulation + "_DOWN_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_BACK'):
-            return manipulation + "_DOWN_LEFT"
-        # elif(movement_direction == 'DIAGONAL_UP_2_RIGHT'):
-        #     return STEP_UP_2
-        elif(movement_direction == 'DIAGONAL_UP_2_LEFT'):
-            return manipulation + "_UP_2_FORWARD"
-        elif(movement_direction == 'DIAGONAL_UP_2_FORWARD'):
-            return manipulation + "_UP_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_UP_2_BACK'):
-            return manipulation + "_UP_2_LEFT"
-        # elif(movement_direction == 'DIAGONAL_DOWN_2_RIGHT'):
-        #     return  STEP_DOWN_2
-        elif(movement_direction == 'DIAGONAL_DOWN_2_LEFT'):
-            return manipulation + "_DOWN_2_FORWARD"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_FORWARD'):
-            return manipulation + "_DOWN_2_RIGHT"
-        elif(movement_direction == 'DIAGONAL_DOWN_2_BACK'):
-            return manipulation + "_DOWN_2_LEFT"
-    else:
-        print("ERROR: invalid orientation")
-
-# returns the direction of the movement and the new orientation
-def get_direction(current_coord, next_coord):
-    delta_x = next_coord[0] - current_coord[0]
-    delta_y = next_coord[2] - current_coord[2]
-    delta_z = next_coord[1] - current_coord[1] # this is the vertical difference
-
-    # these movements are relative to when you are looking normally at a x, y, z plane
-    # horizontal movements
-    if delta_x == 1 and delta_z == 0 and delta_y == 0:
-        return 'RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 0 and delta_y == 0:
-        return 'LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 0 and delta_y == 1:
-        return 'FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 0 and delta_y == -1:
-        return 'BACK', InchwormOrientation.SOUTH
-    # vertical movements
-    elif delta_x == 0 and delta_z == 1 and delta_y == 0:
-        return 'UP', "null"
-    elif delta_x == 0 and delta_z == -1 and delta_y == 0:
-        return 'DOWN', "null"
-    # Diagonal up movements
-    elif delta_x == 1 and delta_z == 1 and delta_y == 0:
-        return 'DIAGONAL_UP_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 1 and delta_y == 0:
-        return 'DIAGONAL_UP_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 1 and delta_y == 1:
-        return 'DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 1 and delta_y == -1:
-        return 'DIAGONAL_UP_BACK', InchwormOrientation.NORTH
-    # Diagonal down movements
-    elif delta_x == 1 and delta_z == -1 and delta_y == 0:
-        return 'DIAGONAL_DOWN_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == -1 and delta_y == 0:
-        return 'DIAGONAL_DOWN_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == -1 and delta_y == 1:
-        return 'DIAGONAL_DOWN_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == -1 and delta_y == -1:
-        return 'DIAGONAL_DOWN_BACK', InchwormOrientation.SOUTH
-    # Diagonal up 2 movements
-    elif delta_x == 1 and delta_z == 2 and delta_y == 0:
-        return 'DIAGONAL_UP_2_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 2 and delta_y == 0:
-        return 'DIAGONAL_UP_2_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 2 and delta_y == 1:
-        return 'DIAGONAL_UP_2_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 2 and delta_y == -1:
-        return 'DIAGONAL_UP_2_BACK', InchwormOrientation.NORTH
-    # Diagonal down 2 movements
-    elif delta_x == 1 and delta_z == -2 and delta_y == 0:
-        return 'DIAGONAL_DOWN_2_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == -2 and delta_y == 0:
-        return 'DIAGONAL_DOWN_2_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == -2 and delta_y == 1:
-        return 'DIAGONAL_DOWN_2_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == -2 and delta_y == -1:
-        return 'DIAGONAL_DOWN_2_BACK', InchwormOrientation.SOUTH
-    # Simplified down 1 movements
-    elif delta_x == 2 and delta_z == -1 and delta_y == 1:
-        return 'SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -1 and delta_y == 1:
-        return 'SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST
-    elif delta_x == 2 and delta_z == -1 and delta_y == -1:
-        return 'SIMPLIFIED_POS_3_DOWN_1', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -1 and delta_y == -1:
-        return 'SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST
-    # Simplified down 2 movements
-    elif delta_x == 2 and delta_z == -2 and delta_y == 1:
-        return 'SIMPLIFIED_POS_1_DOWN_2', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -2 and delta_y == 1:
-        return 'SIMPLIFIED_POS_2_DOWN_2', InchwormOrientation.WEST
-    elif delta_x == 2 and delta_z == -2 and delta_y == -1:
-        return 'SIMPLIFIED_POS_3_DOWN_2', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -2 and delta_y == -1:
-        return 'SIMPLIFIED_POS_4_DOWN_2', InchwormOrientation.WEST
-    # TODO Simplified down 3 movements
-    else:
-        return 'error', InchwormOrientation.SOUTH
+            # "DIAGONAL_UP_RIGHT": "STEP_UP", "DIAGONAL_DOWN_RIGHT": "STEP_DOWN",
+            # "DIAGONAL_UP_2_RIGHT": "STEP_UP_2", "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2"
+        }
+    }
+    return step_mappings[CURRENT_ORIENTATION.name].get(movement_direction, "ERROR: invalid orientation")
 
 # this function will determine if a helper block is needed to reach a certain location
 def determine_helper_blocks(grid, path_start, path_end):

@@ -4,6 +4,25 @@ An advanced simulation showcasing inchworm behavior in a Minecraft-like environm
 # Requirments 
 This simulation was developed using Python 3. Python 3.12 is strongly recommened. Using lower version of Pyhton can cause signifcant bugs.  For more information visit: https://www.python.org/downloads/release/python-3120/ 
 
+Tracy note: Instructions here!
+1. Download Python 3.12 by following the commands below. Courtesy of https://medium.com/@KNuggies/install-python-3-12-on-ubuntu-c7674df5f623
+I reccommend installing this outside your workspace
+`sudo apt update && sudo apt upgrade -y`
+`python3 --version`
+`sudo apt-get install build-essential gdb lcov pkg-config \libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \…`
+`wget -c https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tar.xz`
+`tar -Jxf Python-3.12.4.tar.xz`
+`cd Python-3.12.4`
+`./configure --enable-optimization`
+To have 3.12 run alongside your current python version in Linux, make sure to run the following so your system doesn't die. -j divvies the processes to the number of threads you choose (16)
+`make -j16 all`
+`sudo make altinstall`
+2. Create the virtual environment by going into VSCode (or whatever IDE of your choosing). For VSCode, use the shortcut ctrl + shift + p. Type out 'Python: Select Interrpreter', and at the top, there should be an option to select '+ Create Virtual Environment...' and use .venv
+
+It is only after this you can install your packages: pip, ursina, and numpy. 
+For pip, install it using this command in the **virtual environment** `sudo apt-get install python3-pip`
+
+Another note: for any python command thus forward, you must specify the version by tagging 'python3.12 -m' 
 Required packages: 
 1. ursina 
 2. numpy 

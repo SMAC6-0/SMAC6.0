@@ -1,29 +1,24 @@
 from enum import Enum
 import copy
-from config import BD_LOC, LARGE_BUILD
+from config import BD_LOC, LARGE_BUILD, GRID_SIZE
 
-grid_size = 50  # Define the size of your grid in one direction 
-# Then, use this dimension to create a 3D list representing the cubical workspace where every cell is 0, representing that all those cells are walkable 
-# To reference values in this list, call grid2[x][z][y]
-grid2 = [[[0 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
-#grid2 is never used. TODO: delete??
 blocks_no_longer_walkable = []
 
-def initialize_grid_with_structures(grid_size):
+def initialize_grid_with_structures(GRID_SIZE):
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
 
     Args:
-            grid_size (int): The size of the workspace, as a grid.
+            GRID_SIZE (int): The size of the workspace, as a grid.
     Returns:
         list: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """ 
     #Initialize an empty 3D grid with all cells represented as obstacles
-    grid = [[[1 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)] # 3D list full of ones, equal to the grid size 
+    grid = [[[1 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # 3D list full of ones, equal to the grid size 
 
     # Make the bottom layer (z=0) walkable
-    for x in range(grid_size):
-        for y in range(grid_size):
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
             grid[x][0][y] = 0  # Set the bottom layer cells to walkable (0)
 
     return grid
@@ -44,7 +39,7 @@ def update_grid_with_structure(grid, structure):
     # for structure in structures:        
     x, z, y = structure  # Ensure the order matches your design
 
-    if 0 <= x < grid_size and 0 <= y < grid_size and 0 <= z < grid_size:
+    if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and 0 <= z < GRID_SIZE:
         grid[x][z][y] = 0  # Mark as walkable
         grid[x][z-1][y] = 1  # Mark the cell below the structure as not walkable
         blocks_no_longer_walkable.append((x, z-1, y))
@@ -59,7 +54,7 @@ def bfs_vertical_path(grid, path_start, path_end):
     prev_grid = copy.deepcopy(grid)
 
     # If the end of the path is within the grid / workspace. 
-    if 0 <= x < grid_size and 0 <= y < grid_size and 0 <= z < grid_size:
+    if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and 0 <= z < GRID_SIZE:
         for i in range(z):
             grid[x][z-i][y] = 0  # Mark as walkable
 
@@ -68,7 +63,7 @@ def bfs_vertical_path(grid, path_start, path_end):
 
     # reset the grid to the original grid
     grid = prev_grid
-    if 0 <= x < grid_size and 0 <= y < grid_size and 0 <= z < grid_size:
+    if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and 0 <= z < GRID_SIZE:
         grid[x][z][y] = 0  # Mark as walkable
         grid[x][z-1][y] = 1  # Mark the cell below the structure as not walkable
         blocks_no_longer_walkable.append((x, z-1, y))
@@ -79,7 +74,7 @@ def update_grid_with_structure_not_walkable(grid, structure):
     # for structure in structures:        
     x, z, y = structure  # Ensure the order matches your design
 
-    if 0 <= x < grid_size and 0 <= y < grid_size and 0 <= z < grid_size:
+    if 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and 0 <= z < GRID_SIZE:
         grid[x][z-1][y] = 1  # Mark the cell below the structure as walkable
     
     return grid 
