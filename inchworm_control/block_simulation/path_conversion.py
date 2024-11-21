@@ -1,7 +1,6 @@
 import copy
 from enum import Enum
 from path_planning import *
-from map_data import *
 from config import BD_LOC, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
 
 # converts the list of coords from bfs to a list of inchworm movements
@@ -37,11 +36,11 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 
         # if the next coord is the block depot, the next step should be a grabbing step
         if next_coord == BD_LOC:
-            steps.append((update_manipulation_step(movement_direction, "GRAB"), holding_block))
+            steps.append("GRAB_{movement_direction}", holding_block)
             
         # if the next coordinate is the goal(and not BD), then we need to place the block
         elif next_coord == path_end:
-            steps.append((update_manipulation_step(movement_direction, "PLACE"), holding_block))
+            steps.append("PLACE_{movement_direction}", holding_block)
             # once it places the block, the currnt location will be on top of where the block is
             x, z, y = next_coord
             next_coord = [x, z+1, y]
@@ -116,6 +115,85 @@ def update_steps(movement_direction):
         }
     }
     return step_mappings[CURRENT_ORIENTATION.name].get(movement_direction, "ERROR: invalid orientation")
+
+# returns the direction of the movement and the new orientation
+def get_direction(current_coord, next_coord):
+    delta_x = next_coord[0] - current_coord[0]
+    delta_y = next_coord[2] - current_coord[2]
+    delta_z = next_coord[1] - current_coord[1] # this is the vertical difference
+
+    # these movements are relative to when you are looking normally at a x, y, z plane
+    # horizontal movements
+    if delta_x == 1 and delta_z == 0 and delta_y == 0:
+        return 'RIGHT', InchwormOrientation.EAST
+    elif delta_x == -1 and delta_z == 0 and delta_y == 0:
+        return 'LEFT', InchwormOrientation.WEST
+    elif delta_x == 0 and delta_z == 0 and delta_y == 1:
+        return 'FORWARD', InchwormOrientation.NORTH
+    elif delta_x == 0 and delta_z == 0 and delta_y == -1:
+        return 'BACK', InchwormOrientation.SOUTH
+    # vertical movements
+    elif delta_x == 0 and delta_z == 1 and delta_y == 0:
+        return 'UP', "null"
+    elif delta_x == 0 and delta_z == -1 and delta_y == 0:
+        return 'DOWN', "null"
+    # Diagonal up movements
+    elif delta_x == 1 and delta_z == 1 and delta_y == 0:
+        return 'DIAGONAL_UP_RIGHT', InchwormOrientation.EAST
+    elif delta_x == -1 and delta_z == 1 and delta_y == 0:
+        return 'DIAGONAL_UP_LEFT', InchwormOrientation.WEST
+    elif delta_x == 0 and delta_z == 1 and delta_y == 1:
+        return 'DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH
+    elif delta_x == 0 and delta_z == 1 and delta_y == -1:
+        return 'DIAGONAL_UP_BACK', InchwormOrientation.NORTH
+    # Diagonal down movements
+    elif delta_x == 1 and delta_z == -1 and delta_y == 0:
+        return 'DIAGONAL_DOWN_RIGHT', InchwormOrientation.EAST
+    elif delta_x == -1 and delta_z == -1 and delta_y == 0:
+        return 'DIAGONAL_DOWN_LEFT', InchwormOrientation.WEST
+    elif delta_x == 0 and delta_z == -1 and delta_y == 1:
+        return 'DIAGONAL_DOWN_FORWARD', InchwormOrientation.NORTH
+    elif delta_x == 0 and delta_z == -1 and delta_y == -1:
+        return 'DIAGONAL_DOWN_BACK', InchwormOrientation.SOUTH
+    # Diagonal up 2 movements
+    elif delta_x == 1 and delta_z == 2 and delta_y == 0:
+        return 'DIAGONAL_UP_2_RIGHT', InchwormOrientation.EAST
+    elif delta_x == -1 and delta_z == 2 and delta_y == 0:
+        return 'DIAGONAL_UP_2_LEFT', InchwormOrientation.WEST
+    elif delta_x == 0 and delta_z == 2 and delta_y == 1:
+        return 'DIAGONAL_UP_2_FORWARD', InchwormOrientation.NORTH
+    elif delta_x == 0 and delta_z == 2 and delta_y == -1:
+        return 'DIAGONAL_UP_2_BACK', InchwormOrientation.NORTH
+    # Diagonal down 2 movements
+    elif delta_x == 1 and delta_z == -2 and delta_y == 0:
+        return 'DIAGONAL_DOWN_2_RIGHT', InchwormOrientation.EAST
+    elif delta_x == -1 and delta_z == -2 and delta_y == 0:
+        return 'DIAGONAL_DOWN_2_LEFT', InchwormOrientation.WEST
+    elif delta_x == 0 and delta_z == -2 and delta_y == 1:
+        return 'DIAGONAL_DOWN_2_FORWARD', InchwormOrientation.NORTH
+    elif delta_x == 0 and delta_z == -2 and delta_y == -1:
+        return 'DIAGONAL_DOWN_2_BACK', InchwormOrientation.SOUTH
+    # Simplified down 1 movements
+    elif delta_x == 2 and delta_z == -1 and delta_y == 1:
+        return 'SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST
+    elif delta_x == -2 and delta_z == -1 and delta_y == 1:
+        return 'SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST
+    elif delta_x == 2 and delta_z == -1 and delta_y == -1:
+        return 'SIMPLIFIED_POS_3_DOWN_1', InchwormOrientation.EAST
+    elif delta_x == -2 and delta_z == -1 and delta_y == -1:
+        return 'SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST
+    # Simplified down 2 movements
+    elif delta_x == 2 and delta_z == -2 and delta_y == 1:
+        return 'SIMPLIFIED_POS_1_DOWN_2', InchwormOrientation.EAST
+    elif delta_x == -2 and delta_z == -2 and delta_y == 1:
+        return 'SIMPLIFIED_POS_2_DOWN_2', InchwormOrientation.WEST
+    elif delta_x == 2 and delta_z == -2 and delta_y == -1:
+        return 'SIMPLIFIED_POS_3_DOWN_2', InchwormOrientation.EAST
+    elif delta_x == -2 and delta_z == -2 and delta_y == -1:
+        return 'SIMPLIFIED_POS_4_DOWN_2', InchwormOrientation.WEST
+    # TODO Simplified down 3 movements
+    else:
+        return 'error', InchwormOrientation.SOUTH
 
 # this function will determine if a helper block is needed to reach a certain location
 def determine_helper_blocks(grid, path_start, path_end):
