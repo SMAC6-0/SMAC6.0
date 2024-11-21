@@ -7,12 +7,22 @@ def heuristic(a, b):
 def a_star_search(grid, start, goal, prioritize_vertical=False):
     """
     Perform A* search in a 3D grid. 
-    If prioritize_vertical is True, vertical neighbors are prioritized.
+
+    Args:
+        grid (int): The size of the workspace, as a grid.
+        start (int, int, int): The x, z, and y coordinate of the starting location.
+        goal (int, int, int): The x, z, and y coordinate of the ending location.
+        prioritize_vertical (boolean): A flag indicating if vertical neighbors are prioritized.
+    Returns:
+        path_coords (list): A list of A* path coordinates
+        num_steps (int): The total number of steps taken by the inchworm
     """
+    # Depending on prioritize_vertical, sets either the vertical (z) or the horizontal plane (x & y) as the first number of neighbors
     neighbor_directions = set_neighbors(prioritize_vertical)
 
     start_node = is_valid_position_3d(grid, *start)
     goal_node = is_valid_position_3d(grid, *goal)
+    
     if not start_node or start_node.is_obs:
         print("Invalid or obstructed start position.")
         return [], -1

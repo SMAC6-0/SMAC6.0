@@ -25,9 +25,14 @@ class Node:
     def __lt__(self, other):
         return self.f < other.f # node comparing for priority queue
     
-def initialize_grid_with_structures(grid_size = GRID_SIZE, bd_loc=None):
+def initialize_grid_with_structures(grid_size = GRID_SIZE, bd_loc = None):
     """
-    Initialize an empty grid with all cells but bottom_layer as non-walkable
+    Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
+
+    Args:
+        GRID_SIZE (int): The size of the workspace, as a grid.
+    Returns:
+        list: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """
     grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
 

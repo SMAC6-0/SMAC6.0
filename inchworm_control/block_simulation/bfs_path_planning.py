@@ -5,6 +5,11 @@ from map_data import *
 def breadth_first_search(grid, start, goal, prioritize_vertical=False):
     """
     Perform modified BFS in a 3D grid.
+    
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        start (tuple): 
     If prioritize_vertical is True, vertical neighbors are prioritized.
     """
     print(f"BFS called with start: {start}, goal: {goal}, prioritize_vertical: {prioritize_vertical}")

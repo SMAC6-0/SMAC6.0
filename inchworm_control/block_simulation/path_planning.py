@@ -4,14 +4,14 @@ from config import BD_LOC, LARGE_BUILD, GRID_SIZE
 
 blocks_no_longer_walkable = []
 
-def initialize_grid_with_structures(GRID_SIZE):
+def initialize_grid_with_structures():
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
 
     Args:
-            GRID_SIZE (int): The size of the workspace, as a grid.
+        None
     Returns:
-        list: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
+        grid (list): A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """ 
     #Initialize an empty 3D grid with all cells represented as obstacles
     grid = [[[1 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] # 3D list full of ones, equal to the grid size 
@@ -28,12 +28,12 @@ def update_grid_with_structure(grid, structure):
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 
     Args:
-            grid (list): A 3D list representing the workspace, where each element indicates whether
-                        the corresponding cell is walkable (0) or not (1). 
-            structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
-                        position in the grid. This is a single block. 
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                           position in the grid. This is a single block. 
     Returns:
-        list: An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+        grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
     global blocks_no_longer_walkable
     # for structure in structures:        
