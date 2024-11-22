@@ -6,6 +6,17 @@ from config import BD_LOC1, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientatio
 # converts the list of coords from bfs to a list of inchworm movements
 # returns the list of path coordinates and the list of steps from start to end
 def convert_path_coords_to_steps(grid, path_start, path_end):
+    """
+    Converts the list of coordinates from a pathplanning algorithm into inchworm movesets
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                           position in the grid. This is a single block. 
+    Returns:
+        grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+    """ 
     global CURRENT_LOC, CURRENT_ORIENTATION
 
     # get the path
@@ -148,28 +159,17 @@ def get_direction(current_coord, next_coord):
         (2, -1, 1): ('SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST),
         (-2, -1, 1): ('SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST),
         (2, -1, -1): ('SIMPLIFIED_POS_3_DOWN_1', InchwormOrientation.EAST),
-        (-2, -1, -1): ('SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST)
-        
+        (-2, -1, -1): ('SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST),
+        # simplified down 2 movements
+        (2, -2, 1): ('SIMPLIFIED_POS_1_DOWN_2', InchwormOrientation.EAST),
+        (-2, -2, 1): ('SIMPLIFIED_POS_2_DOWN_2', InchwormOrientation.WEST),
+        (2, -2, -1): ('SIMPLIFIED_POS_3_DOWN_2', InchwormOrientation.EAST),
+        (-2, -2, -1): ('SIMPLIFIED_POS_4_DOWN_2', InchwormOrientation.WEST)
+        # TODO Simplified down 3 movements
     }
-    if delta_x == 2 and delta_z == -1 and delta_y == 1:
-        return 'SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -1 and delta_y == 1:
-        return 'SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST
-    elif delta_x == 2 and delta_z == -1 and delta_y == -1:
-        return 'SIMPLIFIED_POS_3_DOWN_1', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -1 and delta_y == -1:
-        return 'SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST
-    # Simplified down 2 movements
-    elif delta_x == 2 and delta_z == -2 and delta_y == 1:
-        return 'SIMPLIFIED_POS_1_DOWN_2', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -2 and delta_y == 1:
-        return 'SIMPLIFIED_POS_2_DOWN_2', InchwormOrientation.WEST
-    elif delta_x == 2 and delta_z == -2 and delta_y == -1:
-        return 'SIMPLIFIED_POS_3_DOWN_2', InchwormOrientation.EAST
-    elif delta_x == -2 and delta_z == -2 and delta_y == -1:
-        return 'SIMPLIFIED_POS_4_DOWN_2', InchwormOrientation.WEST
-    # TODO Simplified down 3 movements
-    else:
+    for key, value in movement_directions.items():
+        if (key[0] == delta_x) & (key[1] == delta_y) & (key[2] == delta_z):
+            return value
         return 'error', InchwormOrientation.SOUTH
 
 # this function will determine if a helper block is needed to reach a certain location
