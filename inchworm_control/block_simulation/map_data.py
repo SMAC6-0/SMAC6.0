@@ -40,9 +40,6 @@ def initialize_grid_with_structures():
         for y in range(GRID_SIZE):
             grid[x][0][y] = GridStatus.WALKABLE.value
     
-    # Finish initializing grid with block depot locations
-    grid = mark_block_depot(grid)
-    
     return grid
 
 def mark_block_depot(grid):
@@ -63,6 +60,27 @@ def mark_block_depot(grid):
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
     return grid
     
+def update_grid_with_structure(grid, structure):
+    """
+    Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                           position in the grid. This is a single block. 
+    Returns:
+        grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+    """ 
+    # for structure in structures:        
+    x, z, y = structure  # Ensure the order matches your design
+
+    if is_in_bounds(grid, structure):
+        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
+        if z - 1 >= 0:
+            grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
+    return grid 
+
 def set_inchworm_path(grid, x, z, y, inchworm_id):
     grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     inchworm_paths[(x, z, y)] = inchworm_id
@@ -77,24 +95,6 @@ def set_neighbors(prioritize_vertical):
 
     neighbor_directions = primary_neighbors + secondary_neighbors
     return neighbor_directions
-
-def update_grid_with_structure(grid, structure):
-    # for structure in structures:        
-    x, z, y = structure  # Ensure the order matches your design
-
-    if ((0 <= x < GRID_SIZE) and (0 <= y < GRID_SIZE) and (0 <= z < GRID_SIZE)):
-        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
-        if z - 1 >= 0:
-            grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
-    return grid
-
-def update_grid_with_structure_not_walkable(grid, structure):
-    # for structure in structures:        
-    x, z, y = structure  # Ensure the order matches your design
-
-    if ((0 <= x < GRID_SIZE) and (0 <= y < GRID_SIZE) and (0 <= z < GRID_SIZE)):
-        grid[x][z-1][y] = GridStatus.WALKABLE  # cell below
-    return grid 
 
 def rework_path_3d(curr_node, holding_block):
     """

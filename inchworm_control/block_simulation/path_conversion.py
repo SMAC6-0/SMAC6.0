@@ -57,7 +57,6 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 
 # given the movement direction, returns the step to take
 def update_steps(movement_direction):
-
     step_mappings = {
         "NORTH": {
             "FORWARD": "STEP_FORWARD", "BACK": "STEP_BACK", "LEFT": "STEP_LEFT", "RIGHT": "STEP_RIGHT",
@@ -68,7 +67,6 @@ def update_steps(movement_direction):
             "DIAGONAL_UP_2_LEFT": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_FORWARD": "STEP_UP_2",
             "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2_RIGHT", "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2_LEFT",
             "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2"
-
             # movements that are iffy
             # "DIAGONAL_UP_BACK": STEP_BACK, "DIAGONAL_DOWN_BACK": STEP_BACK
             # "DIAGONAL_UP_2_BACK": STEP_BACK_2, "DIAGONAL_DOWN_2_BACK": STEP_BACK_2"
@@ -81,7 +79,6 @@ def update_steps(movement_direction):
             "DIAGONAL_UP_2_RIGHT": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_LEFT": "STEP_UP_2_RIGHT",
             "DIAGONAL_UP_2_BACK": "STEP_UP_2", "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2_LEFT",
             "DIAGONAL_DOWN_LEFT": "STEP_DOWN_2_RIGHT"
-
             # movements that are iffy
             # DIAGONAL_UP_FORWARD": "STEP_UP", "DIAGONAL_DOWN_FORWARD": "STEP_DOWN",
             # "DIAGONAL_UP_2_FORWARD": "STEP_UP_2", "DIAGONAL_DOWN_2_FORWARD": STEP_DOWN_2
@@ -95,7 +92,6 @@ def update_steps(movement_direction):
             "DIAGONAL_UP_2_FORWARD": "STEP_UP_2_LEFT", "DIAGONAL_UP_2_BACK": "STEP_UP_2_RIGHT",
             "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2", "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2_LEFT",
             "DIAGONAL_DOWN_2_BACK": "STEP_DOWN_2_RIGHT"
-
             # movements that are iffy
             # "DIAGONAL_UP_LEFT": "STEP_UP_RIGHT", "DIAGONAL_DOWN_LEFT": "STEP_DOWN_RIGHT",
             # "DIAGONAL_UP_2_LEFT": "STEP_UP_2_RIGHT", "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2_RIGHT"
@@ -109,7 +105,7 @@ def update_steps(movement_direction):
             "DIAGONAL_UP_2_FORWARD": "STEP_UP_2_RIGHT", "DIAGONAL_UP_2_BACK": "STEP_UP_2_LEFT",
             "DIAGONAL_DOWN_2_LEFT": "STEP_DOWN_2", "DIAGONAL_DOWN_2_FORWARD": "STEP_DOWN_2_RIGHT",
             "DIAGONAL_DOWN_2_BACK": "STEP_DOWN_2_LEFT"
-
+            # movements that are iffy
             # "DIAGONAL_UP_RIGHT": "STEP_UP", "DIAGONAL_DOWN_RIGHT": "STEP_DOWN",
             # "DIAGONAL_UP_2_RIGHT": "STEP_UP_2", "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2"
         }
@@ -123,58 +119,39 @@ def get_direction(current_coord, next_coord):
     delta_z = next_coord[1] - current_coord[1] # this is the vertical difference
 
     # these movements are relative to when you are looking normally at a x, y, z plane
-    # horizontal movements
-    if delta_x == 1 and delta_z == 0 and delta_y == 0:
-        return 'RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 0 and delta_y == 0:
-        return 'LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 0 and delta_y == 1:
-        return 'FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 0 and delta_y == -1:
-        return 'BACK', InchwormOrientation.SOUTH
-    # vertical movements
-    elif delta_x == 0 and delta_z == 1 and delta_y == 0:
-        return 'UP', "null"
-    elif delta_x == 0 and delta_z == -1 and delta_y == 0:
-        return 'DOWN', "null"
-    # Diagonal up movements
-    elif delta_x == 1 and delta_z == 1 and delta_y == 0:
-        return 'DIAGONAL_UP_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 1 and delta_y == 0:
-        return 'DIAGONAL_UP_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 1 and delta_y == 1:
-        return 'DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 1 and delta_y == -1:
-        return 'DIAGONAL_UP_BACK', InchwormOrientation.NORTH
-    # Diagonal down movements
-    elif delta_x == 1 and delta_z == -1 and delta_y == 0:
-        return 'DIAGONAL_DOWN_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == -1 and delta_y == 0:
-        return 'DIAGONAL_DOWN_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == -1 and delta_y == 1:
-        return 'DIAGONAL_DOWN_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == -1 and delta_y == -1:
-        return 'DIAGONAL_DOWN_BACK', InchwormOrientation.SOUTH
-    # Diagonal up 2 movements
-    elif delta_x == 1 and delta_z == 2 and delta_y == 0:
-        return 'DIAGONAL_UP_2_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == 2 and delta_y == 0:
-        return 'DIAGONAL_UP_2_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == 2 and delta_y == 1:
-        return 'DIAGONAL_UP_2_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == 2 and delta_y == -1:
-        return 'DIAGONAL_UP_2_BACK', InchwormOrientation.NORTH
-    # Diagonal down 2 movements
-    elif delta_x == 1 and delta_z == -2 and delta_y == 0:
-        return 'DIAGONAL_DOWN_2_RIGHT', InchwormOrientation.EAST
-    elif delta_x == -1 and delta_z == -2 and delta_y == 0:
-        return 'DIAGONAL_DOWN_2_LEFT', InchwormOrientation.WEST
-    elif delta_x == 0 and delta_z == -2 and delta_y == 1:
-        return 'DIAGONAL_DOWN_2_FORWARD', InchwormOrientation.NORTH
-    elif delta_x == 0 and delta_z == -2 and delta_y == -1:
-        return 'DIAGONAL_DOWN_2_BACK', InchwormOrientation.SOUTH
-    # Simplified down 1 movements
-    elif delta_x == 2 and delta_z == -1 and delta_y == 1:
+    movement_directions = {
+        # horizontal & vertical movements
+        (1, 0, 0): ('RIGHT', InchwormOrientation.EAST), (-1, 0, 0): ('LEFT', InchwormOrientation.WEST),
+        (0, 0, 1): ('RIGHT', InchwormOrientation.NORTH), (0, 0, -1): ('LEFT', InchwormOrientation.SOUTH),
+        (0, 1, 0): ('UP', "null"), (0, -1, 0): ('DOWN', "null"), 
+        # diagonal up movements
+        (1, 1, 0): ('DIAGONAL_UP_RIGHT', InchwormOrientation.EAST), 
+        (-1, 1, 0): ('DIAGONAL_UP_LEFT', InchwormOrientation.WEST),
+        (0, 1, 1): ('DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH), 
+        (0, 1, -1): ('DIAGONAL_UP_BACK', InchwormOrientation.NORTH),
+        # diagonal down movements
+        (1, -1, 0): ('DIAGONAL_UP_RIGHT', InchwormOrientation.EAST), 
+        (-1, -1, 0): ('DIAGONAL_UP_LEFT', InchwormOrientation.WEST),
+        (0, -1, 1): ('DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH), 
+        (0, -1, -1): ('DIAGONAL_UP_BACK', InchwormOrientation.SOUTH),
+        # diagonal up 2 movements
+        (1, 2, 0): ('DIAGONAL_UP_2_RIGHT', InchwormOrientation.EAST), 
+        (-1, 2, 0): ('DIAGONAL_UP_2_LEFT', InchwormOrientation.WEST),
+        (0, 2, 1): ('DIAGONAL_UP_2_FORWARD', InchwormOrientation.NORTH), 
+        (0, 2, -1): ('DIAGONAL_UP_2_BACK', InchwormOrientation.NORTH),
+        # diagonal down 2 movements
+        (1, -2, 0): ('DIAGONAL_DOWN_2_RIGHT', InchwormOrientation.EAST), 
+        (-1, -2, 0): ('DIAGONAL_DOWN_2_LEFT', InchwormOrientation.WEST),
+        (0, -2, 1): ('DIAGONAL_DOWN_2_FORWARD', InchwormOrientation.NORTH), 
+        (0, -2, -1): ('DIAGONAL_DOWN_2_BACK', InchwormOrientation.SOUTH),
+        # simplified down 1 movements
+        (2, -1, 1): ('SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST),
+        (-2, -1, 1): ('SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST),
+        (2, -1, -1): ('SIMPLIFIED_POS_3_DOWN_1', InchwormOrientation.EAST),
+        (-2, -1, -1): ('SIMPLIFIED_POS_4_DOWN_1', InchwormOrientation.WEST)
+        
+    }
+    if delta_x == 2 and delta_z == -1 and delta_y == 1:
         return 'SIMPLIFIED_POS_1_DOWN_1', InchwormOrientation.EAST
     elif delta_x == -2 and delta_z == -1 and delta_y == 1:
         return 'SIMPLIFIED_POS_2_DOWN_1', InchwormOrientation.WEST
