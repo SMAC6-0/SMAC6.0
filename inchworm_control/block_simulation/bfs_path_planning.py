@@ -11,9 +11,11 @@ def breadth_first_search(grid, start, goal, prioritize_vertical=False):
                      the corresponding cell is walkable (0) or not (1). 
         start (tuple): A tuple containing the (x, z, y) coordinate of the starting cell in a path.
                        The initial starting position can be configurable in config.py
-        start (tuple): A tuple containing the (x, z, y) coordinate of the starting cell in a path.
-                       The initial starting position can be configurable in config.py
-    If prioritize_vertical is True, vertical neighbors are prioritized.
+        goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
+                      This typically is either the block depot or a block coordinate in the blueprint.
+        prioritize_vertical (boolean): A flag that determines if vertical neighbors are prioritized.
+    Returns:
+        
     """
     print(f"BFS called with start: {start}, goal: {goal}, prioritize_vertical: {prioritize_vertical}")
     
