@@ -2,7 +2,7 @@ import copy
 from config import BD_LOC
 from map_data import *
 
-def breadth_first_search(grid, start, goal, prioritize_vertical=False):
+def breadth_first_search(grid, start, goal, inchworm_id, prioritize_vertical=False):
     """
     Perform modified BFS in a 3D grid.
     
@@ -13,6 +13,8 @@ def breadth_first_search(grid, start, goal, prioritize_vertical=False):
                        The initial starting position can be configurable in config.py
         goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
+        #TODO: clarify if iw_id is int or not
+        inchworm_id (int): An ID that identifies which inchworm grid, start, and goal is being taken in.
         prioritize_vertical (boolean): A flag that determines if vertical neighbors are prioritized.
     Returns:
         
