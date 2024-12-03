@@ -2,7 +2,7 @@ import copy
 from config import BD_LOC
 from map_data import *
 
-def breadth_first_search(grid, start, goal, inchworm_id, prioritize_vertical=False):
+def breadth_first_search(grid, start, goal, holding_block, prioritize_vertical=False):
     """
     Perform modified BFS in a 3D grid.
     
@@ -22,19 +22,19 @@ def breadth_first_search(grid, start, goal, inchworm_id, prioritize_vertical=Fal
     print(f"BFS called with start: {start}, goal: {goal}, prioritize_vertical: {prioritize_vertical}")
     
     neighbor_directions = set_neighbors(prioritize_vertical)
-    start_node = is_valid_position_3d(grid, *start)
-    goal_node = is_valid_position_3d(grid, *goal)
     
-    if not start_node or start_node.is_obs:
-        print("Invalid or obstructed start position: {start}")
-        return [], -1
-    if not goal_node or goal_node.is_obs:
-        print("Invalid or obstructed goal position: {goal}")
+    if is_valid_start_goal_3d(grid, *start, *goal):
+        #TODO: put function in map_data
+        start_cell = Cell(start[0], start[1], start[2])
+        goal_cell = Cell(goal[0], goal[1], goal[2])
+        visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
+    else:
+        print("Invalid or obstructed start position: {start} or goal position: {goal}")
         return [], -1
     
-    queue = [(start_node, [])]
+    queue = [(start_cell, [])]
     visited = set()
-    visited.add(tuple[start_node])
+    visited.add(tuple[start_cell])
 
     while queue:
         current_node, path = queue.pop(0)

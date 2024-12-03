@@ -181,8 +181,8 @@ def bfs_3d_vertical(grid, start, goal):
     This BFS will look for vertical paths.
 
     Args:
-            start (tuple): A tuple containing the (x, z, y) coordinates of the start of the path. 
-            goal (tuple): A tuple containing the (x, z, y) coordinates of the end of the path. 
+        start (tuple): A tuple containing the (x, z, y) coordinates of the start of the path. 
+        goal (tuple): A tuple containing the (x, z, y) coordinates of the end of the path. 
     Returns:
         list: A list of coordinates of each block of the path
     """ 
