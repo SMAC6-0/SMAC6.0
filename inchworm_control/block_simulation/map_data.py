@@ -11,18 +11,34 @@ class GridStatus(Enum):
 
 inchworm_paths = {}
 
-class Node:
-    def __init__(self, x, z, y, is_obs, g = 0, h = 0):
+class Cell:
+    def __init__(self, x: int, z: int, y: int, is_obs: bool, g = 0, h = 0): 
+        """
+        Initialize the Cell class. It represents a single cell (location) within the map or grid, and is used for path planning purposes. 
+        Args:
+            x (int): x location of the cell.
+            z (int): z location of the cell.
+            y (int): y location of the cell.
+            is_obs (bool): True if this cell is occupied, not walkable. False if walkable. 
+            g (int): The cost to reach this cell. 
+            h (int): Evaluated additional heuristic cost to reach this cell. 
+        """
         self.x = x
         self.z = z
         self.y = y
-        self.is_obs = is_obs # indication if obstacle
-        self.g = g # cost
-        self.h = h # heuristic
+        self.is_obs = is_obs
+        self.g = g
+        self.h = h 
         self.f = g + h # total cost
-        self.parent = None
+        self.parent = None # The parent may later be set as another Cell object. 
 
-    def __lt__(self, other):
+    def __lt__(self, other): 
+        """
+        Less than. Returns true is this Cell object's total cost is less than the total cost on the inputted Cell (other). 
+        This is used for node comparison for the priority queue. 
+        Args:
+            other (Cell): Another Cell object. 
+        """
         return self.f < other.f # node comparing for priority queue
     
 def initialize_grid_with_structures():
@@ -70,7 +86,7 @@ def update_grid_with_structure(grid, structure):
         structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
                            position in the grid. This is a single block. 
     Returns:
-        grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+        grid (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
     # for structure in structures:        
     x, z, y = structure  # Ensure the order matches your design
@@ -110,7 +126,7 @@ def rework_path_3d(curr_node, holding_block):
 def is_valid_position_3d(grid, x, z, y):
     if (0 <= x < len(grid) and 0 <= y < len(grid[0]) and 0 <= z < len(grid[0][0])):
         is_obs = grid[x][z][y] != GridStatus.WALKABLE.value
-        return Node(x, z, y, is_obs=is_obs)
+        return Cell(x, z, y, is_obs=is_obs)
     return None
 
 def is_in_bounds(grid, coords):
