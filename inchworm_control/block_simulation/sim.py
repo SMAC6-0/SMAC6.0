@@ -1,6 +1,7 @@
 # Install Ursina before using this "pip install ursina"
 # Tutorial https://www.youtube.com/watch?v=DHSRaVeQxIk
 # What are you doing here?!
+# This file facilitates the operation of the simulation itself: frame updates, button presses, etc.
 
 # Imports
 from ursina import *
