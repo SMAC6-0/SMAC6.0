@@ -24,25 +24,18 @@ def breadth_first_search(grid, start, goal, holding_block, prioritize_vertical=F
     neighbor_directions = set_neighbors(prioritize_vertical)
     
     if is_valid_start_goal_3d(grid, *start, *goal):
-        #TODO: put function in map_data
-        start_cell = Cell(start[0], start[1], start[2])
-        goal_cell = Cell(goal[0], goal[1], goal[2])
-        visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
+        goal_cell, visited, queue, steps = start_search_3d(grid, start, goal)
     else:
         print("Invalid or obstructed start position: {start} or goal position: {goal}")
         return [], -1
-    
-    queue = [(start_cell, [])]
-    visited = set()
-    visited.add(tuple[start_cell])
 
     while queue:
-        current_node, path = queue.pop(0)
-        current_path = path + [tuple(current_node)]
+        current_cell = queue.pop(0)
+        steps += 1
 
-        if tuple(current_node) == tuple(goal):
-            print(f"Path found: {current_path}")
-            return current_path, len(current_path) - 1
+        if is_goal_reached_3d(current_cell, goal_cell):
+            print(f"Path found: {current_cell}")
+            return rework_path_3d(current_cell, holding_block), steps
         
         for dx, dy, dz in neighbor_directions:
             nx, ny, nz = current_node.x + dx, current_node.y + dz, current_node.z + dy

@@ -101,16 +101,89 @@ def set_inchworm_path(grid, x, z, y, inchworm_id):
     grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     inchworm_paths[(x, z, y)] = inchworm_id
 
-def set_neighbors(prioritize_vertical):
+def set_neighbors(prioritize_vertical, allow_diagonal, allow_large_build):    
+    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
+    vertical_neighbors = [(0, 1, 0), (0, -1, 0)]
+    diagonal_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),
+                          (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),
+                          (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
+                          (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1),
+                          (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]
+    large_build_neighbors = [(1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0),
+                             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)]
+    
+    # combined neighbor_directions based on conditions
+    neighbor_directions = base_neighbors
+    
     if prioritize_vertical:
-        primary_neighbors = [(0, 0, 1), (0, 0, -1)]
-        secondary_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
-    else:
-        primary_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
-        secondary_neighbors = [(0, 0, 1), (0, 0, -1)]
-
-    neighbor_directions = primary_neighbors + secondary_neighbors
+        neighbor_directions += vertical_neighbors
+    if allow_diagonal:
+        neighbor_directions += diagonal_neighbors
+    if allow_large_build:
+        neighbor_directions += large_build_neighbors
+        
     return neighbor_directions
+
+# Define test cases based on the original arrays
+test_cases = {
+    "no_vertical_large_build": {
+        "prioritize_vertical": False,
+        "allow_diagonal": True,
+        "allow_large_build": True,
+        "expected": [
+            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),
+            (0, 1, 0), (0, -1, 0), 
+            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),  
+            (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),  
+            (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
+            (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), 
+            (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)
+        ]
+    },
+    "no_vertical_no_diagonal_small_build": {
+        "prioritize_vertical": False,
+        "allow_diagonal": False,
+        "allow_large_build": True,
+        "expected": [
+            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),
+            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
+            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0),
+            (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1),
+            (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
+        ]
+    },
+    "vertical_no_diagonal_small_build": {
+        "prioritize_vertical": True,
+        "allow_diagonal": False,
+        "allow_large_build": True,
+        "expected": [
+            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), 
+            (0, 1, 0), (0, -1, 0),
+            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
+            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
+            (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
+            (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)
+        ]
+    }
+}
+
+# Function to validate outputs
+def validate_neighbors(test_cases):
+    for name, case in test_cases.items():
+        result = set_neighbors(
+            prioritize_vertical=case["prioritize_vertical"],
+            allow_diagonal=case["allow_diagonal"],
+            allow_large_build=case["allow_large_build"]
+        )
+        if sorted(result) == sorted(case["expected"]):
+            print(f"{name}: PASSED")
+        else:
+            print(f"{name}: FAILED")
+            print("Expected:", sorted(case["expected"]))
+            print("Got:", sorted(result))
+
+# Run validation
+validate_neighbors(test_cases)
 
 def rework_path_3d(curr_node, holding_block):
     """
@@ -143,3 +216,12 @@ def is_valid_start_goal_3d(grid, start, goal):
             is_valid_position_3d(grid, goal) and 
             not grid[start[0]][start[1]][start[2]] and 
             not grid[goal[0]][goal[1]][goal[2]])
+    
+def start_search_3d(grid, start, goal):
+    start_cell = Cell(start[0], start[1], start[2])
+    goal_cell = Cell(goal[0], goal[1], goal[2])
+    visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
+    queue = [start_cell]
+    visited[start_cell[0]][start_cell[0][0]][start_cell[0][0][0]]
+    steps = 0
+    return goal_cell, visited, queue, steps
