@@ -1,3 +1,4 @@
 build/
 install/
 log/
+inchworm_control/block_simulation/__pycache__/
