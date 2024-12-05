@@ -98,6 +98,17 @@ def update_grid_with_structure(grid, structure):
     return grid 
 
 def set_inchworm_path(grid, x, z, y, inchworm_id):
+    """
+    Sets the possible ewalkable and the space beneath it is not.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                           position in the grid. This is a single block. 
+    Returns:
+        grid (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+    """ 
     grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     inchworm_paths[(x, z, y)] = inchworm_id
 
@@ -131,13 +142,13 @@ test_cases = {
         "allow_diagonal": True,
         "allow_large_build": True,
         "expected": [
-            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),
-            (0, 1, 0), (0, -1, 0), 
-            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),  
-            (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),  
-            (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
-            (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), 
-            (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)
+            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
+            (0, 1, 0), (0, -1, 0), #up down
+            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
+            (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1), # xz plane y = 1 cross
+            (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1), # xz plane y = -1 cross
+            (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), # xz plane y = 1 corners
+            (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1) #xz plane y = -1 corners
         ]
     },
     "no_vertical_no_diagonal_small_build": {
@@ -145,9 +156,9 @@ test_cases = {
         "allow_diagonal": False,
         "allow_large_build": True,
         "expected": [
-            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1),
-            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
-            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0),
+            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
+            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
+            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1),
             (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
         ]

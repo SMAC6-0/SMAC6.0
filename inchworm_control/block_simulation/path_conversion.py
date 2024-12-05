@@ -209,7 +209,7 @@ def simplify_steps(PAST_LOC, complete_path, complete_steps):
 # -a list of all the path coords for all the structures like [[(x1, y1, z1), (x2, y2, z2), ...], [(x1, y1, z1), (x2, y2, z2), ...], ...]
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
 def dev_total_path_steps(structures, misc_blocks):
-    grid = initialize_grid_with_structures(50)
+    grid = initialize_grid_with_structures()
     update_grid_with_structure(grid, BD_LOC1)
     complete_path = []
     complete_steps = []
