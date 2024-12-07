@@ -38,7 +38,7 @@ def breadth_first_search(grid, start, goal, holding_block, prioritize_vertical=F
             return rework_path_3d(current_cell, holding_block), steps
         
         for dx, dy, dz in neighbor_directions:
-            nx, ny, nz = current_node.x + dx, current_node.y + dz, current_node.z + dy
+            nx, ny, nz = current_cell.x + dx, current_cell.y + dz, current_cell.z + dy
             neighbor = is_valid_position_3d(grid, nx, nz, ny)
 
             if neighbor and not neighbor.is_obs and tuple(neighbor) not in visited:
