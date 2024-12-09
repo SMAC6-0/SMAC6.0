@@ -11,4 +11,20 @@ is located at its final position from the beginning.
 
 import copy
 from config import *
+from inchworm_data import Inchworm
+import map_data
 
+def run_sim(): 
+
+    # initialize the map as the blocks/structure knows it
+    empty_map = map_data.initialize_grid_with_structures()
+    existing_inchworms = []
+    initialized_inchworms = []
+
+
+    # Initialize inchworms 
+    inchworm_1 = Inchworm(1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC)
+    existing_inchworms.append(inchworm_1)
+
+
+    #TODO: could set up for loop to initialize desired num of inchworms 
