@@ -39,7 +39,7 @@ def breadth_first_search(grid, start, goal, holding_block, prioritize_vertical=F
         
         for dx, dy, dz in neighbor_directions:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dz, current_cell.z + dy
-            neighbor = is_valid_position_3d(grid, nx, nz, ny)
+            neighbor = is_valid_position_3d(grid, (nx, nz, ny))
 
             if neighbor and not neighbor.is_obs and tuple(neighbor) not in visited:
                 visited.add(tuple(neighbor))

@@ -15,6 +15,7 @@ class Cell:
     def __init__(self, x: int, z: int, y: int, is_obs: bool, g = 0, h = 0): 
         """
         Initialize the Cell class. It represents a single cell (location) within the map or grid, and is used for path planning purposes. 
+        
         Args:
             x (int): x location of the cell.
             z (int): z location of the cell.
@@ -35,11 +36,12 @@ class Cell:
     def __lt__(self, other): 
         """
         Less than. Returns true is this Cell object's total cost is less than the total cost on the inputted Cell (other). 
-        This is used for node comparison for the priority queue. 
+        This is used for cell comparison for the priority queue. 
+        
         Args:
             other (Cell): Another Cell object. 
         """
-        return self.f < other.f # node comparing for priority queue
+        return self.f < other.f # cell comparing for priority queue
     
 def initialize_grid_with_structures():
     """
@@ -64,7 +66,6 @@ def mark_block_depot(grid):
     
     Args:
         grid [list]: A 3D list of the workspace
-
     Returns:
         grid [list]: A 3D list of the workspace with the supply depot.
     """
@@ -89,9 +90,9 @@ def update_grid_with_structure(grid, structure):
         grid (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
     # for structure in structures:        
-    x, z, y = structure  # Ensure the order matches your design
+    x, z, y = structure
 
-    if is_in_bounds(grid, structure):
+    if is_valid_position_3d(grid, structure):
         grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
         if z - 1 >= 0:
             grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
@@ -99,7 +100,7 @@ def update_grid_with_structure(grid, structure):
 
 def set_inchworm_path(grid, x, z, y, inchworm_id):
     """
-    Sets the possible ewalkable and the space beneath it is not.
+    Sets the possible walkable and the space beneath it is not.
 
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
@@ -113,6 +114,16 @@ def set_inchworm_path(grid, x, z, y, inchworm_id):
     inchworm_paths[(x, z, y)] = inchworm_id
 
 def set_neighbors(prioritize_vertical, allow_diagonal, allow_large_build):    
+    """
+    Sets the neighbors in an algorithm.
+
+    Args:
+        prioritize_vertical (boolean): . 
+        allow_diagonal (boolean): . 
+        allow_large_build (boolean)
+    Returns:
+        neighbor_directions (list(tuple)): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+    """ 
     base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
     vertical_neighbors = [(0, 1, 0), (0, -1, 0)]
     diagonal_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),
@@ -196,31 +207,61 @@ def validate_neighbors(test_cases):
 # Run validation
 validate_neighbors(test_cases)
 
-def rework_path_3d(curr_node, holding_block):
+def rework_path_3d(curr_cell, is_holding_block):
     """
     Reverse calculated path to go from start to goal.
+    
+    Args:
+        curr_cell (Cell): The current position of an inchworm.
+        is_holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
+    Returns:
+        path (list(tuple)): A reworked path found in a path planning algorithm.
+        steps (int): The number of steps in a path.
     """
     path = []
-    while curr_node:
-        path.append(([curr_node.x, curr_node.y, curr_node.z], holding_block))
+    while curr_cell:
+        path.append(([curr_cell.x, curr_cell.z, curr_cell.y], is_holding_block))
         print("reversed path")
-        curr_node = curr_node.parent
+        curr_cell = curr_cell.parent
     return path[::-1], len(path) - 1
 
-def is_valid_position_3d(grid, x, z, y):
-    if (0 <= x < len(grid) and 0 <= y < len(grid[0]) and 0 <= z < len(grid[0][0])):
-        is_obs = grid[x][z][y] != GridStatus.WALKABLE.value
-        return Cell(x, z, y, is_obs=is_obs)
-    return None
+def createCell(grid, coords):
+    """
+    Create Cell data type from a coordinate.
+    
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1).
+        coords (tuple): A coordinate within a grid.
+    Returns:
+        cell (Cell): The corresponding Cell of the given coordinate.
+    """
+    x, z, y = coords[0], coords[1], coords[2]
+    if is_valid_position_3d(grid, (coords)):
+        newCell = Cell(x, z, y)
+    if grid(x, z, y) == GridStatus.WALKABLE.value:  
+        newCell.is_obs = False
+    else:
+        newCell.is_obs = True
+    
+def is_valid_position_3d(grid, coords):
+    """
+    Validates a coordinate to see if it is in bounds.
 
-def is_in_bounds(grid, coords):
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        coords (tuple): A tuple containing the (x, z, y) coordinates of a position. 
+    Returns:
+        (boolean): A boolean confirming or denying a coordinate. 
+    """ 
     x, y, z = coords
     return 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0])
 
-def is_goal_reached_3d(curr_node, goal_node):
-    return (curr_node.x == goal_node.x and 
-            curr_node.y == goal_node.y and 
-            curr_node.z == goal_node.z)
+def is_goal_reached_3d(curr_cell, goal_cell):
+    return (curr_cell.x == goal_cell.x and 
+            curr_cell.y == goal_cell.y and 
+            curr_cell.z == goal_cell.z)
 
 def is_valid_start_goal_3d(grid, start, goal):
     return (is_valid_position_3d(grid, start) and 
