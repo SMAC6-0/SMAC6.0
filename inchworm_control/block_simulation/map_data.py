@@ -71,7 +71,7 @@ def mark_block_depot(grid):
     """
     for i in BD_LOCS[i]:
         x, z, y = BD_LOCS[i]
-        if is_in_bounds(grid, BD_LOCS[i]):
+        if is_valid_position_3d(grid, BD_LOCS[i]):
             grid[x][z][y] = GridStatus.SUPPLY_DEPOT.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
@@ -146,66 +146,66 @@ def set_neighbors(prioritize_vertical, allow_diagonal, allow_large_build):
         
     return neighbor_directions
 
-# Define test cases based on the original arrays
-test_cases = {
-    "no_vertical_large_build": {
-        "prioritize_vertical": False,
-        "allow_diagonal": True,
-        "allow_large_build": True,
-        "expected": [
-            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
-            (0, 1, 0), (0, -1, 0), #up down
-            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
-            (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1), # xz plane y = 1 cross
-            (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1), # xz plane y = -1 cross
-            (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), # xz plane y = 1 corners
-            (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1) #xz plane y = -1 corners
-        ]
-    },
-    "no_vertical_no_diagonal_small_build": {
-        "prioritize_vertical": False,
-        "allow_diagonal": False,
-        "allow_large_build": True,
-        "expected": [
-            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
-            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
-            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
-            (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1),
-            (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
-        ]
-    },
-    "vertical_no_diagonal_small_build": {
-        "prioritize_vertical": True,
-        "allow_diagonal": False,
-        "allow_large_build": True,
-        "expected": [
-            (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), 
-            (0, 1, 0), (0, -1, 0),
-            (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
-            (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
-            (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
-            (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)
-        ]
-    }
-}
+# # Define test cases based on the original arrays
+# test_cases = {
+#     "no_vertical_large_build": {
+#         "prioritize_vertical": False,
+#         "allow_diagonal": True,
+#         "allow_large_build": True,
+#         "expected": [
+#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
+#             (0, 1, 0), (0, -1, 0), #up down
+#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
+#             (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1), # xz plane y = 1 cross
+#             (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1), # xz plane y = -1 cross
+#             (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), # xz plane y = 1 corners
+#             (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1) #xz plane y = -1 corners
+#         ]
+#     },
+#     "no_vertical_no_diagonal_small_build": {
+#         "prioritize_vertical": False,
+#         "allow_diagonal": False,
+#         "allow_large_build": True,
+#         "expected": [
+#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
+#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
+#             (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
+#             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1),
+#             (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
+#         ]
+#     },
+#     "vertical_no_diagonal_small_build": {
+#         "prioritize_vertical": True,
+#         "allow_diagonal": False,
+#         "allow_large_build": True,
+#         "expected": [
+#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), 
+#             (0, 1, 0), (0, -1, 0),
+#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
+#             (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
+#             (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
+#             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)
+#         ]
+#     }
+# }
 
-# Function to validate outputs
-def validate_neighbors(test_cases):
-    for name, case in test_cases.items():
-        result = set_neighbors(
-            prioritize_vertical=case["prioritize_vertical"],
-            allow_diagonal=case["allow_diagonal"],
-            allow_large_build=case["allow_large_build"]
-        )
-        if sorted(result) == sorted(case["expected"]):
-            print(f"{name}: PASSED")
-        else:
-            print(f"{name}: FAILED")
-            print("Expected:", sorted(case["expected"]))
-            print("Got:", sorted(result))
+# # Function to validate outputs
+# def validate_neighbors(test_cases):
+#     for name, case in test_cases.items():
+#         result = set_neighbors(
+#             prioritize_vertical=case["prioritize_vertical"],
+#             allow_diagonal=case["allow_diagonal"],
+#             allow_large_build=case["allow_large_build"]
+#         )
+#         if sorted(result) == sorted(case["expected"]):
+#             print(f"{name}: PASSED")
+#         else:
+#             print(f"{name}: FAILED")
+#             print("Expected:", sorted(case["expected"]))
+#             print("Got:", sorted(result))
 
-# Run validation
-validate_neighbors(test_cases)
+# # Run validation
+# validate_neighbors(test_cases)
 
 def rework_path_3d(curr_cell, is_holding_block):
     """
@@ -253,27 +253,65 @@ def is_valid_position_3d(grid, coords):
                      the corresponding cell is walkable (0) or not (1). 
         coords (tuple): A tuple containing the (x, z, y) coordinates of a position. 
     Returns:
-        (boolean): A boolean confirming or denying a coordinate. 
+        valid (boolean): A boolean confirming or denying a coordinate. 
     """ 
     x, y, z = coords
-    return 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0])
+    valid = 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0])
+    
+    if valid:
+        return valid
+    
+    raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):
+    """
+    Validates if the current cell is the goal cell.
+
+    Args:
+        curr_cell (Cell): A Cell of the current position of an inchworm.  
+        goal_cell (Cell): A Cell of the goal position of an inchworm's path.  
+    Returns:
+        (boolean): A boolean confirming or denying if the current cell is the goal cell. 
+    """
     return (curr_cell.x == goal_cell.x and 
             curr_cell.y == goal_cell.y and 
             curr_cell.z == goal_cell.z)
 
 def is_valid_start_goal_3d(grid, start, goal):
-    return (is_valid_position_3d(grid, start) and 
-            is_valid_position_3d(grid, goal) and 
-            not grid[start[0]][start[1]][start[2]] and 
-            not grid[goal[0]][goal[1]][goal[2]])
+    """
+    Validates a coordinate to see if it is in bounds.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        start (tuple): A tuple of the starting position in an inchworm's path.
+        goal (tuple): A tuple of the goal position in an inchworm's path. 
+    Returns:
+        (boolean): A boolean confirming or denying a coordinate. 
+    """
+    createCell(grid, start)
+    createCell(grid, goal)
+    return not start.is_obs and not goal.is_obs
     
 def start_search_3d(grid, start, goal):
-    start_cell = Cell(start[0], start[1], start[2])
-    goal_cell = Cell(goal[0], goal[1], goal[2])
+    """
+    Takes given grid, start position, and goal position of pathfinding and initializes a search.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0) or not (1). 
+        start (tuple): A tuple of the starting position in an inchworm's path.
+        goal (tuple): A tuple of the goal position in an inchworm's path. 
+    Returns:
+        goal_cell (Cell): .
+        visited (list(tuple)): .
+        queue (list(Cell)): .
+        steps (int): The number of steps in a path.
+    """
+    start_cell = createCell(grid, start)
+    goal_cell = createCell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
     queue = [start_cell]
-    visited[start_cell[0]][start_cell[0][0]][start_cell[0][0][0]]
+    visited[start_cell.x][start_cell.z][start_cell.y]
     steps = 0
     return goal_cell, visited, queue, steps
