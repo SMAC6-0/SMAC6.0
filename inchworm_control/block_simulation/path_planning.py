@@ -5,6 +5,7 @@ from config import BD_LOC, LARGE_BUILD
 grid_size = 50  # Define the size of your grid in one direction 
 # Then, use this dimension to create a 3D list representing the cubical workspace where every cell is 0, representing that all those cells are walkable 
 # To reference values in this list, call grid2[x][z][y]
+
 grid2 = [[[0 for _ in range(grid_size)] for _ in range(grid_size)] for _ in range(grid_size)]
 #grid2 is never used. TODO: delete??
 blocks_no_longer_walkable = []
