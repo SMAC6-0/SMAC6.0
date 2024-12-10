@@ -4,12 +4,16 @@ from std_msgs.msg import Float32, String
 
 from enum import Enum
 from transitions import Machine
+from inchworm_control.ik_test import IkTest
+import time
+from time import sleep
 
-
+SUPPLY_LOCATION = [1, 1, 1]
+PATH_PLANNING_TIMER = 3 # timer for when IW can started path planning again (in seconds) 
 
 # Defining the Inchworm states 
 Inchworm_States = ["INITIALIZATION", "PATH_PLANNING", "TRAVELLING_TO_SUPPLY", "TRANSPORTING_BLOCK", "PLACING_BLOCK", "ERROR", "STRUCTURE_COMPLETE"]
-current_map = [
+BLUEPRINT = [
     [  # Layer 0
         [1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
@@ -33,6 +37,37 @@ current_map = [
     ]
 ]
 
+# update this map to the map the inchworm sends 
+current_Map = [
+    [  # Layer 0
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ],
+    [  # Layer 1
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ],
+    [  # Layer 2
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ]
+]
+
+IW_Path = []
+
+# create an instance of IkTest to use the functions
+# TODO: remane the IkTest to something else maybe Inchworm_Movement 
+inchworm_movement = IkTest()
+
 # class for Finite State Machine
 class Inchworm_StateMachine:
     def __init__(self):
@@ -40,91 +75,85 @@ class Inchworm_StateMachine:
         self.machine = Machine(model=self, states=Inchworm_States, initial= "INITIALIZATION")
 
         # add transitions
-        self.machine.add_transition(source="INITIALIZATION", dest="PATH_PLANNING", condition="IW_gets_Map_Snapshot")
-        # self.machine.add_transition(source="PATH_PLANNING", dest= "TRAVELLING_TO_SUPPLY")
+        self.machine.add_transition(source="INITIALIZATION", dest="PATH_PLANNING", condition="IW_gets_Map_Snapshot", after="on_Path_Planning")
+        self.machine.add_transition(source="PATH_PLANNING", dest="PATH_PLANNING", unless="is_Path_Available", after="retry_path")
+        self.machine.add_transition(source="PATH_PLANNING", dest= "TRAVELLING_TO_SUPPLY", condition="is_Path_Available")
+        self.machine.add_transition(source="TRAVELLING_TO_SUPPLY", dest="TRANSPORTING_BLOCK", condition="is_IW_in_supply")
+        self.machine.add_transition(source="TRAVELLING_TO_SUPPLY", dest="ERROR", unless="is_IW_in_supply", after="error_action")
 
         # Callbacks
-        
-        self.machine.on_enter_Initialization(self.on_Initialization)
-
-        self.machine.on_enter_Path_Planning(self.on_Path_Planning)
+        self.machine.on_enter_Initialization(self.on_picking_new_block)
+        self.machine.on_enter_Travelling_to_Supply(self.on_Travelling_to_Supply)
+        self.machine.on_enter_Transporting_Blocks(self.on_picking_new_block)
+    
+    # Actions
 
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
-    def on_Initialization(self):
+    def on_picking_new_block(self):
+        # pick up the block infornt of it
+        print("Initializing the block")
 
-        
+        # transfer the block location data 
+        # TODO: MOOO help 
+
+    def on_Path_Planning(self):
+        # TODO: add the path planning stuff 
+        print("Planning path from supply to the next block")
+
+        # IW path plans to the supply and to the next block
+        # store that path in IW_path 
         pass
 
+    def retry_path(self):
+        print("Retrying path planning after waiting")
+        
+        # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+        sleep(PATH_PLANNING_TIMER)
+        self.on_Path_Planning()
+    
+    def send_path_to_structure(self):
+        # MOOOO HELPPP 
+        print("Sending the IW path to the structure")
+        pass
+    
+    def on_Travelling_to_Supply(self):
+        self.send_path_to_structure()
+
+        print("IW startes to travel to supply")
+        pass
+
+    def error_action(self):
+        print("OH NOOO ERROR OCCURED")
+
+        # stop the iW
+        # flash red light
 
 
-    # TODO: ask Mo for help when the IW gets the map SnapShot back 
+    # Conditionals 
     def IW_gets_Map_Snapshot(self):
         # blah blah low level language 
+        # TODO: ask Mo for help when the IW gets the map SnapShot back 
+
         # return true if the IW got the map snapshot
         return True
+    
+    def is_Path_Available(self):
+        # question how do we know if this path is the most upto date path
+        return not IW_Path == [] # return if IW_path is empty or not (True: if not empty)
+    
+    def is_IW_in_supply(self):
+        # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
+        pass 
+            
 
 # an instance of Inchworm Statemachine
-inchworm = Inchworm_StateMachine()
+inchworm_sm = Inchworm_StateMachine()
 
 # Simulate the state machine
 def run_inchworm_stateMachine ():
-    print("Current inchworm state: {inchworm.state}")
+    print("Current inchworm state: {inchworm_sm.state}")
 
 
 if __name__ == "__main__":
     run_inchworm_stateMachine()
-
-
-# ------------ implement state machine chatgpt code
-
-from transitions import Machine
-
-# Define the states
-states = ["Locked", "Unlocked", "Open"]
-
-class Door:
-    def __init__(self):
-        self.machine = Machine(model=self, states=states, initial="Locked")
-
-        # Define transitions
-        self.machine.add_transition(trigger="unlock", source="Locked", dest="Unlocked", conditions="is_code_correct")
-        self.machine.add_transition(trigger="open", source="Unlocked", dest="Open")
-        self.machine.add_transition(trigger="close", source="Open", dest="Unlocked")
-        self.machine.add_transition(trigger="lock", source="Unlocked", dest="Locked")
-
-        # Callbacks
-        self.machine.on_enter_Locked(self.on_locked)
-        self.machine.on_enter_Unlocked(self.on_unlocked)
-        self.machine.on_enter_Open(self.on_open)
-
-    def is_code_correct(self):
-        # Example condition (could be replaced with user input)
-        code = input("Enter the code: ")
-        return code == "1234"
-
-    def on_locked(self):
-        print("The door is now locked.")
-
-    def on_unlocked(self):
-        print("The door is now unlocked.")
-
-    def on_open(self):
-        print("The door is open. Welcome!")
-
-# Create the Door instance
-door = Door()
-
-# Simulate the state machine
-while True:
-    print(f"Current state: {door.state}")
-    action = input("Choose an action (unlock, open, close, lock, quit): ").strip().lower()
-    if action == "quit":
-        break
-    try:
-        getattr(door, action)()
-    except AttributeError:
-        print("Invalid action!")
-
-
-
