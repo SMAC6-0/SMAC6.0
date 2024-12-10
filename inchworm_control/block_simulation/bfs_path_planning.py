@@ -34,17 +34,18 @@ def breadth_first_search(grid, start, goal, holding_block, prioritize_vertical=F
         steps += 1
 
         if is_goal_reached_3d(current_cell, goal_cell):
-            print(f"Path found: {current_cell}")
-            return rework_path_3d(current_cell, holding_block), steps
+            path = rework_path_3d(current_cell, holding_block)
+            print(f"Path found: {path}")
+            return path, steps
         
         for dx, dy, dz in neighbor_directions:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dz, current_cell.z + dy
-            neighbor = is_valid_position_3d(grid, (nx, nz, ny))
-
-            if neighbor and not neighbor.is_obs and tuple(neighbor) not in visited:
-                visited.add(tuple(neighbor))
-                queue.append((neighbor, current_path))
+            neighborCoord = nx, ny, nz
+            if is_valid_position_3d(grid, (neighborCoord)) and not grid[nx][nz][ny] and not visited[nx][nz][ny]:
+                visited[nx][nz][ny] = True
+                neighbor = createCell(grid, neighborCoord)
+                neighbor.parent = current_cell
+                queue.append(neighbor)
     
-    if path == []:
-        print(f"No path found with BFS from {start} to {goal}")
+    print(f"No path found with BFS from {start} to {goal}")
     return [], -1

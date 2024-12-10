@@ -253,14 +253,11 @@ def is_valid_position_3d(grid, coords):
                      the corresponding cell is walkable (0) or not (1). 
         coords (tuple): A tuple containing the (x, z, y) coordinates of a position. 
     Returns:
-        valid (boolean): A boolean confirming or denying a coordinate. 
+        (boolean): A boolean confirming or denying a coordinate. 
     """ 
     x, y, z = coords
-    valid = 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0])
-    
-    if valid:
-        return valid
-    
+    if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
+        return True
     raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):
@@ -304,7 +301,7 @@ def start_search_3d(grid, start, goal):
         goal (tuple): A tuple of the goal position in an inchworm's path. 
     Returns:
         goal_cell (Cell): .
-        visited (list(tuple)): .
+        visited (list(boolean)): .
         queue (list(Cell)): .
         steps (int): The number of steps in a path.
     """
@@ -312,6 +309,6 @@ def start_search_3d(grid, start, goal):
     goal_cell = createCell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
     queue = [start_cell]
-    visited[start_cell.x][start_cell.z][start_cell.y]
+    visited[start_cell.x][start_cell.z][start_cell.y] = True
     steps = 0
     return goal_cell, visited, queue, steps

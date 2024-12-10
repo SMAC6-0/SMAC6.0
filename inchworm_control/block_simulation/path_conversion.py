@@ -12,8 +12,8 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0) or not (1). 
-        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
-                           position in the grid. This is a single block. 
+        path_start (tuple): .
+        path_end (tuple): .
     Returns:
         grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
@@ -210,7 +210,7 @@ def simplify_steps(PAST_LOC, complete_path, complete_steps):
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
 def dev_total_path_steps(structures, misc_blocks):
     grid = initialize_grid_with_structures()
-    update_grid_with_structure(grid, BD_LOC1)
+    update_grid_with_structure(grid)
     complete_path = []
     complete_steps = []
     list_of_goals = []
