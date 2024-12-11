@@ -10,6 +10,7 @@ from search import search
 from path_conversion import * 
 from config import CURRENT_LOC, BD_LOC, DEMO
 import copy 
+import sim_data 
 
 app = Ursina()
 
@@ -45,16 +46,11 @@ key_p_pressed = False
 placed_block = None 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
-blocks_placed = []
-found_structures = []
 coords_to_spawn = []
-misc_blocks = []
 complete_steps = []
 path_steps = None 
 number = 0 
-# Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-point = CURRENT_LOC
-prev_point = point
+
 
 # Updates every frame
 def update():
@@ -68,6 +64,7 @@ def update():
             spawn_cube(x, y, z,'')  # Replace
             cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
             blocks_placed.append(cube.position) 
+            sim_data.append(blocks_placed, cube.position)
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
@@ -180,10 +177,10 @@ def update():
         prev_point = point
         key_n_pressed = False
 
-
-
-# writes steps to a txt file              
 def step_getter(steps):
+    """
+    Write the steps to steps.txt
+    """
     complete_steps = copy.deepcopy(steps)
     file_path = "steps.txt"
     
