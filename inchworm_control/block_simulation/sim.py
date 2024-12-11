@@ -10,9 +10,10 @@ from search import search
 from path_conversion import * 
 from config import CURRENT_LOC, BD_LOC, DEMO
 import copy 
-import sim_data 
+from sim_data import SimData
 
 app = Ursina()
+sim_data = SimData()
 
 # stltovoxel /Users/canguven/Downloads/tower.stl /Users/canguven/Downloads/yarrak.xyz  --resolution 50
 
@@ -43,18 +44,21 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed = False
-placed_block = None 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
-coords_to_spawn = []
+# coords_to_spawn = []
 complete_steps = []
-path_steps = None 
+# path_steps = None 
 number = 0 
 
 
+# Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
+point = CURRENT_LOC
+prev_point = point
+
 # Updates every frame
 def update():
-    global blocks_placed, key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
+    global key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, prev_point, point, spawned, spawn_x, spawn_y, spawn_z, number
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -63,8 +67,8 @@ def update():
         for x, y, z in pyramid_coordinates:
             spawn_cube(x, y, z,'')  # Replace
             cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            blocks_placed.append(cube.position) 
-            sim_data.append(blocks_placed, cube.position)
+            # blocks_placed.append(cube.position) 
+            sim_data.blocks_placed.append(cube.position)
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
@@ -85,7 +89,7 @@ def update():
         for x, y, z in coordinates:
             spawn_cube(x, y, z,'')  # Replace
             cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            blocks_placed.append(cube.position) 
+            sim_data.blocks_placed.append(cube.position) 
         key_t_pressed = True  # Set the flag to True after printing
     
     if not held_keys["t"]:
@@ -93,24 +97,19 @@ def update():
 
     # Search(Look) for structures
     if held_keys["l"]:
-        found_structures, misc_blocks = show_structures()
+        sim_data.found_structures, sim_data.misc_blocks = show_structures()
 
     # Generate paths and inchworm steps
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n')
-        sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        coords_to_spawn, path_steps , goal= dev_total_path_steps(found_structures, sorted_list)
-        step_getter(path_steps)
-        for point in goal:
-            point[1] += 1  # Increment the second value
-
+        sim_data.plan_path()
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and coords_to_spawn:
-        (point, holding_block) = coords_to_spawn.pop(0)  # Get the next point
+    if held_keys["n"] and not key_n_pressed and sim_data.coords_to_spawn:
+        (point, holding_block) = sim_data.coords_to_spawn.pop(0)  # Get the next point
         x, z, y = point
         if holding_block:
             z = z+1
@@ -133,7 +132,7 @@ def update():
 
             # Store the original texture before changing it
             last_block_original_texture = already_placed_block.texture
-            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, goal[number])):
+            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.goal[number])):
                 last_block_original_texture = smart_block_texture
                 new_texture = smart_block_texture 
                 number += 1
@@ -177,31 +176,31 @@ def update():
         prev_point = point
         key_n_pressed = False
 
-def step_getter(steps):
-    """
-    Write the steps to steps.txt
-    """
-    complete_steps = copy.deepcopy(steps)
-    file_path = "steps.txt"
+# def step_getter(steps):
+#     """
+#     Write the steps to steps.txt
+#     """
+#     complete_steps = copy.deepcopy(steps)
+#     file_path = "steps.txt"
     
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
+#     with open(file_path, 'w') as file:
+#         for step in complete_steps:
+#             file.write(f"{step}\n")
 
 # Searches for known structures and changes the color of strucutres found 
 def show_structures():
-    found_structures, misc_blocks = search(blocks_placed)
-    for structure in found_structures:
+    sim_data.found_structures, sim_data.misc_blocks = search(sim_data.blocks_placed)
+    for structure in sim_data.found_structures:
         structure_pos = structure[1]  
         structure_name = structure[0] #string
         for block in structure_pos:
             delete_cube(block[0], block[1], block[2])
             spawn_cube(block[0], block[1], block[2], structure_name[-1])
             #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
-    for block in misc_blocks:
+    for block in sim_data.misc_blocks:
             delete_cube(block[0], block[1], block[2])
             spawn_cube(block[0], block[1], block[2], 'misc')
-    return found_structures, misc_blocks
+    return sim_data.found_structures, sim_data.misc_blocks
 
 # Voxel (block) properties
 class Voxel(Button):
@@ -224,10 +223,10 @@ class Voxel(Button):
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
                 # only add blocks above field
                 if(voxel.position[1] > 0):
-                    blocks_placed.append(voxel.position) 
+                    sim_data.blocks_placed.append(voxel.position) 
             if key == "right mouse down":
                 try: 
-                    blocks_placed.remove(self.position)
+                    sim_data.blocks_placed.remove(self.position)
                 except Exception as e: 
                     print("Block not found")
                 destroy(self)
@@ -386,7 +385,7 @@ def spawn_cube(x, y, z, color_index):
 
     # Spawn the cube
     new_cube = Voxel(position=target_position, texture=color_index)
-    blocks_placed.append(target_position)  # Optionally update the blocks_placed list
+    sim_data.blocks_placed.append(target_position)  # Optionally update the blocks_placed list
 
 # delete a block from the simulation at the specified position
 def delete_cube(x, y, z):
@@ -394,8 +393,8 @@ def delete_cube(x, y, z):
     for e in scene.entities:
         if hasattr(e, 'position') and e.position == target_position:
             destroy(e)
-            if target_position in blocks_placed:
-                blocks_placed.remove(target_position)
+            if target_position in sim_data.blocks_placed:
+                sim_data.blocks_placed.remove(target_position)
             break
 
 # Increase the numbers for a bigger field. 
