@@ -13,7 +13,7 @@ DEMO = False
 LARGE_BUILD = False
 
 # Define the possible orientations of the inchworm
-InchwormOrientation = Enum('InchwormOrientaton', ['NORTH', 'SOUTH', 'EAST', 'WEST'])
+InchwormOrientation = Enum('InchwormOrientaton', ['NORTH', 'SOUTH', 'EAST', 'WEST', 'UNDEFINED'])
 CURRENT_ORIENTATION = InchwormOrientation.NORTH
 
 # have inchworm starting inline with BD 

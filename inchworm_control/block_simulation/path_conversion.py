@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 from enum import Enum
 from path_planning import *
 from config import BD_LOC1, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
@@ -27,9 +28,9 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
         grid, path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
 
     # if the start is the Block Depot, it is holding a block
-    holding_block = False
+    is_holding_block = False
     if(path_start == BD_LOC1):
-        holding_block = True
+        is_holding_block = True
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
@@ -47,17 +48,17 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
 
         # if the next coord is the block depot, the next step should be a grabbing step
         if next_coord == BD_LOC1:
-            steps.append(("GRAB_{movement_direction}", holding_block))
+            steps.append(("GRAB_{movement_direction}", is_holding_block))
             
         # if the next coordinate is the goal(and not BD), then we need to place the block
         elif next_coord == path_end:
-            steps.append(("PLACE_{movement_direction}", holding_block))
+            steps.append(("PLACE_{movement_direction}", is_holding_block))
             # once it places the block, the currnt location will be on top of where the block is
             x, z, y = next_coord
             next_coord = [x, z+1, y]
         else:
             # general case
-            steps.append((update_steps(movement_direction), holding_block))
+            steps.append((update_steps(movement_direction), is_holding_block))
 
         # update the current location and orientation
         CURRENT_LOC = next_coord
@@ -132,9 +133,12 @@ def get_direction(current_coord, next_coord):
     # these movements are relative to when you are looking normally at a x, y, z plane
     movement_directions = {
         # horizontal & vertical movements
-        (1, 0, 0): ('RIGHT', InchwormOrientation.EAST), (-1, 0, 0): ('LEFT', InchwormOrientation.WEST),
-        (0, 0, 1): ('RIGHT', InchwormOrientation.NORTH), (0, 0, -1): ('LEFT', InchwormOrientation.SOUTH),
-        (0, 1, 0): ('UP', "null"), (0, -1, 0): ('DOWN', "null"), 
+        (1, 0, 0): ('RIGHT', InchwormOrientation.EAST), 
+        (-1, 0, 0): ('LEFT', InchwormOrientation.WEST),
+        (0, 0, 1): ('RIGHT', InchwormOrientation.NORTH), 
+        (0, 0, -1): ('LEFT', InchwormOrientation.SOUTH),
+        (0, 1, 0): ('UP', "null"), 
+        (0, -1, 0): ('DOWN', "null"), 
         # diagonal up movements
         (1, 1, 0): ('DIAGONAL_UP_RIGHT', InchwormOrientation.EAST), 
         (-1, 1, 0): ('DIAGONAL_UP_LEFT', InchwormOrientation.WEST),
@@ -171,6 +175,62 @@ def get_direction(current_coord, next_coord):
         if (key[0] == delta_x) & (key[1] == delta_y) & (key[2] == delta_z):
             return value
         return 'error', InchwormOrientation.SOUTH
+
+def convert_directions_to_steps(current_coord, next_coord):
+    """
+    Determines the steps needed to get from current_coord to next_coord by taking into account the
+    direction of movement and new orientation of the inchworm's position in the 3D grid.
+    
+    Note: To make it more intuitive, think of it on the XY plane.
+
+    Args:
+        current_coord (tuple): The current position (x, z, y).
+        next_coord (tuple): The next position (x, z, y).
+
+    Returns:
+        step_mappings (string): 
+        is_holding_block (boolean): 
+    """
+    movement_vector = np.subtract(next_coord, current_coord)
+
+    base_mappings = {
+        (1, 0, 0): "STEP_RIGHT",
+        (-1, 0, 0): "STEP_LEFT",
+        (0, 0, 1): "STEP_FORWARD",
+        (0, 0, -1): "STEP_BACK",
+        (0, 1, 0): "CLIMB_UP",
+        (0, -1, 0): "CLIMB_DOWN",
+        # Diagonal movements
+        (1, 1, 0): "STEP_UP_RIGHT",
+        (-1, 1, 0): "STEP_UP_LEFT",
+        (0, 1, 1): ('DIAGONAL_UP_FORWARD', 'InchwormOrientation.NORTH'),
+        (0, 1, -1): ('DIAGONAL_UP_BACK', 'InchwormOrientation.SOUTH'),
+    }
+
+    # Check if the normalized movement vector exists in the base movements
+    if normalized_vector in base_movements:
+        base_movement, orientation = base_movements[normalized_vector]
+        # Split the base movement name for dynamic step count insertion
+        if step_count > 1:
+            movement_parts = base_movement.split("_")
+            # Insert the step count into the appropriate position
+            movement = "_".join(movement_parts[:-1] + [str(step_count)] + [movement_parts[-1]])
+        else:
+            movement = base_movement
+        return (movement, orientation)
+
+    # Handle "Simplified Down" movements (e.g., SIMPLIFIED_POS_X_DOWN_Y)
+    if abs(movement_vector[0]) == 2 and movement_vector[1] < 0 and abs(movement_vector[2]) == 1:
+        # Identify position and down step count
+        pos_index = 1 if movement_vector[0] > 0 else 2
+        y_index = 1 if movement_vector[2] > 0 else 3
+        movement = f"SIMPLIFIED_POS_{pos_index + y_index - 1}_DOWN_{abs(movement_vector[1])}"
+        orientation = 'InchwormOrientation.EAST' if movement_vector[0] > 0 else 'InchwormOrientation.WEST'
+        return (movement, orientation)
+
+    # Handle undefined or complex movements gracefully
+    return (f'UNKNOWN_{step_count}_STEPS', 'InchwormOrientation.UNDEFINED')
+
 
 # this function will determine if a helper block is needed to reach a certain location
 def determine_helper_blocks(grid, path_start, path_end):
