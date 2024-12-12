@@ -80,6 +80,13 @@ class Inchworm_StateMachine:
         self.machine.add_transition(source="PATH_PLANNING", dest= "TRAVELLING_TO_SUPPLY", condition="is_Path_Available")
         self.machine.add_transition(source="TRAVELLING_TO_SUPPLY", dest="TRANSPORTING_BLOCK", condition="is_IW_in_supply")
         self.machine.add_transition(source="TRAVELLING_TO_SUPPLY", dest="ERROR", unless="is_IW_in_supply", after="error_action")
+        self.machine.add_transition(source="TRANSPORTING_BLOCK", dest="ERROR", unless="is_IW_in_block_location", after="error_action")
+        self.machine.add_transition(source="TRANSPORTING_BLOCK", dest="PLACING_BLOCK", condition="is_IW_in_block_location")
+        self.machine.add_transition(source="PLACING_BLOCK", dest="ERROR", condition= "incorrect_block_location", after="error_action")
+
+        # assume that if the IW get's map snapshot, the block is placed in the correct location
+        self.machine.add_transition(source="PLACING_BLOCK", dest="STRUCTURE_COMPLETE", conditions=[self.IW_gets_Map_Snapshot, self.is_structure_complete], after="do_structure_complete")
+        self.machine.add_transition(source="PLACING_BLOCK", dest="PATH_PLANNING", condition= "IW_gets_Map_Snapshot", unless= "is_structure_complete")
 
         # Callbacks
         self.machine.on_enter_Initialization(self.on_picking_new_block)
@@ -96,6 +103,11 @@ class Inchworm_StateMachine:
 
         # transfer the block location data 
         # TODO: MOOO help 
+
+        # flash block that it's in unplaced location
+
+        # IW starts to travel to the next block 
+
 
     def on_Path_Planning(self):
         # TODO: add the path planning stuff 
@@ -129,6 +141,12 @@ class Inchworm_StateMachine:
         # stop the iW
         # flash red light
 
+    def do_structure_complete(self):
+        print("Structure is complete YIppeee")
+        # stop the iW
+        # flash green light
+
+
 
     # Conditionals 
     def IW_gets_Map_Snapshot(self):
@@ -145,6 +163,22 @@ class Inchworm_StateMachine:
     def is_IW_in_supply(self):
         # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
         pass 
+
+    def is_IW_in_block_location(self):
+        # return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
+        pass 
+
+    def incorrect_block_location(self):
+        print("Block is placed in incorrect location?")
+        # return true if the IW gets "incorrectly placed block" from the structure 
+        pass
+
+    def is_structure_complete(self):
+        print("Structure is complete?")
+
+        # compare the current map and the blueprint
+        # return true if structure is complete and false otherwise
+        pass
             
 
 # an instance of Inchworm Statemachine
