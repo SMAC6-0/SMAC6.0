@@ -63,9 +63,9 @@ def update():
         # Spawn cubes for each coordinate in the pyramid
         for x, y, z in pyramid_coordinates:
             spawn_cube(x, y, z,'')  # Replace
-            cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
+            # cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
             # blocks_placed.append(cube.position) 
-            sim_data.blocks_placed.append(cube.position)
+            # sim_data.blocks_placed.append(cube.position)
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
@@ -95,6 +95,8 @@ def update():
     # Search(Look) for structures
     if held_keys["l"]:
         sim_data.found_structures, sim_data.misc_blocks = show_structures()
+        print("found structures: ", sim_data.found_structures)
+        print("misc blocks: ", sim_data.misc_blocks)
 
     # Generate paths and inchworm steps
     if held_keys["p"] and not key_p_pressed:
@@ -385,10 +387,10 @@ def spawn_cube(x, y, z, color_index):
         color_index = smart_block_outline    
     else:
         color_index = smart_block_texture
+        sim_data.blocks_placed.append(target_position)  # Update the block information
 
     # Spawn the cube
     new_cube = Voxel(position=target_position, texture=color_index)
-    sim_data.blocks_placed.append(target_position)  # Update the block information
 
 def delete_cube(x, y, z):
     """
