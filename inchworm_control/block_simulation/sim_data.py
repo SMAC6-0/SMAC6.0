@@ -31,13 +31,15 @@ class SimData:
         self.blocks_placed = []
         self.found_structures = []
         self.misc_blocks = []
-        self.coords_to_spawn = []
+        self.coords_to_spawn = [] # the complete path
         # self.path_steps = None 
         self.goal = []
 
+        # TODO: make these custom to the inchworm 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-        point = CURRENT_LOC
-        prev_point = point
+        self.point = CURRENT_LOC
+        self.prev_point = self.point
+        # self.holding_block
 
         # initialize the map as the blocks/structure knows it
         # empty_map = map_data.initialize_grid_with_structures()
@@ -53,6 +55,13 @@ class SimData:
         step_getter(path_steps)
         for point in self.goal:
             point[1] += 1  # Increment the second value
+
+    def get_next_point(self): 
+        (self.point, holding_block) = self.coords_to_spawn.pop(0)  # Get the next point
+        x, z, y = self.point
+        if holding_block:
+            z = z+1
+        return x, z, y
 
 
 
