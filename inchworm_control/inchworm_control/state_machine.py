@@ -8,8 +8,17 @@ from inchworm_control.ik_test import IkTest
 import time
 from time import sleep
 
+
+## UART stuff
+UART_BAUD = 9600
+
+# setup uart 
+uart1 = UART(0,)
+
 SUPPLY_LOCATION = [1, 1, 1]
 PATH_PLANNING_TIMER = 3 # timer for when IW can started path planning again (in seconds) 
+
+
 
 # Defining the Inchworm states 
 Inchworm_States = ["INITIALIZATION", "PATH_PLANNING", "TRAVELLING_TO_SUPPLY", "TRANSPORTING_BLOCK", "PLACING_BLOCK", "ERROR", "STRUCTURE_COMPLETE"]
@@ -103,6 +112,8 @@ class Inchworm_StateMachine:
 
         # transfer the block location data 
         # TODO: MOOO help 
+        # send a 1D array ended with the Initialization enum OxFA 
+
 
         # flash block that it's in unplaced location
 
