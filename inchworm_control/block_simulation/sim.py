@@ -47,7 +47,6 @@ key_p_pressed = False
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
 # coords_to_spawn = []
-complete_steps = []
 # path_steps = None 
 number = 0 
 
@@ -59,13 +58,10 @@ def update():
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
-        pyramid_coordinates = generate_pyramid(5)
+        pyramid_coordinates = sim_data.generate_pyramid(5)
         # Spawn cubes for each coordinate in the pyramid
         for x, y, z in pyramid_coordinates:
-            spawn_cube(x, y, z,'')  # Replace
-            # cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            # blocks_placed.append(cube.position) 
-            # sim_data.blocks_placed.append(cube.position)
+            spawn_cube(x, y, z,'')  
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
@@ -75,8 +71,8 @@ def update():
         # To use this function, just pass the path to your 'empire.xyz' file
         # file_path = '/Users/canguven/Downloads/yarrak.xyz'
         # UPDATE THE FILES HERE
-        simplify_and_ensure_connectivity('/Users/canguven/Downloads/empire.xyz', '/Users/canguven/Downloads/empire2.xyz', grid_size=10)
-        coordinates = read_and_place_voxels_from_file('/Users/canguven/Downloads/empire2.xyz')
+        simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)
+        coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         # pyramid_coordinates = generate_pyramid(5)
         # # Spawn cubes for each coordinate in the pyramid
         # for x, y, z in pyramid_coordinates:
@@ -85,9 +81,9 @@ def update():
         #     blocks_placed.append(cube.position) 
         for x, y, z in coordinates:
             spawn_cube(x, y, z,'')  # Replace
-            cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            sim_data.blocks_placed.append(cube.position) 
-        key_t_pressed = True  # Set the flag to True after printing
+            # cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
+            # sim_data.blocks_placed.append(cube.position) 
+        key_t_pressed = True  # Setres/empire.xyz", "Assets/Structures/empire2.xyz", grid_size=10) the flag to True after printing
     
     if not held_keys["t"]:
         key_t_pressed = False
@@ -173,16 +169,6 @@ def update():
         sim_data.prev_point = sim_data.point
         key_n_pressed = False
 
-# def step_getter(steps):
-#     """
-#     Write the steps to steps.txt
-#     """
-#     complete_steps = copy.deepcopy(steps)
-#     file_path = "steps.txt"
-    
-#     with open(file_path, 'w') as file:
-#         for step in complete_steps:
-#             file.write(f"{step}\n")
  
 def show_structures():
     """
@@ -249,10 +235,10 @@ def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_siz
     """
     Simplifies an XYZ file and ensures each voxel is at least connected to one other voxel.
 
-    Parameters:
-    - input_file_path: Path to the input XYZ file.
-    - output_file_path: Path to the output simplified XYZ file.
-    - grid_size: Size of the grid cell for downsampling and connectivity checks.
+    Args:
+        input_file_path: Path to the input XYZ file.
+        output_file_path: Path to the output simplified XYZ file.
+        grid_size: Size of the grid cell for downsampling and connectivity checks.
     """
     voxel_grid = {}  # Use a dictionary to represent a sparse grid
     with open(input_file_path, 'r') as file:
@@ -285,17 +271,6 @@ def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_siz
 # simplify_and_ensure_connectivity('path/to/your/original_file.xyz', 'path/to/your/simplified_file.xyz', grid_size=10)
 
         
-# Generates a quarter section of a 10-by-10 pyramid of blocks
-def generate_pyramid(base_size):
-    pyramid = []
-    # Each layer
-    for y in range(base_size):
-        # Each row
-        for x in range(base_size - y):
-            # Each column
-            for z in range(base_size - y):
-                pyramid.append((x+10, y+1, z+10))
-    return pyramid
 
 def read_and_place_voxels_from_file(file_path):
     coordinates_from_file = []

@@ -62,6 +62,24 @@ class SimData:
         if holding_block:
             z = z+1
         return x, z, y
+    
+    def generate_pyramid(self, base_size):
+        """
+        Generates a quarter section of a 10-by-10 pyramid of blocks (if base_size = 5).
+        Args:
+            base_size (int): Base size of the quarter of the pyramid. 
+        Returns:
+            pyramid: list of tuple (x, y, z). List block locations. 
+        """
+        pyramid = []
+        # Each layer
+        for y in range(base_size):
+            # Each row
+            for x in range(base_size - y):
+                # Each column
+                for z in range(base_size - y):
+                    pyramid.append((x+10, y+1, z+10))
+        return pyramid
 
 
 
