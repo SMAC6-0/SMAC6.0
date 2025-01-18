@@ -4,18 +4,23 @@ from std_msgs.msg import Float32, String
 
 from enum import Enum
 from transitions import Machine
-from inchworm_control.ik_test import IkTest
+from ik_test import IkTest
 import time
 from time import sleep
 
+import copy
+from block_simulation.config import *
+import map_data 
+from map_data import Cell
+
 
 ## UART stuff
-UART_BAUD = 9600
+UART_BAUD = 9600 # config
 
 # setup uart 
 # uart1 = UART(0,)
 
-SUPPLY_LOCATION = [1, 1, 1]
+SUPPLY_LOCATION = [1, 1, 1] # config
 PATH_PLANNING_TIMER = 3 # timer for when IW can started path planning again (in seconds) 
 
 # Defining the Inchworm states 
@@ -75,9 +80,42 @@ IW_Path = []
 # TODO: remane the IkTest to something else maybe Inchworm_Movement 
 inchworm_movement = IkTest()
 
+def update_current_map(self, map): 
+    """
+    Updates the inchworm's map based on received updates from the structure. 
+    Args: 
+        map: xzy (3D) list storing the current status of the map, as the structure knows it.  
+    """
+    self.current_map = map
+
+def clear_my_path(self): 
+    pass
+
+def plan_path(self, end): 
+    pass
+
+
 # class for Finite State Machine
-class Inchworm_StateMachine:
-    def __init__(self):
+class Inchworm:
+    def __init__(self, id: int, orientation, paths: list[Cell], final_structure, location: list[int], holding_block=False):
+        """
+        Initialize one inchworm (abbreviated as IW) in the system.
+        Args:
+            id (int): This inchworm's ID number. Used to set paths in the map. 
+            orientation (Enum): the direction that the IW's leading leg is facing, relative to the world grid's frame. 
+            paths(list[Cell]): The Cells through which this inchworm will travel. (May be multiple, ie to the supply depot then to the structure.)
+            final_structure (list[int]): xzy (3D) list storing the final structure the inchworms are trying to build.  
+            location (list[int]): the xzy location of the inchworm's leading foot. 
+            holding_block (bool): True if the inchworm's leading foot is holding a block. 
+        """
+        self.id = id
+        self.orientation = orientation
+        self.paths = paths
+        self.current_map = map_data.initialize_grid_with_structures()
+        self.final_structure = final_structure
+        self.lead_foot_loc = location
+        self.holding_block = holding_block
+
         # initial state
         self.machine = Machine(model=self, states=Inchworm_States, initial= "INITIALIZATION")
 
@@ -191,12 +229,12 @@ class Inchworm_StateMachine:
             
 
 # an instance of Inchworm Statemachine
-inchworm_sm = Inchworm_StateMachine()
+inchworm_sm = Inchworm()
 
 # Simulate the state machine
-def run_inchworm_stateMachine ():
+def run_Inchworm ():
     print("Current inchworm state: {inchworm_sm.state}")
 
 
 if __name__ == "__main__":
-    run_inchworm_stateMachine()
+    run_Inchworm()
