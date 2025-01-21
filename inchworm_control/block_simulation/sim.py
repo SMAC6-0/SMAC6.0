@@ -48,13 +48,12 @@ spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
 # coords_to_spawn = []
 # path_steps = None 
-number = 0 
 
 
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z, number
+    global key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -91,12 +90,12 @@ def update():
     # Search(Look) for structures
     if held_keys["l"]:
         sim_data.found_structures, sim_data.misc_blocks = show_structures()
-        print("found structures: ", sim_data.found_structures)
+        # print("found structures: ", sim_data.found_structures)
         print("misc blocks: ", sim_data.misc_blocks)
 
-    # Generate paths and inchworm steps
+    # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n')
+        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n') # consider changing accessing the supply depot to be through sim_data.py
         sim_data.plan_path()
         key_p_pressed = True
 
@@ -104,15 +103,16 @@ def update():
         key_p_pressed = False
 
     if held_keys["n"] and not key_n_pressed and sim_data.coords_to_spawn: # simulates the stepping of the leading leg
+        # coords_to_spawn verifies that a path exists before trying to do anything
+
+        # TODO: consider moving block tracking to sim_data
+        # for each inchrorm: 
+            # get next point in that inchworm's path 
         x, z, y = sim_data.get_next_point()
+            # store x z y coords in list of tuples
 
-        # This checks if there are existing block entities at the next point 
-        already_placed_block = None
-        for e in scene.entities:
-            if hasattr(e, 'position') and e.position == Vec3(x, z, y):
-                already_placed_block = e
-                break
-
+        # for each set of x z y in list of next blocks 
+        
         # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
         if spawned:
             delete_cube(spawn_x, spawn_z, spawn_y)
@@ -121,26 +121,39 @@ def update():
         # If there is a previously colored block, restore to original texture
         elif last_colored_block is not None:
                 last_colored_block.texture = last_block_original_texture
-        if already_placed_block:
 
-            # Store the original texture before changing it
-            last_block_original_texture = already_placed_block.texture
-            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.goal[number])):
+        # This checks if there are existing block entities at the next point 
+        already_placed_block = None
+        for e in scene.entities:
+            if hasattr(e, 'position') and e.position == Vec3(x, z, y):
+                already_placed_block = e
+                break
+
+        if already_placed_block: # When you aren't simulating walking with cube 
+
+            last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
+            # TODO: make number relative to each inchworm 
+            # TODO: modify path planning so that not every inchworm goes to every block (just do every other or split)
+
+            # Checks for visuals at goal location
+            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.goal[sim_data.goal_progress_index])):
+                # IW reaches goal coords & places block 
                 last_block_original_texture = smart_block_texture
                 new_texture = smart_block_texture 
-                number += 1
+                sim_data.goal_progress_index += 1
             else:
+                # The inchworm is not yet at the goal
                 new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
             already_placed_block.texture = new_texture
             last_colored_block = already_placed_block
-
-        else:
+ 
+        else: # Walking with block in empty space
             spawned = True
             spawned_block = spawn_cube(x, z, y,'step')
             spawn_x, spawn_y, spawn_z = x, y, z
             last_colored_block = spawned_block
             last_block_original_texture = smart_block_texture
-
+          
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
@@ -202,7 +215,7 @@ class Voxel(Button):
             scale = 0.5
         )
 
-    # What happens to blocks on inputs
+    # What happens to blocks on mouse inputs
     def input(self,key):
         if self.hovered:
             if key == "left mouse down":

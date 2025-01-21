@@ -34,6 +34,7 @@ class SimData:
         self.coords_to_spawn = [] # the complete path
         # self.path_steps = None 
         self.goal = []
+        self.goal_progress_index = 0
 
         # TODO: make these custom to the inchworm 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
@@ -45,7 +46,7 @@ class SimData:
         # empty_map = map_data.initialize_grid_with_structures()
         existing_inchworms = []
         initialized_inchworms = []
-        pass
+        
 
     def plan_path(self): 
         # TODO: transfer this function to the inchworm class 
