@@ -3,6 +3,78 @@ from transitions import Machine
 import time
 from time import sleep
 
+# Inchworm states
+class IW_STATE(Enum):
+    IDLE = 0 # added this incase we need to use it
+    INITIALIZATION = 1
+    PATH_PLANNING = 2
+    TRAVELLING_TO_SUPPLY = 3
+    TRANSPORTING_BLOCK = 4
+    PLACING_BLOCK = 5
+    ERROR = 6
+    STRUCTURE_COMPLETE = 7
+
+class Inchworm:
+    def __init__(self):
+        self.state = IW_STATE.INITIALIZATION
+
+        while True: 
+            self.update_state()
+
+        pass
+
+    def update_state(self):
+        match self.state:
+            case IW_STATE.IDLE:
+                self.handle_idle()
+            case IW_STATE.INITIALIZATION:
+                if (self.IW_gets_Map_Snapshot()): # IW got the mapsnap shot 
+                    self.handle_IW_gets_Map()
+            # case IW_STATE.PATH_PLANNING:
+            #     self.handle_path_planning()
+            # case IW_STATE.TRAVELLING_TO_SUPPLY:
+            #     self.handle_travelling_to_supply()
+            # case IW_STATE.TRANSPORTING_BLOCK:
+            #     self.handle_transporting_block()
+            # case IW_STATE.PLACING_BLOCK:
+            #     self.handle_placing_block()
+            # case IW_STATE.ERROR:
+            #     self.handle_error()
+            # case IW_STATE.STRUCTURE_COMPLETE:
+            #     self.handle_structure_complete()
+
+    
+    ##### Checkers and Handlers
+    def handle_idle(self):
+        print("IDILING...")
+
+    # Handlers 
+    def handle_IW_gets_Map(self):
+        print("Map snapshot successful. Transitioning to PATH_PLANNING...")
+        self.state = IW_STATE.PATH_PLANNING
+        print(f"Current inchworm state: {self.state}")
+
+    # Checkers
+    def IW_gets_Map_Snapshot(self):
+        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+        if got_map_snapshot.lower() == 'yes':
+            return True
+        elif got_map_snapshot.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+
+# an instance of Inchworm Statemachine
+inchworm_sm = Inchworm()
+
+# Simulate the state machine
+def run_Inchworm ():
+    print("Current inchworm state:")
+
+if __name__ == "__main__":
+    run_Inchworm()
+
+'''
 # Define states
 Inchworm_States = ["INITIALIZATION", "PATH_PLANNING", "TRAVELLING_TO_SUPPLY", "TRANSPORTING_BLOCK", "PLACING_BLOCK", "ERROR", "STRUCTURE_COMPLETE"]
 
@@ -20,14 +92,7 @@ class Inchworm:
         self.machine.on_enter_PLACING_BLOCK(self.check_structure_completion)
 
     # Callback for state hooks
-    def check_map_snapshot(self):
-        print("Checking map snapshot...")
-        if self.IW_gets_Map_Snapshot():
-            print(self.IW_gets_Map_Snapshot())
-            print("Map snapshot successful. Transitioning to PATH_PLANNING...")
-            self.to_PATH_PLANNING()  # Move to the next state automatically
-        else:
-            print("Map snapshot failed. Retrying...")
+    
 
     def check_path_availability(self):
         print("Checking path availability...")
@@ -100,3 +165,5 @@ inchworm_sm.to_INITIALIZATION()  # Explicitly enter the INITIALIZATION state
 while inchworm_sm.state != "STRUCTURE_COMPLETE":
     print(f"Current State: {inchworm_sm.state}")
     time.sleep(1)  # Simulate time passing
+
+'''
