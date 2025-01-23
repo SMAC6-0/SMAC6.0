@@ -137,3 +137,4 @@ def read_and_place_voxels_from_file(file_path):
             # blocks_placed.append(coordinates_from_file)
 
     return coordinates_from_file
+

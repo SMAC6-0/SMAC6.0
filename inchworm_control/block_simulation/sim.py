@@ -1,6 +1,7 @@
 # Install Ursina before using this "pip install ursina"
 # Tutorial https://www.youtube.com/watch?v=DHSRaVeQxIk
 # What are you doing here?!
+# This file facilitates the operation of the simulation itself: frame updates, button presses, etc.
 
 # Imports
 from ursina import *
@@ -8,7 +9,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
 from path_conversion import * 
-from config import CURRENT_LOC, BD_LOC, DEMO
+from config import CURRENT_LOC, BD_LOC1, DEMO
 import copy 
 from sim_data import SimData
 
@@ -44,6 +45,7 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed = False
+
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
 # coords_to_spawn = []
@@ -54,6 +56,7 @@ spawn_x, spawn_y, spawn_z = 0, 0, 0
 # Updates every frame
 def update():
     global key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z
+
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -168,7 +171,6 @@ def update():
         sim_data.existing_inchworms[0].prev_point = sim_data.existing_inchworms[0].point
         key_n_pressed = False
 
- 
 def show_structures():
     """
     Searches for known structures and changes the color of structures found. 
@@ -203,6 +205,7 @@ class Voxel(Button):
 
     # What happens to blocks on mouse inputs
     def input(self,key):
+
         if self.hovered:
             if key == "left mouse down":
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
@@ -215,6 +218,13 @@ class Voxel(Button):
                 except Exception as e: 
                     print("Block not found")
                 destroy(self)
+                
+        if key == "escape":
+            if not key_esc_pressed:
+                stop_simulation()
+                key_esc_pressed = True
+            elif key == "escape up":
+                key_esc_pressed - False
 
 # Skybox
 class Sky(Entity):
@@ -274,6 +284,12 @@ def check_block_color(x, y, z):
 
     return block_color
 
+
+def stop_simulation():
+    print("User pressed 'ESC'. Stopping simulation...")
+    application.quit()
+
+# spawns a cude in the simulation at the specified position and with the specified color
 def spawn_cube(x, y, z, color_index):
     """
     Spawns a cube in the simulation at the specified xyz position and with the specified color. 
