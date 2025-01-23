@@ -4,8 +4,6 @@ from enum import Enum
 from path_planning import *
 from config import BD_LOC1, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
 
-# converts the list of coords from bfs to a list of inchworm movements
-# returns the list of path coordinates and the list of steps from start to end
 def convert_path_coords_to_steps(grid, path_start, path_end):
     """
     Converts the list of coordinates from a pathplanning algorithm into inchworm movesets
@@ -270,7 +268,7 @@ def simplify_steps(PAST_LOC, complete_path, complete_steps):
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
 def dev_total_path_steps(structures, misc_blocks):
     grid = initialize_grid_with_structures()
-    update_grid_with_structure(grid)
+    update_grid_with_structure(grid, BD_LOC1)
     complete_path = []
     complete_steps = []
     list_of_goals = []

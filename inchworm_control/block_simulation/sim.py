@@ -104,7 +104,7 @@ def update():
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOC1[0], BD_LOC1[1], BD_LOC1[2], 'n')
         sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        coords_to_spawn, path_steps , goal= dev_total_path_steps(found_structures, sorted_list)
+        coords_to_spawn, path_steps, goal = dev_total_path_steps(found_structures, sorted_list)
         step_getter(path_steps)
         for point in goal:
             point[1] += 1  # Increment the second value

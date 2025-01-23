@@ -146,67 +146,6 @@ def set_neighbors(prioritize_vertical, allow_diagonal, allow_large_build):
         
     return neighbor_directions
 
-# # Define test cases based on the original arrays
-# test_cases = {
-#     "no_vertical_large_build": {
-#         "prioritize_vertical": False,
-#         "allow_diagonal": True,
-#         "allow_large_build": True,
-#         "expected": [
-#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
-#             (0, 1, 0), (0, -1, 0), #up down
-#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
-#             (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1), # xz plane y = 1 cross
-#             (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1), # xz plane y = -1 cross
-#             (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1), # xz plane y = 1 corners
-#             (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1) #xz plane y = -1 corners
-#         ]
-#     },
-#     "no_vertical_no_diagonal_small_build": {
-#         "prioritize_vertical": False,
-#         "allow_diagonal": False,
-#         "allow_large_build": True,
-#         "expected": [
-#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), #first layer aside from up down
-#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), #xz plane y = 0 cross
-#             (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
-#             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1),
-#             (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
-#         ]
-#     },
-#     "vertical_no_diagonal_small_build": {
-#         "prioritize_vertical": True,
-#         "allow_diagonal": False,
-#         "allow_large_build": True,
-#         "expected": [
-#             (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), 
-#             (0, 1, 0), (0, -1, 0),
-#             (1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0), 
-#             (1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0), 
-#             (0, 1, -1), (0, -1, -1), (0, -1, 1), (0, 1, 1),
-#             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)
-#         ]
-#     }
-# }
-
-# # Function to validate outputs
-# def validate_neighbors(test_cases):
-#     for name, case in test_cases.items():
-#         result = set_neighbors(
-#             prioritize_vertical=case["prioritize_vertical"],
-#             allow_diagonal=case["allow_diagonal"],
-#             allow_large_build=case["allow_large_build"]
-#         )
-#         if sorted(result) == sorted(case["expected"]):
-#             print(f"{name}: PASSED")
-#         else:
-#             print(f"{name}: FAILED")
-#             print("Expected:", sorted(case["expected"]))
-#             print("Got:", sorted(result))
-
-# # Run validation
-# validate_neighbors(test_cases)
-
 def rework_path_3d(curr_cell, is_holding_block):
     """
     Reverse calculated path to go from start to goal.
@@ -225,7 +164,7 @@ def rework_path_3d(curr_cell, is_holding_block):
         curr_cell = curr_cell.parent
     return path[::-1], len(path) - 1
 
-def createCell(grid, coords):
+def create_cell(grid, coords):
     """
     Create Cell data type from a coordinate.
     
@@ -286,8 +225,8 @@ def is_valid_start_goal_3d(grid, start, goal):
     Returns:
         (boolean): A boolean confirming or denying a coordinate. 
     """
-    createCell(grid, start)
-    createCell(grid, goal)
+    create_cell(grid, start)
+    create_cell(grid, goal)
     return not start.is_obs and not goal.is_obs
     
 def start_search_3d(grid, start, goal):
@@ -305,8 +244,8 @@ def start_search_3d(grid, start, goal):
         queue (list(Cell)): .
         steps (int): The number of steps in a path.
     """
-    start_cell = createCell(grid, start)
-    goal_cell = createCell(grid, goal)
+    start_cell = create_cell(grid, start)
+    goal_cell = create_cell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(grid[0][0])]
     queue = [start_cell]
     visited[start_cell.x][start_cell.z][start_cell.y] = True
