@@ -190,44 +190,43 @@ def convert_directions_to_steps(current_coord, next_coord):
         is_holding_block (boolean): 
     """
     movement_vector = np.subtract(next_coord, current_coord)
+    magnitude = int(np.linalg.norm(movement_vector))
+    
+    if magnitude == 0:
+        print("Warning: No movement required.")
+        return [], "null"
+    
+    normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
 
     base_mappings = {
-        (1, 0, 0): "STEP_RIGHT",
-        (-1, 0, 0): "STEP_LEFT",
-        (0, 0, 1): "STEP_FORWARD",
-        (0, 0, -1): "STEP_BACK",
-        (0, 1, 0): "CLIMB_UP",
-        (0, -1, 0): "CLIMB_DOWN",
+        (1, 0, 0): ("STEP_RIGHT", InchwormOrientation.EAST),
+        (-1, 0, 0): ("STEP_LEFT", InchwormOrientation.WEST),
+        (0, 0, 1): ("STEP_FORWARD", InchwormOrientation.NORTH),
+        (0, 0, -1): ("STEP_BACK", InchwormOrientation.SOUTH),
+        (0, 1, 0): ("CLIMB_UP", "null"),
+        (0, -1, 0): ("CLIMB_DOWN", "null"),
         # Diagonal movements
-        (1, 1, 0): "STEP_UP_RIGHT",
-        (-1, 1, 0): "STEP_UP_LEFT",
-        (0, 1, 1): ('DIAGONAL_UP_FORWARD', 'InchwormOrientation.NORTH'),
-        (0, 1, -1): ('DIAGONAL_UP_BACK', 'InchwormOrientation.SOUTH'),
+        (1, 1, 0): ("STEP_UP_RIGHT", InchwormOrientation.EAST),
+        (-1, 1, 0): ("STEP_UP_LEFT", InchwormOrientation.WEST),
+        (0, 1, 1): ("DIAGONAL_UP_FORWARD", InchwormOrientation.NORTH),
+        (0, 1, -1): ("DIAGONAL_UP_BACK", InchwormOrientation.SOUTH),
+        (1, -1, 0): ("STEP_DOWN_RIGHT", InchwormOrientation.EAST),
+        (-1, -1, 0): ("STEP_DOWN_LEFT", InchwormOrientation.WEST),
+        (0, -1, 1): ("DIAGONAL_DOWN_FORWARD", InchwormOrientation.NORTH),
+        (0, -1, -1): ("DIAGONAL_DOWN_BACK", InchwormOrientation.SOUTH),
     }
 
-    # Check if the normalized movement vector exists in the base movements
-    if normalized_vector in base_movements:
-        base_movement, orientation = base_movements[normalized_vector]
-        # Split the base movement name for dynamic step count insertion
-        if step_count > 1:
-            movement_parts = base_movement.split("_")
-            # Insert the step count into the appropriate position
-            movement = "_".join(movement_parts[:-1] + [str(step_count)] + [movement_parts[-1]])
-        else:
-            movement = base_movement
-        return (movement, orientation)
+    # Check if the normalized vector matches a known direction
+    if normalized_vector in base_mappings:
+        step_name, orientation = base_mappings[normalized_vector]
 
-    # Handle "Simplified Down" movements (e.g., SIMPLIFIED_POS_X_DOWN_Y)
-    if abs(movement_vector[0]) == 2 and movement_vector[1] < 0 and abs(movement_vector[2]) == 1:
-        # Identify position and down step count
-        pos_index = 1 if movement_vector[0] > 0 else 2
-        y_index = 1 if movement_vector[2] > 0 else 3
-        movement = f"SIMPLIFIED_POS_{pos_index + y_index - 1}_DOWN_{abs(movement_vector[1])}"
-        orientation = 'InchwormOrientation.EAST' if movement_vector[0] > 0 else 'InchwormOrientation.WEST'
-        return (movement, orientation)
+        # If magnitude > 1, repeat the step multiple times
+        steps = [step_name] * magnitude
+        return steps, orientation
 
-    # Handle undefined or complex movements gracefully
-    return (f'UNKNOWN_{step_count}_STEPS', 'InchwormOrientation.UNDEFINED')
+    # Handle undefined or unexpected movements
+    print(f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
+    return ["UNKNOWN_STEP"], "null"
 
 
 # this function will determine if a helper block is needed to reach a certain location
