@@ -140,47 +140,47 @@ class Inchworm:
     
     # Actions
 
-    # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
-    # and transfer the block location to the seed block
-    def on_picking_new_block(self):
-        # pick up the block infornt of it
-        print("Initializing the block")
+    # # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
+    # # and transfer the block location to the seed block
+    # def on_picking_new_block(self):
+    #     # pick up the block infornt of it
+    #     print("Initializing the block")
 
-        # transfer the block location data 
-        # TODO: MOOO help 
-        # send a 1D array ended with the Initialization enum OxFA 
-
-
-        # flash block that it's in unplaced location
-
-        # IW starts to travel to the next block 
+    #     # transfer the block location data 
+    #     # TODO: MOOO help 
+    #     # send a 1D array ended with the Initialization enum OxFA 
 
 
-    def on_Path_Planning(self):
-        # TODO: add the path planning stuff 
-        print("Planning path from supply to the next block")
+    #     # flash block that it's in unplaced location
 
-        # IW path plans to the supply and to the next block
-        # store that path in IW_path 
-        pass
+    #     # IW starts to travel to the next block 
 
-    def retry_path(self):
-        print("Retrying path planning after waiting")
+
+    # def on_Path_Planning(self):
+    #     # TODO: add the path planning stuff 
+    #     print("Planning path from supply to the next block")
+
+    #     # IW path plans to the supply and to the next block
+    #     # store that path in IW_path 
+    #     pass
+
+    # def retry_path(self):
+    #     print("Retrying path planning after waiting")
         
-        # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-        sleep(PATH_PLANNING_TIMER)
-        self.on_Path_Planning()
+    #     # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+    #     sleep(PATH_PLANNING_TIMER)
+    #     self.on_Path_Planning()
     
-    def send_path_to_structure(self):
-        # MOOOO HELPPP 
-        print("Sending the IW path to the structure")
-        pass
+    # def send_path_to_structure(self):
+    #     # MOOOO HELPPP 
+    #     print("Sending the IW path to the structure")
+    #     pass
     
-    def on_Travelling_to_Supply(self):
-        self.send_path_to_structure()
+    # def on_Travelling_to_Supply(self):
+    #     self.send_path_to_structure()
 
-        print("IW startes to travel to supply")
-        pass
+    #     print("IW startes to travel to supply")
+    #     pass
 
     def error_action(self):
         print("OH NOOO ERROR OCCURED")
@@ -196,20 +196,20 @@ class Inchworm:
 
 
     # Conditionals 
-    def IW_gets_Map_Snapshot(self):
-        # blah blah low level language 
-        # TODO: ask Mo for help when the IW gets the map SnapShot back 
+    # def IW_gets_Map_Snapshot(self):
+    #     # blah blah low level language 
+    #     # TODO: ask Mo for help when the IW gets the map SnapShot back 
 
-        # return true if the IW got the map snapshot
-        return True
+    #     # return true if the IW got the map snapshot
+    #     return True
     
-    def is_Path_Available(self):
-        # question how do we know if this path is the most upto date path
-        return not IW_Path == [] # return if IW_path is empty or not (True: if not empty)
+    # def is_Path_Available(self):
+    #     # question how do we know if this path is the most upto date path
+    #     return not IW_Path == [] # return if IW_path is empty or not (True: if not empty)
     
-    def is_IW_in_supply(self):
-        # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
-        pass 
+    # def is_IW_in_supply(self):
+    #     # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
+    #     pass 
 
     def is_IW_in_block_location(self):
         # return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)

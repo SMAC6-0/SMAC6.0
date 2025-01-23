@@ -14,6 +14,7 @@ class IW_STATE(Enum):
     ERROR = 6
     STRUCTURE_COMPLETE = 7
 
+PATH_PLANNING_TIMER = 3
 class Inchworm:
     def __init__(self):
         self.state = IW_STATE.INITIALIZATION
@@ -28,12 +29,19 @@ class Inchworm:
             case IW_STATE.IDLE:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
+                self.handle_initilization()
                 if (self.IW_gets_Map_Snapshot()): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
-            # case IW_STATE.PATH_PLANNING:
-            #     self.handle_path_planning()
-            # case IW_STATE.TRAVELLING_TO_SUPPLY:
-            #     self.handle_travelling_to_supply()
+            case IW_STATE.PATH_PLANNING:
+                if (self.is_Path_Available()): # Path exists!
+                    self.path_exists()
+                else: # Path doesn't exist!
+                    print("Retrying path planning after waiting")
+                    # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+                    sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code 
+            case IW_STATE.TRAVELLING_TO_SUPPLY:
+                if (self.check_supply_location()):
+                    self.handle_travelling_to_supply()
             # case IW_STATE.TRANSPORTING_BLOCK:
             #     self.handle_transporting_block()
             # case IW_STATE.PLACING_BLOCK:
@@ -45,21 +53,88 @@ class Inchworm:
 
     
     ##### Checkers and Handlers
-    def handle_idle(self):
-        print("IDILING...")
 
     # Handlers 
+
+    # added this func incase we need it in the future
+    def handle_idle():
+        print("IDLINGGG....")
+    
+    # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
+    # and transfer the block location to the seed block
+    def handle_initilization(self):
+        print("INITIALIZATION...")
+        # path plan to the seed block location from the supply depot
+
+        print("Initializing the block")
+        # pick up the block infornt of it
+        
+        print("Transferring the block data")
+        # transfer the block location data 
+        # TODO: MOOO help 
+        # send a 1D array ended with the Initialization enum OxFA 
+        # flash block that it's in unplaced location
+    
     def handle_IW_gets_Map(self):
         print("Map snapshot successful. Transitioning to PATH_PLANNING...")
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
 
+    def path_exists(self):
+        # MOOOO HELPPP 
+        print("Sending the IW path to the structure")
+        # IW sends it's path to the structure 
+
+        print("Travelling to the supply")
+        # IW begins travelling to supply location
+
+        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+        print(f"Current inchworm state: {self.state}")
+    
+    def swdvsdvf(self):
+        print("Path exists. Transitioning to PATH_PLANNING...")
+        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+        print(f"Current inchworm state: {self.state}")
+
     # Checkers
     def IW_gets_Map_Snapshot(self):
+        # blah blah low level language 
+        # TODO: ask Mo for help when the IW gets the map SnapShot back 
+        # return true if the IW got the map snapshot
+
         got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
         if got_map_snapshot.lower() == 'yes':
             return True
         elif got_map_snapshot.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+    
+    def is_Path_Available(self):
+        # # question how do we know if this path is the most upto date path
+        # return not IW_Path == [] # return if IW_path is empty or not (True: if not empty)
+        # TODO: add the path planning stuff 
+        print("Planning path from supply to the next block")
+        # IW path plans to the supply and to the next block
+        # store that path in IW_path 
+
+        print("Checking path availability...")
+        is_Path_Available = input("Is Path Available? (yes/no) \n")
+        if is_Path_Available.lower() == 'yes':
+            return True
+        elif is_Path_Available.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+
+    def check_supply_location(self):
+        # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
+        print("Checking if at supply location...")
+        
+        IW_in_supply = input("Is iW in supply? (yes/no) \n")
+        if IW_in_supply.lower() == 'yes':
+            return True
+        elif IW_in_supply.lower() == 'no':
             return False
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
@@ -94,19 +169,9 @@ class Inchworm:
     # Callback for state hooks
     
 
-    def check_path_availability(self):
-        print("Checking path availability...")
-        if self.is_Path_Available():
-            print("Path is available. Transitioning to TRAVELLING_TO_SUPPLY...")
-            self.to_TRAVELLING_TO_SUPPLY()  # Move to the next state automatically
-        else:
-            print("Path is not available. Retrying...")
+    
 
-    def check_supply_location(self):
-        print("Checking if at supply location...")
-        if self.is_IW_in_supply():
-            print("At supply location. Transitioning to TRANSPORTING_BLOCK...")
-            self.to_TRANSPORTING_BLOCK()  # Move to the next state automatically
+    
 
     def check_block_location(self):
         print("Checking if at block location...")
@@ -128,24 +193,11 @@ class Inchworm:
         print("An error occurred.")
 
     # Condition methods
-    def IW_gets_Map_Snapshot(self):
-        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        if got_map_snapshot.lower() == 'yes':
-            return True
-        elif got_map_snapshot.lower() == 'no':
-            return False
-        else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
-            return self.IW_gets_Map_Snapshot()  # Recursively ask again
 
 
-    def is_Path_Available(self):
-        is_Path_Available = input("Is Path Available? \n")
-        return is_Path_Available
+    
 
-    def is_IW_in_supply(self):
-        IW_in_supply = input("Is iW in supply? \n")
-        return IW_in_supply
+    
 
     def is_IW_in_block_location(self):
         IW_in_block_location = input("Is IW in block location? \n")
