@@ -21,7 +21,7 @@ class Inchworm:
         self.id = id
         self.orientation = orientation
         self.paths = paths
-        self.current_map = path_planning.initialize_grid_with_structures(path_planning.grid_size)
+        self.current_map = path_planning.initialize_grid_with_structures()
         self.final_structure = final_structure
         self.lead_foot_loc = location
         self.holding_block = holding_block

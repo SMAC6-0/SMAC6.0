@@ -68,7 +68,7 @@ class SimData:
     def run_sim(self): 
 
         # initialize the map as the blocks/structure knows it
-        empty_map = path_planning.initialize_grid_with_structures(path_planning.grid_size)
+        empty_map = path_planning.initialize_grid_with_structures()
         # TODO: replace the param --> set grid size in config?
 
         # Initialize inchworms 

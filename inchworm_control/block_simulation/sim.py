@@ -84,7 +84,7 @@ def update():
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOCS[0], BD_LOCS[1], BD_LOCS[2], 'n') # consider changing accessing the supply depot to be through sim_data.py
+        spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
         sim_data.existing_inchworms[0].plan_path(sim_data.misc_blocks, sim_data.found_structures)
         key_p_pressed = True
 
