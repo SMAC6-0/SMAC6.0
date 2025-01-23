@@ -1,6 +1,7 @@
 # Install Ursina before using this "pip install ursina"
 # Tutorial https://www.youtube.com/watch?v=DHSRaVeQxIk
 # What are you doing here?!
+# This file facilitates the operation of the simulation itself: frame updates, button presses, etc.
 
 # Imports
 from ursina import *
@@ -8,7 +9,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
 from path_conversion import * 
-from config import CURRENT_LOC, BD_LOC, DEMO
+from config import CURRENT_LOC, BD_LOC1, DEMO
 import copy 
 
 app = Ursina()
@@ -42,6 +43,7 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed = False
+key_esc_pressed = False
 placed_block = None 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
@@ -58,7 +60,7 @@ prev_point = point
 
 # Updates every frame
 def update():
-    global blocks_placed, key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
+    global blocks_placed, key_g_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_esc_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
@@ -100,9 +102,9 @@ def update():
 
     # Generate paths and inchworm steps
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n')
+        spawn_cube(BD_LOC1[0], BD_LOC1[1], BD_LOC1[2], 'n')
         sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        coords_to_spawn, path_steps , goal= dev_total_path_steps(found_structures, sorted_list)
+        coords_to_spawn, path_steps, goal = dev_total_path_steps(found_structures, sorted_list)
         step_getter(path_steps)
         for point in goal:
             point[1] += 1  # Increment the second value
@@ -180,8 +182,6 @@ def update():
         prev_point = point
         key_n_pressed = False
 
-
-
 # writes steps to a txt file              
 def step_getter(steps):
     complete_steps = copy.deepcopy(steps)
@@ -221,7 +221,9 @@ class Voxel(Button):
         )
 
     # What happens to blocks on inputs
-    def input(self,key):
+    def input(self, key):
+        global key_esc_pressed
+        
         if self.hovered:
             if key == "left mouse down":
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
@@ -234,6 +236,13 @@ class Voxel(Button):
                 except Exception as e: 
                     print("Block not found")
                 destroy(self)
+                
+        if key == "escape":
+            if not key_esc_pressed:
+                stop_simulation()
+                key_esc_pressed = True
+            elif key == "escape up":
+                key_esc_pressed - False
 
 # Skybox
 class Sky(Entity):
@@ -365,6 +374,10 @@ def check_block_color(x, y, z):
                 print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
     return block_color
+
+def stop_simulation():
+    print("User pressed 'ESC'. Stopping simulation...")
+    application.quit()
 
 # spawns a cude in the simulation at the specified position and with the specified color
 def spawn_cube(x, y, z, color_index):
