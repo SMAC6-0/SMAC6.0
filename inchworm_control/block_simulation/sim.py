@@ -77,25 +77,24 @@ def update():
     # Search(Look) for structures
     if held_keys["l"]:
         sim_data.found_structures, sim_data.misc_blocks = show_structures()
-        # print("found structures: ", sim_data.found_structures)
         print("misc blocks: ", sim_data.misc_blocks)
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n') # consider changing accessing the supply depot to be through sim_data.py
-        sim_data.plan_path()
+        sim_data.existing_inchworms[0].plan_path(sim_data.misc_blocks, sim_data.found_structures)
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and sim_data.coords_to_spawn: # simulates the stepping of the leading leg
+    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].coords_to_spawn: # simulates the stepping of the leading leg
         # coords_to_spawn verifies that a path exists before trying to do anything
 
         # TODO: consider moving block tracking to sim_data
         # for each inchrorm: 
             # get next point in that inchworm's path 
-        x, z, y = sim_data.get_next_point()
+        x, z, y = sim_data.get_next_steps()
             # store x z y coords in list of tuples
 
         # for each set of x z y in list of next blocks 
@@ -123,11 +122,11 @@ def update():
             # TODO: modify path planning so that not every inchworm goes to every block (just do every other or split)
 
             # Checks for visuals at goal location
-            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.goal[sim_data.goal_progress_index])):
+            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.existing_inchworms[0].goal[sim_data.existing_inchworms[0].goal_progress_index])):
                 # IW reaches goal coords & places block 
                 last_block_original_texture = smart_block_texture
                 new_texture = smart_block_texture 
-                sim_data.goal_progress_index += 1
+                sim_data.existing_inchworms[0].goal_progress_index += 1
             else:
                 # The inchworm is not yet at the goal
                 new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
@@ -144,7 +143,7 @@ def update():
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, z2, y2 = sim_data.prev_point
+        x2, z2, y2 = sim_data.existing_inchworms[0].prev_point
         already_placed_block_2 = None
         for e in scene.entities:
             if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
@@ -166,7 +165,7 @@ def update():
             last_colored_block_2 = spawned_block_2
             last_block_original_texture_2 = smart_block_texture
 
-        sim_data.prev_point = sim_data.point
+        sim_data.existing_inchworms[0].prev_point = sim_data.existing_inchworms[0].point
         key_n_pressed = False
 
  
@@ -392,4 +391,5 @@ class FlyingFirstPersonController(FirstPersonController):
 player = FlyingFirstPersonController()
 sky = Sky()
 
+sim_data.run_sim()
 app.run()

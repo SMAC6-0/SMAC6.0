@@ -12,9 +12,10 @@ is located at its final position from the beginning.
 import copy
 from config import *
 # from inchworm_data import Inchworm
-# import map_data
+import path_planning
 from path_conversion import * 
 from search import search
+from TEMP import Inchworm
 
 
 
@@ -23,38 +24,21 @@ class SimData:
         self.blocks_placed = []
         self.found_structures = []
         self.misc_blocks = []
-        self.coords_to_spawn = [] # the complete path
-        # self.path_steps = None 
-        self.goal = []
-        self.goal_progress_index = 0
-
-        # TODO: make these custom to the inchworm 
-        # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-        self.point = CURRENT_LOC
-        self.prev_point = self.point
-        # self.holding_block
 
         # initialize the map as the blocks/structure knows it
         # empty_map = map_data.initialize_grid_with_structures()
-        existing_inchworms = []
-        initialized_inchworms = []
+        self.existing_inchworms = []
+        self.initialized_inchworms = []
         
 
-    def plan_path(self): 
-        # TODO: transfer this function to the inchworm class 
 
-        sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
-        self.coords_to_spawn, path_steps , self.goal= dev_total_path_steps(self.found_structures, sorted_list)
-        step_getter(path_steps)
-        for point in self.goal:
-            point[1] += 1  # Increment the second value
-
-    def get_next_point(self): 
-        (self.point, holding_block) = self.coords_to_spawn.pop(0)  # Get the next point
-        x, z, y = self.point
-        if holding_block:
-            z = z+1
-        return x, z, y
+    def get_next_steps(self): 
+        """
+        Returns all of the next steps that all inchworms will be taking
+        """
+        for inchworm in self.existing_inchworms: 
+            return inchworm.get_next_point()
+        # TODO: return a list of all the next points of travel
     
     def generate_pyramid(self, base_size):
         """
@@ -81,32 +65,19 @@ class SimData:
 
 
 
-def run_sim(): 
+    def run_sim(self): 
 
-    # initialize the map as the blocks/structure knows it
-    # empty_map = map_data.initialize_grid_with_structures()
-    existing_inchworms = []
-    initialized_inchworms = []
+        # initialize the map as the blocks/structure knows it
+        empty_map = path_planning.initialize_grid_with_structures(path_planning.grid_size)
+        # TODO: replace the param --> set grid size in config?
 
+        # Initialize inchworms 
+        inchworm_1 = Inchworm(1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC)
+        self.existing_inchworms.append(inchworm_1)
 
-    # Initialize inchworms 
-    # inchworm_1 = Inchworm(1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC)
-    # existing_inchworms.append(inchworm_1)
+        print("inchworms spawned")
+        #TODO: could set up for loop to initialize desired num of inchworms 
 
-
-    #TODO: could set up for loop to initialize desired num of inchworms 
-
-def step_getter(steps):
-    """
-    Write the steps to steps.txt
-    """
-    complete_steps = copy.deepcopy(steps)
-    file_path = "steps.txt"
-    
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
-# sim.app.run()
 
 def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):
     """
