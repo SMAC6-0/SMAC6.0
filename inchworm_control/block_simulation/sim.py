@@ -9,7 +9,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
 from path_conversion import * 
-from config import CURRENT_LOC, BD_LOC1, DEMO
+from config import CURRENT_LOC, BD_LOC1, BD_LOCS, DEMO
 import copy 
 from sim_data import SimData
 
@@ -84,7 +84,7 @@ def update():
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n') # consider changing accessing the supply depot to be through sim_data.py
+        spawn_cube(BD_LOCS[0], BD_LOCS[1], BD_LOCS[2], 'n') # consider changing accessing the supply depot to be through sim_data.py
         sim_data.existing_inchworms[0].plan_path(sim_data.misc_blocks, sim_data.found_structures)
         key_p_pressed = True
 
