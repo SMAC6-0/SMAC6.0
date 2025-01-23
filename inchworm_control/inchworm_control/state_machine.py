@@ -182,11 +182,11 @@ class Inchworm:
     #     print("IW startes to travel to supply")
     #     pass
 
-    def error_action(self):
-        print("OH NOOO ERROR OCCURED")
+    # def error_action(self):
+    #     print("OH NOOO ERROR OCCURED")
 
-        # stop the iW
-        # flash red light
+    #     # stop the iW
+    #     # flash red light
 
     def do_structure_complete(self):
         print("Structure is complete YIppeee")
@@ -211,9 +211,9 @@ class Inchworm:
     #     # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
     #     pass 
 
-    def is_IW_in_block_location(self):
-        # return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
-        pass 
+    # def is_IW_in_block_location(self):
+    #     # return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
+    #     pass 
 
     def incorrect_block_location(self):
         print("Block is placed in incorrect location?")
@@ -228,13 +228,13 @@ class Inchworm:
         pass
             
 
-# an instance of Inchworm Statemachine
-inchworm_sm = Inchworm()
+# # an instance of Inchworm Statemachine
+# inchworm_sm = Inchworm()
 
-# Simulate the state machine
-def run_Inchworm ():
-    print("Current inchworm state: {inchworm_sm.state}")
+# # Simulate the state machine
+# def run_Inchworm ():
+#     print("Current inchworm state: {inchworm_sm.state}")
 
 
-if __name__ == "__main__":
-    run_Inchworm()
+# if __name__ == "__main__":
+#     run_Inchworm()

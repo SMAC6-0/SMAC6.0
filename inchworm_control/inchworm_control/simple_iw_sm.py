@@ -14,10 +14,14 @@ class IW_STATE(Enum):
     ERROR = 6
     STRUCTURE_COMPLETE = 7
 
+
+
 PATH_PLANNING_TIMER = 3
 class Inchworm:
     def __init__(self):
         self.state = IW_STATE.INITIALIZATION
+
+        self.initilization_flag = True
 
         while True: 
             self.update_state()
@@ -29,7 +33,8 @@ class Inchworm:
             case IW_STATE.IDLE:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
-                self.handle_initilization()
+                if self.initilization_flag:
+                    self.handle_initilization()
                 if (self.IW_gets_Map_Snapshot()): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -40,10 +45,15 @@ class Inchworm:
                     # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
                     sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code 
             case IW_STATE.TRAVELLING_TO_SUPPLY:
-                if (self.check_supply_location()):
+                if (self.is_IW_in_supply()):
                     self.handle_travelling_to_supply()
-            # case IW_STATE.TRANSPORTING_BLOCK:
-            #     self.handle_transporting_block()
+                else:
+                    self.handle_error()
+            case IW_STATE.TRANSPORTING_BLOCK:
+                if (self.is_IW_in_block()):
+                    self.handle_transporting_block()
+                else:
+                    self.handle_error()
             # case IW_STATE.PLACING_BLOCK:
             #     self.handle_placing_block()
             # case IW_STATE.ERROR:
@@ -63,20 +73,23 @@ class Inchworm:
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
     def handle_initilization(self):
-        print("INITIALIZATION...")
+        print("MOVINGGG...")
         # path plan to the seed block location from the supply depot
 
         print("Initializing the block")
-        # pick up the block infornt of it
+        # touch the block infornt of it
+
+        self.initilization_flag = False
         
+    def handle_IW_gets_Map(self):
+        print("Map snapshot successful.")
+
         print("Transferring the block data")
         # transfer the block location data 
         # TODO: MOOO help 
         # send a 1D array ended with the Initialization enum OxFA 
         # flash block that it's in unplaced location
-    
-    def handle_IW_gets_Map(self):
-        print("Map snapshot successful. Transitioning to PATH_PLANNING...")
+
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
 
@@ -91,10 +104,39 @@ class Inchworm:
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(f"Current inchworm state: {self.state}")
     
-    def swdvsdvf(self):
-        print("Path exists. Transitioning to PATH_PLANNING...")
-        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+    def handle_travelling_to_supply(self):
+        print("Touching the new block")
+        # touch the new block
+
+        print("IW flashes block with it's location")
+        # MO HHELLPP MEEEE 
+        
+        self.state = IW_STATE.TRANSPORTING_BLOCK
         print(f"Current inchworm state: {self.state}")
+
+    def handle_transporting_block(self):
+        print("IW sends a messgae indicating block is being placed")
+        # IW sends a messgae indicating block is being placed
+        # MOOOOO HELPPPP
+
+        print("Travelling to the block location")
+        # IW begins travelling to block location
+
+        self.state = IW_STATE.PLACING_BLOCK
+        print(f"Current inchworm state: {self.state}")
+
+    def handle_error(self):
+        print("OHHH NOOO, ERROR ERROR")
+
+        print("Stop Inchworm")
+        # stop the inchworm
+        
+        print("flash red LED")
+        # flash red Led 
+
+        self.state = IW_STATE.IDLE
+        print(f"Current inchworm state: {self.state}")
+        
 
     # Checkers
     def IW_gets_Map_Snapshot(self):
@@ -127,14 +169,26 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
-    def check_supply_location(self):
+    def is_IW_in_supply(self):
         # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)
         print("Checking if at supply location...")
-        
+
         IW_in_supply = input("Is iW in supply? (yes/no) \n")
         if IW_in_supply.lower() == 'yes':
             return True
         elif IW_in_supply.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+
+    def is_IW_in_block(self):
+        #  return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
+        print("Checking if at block location...")
+
+        IW_in_block = input("Is iW in block location? (yes/no) \n")
+        if IW_in_block.lower() == 'yes':
+            return True
+        elif IW_in_block.lower() == 'no':
             return False
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
