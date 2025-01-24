@@ -15,7 +15,7 @@ from config import *
 import map_data
 from path_conversion import * 
 from search import search
-from inchworm_control.block_simulation.inchworm_data import Inchworm
+from inchworm_data import Inchworm
 
 
 
@@ -62,10 +62,20 @@ class SimData:
         simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
+    
+    def receive_IW_update(self, update_msg): 
+        """
+        Structure receives update & processes it
+        """
+        pass 
+
+    def send_current_map(self): 
+        """ send current structure to IWs in contact w structure"""
+        pass
 
 
 
-    def run_sim(self): 
+    def spawn_inchworms(self): 
 
         # initialize the map as the blocks/structure knows it
         empty_map = map_data.initialize_grid_with_structures()

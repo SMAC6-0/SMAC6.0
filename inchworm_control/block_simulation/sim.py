@@ -79,7 +79,7 @@ def update():
 
     # Search(Look) for structures
     if held_keys["l"]:
-        sim_data.found_structures, sim_data.misc_blocks = show_structures()
+        show_structures()
         print("misc blocks: ", sim_data.misc_blocks)
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
@@ -187,7 +187,6 @@ def show_structures():
     for block in sim_data.misc_blocks:
             delete_cube(block[0], block[1], block[2])
             spawn_cube(block[0], block[1], block[2], 'misc')
-    return sim_data.found_structures, sim_data.misc_blocks
 
 # Voxel (block) properties
 class Voxel(Button):
@@ -407,5 +406,5 @@ class FlyingFirstPersonController(FirstPersonController):
 player = FlyingFirstPersonController()
 sky = Sky()
 
-sim_data.run_sim()
+sim_data.spawn_inchworms()
 app.run()
