@@ -14,8 +14,6 @@ class IW_STATE(Enum):
     ERROR = 7
     STRUCTURE_COMPLETE = 8
 
-
-
 PATH_PLANNING_TIMER = 3
 class Inchworm:
     def __init__(self):
