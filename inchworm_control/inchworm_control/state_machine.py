@@ -188,10 +188,10 @@ class Inchworm:
     #     # stop the iW
     #     # flash red light
 
-    def do_structure_complete(self):
-        print("Structure is complete YIppeee")
-        # stop the iW
-        # flash green light
+    # def do_structure_complete(self):
+    #     print("Structure is complete YIppeee")
+    #     # stop the iW
+    #     # flash green light
 
 
 
@@ -215,17 +215,17 @@ class Inchworm:
     #     # return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
     #     pass 
 
-    def incorrect_block_location(self):
-        print("Block is placed in incorrect location?")
-        # return true if the IW gets "incorrectly placed block" from the structure 
-        pass
+    # def incorrect_block_location(self):
+    #     print("Block is placed in incorrect location?")
+    #     # return true if the IW gets "incorrectly placed block" from the structure 
+    #     pass
 
-    def is_structure_complete(self):
-        print("Structure is complete?")
+    # def is_structure_complete(self):
+    #     print("Structure is complete?")
 
-        # compare the current map and the blueprint
-        # return true if structure is complete and false otherwise
-        pass
+    #     # compare the current map and the blueprint
+    #     # return true if structure is complete and false otherwise
+    #     pass
             
 
 # # an instance of Inchworm Statemachine
