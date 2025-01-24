@@ -1,11 +1,12 @@
 from enum import Enum
 import copy
 from config import *
-import map_data 
-from map_data import Cell
+import path_planning 
+import path_conversion
+import map_data
 
 class Inchworm:
-    def __init__(self, id: int, orientation, paths: list[Cell], final_structure, location: list[int], holding_block=False):
+    def __init__(self, id: int, orientation, paths, final_structure, location: list[int], holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
@@ -16,6 +17,7 @@ class Inchworm:
             location (list[int]): the xzy location of the inchworm's leading foot. 
             holding_block (bool): True if the inchworm's leading foot is holding a block. 
         """
+        # Essential information for IW to keep track of
         self.id = id
         self.orientation = orientation
         self.paths = paths
@@ -23,6 +25,15 @@ class Inchworm:
         self.final_structure = final_structure
         self.lead_foot_loc = location
         self.holding_block = holding_block
+
+        # Path planning relevant vars
+        self.coords_to_spawn = [] # the complete path
+        self.goal = []
+        self.goal_progress_index = 0
+
+        # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
+        self.point = CURRENT_LOC
+        self.prev_point = self.point
 
     def update_current_map(self, map): 
         """
@@ -33,9 +44,36 @@ class Inchworm:
         self.current_map = map
 
     def clear_my_path(self): 
+        print("i cleared my path")
         pass
 
-    def plan_path(self, end): 
-        pass
+    
+    def plan_path(self, misc_blocks, found_structures): 
+        # TODO: transfer this function to the inchworm class 
 
-    # TODO: insert state machine here 
+        sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
+        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(found_structures, sorted_list)
+        step_getter(path_steps)
+        for point in self.goal:
+            point[1] += 1  # Increment the second value
+
+    def get_next_point(self): 
+        """ 
+        Returns the set of the next points of inchworm travel
+        """
+        (self.point, holding_block) = self.coords_to_spawn.pop(0)  # Get the next point
+        x, z, y = self.point
+        if holding_block:
+            z = z+1
+        return x, z, y
+
+def step_getter(steps):
+    """
+    Write the steps to steps.txt
+    """
+    complete_steps = copy.deepcopy(steps)
+    file_path = "steps.txt"
+    
+    with open(file_path, 'w') as file:
+        for step in complete_steps:
+            file.write(f"{step}\n")

@@ -12,10 +12,10 @@ is located at its final position from the beginning.
 import copy
 from config import *
 # from inchworm_data import Inchworm
-import path_planning
+import map_data
 from path_conversion import * 
 from search import search
-from TEMP import Inchworm
+from inchworm_control.block_simulation.inchworm_data import Inchworm
 
 
 
@@ -68,7 +68,7 @@ class SimData:
     def run_sim(self): 
 
         # initialize the map as the blocks/structure knows it
-        empty_map = path_planning.initialize_grid_with_structures()
+        empty_map = map_data.initialize_grid_with_structures()
         # TODO: replace the param --> set grid size in config?
 
         # Initialize inchworms 
