@@ -43,32 +43,33 @@ def convert_path_coords_to_steps(grid, path_start, path_end, curr_location, curr
             x, z, y = current_coord
             current_coord = [x, z-1, y]
             
-        end_flag = bool(next_coord == BD_LOC1)
-        path_step, orientation = convert_coordinate_to_steps(current_coord, next_coord, curr_orientation, is_holding_block, end_flag)
+        # end_flag = bool(next_coord == BD_LOC1)
+        # path_step, orientation = convert_coordinate_to_steps(current_coord, next_coord, curr_orientation, is_holding_block, end_flag)
 
-        steps.append(path_step)
-        curr_orientation = orientation
-        # # get the movement direction and the new orientation
-        # movement_direction, new_orientation = get_direction(current_coord, next_coord)
+        # steps.append(path_step)
+        # curr_orientation = orientation
+        
+        # get the movement direction and the new orientation
+        movement_direction, new_orientation = get_direction(current_coord, next_coord)
 
-        # # if the next coord is the block depot, the next step should be a grabbing step
-        # if next_coord == BD_LOC1:
-        #     steps.append(("GRAB_{movement_direction}", is_holding_block))
+        # if the next coord is the block depot, the next step should be a grabbing step
+        if next_coord == BD_LOC1:
+            steps.append(("GRAB_{movement_direction}", is_holding_block))
             
-        # # if the next coordinate is the goal(and not BD), then we need to place the block
-        # elif next_coord == path_end:
-        #     steps.append(("PLACE_{movement_direction}", is_holding_block))
-        #     # once it places the block, the currnt location will be on top of where the block is
-        #     x, z, y = next_coord
-        #     next_coord = [x, z+1, y]
-        # else:
-        #     # general case
-        #     steps.append((update_steps(movement_direction), is_holding_block))
+        # if the next coordinate is the goal(and not BD), then we need to place the block
+        elif next_coord == path_end:
+            steps.append(("PLACE_{movement_direction}", is_holding_block))
+            # once it places the block, the currnt location will be on top of where the block is
+            x, z, y = next_coord
+            next_coord = [x, z+1, y]
+        else:
+            # general case
+            steps.append((update_steps(movement_direction), is_holding_block))
 
-        # # update the current location and orientation
-        # curr_location = next_coord
-        # if(new_orientation != "null"):
-        #     curr_orientation = new_orientation
+        # update the current location and orientation
+        curr_location = next_coord
+        if(new_orientation != "null"):
+            curr_orientation = new_orientation
 
     return path_coords, steps
 
