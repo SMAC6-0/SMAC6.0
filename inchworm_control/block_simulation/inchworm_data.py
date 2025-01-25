@@ -2,6 +2,7 @@ from enum import Enum
 import copy
 from config import *
 import path_planning 
+from bfs_path_planning import *
 import path_conversion
 import map_data
 from time import sleep
@@ -20,7 +21,10 @@ class IW_STATE(Enum):
 PATH_PLANNING_TIMER = 3
 
 class Inchworm:
-    def __init__(self, id: int, orientation, paths, final_structure, location: list[int], holding_block=False):
+    next_id = 1
+    inchworm_list = []
+    
+    def __init__(self, orientation, paths, final_structure, location: list[int], holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
@@ -32,7 +36,7 @@ class Inchworm:
             holding_block (bool): True if the inchworm's leading foot is holding a block. 
         """
         # Essential information for IW to keep track of
-        self.id = id
+        self.id = Inchworm.next_id
         self.orientation = orientation
         self.paths = paths
         self.current_map = map_data.initialize_grid_with_structures()
@@ -53,6 +57,15 @@ class Inchworm:
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
         self.print_flag = True
+        
+        Inchworm.next_id += 1
+        Inchworm.inchworm_list.append(self)
+    
+    def __del__(self):
+        """
+        Deletion of inchworm in the list of inchworms.
+        """
+        Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
 
     def update_current_map(self, map): 
         """
@@ -70,10 +83,17 @@ class Inchworm:
     
     def plan_path(self, misc_blocks, found_structures): 
         # TODO: transfer this function to the inchworm class 
+        
+        # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
+        # for index in self.goal_progress_index:
+        #     path = bfs(self.current_map, start=self.lead_foot_loc, goal=self.goal[index], holding_block=self.holding_block)
+        #     self.paths.append(path)
+        
+        #     map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
 
         sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(found_structures, sorted_list)
-        step_getter(path_steps)
+        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(found_structures, sorted_list, self.lead_foot_loc, self.orientation)
+        self.step_getter(path_steps)
         for point in self.goal:
             point[1] += 1  # Increment the second value
 
@@ -86,6 +106,16 @@ class Inchworm:
         if holding_block:
             z = z+1
         return x, z, y
+    
+    def get_total_inchworms(cls):
+        """
+        Returns the total number of inchworms in the system
+        """
+        return len(cls.inchworm_list)
+        
+    def reset_inchworms(cls):
+        cls.next_id = 1
+        cls.inchworm_list.clear()
     
     ### STATE MACHINE 
 
@@ -323,16 +353,23 @@ class Inchworm:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
 
-def step_getter(steps):
-    """
-    Write the steps to steps.txt
-    """
-    complete_steps = copy.deepcopy(steps)
-    file_path = "steps.txt"
-    
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
+    def step_getter(self, path):
+        """
+        Write the steps to steps.txt
+        """
+        steps = []
+        for i in range(len(path) - 1):
+            curr_coord = path[i][0]
+            next_coord = path[i + 1][0] 
+            
+            end_flag = bool(i == len(path) - 1)
+            steps.append(map_data.convert_coordinate_to_steps(curr_coord, next_coord, self.orientation, self.is_holding_block, end_flag))
+        complete_steps = copy.deepcopy(steps)
+        file_path = "steps.txt"
+        
+        with open(file_path, 'w') as file:
+            for step in complete_steps:
+                file.write(f"{step}\n")
 
 if __name__ == "__main__":
     inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, CURRENT_LOC)

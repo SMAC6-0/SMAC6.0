@@ -1,0 +1,17 @@
+import map_data
+import bfs_path_planning
+
+grid = map_data.initialize_grid_with_structures()
+cool_coords = [7, 3, 9]
+cool_cell = map_data.create_cell(grid, cool_coords)
+
+start_coords = [10, 10, 10]
+end_coords = [20, 20, 20]
+start_cell = map_data.create_cell(grid, start_coords)
+goal_cell = map_data.create_cell(grid, end_coords)
+print("start: ", start_cell.is_obs)
+print("goal: ", goal_cell.is_obs)
+print("valid? ", map_data.is_valid_start_goal_3d(grid,start_coords, end_coords))
+goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start_coords, end_coords)
+path, num_steps = bfs_path_planning.find_path(grid, start_coords, end_coords, False)
+print(num_steps)

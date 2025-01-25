@@ -2,24 +2,26 @@ import copy
 import numpy as np
 from enum import Enum
 from path_planning import *
-from config import BD_LOC1, CURRENT_LOC, CURRENT_ORIENTATION, InchwormOrientation, DEMO
+import bfs_path_planning
+from map_data import *
+from config import BD_LOC1
 
-def convert_path_coords_to_steps(grid, path_start, path_end):
+def convert_path_coords_to_steps(grid, path_start, path_end, curr_location, curr_orientation):
     """
-    Converts the list of coordinates from a pathplanning algorithm into inchworm movesets
+    Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0) or not (1). 
-        path_start (tuple): .
-        path_end (tuple): .
+        path_start (tuple): The starting position of the path.
+        path_end (tuple): The ending position of the path.
     Returns:
         grid: (list): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
-    global CURRENT_LOC, CURRENT_ORIENTATION
 
     # get the path
-    path_coords, num_steps = bfs_3d(grid, path_start, path_end)
+    # path_coords, num_steps = bfs_3d(grid, path_start, path_end)
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block=False, prioritize_vertical=False)
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
@@ -40,28 +42,33 @@ def convert_path_coords_to_steps(grid, path_start, path_end):
         if current_coord == BD_LOC1:
             x, z, y = current_coord
             current_coord = [x, z-1, y]
-
-        # get the movement direction and the new orientation
-        movement_direction, new_orientation = get_direction(current_coord, next_coord)
-
-        # if the next coord is the block depot, the next step should be a grabbing step
-        if next_coord == BD_LOC1:
-            steps.append(("GRAB_{movement_direction}", is_holding_block))
             
-        # if the next coordinate is the goal(and not BD), then we need to place the block
-        elif next_coord == path_end:
-            steps.append(("PLACE_{movement_direction}", is_holding_block))
-            # once it places the block, the currnt location will be on top of where the block is
-            x, z, y = next_coord
-            next_coord = [x, z+1, y]
-        else:
-            # general case
-            steps.append((update_steps(movement_direction), is_holding_block))
+        end_flag = bool(next_coord == BD_LOC1)
+        path_step, orientation = convert_coordinate_to_steps(current_coord, next_coord, curr_orientation, is_holding_block, end_flag)
 
-        # update the current location and orientation
-        CURRENT_LOC = next_coord
-        if(new_orientation != "null"):
-            CURRENT_ORIENTATION = new_orientation
+        steps.append(path_step)
+        curr_orientation = orientation
+        # # get the movement direction and the new orientation
+        # movement_direction, new_orientation = get_direction(current_coord, next_coord)
+
+        # # if the next coord is the block depot, the next step should be a grabbing step
+        # if next_coord == BD_LOC1:
+        #     steps.append(("GRAB_{movement_direction}", is_holding_block))
+            
+        # # if the next coordinate is the goal(and not BD), then we need to place the block
+        # elif next_coord == path_end:
+        #     steps.append(("PLACE_{movement_direction}", is_holding_block))
+        #     # once it places the block, the currnt location will be on top of where the block is
+        #     x, z, y = next_coord
+        #     next_coord = [x, z+1, y]
+        # else:
+        #     # general case
+        #     steps.append((update_steps(movement_direction), is_holding_block))
+
+        # # update the current location and orientation
+        # curr_location = next_coord
+        # if(new_orientation != "null"):
+        #     curr_orientation = new_orientation
 
     return path_coords, steps
 
@@ -120,7 +127,7 @@ def update_steps(movement_direction):
             # "DIAGONAL_UP_2_RIGHT": "STEP_UP_2", "DIAGONAL_DOWN_2_RIGHT": "STEP_DOWN_2"
         }
     }
-    return step_mappings[CURRENT_ORIENTATION.name].get(movement_direction, "ERROR: invalid orientation")
+    return step_mappings[orientation.name].get(movement_direction, "ERROR: invalid orientation")
 
 # returns the direction of the movement and the new orientation
 def get_direction(current_coord, next_coord):
@@ -128,7 +135,7 @@ def get_direction(current_coord, next_coord):
     delta_y = next_coord[2] - current_coord[2]
     delta_z = next_coord[1] - current_coord[1] # this is the vertical difference
 
-    # these movements are relative to when you are looking normally at a x, y, z plane
+    # these movements are relative to when you are looking normally at a x, z, y plane
     movement_directions = {
         # horizontal & vertical movements
         (1, 0, 0): ('RIGHT', InchwormOrientation.EAST), 
@@ -143,10 +150,10 @@ def get_direction(current_coord, next_coord):
         (0, 1, 1): ('DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH), 
         (0, 1, -1): ('DIAGONAL_UP_BACK', InchwormOrientation.NORTH),
         # diagonal down movements
-        (1, -1, 0): ('DIAGONAL_UP_RIGHT', InchwormOrientation.EAST), 
-        (-1, -1, 0): ('DIAGONAL_UP_LEFT', InchwormOrientation.WEST),
-        (0, -1, 1): ('DIAGONAL_UP_FORWARD', InchwormOrientation.NORTH), 
-        (0, -1, -1): ('DIAGONAL_UP_BACK', InchwormOrientation.SOUTH),
+        (1, -1, 0): ('DIAGONAL_DOWN_RIGHT', InchwormOrientation.EAST), 
+        (-1, -1, 0): ('DIAGONAL_DOWN_LEFT', InchwormOrientation.WEST),
+        (0, -1, 1): ('DIAGONAL_DOWN_FORWARD', InchwormOrientation.NORTH), 
+        (0, -1, -1): ('DIAGONAL_DOWN_BACK', InchwormOrientation.SOUTH),
         # diagonal up 2 movements
         (1, 2, 0): ('DIAGONAL_UP_2_RIGHT', InchwormOrientation.EAST), 
         (-1, 2, 0): ('DIAGONAL_UP_2_LEFT', InchwormOrientation.WEST),
@@ -174,20 +181,25 @@ def get_direction(current_coord, next_coord):
             return value
         return 'error', InchwormOrientation.SOUTH
 
-def convert_directions_to_steps(current_coord, next_coord):
+def convert_directions_to_steps(current_coord, next_coord, orientation, is_holding_block, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
     
     Note: To make it more intuitive, think of it on the XY plane.
+          Because the leading foot never changes, there's no way for the inchworm to ever step 
+          diagonally backwards. Additionally, regular stepping forward and backward is just the 
+          inchworm turning and doing a right or left step.
 
     Args:
         current_coord (tuple): The current position (x, z, y).
         next_coord (tuple): The next position (x, z, y).
+        orientation (InchwormOrientation): The current orientation.
+        is_holding_block (boolean): Whether the inchworm is holding a block.
+        end_flag (boolean): Indicates the end of path.
 
     Returns:
-        step_mappings (string): 
-        is_holding_block (boolean): 
+        tuple: A formatted step name and the new orientation.
     """
     movement_vector = np.subtract(next_coord, current_coord)
     magnitude = int(np.linalg.norm(movement_vector))
@@ -198,31 +210,53 @@ def convert_directions_to_steps(current_coord, next_coord):
     
     normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
 
+    # Orientation here is based on NORTH.
     base_mappings = {
-        (1, 0, 0): ("STEP_RIGHT", InchwormOrientation.EAST),
-        (-1, 0, 0): ("STEP_LEFT", InchwormOrientation.WEST),
-        (0, 0, 1): ("STEP_FORWARD", InchwormOrientation.NORTH),
-        (0, 0, -1): ("STEP_BACK", InchwormOrientation.SOUTH),
-        (0, 1, 0): ("CLIMB_UP", "null"),
-        (0, -1, 0): ("CLIMB_DOWN", "null"),
+        ( 1,  0,  0): ("RIGHT", InchwormOrientation.EAST),
+        (-1,  0,  0): ("LEFT", InchwormOrientation.WEST),
+        ( 0,  0,  1): ("RIGHT", InchwormOrientation.NORTH),
+        ( 0,  0, -1): ("LEFT", InchwormOrientation.SOUTH),
+        ( 0,  1,  0): ("UP", orientation),
+        ( 0, -1,  0): ("DOWN", orientation),
         # Diagonal movements
-        (1, 1, 0): ("STEP_UP_RIGHT", InchwormOrientation.EAST),
-        (-1, 1, 0): ("STEP_UP_LEFT", InchwormOrientation.WEST),
-        (0, 1, 1): ("DIAGONAL_UP_FORWARD", InchwormOrientation.NORTH),
-        (0, 1, -1): ("DIAGONAL_UP_BACK", InchwormOrientation.SOUTH),
-        (1, -1, 0): ("STEP_DOWN_RIGHT", InchwormOrientation.EAST),
-        (-1, -1, 0): ("STEP_DOWN_LEFT", InchwormOrientation.WEST),
-        (0, -1, 1): ("DIAGONAL_DOWN_FORWARD", InchwormOrientation.NORTH),
-        (0, -1, -1): ("DIAGONAL_DOWN_BACK", InchwormOrientation.SOUTH),
+        ( 1,  1,  0): ("UP_RIGHT", InchwormOrientation.EAST),
+        (-1,  1,  0): ("UP_LEFT", InchwormOrientation.WEST),
+        ( 0,  1,  1): ("UP_FORWARD", InchwormOrientation.NORTH),
+        ( 0,  1, -1): ("UP_BACK", InchwormOrientation.SOUTH),
+        ( 1, -1,  0): ("DOWN_RIGHT", InchwormOrientation.EAST),
+        (-1, -1,  0): ("DOWN_LEFT", InchwormOrientation.WEST),
+        ( 0, -1,  1): ("DOWN_FORWARD", InchwormOrientation.NORTH),
+        ( 0, -1, -1): ("DOWN_BACK", InchwormOrientation.SOUTH),
     }
+    
+    orientation_transforms = {
+        "NORTH": lambda x, z, y: (x, z, y),  
+        "SOUTH": lambda x, z, y: (-x, z, -y),
+        "EAST": lambda x, z, y: (y, z, -x),  
+        "WEST": lambda x, z, y: (-y, z, x),  
+    }
+    
+    transform = orientation_transforms[orientation]
+    transformed_vector = transform(*normalized_vector)
 
-    # Check if the normalized vector matches a known direction
-    if normalized_vector in base_mappings:
-        step_name, orientation = base_mappings[normalized_vector]
+    if transformed_vector in base_mappings:
+        step_name, new_orientation = base_mappings[transformed_vector]
 
-        # If magnitude > 1, repeat the step multiple times
-        steps = [step_name] * magnitude
-        return steps, orientation
+        if magnitude > 1:
+            if "UP" in step_name or "DOWN" in step_name:
+                verticality = step_name.split("_")[0]
+                horizontality = step_name.split("_")[-1]
+                step_name = f"{verticality}_{magnitude}_{horizontality}"
+            else:
+                horizontality = step_name
+                step_name = f"{magnitude}_{horizontality}"
+        
+        if next_coord == BD_LOC1:
+            return "GRAB_{step_name}", new_orientation
+        elif is_holding_block & end_flag:
+            return "PLACE_{step_name}", new_orientation
+        else:
+            return "STEP_{step_name}", new_orientation
 
     # Handle undefined or unexpected movements
     print(f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
@@ -238,34 +272,33 @@ def determine_helper_blocks(grid, path_start, path_end):
 
 # once a block is placed, this function manually adds an extra coordinate to the path in order to simplfify the movement after the inchworm places a block
 # it then adds the extra coordinate and step to get there to complete_path and complete_steps
-def simplify_steps(PAST_LOC, complete_path, complete_steps):
-    global CURRENT_LOC, CURRENT_ORIENTATION
+def simplify_steps(PAST_LOC, complete_path, complete_steps, location, orientation):
     # Case 1 and 3 
-    if CURRENT_LOC[0] < BD_LOC1[0]:
+    if location[0] < BD_LOC1[0]:
         new_start = [PAST_LOC[0]+2, PAST_LOC[1], PAST_LOC[2]]
-    elif CURRENT_LOC[0] > BD_LOC1[0]:
+    elif location[0] > BD_LOC1[0]:
         new_start = [PAST_LOC[0]-2, PAST_LOC[1], PAST_LOC[2]]
     else:
         print("you are already on the block depot") 
 
     # in this case, get_direction returns the correct step, so no need to call update_steps
-    movement_direction, new_orientation = get_direction(CURRENT_LOC, new_start)
+    movement_direction, new_orientation = get_direction(location, new_start)
 
     # add these values to the complete path and steps
     complete_steps.append((movement_direction, False))
     complete_path.append((new_start, False))
 
-    # update the current location and orientation
+    # update the current location an orientation
     if(new_orientation != "null"):
-        CURRENT_ORIENTATION = new_orientation
-    CURRENT_LOC = new_start
+        orientation = new_orientation
+    location = new_start
     
     return complete_path, complete_steps  
 
 # returns: 
 # -a list of all the path coords for all the structures like [[(x1, y1, z1), (x2, y2, z2), ...], [(x1, y1, z1), (x2, y2, z2), ...], ...]
 # -a list of all the steps to build all the structures like [(STEP_FORWARD, False), (STEP_LEFT, False), ...] Note: the boolean indicates in the inchworm is holding a block or not
-def dev_total_path_steps(structures, misc_blocks):
+def dev_total_path_steps(structures, misc_blocks, location, orientation):
     grid = initialize_grid_with_structures()
     update_grid_with_structure(grid, BD_LOC1)
     complete_path = []
@@ -283,10 +316,10 @@ def dev_total_path_steps(structures, misc_blocks):
             # should go from current location to block depot, then from block depot to block until last block in structure
             list_of_structure_coords = structure[1]
             for coord in list_of_structure_coords:
-                PAST_LOC = copy.deepcopy(CURRENT_LOC)
+                PAST_LOC = copy.deepcopy(location)
                 print("corod: ", coord)
                 # get path and steps from current location to block depot
-                bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC1)
+                bd_path, bd_steps = convert_path_coords_to_steps(grid, location, BD_LOC1, location, orientation)
                 print("bd_path: ", bd_path)
                 # pop the first value in list of path coords to remove repeat coords
                 bd_path.pop(0)
@@ -299,7 +332,7 @@ def dev_total_path_steps(structures, misc_blocks):
                 list_of_goals.append(new_coord)
                 
                 # get path and steps from current location to coordinate in structure
-                block_path, block_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, new_coord)
+                block_path, block_steps = convert_path_coords_to_steps(grid, location, new_coord, location, orientation)
                 # update grid to indicate that the placed block can now be walked on
                 grid = update_grid_with_structure(grid, coord)
 
@@ -317,7 +350,7 @@ def dev_total_path_steps(structures, misc_blocks):
 
                 # simplify the step after placing if it is the demo and it's not the last block in the structure
                 if DEMO == True and coord != list_of_structure_coords[-1]:
-                    complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps)
+                    complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps, location, orientation)
     if not misc_blocks:
         print("No misc_block.")
     else:
@@ -325,10 +358,10 @@ def dev_total_path_steps(structures, misc_blocks):
         # at this point, we have paths and stepa for each block in each structure, but not the miscellanous blocks
         # search for path and steps for each miscellanous block, and add it to the complete path and steps
         for coord in misc_blocks:
-            PAST_LOC = copy.deepcopy(CURRENT_LOC)
+            PAST_LOC = copy.deepcopy(location)
 
             # get path and steps from current location to block depot  
-            bd_path, bd_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, BD_LOC1)
+            bd_path, bd_steps = convert_path_coords_to_steps(grid, location, BD_LOC1, location, orientation)
 
             # pop the first value in list of path coords to remove repeat coords
             try:
@@ -343,7 +376,7 @@ def dev_total_path_steps(structures, misc_blocks):
             list_of_goals.append(new_coord)
             
             # get path and steps from current location to coordinate in structure
-            block_path, block_steps = convert_path_coords_to_steps(grid, CURRENT_LOC, new_coord)
+            block_path, block_steps = convert_path_coords_to_steps(grid, location, new_coord, location, orientation)
             # update grid to indicate that the placed block can now be walked on
             grid = update_grid_with_structure(grid, coord)
 
@@ -358,6 +391,6 @@ def dev_total_path_steps(structures, misc_blocks):
 
             # simplify the step after placing if it is the demo
             if DEMO == True:
-                complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps)
+                complete_path, complete_steps = simplify_steps(PAST_LOC, complete_path, complete_steps, location, orientation)
 
     return complete_path, complete_steps, list_of_goals
