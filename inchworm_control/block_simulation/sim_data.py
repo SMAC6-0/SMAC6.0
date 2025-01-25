@@ -23,6 +23,9 @@ class SimData:
     def __init__(self): 
         self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
         self.blocks_placed = []
+        self.incoming_blocks = [] 
+        self.all_paths = []
+        self.supply_depot = []
         
         self.existing_inchworms = []
         self.initialized_inchworms = []

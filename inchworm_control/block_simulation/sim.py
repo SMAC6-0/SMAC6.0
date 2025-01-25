@@ -19,7 +19,7 @@ sim_data = SimData()
 # stltovoxel /Users/canguven/Downloads/tower.stl /Users/canguven/Downloads/yarrak.xyz  --resolution 50
 
 # Variables
-sky_texture = load_texture("Assets/Textures/skybox.png")
+sky_texture = load_texture("Assets/Textures/Skybox.png")
 white_block_texture = load_texture("Assets/Textures/white_block.png")
 smart_block_texture = load_texture("Assets/Textures/smart_block_new.png")
 smart_block_texture_step = load_texture("Assets/Textures/smart_block_step_new.png")
@@ -213,11 +213,12 @@ class Voxel(Button):
                 destroy(self)
                 
         if key == "escape":
-            if not key_esc_pressed:
-                stop_simulation()
-                key_esc_pressed = True
-            elif key == "escape up":
-                key_esc_pressed - False
+            stop_simulation()
+            # if not key_esc_pressed:
+            #     stop_simulation()
+            #     key_esc_pressed = True
+            # elif key == "escape up":
+            #     key_esc_pressed = False
 
 # Skybox
 class Sky(Entity):
