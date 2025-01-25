@@ -3,6 +3,14 @@ from transitions import Machine
 import time
 from time import sleep
 
+## UART stuff
+UART_BAUD = 9600 # config
+# setup uart 
+# uart1 = UART(0,)
+
+SUPPLY_LOCATION = [1, 1, 1] # config
+
+
 # Inchworm states
 class IW_STATE(Enum):
     IDLE = 1 # added this incase we need to use it
