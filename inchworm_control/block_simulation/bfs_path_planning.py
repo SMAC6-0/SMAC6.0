@@ -36,12 +36,12 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical=False):
             print(f"Path found: {path}")
             return path, steps
         
-        for dx, dy, dz in neighbor_directions:
-            nx, ny, nz = current_cell.x + dx, current_cell.y + dz, current_cell.z + dy
-            neighborCoord = nx, ny, nz
-            if map_data.is_valid_position_3d(grid, (neighborCoord)) and not grid[nx][nz][ny] and not visited[nx][nz][ny]:
+        for dx, dz, dy in neighbor_directions:
+            nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
+            neighbor_coord = nx, nz, ny
+            if map_data.is_valid_position_3d(grid, (neighbor_coord)) and (grid[nx][nz][ny] == 0) and not visited[nx][nz][ny]:
                 visited[nx][nz][ny] = True
-                neighbor = map_data.create_cell(grid, neighborCoord)
+                neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
     

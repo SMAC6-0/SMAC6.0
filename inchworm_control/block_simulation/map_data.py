@@ -160,7 +160,6 @@ def rework_path_3d(curr_cell, is_holding_block):
     path = []
     while curr_cell:
         path.append(([curr_cell.x, curr_cell.z, curr_cell.y], is_holding_block))
-        print("reversed path")
         curr_cell = curr_cell.parent
     return path[::-1], len(path) - 1
 
@@ -201,7 +200,7 @@ def is_valid_position_3d(grid, coords):
     x, z, y = coords[0], coords[1], coords[2]
     if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
         return True
-    raise ValueError(f"Error: Invalid position at {coords}.") 
+    # raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):
     """
@@ -231,7 +230,7 @@ def is_valid_start_goal_3d(grid, start, goal):
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
-    return start_cell.is_obs and goal_cell.is_obs
+    return not (start_cell.is_obs and goal_cell.is_obs)
     
 def start_search_3d(grid, start, goal):
     """
@@ -260,7 +259,7 @@ def handle_block_depot():
     #TODO
     pass
 
-def convert_coordinate_to_steps(current_coord, next_coord, orientation, is_holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is_holding_block, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -271,8 +270,8 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, is_holdi
           inchworm turning and doing a right or left step.
 
     Args:
-        current_coord (tuple): The current position (x, z, y).
-        next_coord (tuple): The next position (x, z, y).
+        current_coord (tuple()): The current position (x, z, y).
+        next_coord (tuple[tuple())): The next position (x, z, y).
         orientation (InchwormOrientation): The current orientation.
         is_holding_block (boolean): Whether the inchworm is holding a block.
         end_flag (boolean): Indicates the end of path.
@@ -287,17 +286,39 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, is_holdi
         print("Warning: No movement required.")
         return [], "null"
     
+    # If horizontally diagonal, needs to split into 2 sequential steps.
+    if abs(movement_vector[0]) > 0 and abs(movement_vector[2]) > 0:  # Diagonal in x-y plane
+        intermediate_coord = ((int(current_coord[0] + np.sign(movement_vector[0])), current_coord[1], current_coord[2]))
+        
+        # Process the two components
+        step1, orientation1 = convert_coordinate_to_steps(grid, current_coord, intermediate_coord, orientation, is_holding_block, end_flag)
+        step2, orientation2 = convert_coordinate_to_steps(grid, intermediate_coord, next_coord, orientation1, is_holding_block, end_flag)
+        
+        combined_steps = f"{step1}\n{step2}"
+        return combined_steps, orientation2
+    
     normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
-
+    
+    orientation_transforms = {
+        InchwormOrientation.NORTH: lambda x, z, y: (x, z, y),  
+        InchwormOrientation.SOUTH: lambda x, z, y: (-x, z, -y),
+        InchwormOrientation.EAST: lambda x, z, y: (y, z, -x),  
+        InchwormOrientation.WEST: lambda x, z, y: (-y, z, x),  
+    }
+    
+    transform = orientation_transforms[orientation]
+    transformed_vector = transform(*normalized_vector)
+    
     # Orientation here is based on NORTH.
     base_mappings = {
+        # Horizontal movements
         ( 1,  0,  0): ("RIGHT", InchwormOrientation.EAST),
         (-1,  0,  0): ("LEFT", InchwormOrientation.WEST),
         ( 0,  0,  1): ("RIGHT", InchwormOrientation.NORTH),
         ( 0,  0, -1): ("LEFT", InchwormOrientation.SOUTH),
         ( 0,  1,  0): ("UP", orientation),
         ( 0, -1,  0): ("DOWN", orientation),
-        # Diagonal movements
+        # Vertically diagonal movements
         ( 1,  1,  0): ("UP_RIGHT", InchwormOrientation.EAST),
         (-1,  1,  0): ("UP_LEFT", InchwormOrientation.WEST),
         ( 0,  1,  1): ("UP_FORWARD", InchwormOrientation.NORTH),
@@ -307,16 +328,6 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, is_holdi
         ( 0, -1,  1): ("DOWN_FORWARD", InchwormOrientation.NORTH),
         ( 0, -1, -1): ("DOWN_BACK", InchwormOrientation.SOUTH),
     }
-    
-    orientation_transforms = {
-        "NORTH": lambda x, z, y: (x, z, y),  
-        "SOUTH": lambda x, z, y: (-x, z, -y),
-        "EAST": lambda x, z, y: (y, z, -x),  
-        "WEST": lambda x, z, y: (-y, z, x),  
-    }
-    
-    transform = orientation_transforms[orientation]
-    transformed_vector = transform(*normalized_vector)
 
     if transformed_vector in base_mappings:
         step_name, new_orientation = base_mappings[transformed_vector]
@@ -331,11 +342,11 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, is_holdi
                 step_name = f"{magnitude}_{horizontality}"
         
         if next_coord == BD_LOC1:
-            return "GRAB_{step_name}", new_orientation
+            return f"GRAB_{step_name}", new_orientation
         elif is_holding_block & end_flag:
-            return "PLACE_{step_name}", new_orientation
+            return f"PLACE_{step_name}", new_orientation
         else:
-            return "STEP_{step_name}", new_orientation
+            return f"STEP_{step_name}", new_orientation
 
     # Handle undefined or unexpected movements
     print(f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
