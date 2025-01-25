@@ -80,12 +80,11 @@ def update():
     # Search(Look) for structures
     if held_keys["l"]:
         show_structures()
-        print("misc blocks: ", sim_data.misc_blocks)
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
-        sim_data.existing_inchworms[0].plan_path(sim_data.misc_blocks, sim_data.found_structures)
+        sim_data.existing_inchworms[0].plan_path()
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
@@ -174,19 +173,19 @@ def update():
 def show_structures():
     """
     Searches for known structures and changes the color of structures found. 
-    TODO: return prob unnecessary
     """
-    sim_data.found_structures, sim_data.misc_blocks = search(sim_data.blocks_placed)
-    for structure in sim_data.found_structures:
-        structure_pos = structure[1]  
-        structure_name = structure[0] #string
-        for block in structure_pos:
-            delete_cube(block[0], block[1], block[2])
-            spawn_cube(block[0], block[1], block[2], structure_name[-1])
-            #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
-    for block in sim_data.misc_blocks:
-            delete_cube(block[0], block[1], block[2])
-            spawn_cube(block[0], block[1], block[2], 'misc')
+    for inchworm in sim_data.existing_inchworms:
+        inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
+        for structure in inchworm.found_structures:
+            structure_pos = structure[1]  
+            structure_name = structure[0] #string
+            for block in structure_pos:
+                delete_cube(block[0], block[1], block[2])
+                spawn_cube(block[0], block[1], block[2], structure_name[-1])
+                #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
+        for block in inchworm.misc_blocks:
+                delete_cube(block[0], block[1], block[2])
+                spawn_cube(block[0], block[1], block[2], 'misc')
 
 # Voxel (block) properties
 class Voxel(Button):

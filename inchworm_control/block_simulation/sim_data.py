@@ -22,9 +22,7 @@ from inchworm_data import Inchworm
 class SimData: 
     def __init__(self): 
         self.blocks_placed = []
-        self.found_structures = []
-        self.misc_blocks = []
-
+        
         # initialize the map as the blocks/structure knows it
         # empty_map = map_data.initialize_grid_with_structures()
         self.existing_inchworms = []

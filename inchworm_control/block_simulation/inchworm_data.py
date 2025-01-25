@@ -48,6 +48,9 @@ class Inchworm:
         self.coords_to_spawn = [] # the complete path
         self.goal = []
         self.goal_progress_index = 0
+        self.found_structures = []
+        self.misc_blocks = []
+
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
         self.point = CURRENT_LOC
@@ -81,7 +84,7 @@ class Inchworm:
         pass
 
     
-    def plan_path(self, misc_blocks, found_structures): 
+    def plan_path(self): 
         # TODO: transfer this function to the inchworm class 
         
         # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
@@ -91,8 +94,8 @@ class Inchworm:
         
         #     map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
 
-        sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(found_structures, sorted_list, self.lead_foot_loc, self.orientation)
+        sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
+        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(self.found_structures, sorted_list, self.lead_foot_loc, self.orientation)
         self.step_getter(path_steps)
         for point in self.goal:
             point[1] += 1  # Increment the second value
@@ -289,7 +292,7 @@ class Inchworm:
         print("Planning path from supply to the next block")
         # IW path plans to the supply and to the next block
         # store that path in IW_path 
-        # self.plan_path(self.misc_blocks, self.found_structures)
+        # self.plan_path()
         # TODO: make the path planning compatible with the sim
 
         print("Checking path availability...")
