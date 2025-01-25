@@ -73,18 +73,17 @@ class SimData:
 
 
 
-    def spawn_inchworms(self): 
-
+    def spawn_inchworms(self, num_inchworms: int): 
+        """
+        Args: 
+            num_inchworms (int): number of inchworms building the structure
+        """
         # initialize the map as the blocks/structure knows it
         empty_map = map_data.initialize_grid_with_structures()
-        # TODO: replace the param --> set grid size in config?
 
-        # Initialize inchworms 
-        inchworm_1 = Inchworm(1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC)
-        self.existing_inchworms.append(inchworm_1)
-
+        for i in range(num_inchworms): 
+            self.existing_inchworms.append(Inchworm(i+1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC))
         print("inchworms spawned")
-        #TODO: could set up for loop to initialize desired num of inchworms 
 
 
 def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):

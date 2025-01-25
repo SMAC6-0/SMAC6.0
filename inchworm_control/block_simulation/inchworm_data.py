@@ -83,6 +83,9 @@ class Inchworm:
         print("i cleared my path")
         pass
 
+    def get_loc_in_path(self): 
+        return tuple(map(float, self.goal[self.goal_progress_index]))
+
     
     def plan_path(self): 
         # TODO: transfer this function to the inchworm class 
@@ -95,7 +98,7 @@ class Inchworm:
         #     map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
 
         sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
-        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(self.found_structures, sorted_list, self.lead_foot_loc, self.orientation)
+        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(self.found_structures, sorted_list, self.lead_foot_loc, self.orientation) 
         self.step_getter(path_steps)
         for point in self.goal:
             point[1] += 1  # Increment the second value

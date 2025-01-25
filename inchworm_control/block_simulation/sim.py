@@ -94,53 +94,48 @@ def update():
         # coords_to_spawn verifies that a path exists before trying to do anything
 
         # TODO: consider moving block tracking to sim_data
-        # for each inchrorm: 
-            # get next point in that inchworm's path 
-        x, z, y = sim_data.get_next_steps()
-            # store x z y coords in list of tuples
-
-        # for each set of x z y in list of next blocks 
+        for inchworm in sim_data.existing_inchworms: 
+            x, z, y = inchworm.get_next_point() 
         
-        # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
-        if spawned:
-            delete_cube(spawn_x, spawn_z, spawn_y)
-            spawned = False
+            # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
+            if spawned:
+                delete_cube(spawn_x, spawn_z, spawn_y)
+                spawned = False
 
-        # If there is a previously colored block, restore to original texture
-        elif last_colored_block is not None:
-                last_colored_block.texture = last_block_original_texture
+            # If there is a previously colored block, restore to original texture
+            elif last_colored_block is not None:
+                    last_colored_block.texture = last_block_original_texture
 
-        # This checks if there are existing block entities at the next point 
-        already_placed_block = None
-        for e in scene.entities:
-            if hasattr(e, 'position') and e.position == Vec3(x, z, y):
-                already_placed_block = e
-                break
+            # This checks if there are existing block entities at the next point 
+            already_placed_block = None
+            for e in scene.entities:
+                if hasattr(e, 'position') and e.position == Vec3(x, z, y):
+                    already_placed_block = e
+                    break
 
-        if already_placed_block: # When you aren't simulating walking with cube 
+            if already_placed_block: # When you aren't simulating walking with cube 
 
-            last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
-            # TODO: make number relative to each inchworm 
-            # TODO: modify path planning so that not every inchworm goes to every block (just do every other or split)
+                last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
+                # TODO: modify path planning so that not every inchworm goes to every block (just do every other or split)
 
-            # Checks for visuals at goal location
-            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, sim_data.existing_inchworms[0].goal[sim_data.existing_inchworms[0].goal_progress_index])):
-                # IW reaches goal coords & places block 
+                # Checks for visuals at goal location
+                if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == inchworm.get_loc_in_path():
+                    # IW reaches goal coords & places block 
+                    last_block_original_texture = smart_block_texture
+                    new_texture = smart_block_texture 
+                    inchworm.goal_progress_index += 1
+                else:
+                    # The inchworm is not yet at the goal
+                    new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
+                already_placed_block.texture = new_texture
+                last_colored_block = already_placed_block
+    
+            else: # Walking with block in empty space
+                spawned = True
+                spawned_block = spawn_cube(x, z, y,'step')
+                spawn_x, spawn_y, spawn_z = x, y, z
+                last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
-                new_texture = smart_block_texture 
-                sim_data.existing_inchworms[0].goal_progress_index += 1
-            else:
-                # The inchworm is not yet at the goal
-                new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
-            already_placed_block.texture = new_texture
-            last_colored_block = already_placed_block
- 
-        else: # Walking with block in empty space
-            spawned = True
-            spawned_block = spawn_cube(x, z, y,'step')
-            spawn_x, spawn_y, spawn_z = x, y, z
-            last_colored_block = spawned_block
-            last_block_original_texture = smart_block_texture
           
         key_n_pressed = True
 
@@ -405,5 +400,5 @@ class FlyingFirstPersonController(FirstPersonController):
 player = FlyingFirstPersonController()
 sky = Sky()
 
-sim_data.spawn_inchworms()
+sim_data.spawn_inchworms(1)
 app.run()
