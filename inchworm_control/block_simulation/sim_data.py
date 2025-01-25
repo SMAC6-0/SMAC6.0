@@ -21,10 +21,9 @@ from inchworm_data import Inchworm
 
 class SimData: 
     def __init__(self): 
+        self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
         self.blocks_placed = []
         
-        # initialize the map as the blocks/structure knows it
-        # empty_map = map_data.initialize_grid_with_structures()
         self.existing_inchworms = []
         self.initialized_inchworms = []
         
