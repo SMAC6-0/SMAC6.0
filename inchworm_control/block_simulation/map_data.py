@@ -307,30 +307,32 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
     }
     
     transform = orientation_transforms[orientation]
+    print(f"orientation: {orientation}, type: {type(orientation)}")
+    print(f"Keys in orientation_transforms: {list(orientation_transforms.keys())}")
     transformed_vector = transform(*normalized_vector)
     
     # Orientation here is based on NORTH.
     base_mappings = {
         # Horizontal movements
-        ( 1,  0,  0): ("RIGHT", InchwormOrientation.EAST),
-        (-1,  0,  0): ("LEFT", InchwormOrientation.WEST),
-        ( 0,  0,  1): ("RIGHT", InchwormOrientation.NORTH),
-        ( 0,  0, -1): ("LEFT", InchwormOrientation.SOUTH),
-        ( 0,  1,  0): ("UP", orientation),
-        ( 0, -1,  0): ("DOWN", orientation),
+        ( 1,  0,  0): ("RIGHT"),
+        (-1,  0,  0): ("LEFT"),
+        ( 0,  0,  1): ("FORWARD"),
+        ( 0,  0, -1): ("BACK"),
+        ( 0,  1,  0): ("UP"),
+        ( 0, -1,  0): ("DOWN"),
         # Vertically diagonal movements
-        ( 1,  1,  0): ("UP_RIGHT", InchwormOrientation.EAST),
-        (-1,  1,  0): ("UP_LEFT", InchwormOrientation.WEST),
-        ( 0,  1,  1): ("UP_FORWARD", InchwormOrientation.NORTH),
-        ( 0,  1, -1): ("UP_BACK", InchwormOrientation.SOUTH),
-        ( 1, -1,  0): ("DOWN_RIGHT", InchwormOrientation.EAST),
-        (-1, -1,  0): ("DOWN_LEFT", InchwormOrientation.WEST),
-        ( 0, -1,  1): ("DOWN_FORWARD", InchwormOrientation.NORTH),
-        ( 0, -1, -1): ("DOWN_BACK", InchwormOrientation.SOUTH),
+        ( 1,  1,  0): ("UP_RIGHT"),
+        (-1,  1,  0): ("UP_LEFT"),
+        ( 0,  1,  1): ("UP_FORWARD"),
+        ( 0,  1, -1): ("UP_BACK"),
+        ( 1, -1,  0): ("DOWN_RIGHT"),
+        (-1, -1,  0): ("DOWN_LEFT"),
+        ( 0, -1,  1): ("DOWN_FORWARD"),
+        ( 0, -1, -1): ("DOWN_BACK")
     }
 
     if transformed_vector in base_mappings:
-        step_name, new_orientation = base_mappings[transformed_vector]
+        step_name = base_mappings[transformed_vector]
 
         if magnitude > 1:
             if "UP" in step_name or "DOWN" in step_name:
@@ -340,7 +342,10 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
             else:
                 horizontality = step_name
                 step_name = f"{magnitude}_{horizontality}"
+                
+        new_orientation = get_orientation(step_name, orientation)
         
+        #TODO: handle any block depot
         if next_coord == BD_LOC1:
             return f"GRAB_{step_name}", new_orientation
         elif is_holding_block & end_flag:
@@ -351,3 +356,14 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
     # Handle undefined or unexpected movements
     print(f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
     return ["UNKNOWN_STEP"], "null"
+
+def get_orientation(movement: str, prev_orientation: InchwormOrientation):
+    if "RIGHT" in movement: 
+        return prev_orientation.rotate(1)
+    elif "LEFT" in movement: 
+        prev_orientation.rotate(-1)
+    elif "BACK" in movement: 
+        prev_orientation.rotate(2)
+    else:
+        return prev_orientation    
+    

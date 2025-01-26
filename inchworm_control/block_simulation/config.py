@@ -13,7 +13,19 @@ DEMO = False
 LARGE_BUILD = False
 
 # Define the possible orientations of the inchworm
-InchwormOrientation = Enum('InchwormOrientaton', ['NORTH', 'SOUTH', 'EAST', 'WEST', 'UNDEFINED'])
+class InchwormOrientation(Enum):
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
+
+    def rotate(self, steps):
+        """
+        Rotate the orientation by a number of steps.
+        Positive steps rotate clockwise, negative steps rotate counterclockwise.
+        """
+        new_value = (self.value + steps) % len(InchwormOrientation)
+        return InchwormOrientation(new_value)
 CURRENT_ORIENTATION = InchwormOrientation.NORTH
 
 # have inchworm starting inline with BD 

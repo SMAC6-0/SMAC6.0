@@ -8,7 +8,7 @@ cool_coords = [7, 3, 9]
 cool_cell = map_data.create_cell(grid, cool_coords)
 
 start_coords = [10, 0, 10]
-end_coords = [32, 0, 20]
+end_coords = [20, 0, 20]
 start_cell = map_data.create_cell(grid, start_coords)
 goal_cell = map_data.create_cell(grid, end_coords)
 goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start_coords, end_coords)
