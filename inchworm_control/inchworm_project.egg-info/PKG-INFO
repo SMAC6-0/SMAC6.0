@@ -1,0 +1,13 @@
+Metadata-Version: 2.2
+Name: inchworm_project
+Version: 0.0.1
+Summary: TODO: Package description
+Maintainer: your_name
+Maintainer-email: your_email@example.com
+License: TODO: License declaration
+Requires-Dist: setuptools
+Dynamic: license
+Dynamic: maintainer
+Dynamic: maintainer-email
+Dynamic: requires-dist
+Dynamic: summary

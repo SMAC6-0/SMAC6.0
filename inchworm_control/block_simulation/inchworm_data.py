@@ -2,8 +2,11 @@ from enum import Enum
 import copy
 from config import *
 import map_data
-from inchworm_control.blueprint import blueprint as BP
+# from inchworm_control.blueprint import blueprint as BP
 from time import sleep
+from ..inchworm_control import blueprint
+
+
 
 # Inchworm states
 class IW_STATE(Enum):
