@@ -8,7 +8,6 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
-from path_conversion import * 
 from config import CURRENT_LOC, BD_LOC1, BD_LOCS, DEMO
 import copy 
 from sim_data import SimData

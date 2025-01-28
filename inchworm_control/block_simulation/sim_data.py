@@ -13,7 +13,6 @@ import copy
 from config import *
 # from inchworm_data import Inchworm
 import map_data
-from path_conversion import * 
 from search import search
 from inchworm_data import Inchworm
 
@@ -84,7 +83,7 @@ class SimData:
         empty_map = map_data.initialize_grid_with_structures()
 
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(i+1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC))
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, None, CURRENT_LOC))
         print("inchworms spawned")
 
 
