@@ -2,7 +2,7 @@ from enum import Enum
 import copy
 from config import *
 import map_data
-from inchworm_control.blueprint import blueprint as BP
+from inchworm_control.blueprint import blueprint as blueprint
 from time import sleep
 
 # Inchworm states
@@ -22,7 +22,7 @@ class Inchworm:
     next_id = 1
     inchworm_list = []
     
-    def __init__(self, orientation, location: tuple[int], holding_block=False):
+    def __init__(self, orientation, final_structure, location: tuple[int], holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
@@ -36,7 +36,7 @@ class Inchworm:
         self.orientation = orientation
         
         self.current_map = map_data.initialize_grid_with_structures()
-        self.final_structure = []
+        self.final_structure = final_structure
         self.lead_foot_loc = location
         self.holding_block = holding_block
 
@@ -46,7 +46,6 @@ class Inchworm:
         self.goal_progress_index = 0
         self.found_structures = []
         self.misc_blocks = []
-
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
         self.leading_foot = CURRENT_LOC
@@ -86,6 +85,7 @@ class Inchworm:
         # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
         next_goal = self.get_next_block()
         
+        print("got goal")
         path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation)
     
         map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
@@ -108,7 +108,7 @@ class Inchworm:
         # TODO: handle misc
         sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
         self.misc_blocks = sorted_list
-        new_next_block = BP.blueprint(self.found_structures)
+        new_next_block = blueprint(self.found_structures)
         return new_next_block
     
     def get_total_inchworms(cls):
