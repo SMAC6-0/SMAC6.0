@@ -27,6 +27,7 @@ smart_block_texture_blue = load_texture("Assets/Textures/smart_block_blue_outlin
 smart_block_texture_yellow = load_texture("Assets/Textures/smart_block_yellow_outline.png")
 smart_block_texture_green = load_texture("Assets/Textures/smart_block_neon_green_outline.png")
 smart_block_outline = load_texture("Assets/Textures/smart_block_outline.png")
+seed_block_texture = load_texture("Assets/Textures/seed_block.png")
 
 # Color Steps
 smart_block_texture_step_red = load_texture("Assets/Textures/smart_block_red_step.png")
@@ -51,8 +52,6 @@ key_p_pressed = False
 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
-# coords_to_spawn = []
-# path_steps = None 
 
 
 
@@ -90,7 +89,8 @@ def update():
         for inchworm in sim_data.existing_inchworms:
             inchworm.plan_path()
             show_IW_paths(inchworm)
-            
+        seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
+        spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
@@ -231,11 +231,6 @@ class Voxel(Button):
                 
         if key == "escape":
             stop_simulation()
-            # if not key_esc_pressed:
-            #     stop_simulation()
-            #     key_esc_pressed = True
-            # elif key == "escape up":
-            #     key_esc_pressed = False
 
 # Skybox
 class Sky(Entity):
@@ -311,7 +306,7 @@ def spawn_cube(x, y, z, color_index):
     # check if the position is already occupied
     target_position = Vec3(x, y, z)
 
-    # Assign color_index based on the input
+    # Assign color_index based on the input. The first few are based on different substructures. 
     if color_index == 'n': 
         color_index = smart_block_texture_red
     elif color_index == 's':
@@ -328,6 +323,8 @@ def spawn_cube(x, y, z, color_index):
         color_index = incoming_block_texture
     elif color_index == 'path':
         color_index = incoming_step_texture
+    elif color_index == 'seed':
+        color_index = seed_block_texture
     else:
         color_index = smart_block_texture
         sim_data.blocks_placed.append(target_position)  # Update the block information
