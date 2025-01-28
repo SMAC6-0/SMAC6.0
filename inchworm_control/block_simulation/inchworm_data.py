@@ -65,7 +65,7 @@ class Inchworm:
         """
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
 
-    def update_current_map(self, map): 
+    def update_my_current_map(self, map): 
         """
         Updates the inchworm's map based on received updates from the structure. 
         Args: 
@@ -73,6 +73,14 @@ class Inchworm:
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
         self.current_map = map
+
+    def send_my_next_steps(self, path): 
+        """ Send IW path and the corresponding incoming block to the structure. """ 
+        if SIMULATION: 
+            return path, self.goal[self.goal_progress_index]
+        else: 
+            # TODO @ SAKSHI & MO: UART COMMUNICATION
+            pass
 
     def clear_my_path(self): 
         print("i cleared my path")
@@ -88,7 +96,7 @@ class Inchworm:
         print("got goal")
         path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation)
     
-        map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
+        map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
 
         self.step_getter(step_instructions)
         for point in self.goal:
@@ -207,6 +215,7 @@ class Inchworm:
         # MOOOO HELPPP 
         print("Sending the IW path to the structure")
         # IW sends it's path to the structure 
+        self.send_my_next_steps()
 
         print("Travelling to the supply")
         # IW begins travelling to supply location

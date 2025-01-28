@@ -66,6 +66,8 @@ class SimData:
         """
         Structure receives update & processes it
         """
+        # if sim detects iw is in contact w structure, send map snapshot, receive the incoming block, update self
+        # TODO: @ SAKSHI & MO: processing msg structure to update the 3D list 
         pass 
 
     def send_current_map(self): 

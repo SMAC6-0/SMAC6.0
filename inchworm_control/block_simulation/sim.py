@@ -8,7 +8,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
-from config import CURRENT_LOC, BD_LOC1, BD_LOCS, DEMO
+from config import CURRENT_LOC, BD_LOC1, BD_LOCS, SIMULATION
 import copy 
 from sim_data import SimData
 
@@ -33,6 +33,10 @@ smart_block_texture_step_red = load_texture("Assets/Textures/smart_block_red_ste
 smart_block_texture_step_blue = load_texture("Assets/Textures/smart_block_blue_step.png")
 smart_block_texture_step_yellow = load_texture("Assets/Textures/smart_block_yellow_step.png")
 smart_block_texture_step_green = load_texture("Assets/Textures/smart_block_green_step.png") 
+
+# Incoming Blocks / Steps 
+incoming_step_texture = load_texture("Assets/Textures/incoming_path_red.png")
+incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
 
 # More Variables
 last_colored_block = None
@@ -83,7 +87,10 @@ def update():
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
-        sim_data.existing_inchworms[0].plan_path()
+        for inchworm in sim_data.existing_inchworms:
+            inchworm.plan_path()
+            show_IW_paths(inchworm)
+            
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
@@ -163,6 +170,17 @@ def update():
 
         sim_data.existing_inchworms[0].prev_point = sim_data.existing_inchworms[0].point
         key_n_pressed = False
+
+def show_IW_paths(inchworm):
+    # First extract the next block the IW is going to place
+    cell = inchworm.goal[inchworm.goal_progress_index]
+    delete_cube(cell[0], cell[1], cell[2])
+    spawn_cube(cell[0], cell[1], cell[2], 'incoming')
+
+    # Then show the path the inchworm is going to take
+    for cell in inchworm.path: 
+        delete_cube(cell[0], cell[1], cell[2])
+        spawn_cube(cell[0], cell[1], cell[2], 'path')
 
 def show_structures():
     """
@@ -306,6 +324,10 @@ def spawn_cube(x, y, z, color_index):
         color_index = smart_block_texture_step
     elif color_index == 'misc':
         color_index = smart_block_outline    
+    elif color_index == 'incoming':
+        color_index = incoming_block_texture
+    elif color_index == 'path':
+        color_index = incoming_step_texture
     else:
         color_index = smart_block_texture
         sim_data.blocks_placed.append(target_position)  # Update the block information
@@ -326,7 +348,7 @@ def delete_cube(x, y, z):
             break
 
 # Increase the numbers for a bigger field. 
-if DEMO:
+if not SIMULATION:
     for z in range(5): 
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))

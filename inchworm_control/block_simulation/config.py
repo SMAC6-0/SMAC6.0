@@ -9,7 +9,7 @@ BD_LOC1 = [4, 1, 4] # The location where new blocks are sourced/placed to then b
 CURRENT_LOC = [4, 0, 1] # Starting location of the inchworm robot, where the coordinates are represented as (x, z, y).
 BD_LOCS = [BD_LOC1] # The locations of all block depots (if there are multiple)
 # if the simulation is for the demo, set this to True
-DEMO = False
+SIMULATION = True
 LARGE_BUILD = False
 
 # Define the possible orientations of the inchworm
