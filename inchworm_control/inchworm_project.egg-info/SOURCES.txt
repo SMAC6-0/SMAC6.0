@@ -25,6 +25,4 @@ inchworm_project.egg-info/PKG-INFO
 inchworm_project.egg-info/SOURCES.txt
 inchworm_project.egg-info/dependency_links.txt
 inchworm_project.egg-info/entry_points.txt
-inchworm_project.egg-info/requires.txt
 inchworm_project.egg-info/top_level.txt
-inchworm_project.egg-info/zip-safe
