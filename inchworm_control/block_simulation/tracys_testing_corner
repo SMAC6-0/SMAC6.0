@@ -1,6 +1,5 @@
 import map_data
-import bfs_path_planning
-import path_conversion
+import inchworm_data
 from config import *
 
 grid = map_data.initialize_grid_with_structures()
@@ -9,9 +8,4 @@ cool_cell = map_data.create_cell(grid, cool_coords)
 
 start_coords = [10, 0, 10]
 end_coords = [20, 0, 20]
-start_cell = map_data.create_cell(grid, start_coords)
-goal_cell = map_data.create_cell(grid, end_coords)
-goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start_coords, end_coords)
-#print("goal: ", goal_cell, "\nvisited: ", visited, "\nqueue: ", queue, "\nsteps: ", steps)
-# path, num_steps = bfs_path_planning.find_path(grid, start_coords, end_coords, False)
-path_conversion.convert_path_coords_to_steps(grid, start_coords, end_coords, curr_location=[0, 0, 0], curr_orientation=InchwormOrientation.NORTH)
+inchworm_data.Inchworm(InchwormOrientation.NORTH, start_coords).plan_path

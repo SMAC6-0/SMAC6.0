@@ -1,10 +1,8 @@
 from enum import Enum
 import copy
 from config import *
-import path_planning 
-from bfs_path_planning import *
-import path_conversion
 import map_data
+from inchworm_control.blueprint import blueprint as BP
 from time import sleep
 
 # Inchworm states
@@ -24,28 +22,26 @@ class Inchworm:
     next_id = 1
     inchworm_list = []
     
-    def __init__(self, orientation, paths, final_structure, location: list[int], holding_block=False):
+    def __init__(self, orientation, location: tuple[int], holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
             id (int): This inchworm's ID number. Used to set paths in the map. 
             orientation (Enum): the direction that the IW's leading leg is facing, relative to the world grid's frame. 
-            paths(list[Cell]): The Cells through which this inchworm will travel. (May be multiple, ie to the supply depot then to the structure.)
-            final_structure (list[int]): xzy (3D) list storing the final structure the inchworms are trying to build.  
-            location (list[int]): the xzy location of the inchworm's leading foot. 
+            location (tuple[int]): the xzy location of the inchworm's leading foot. 
             holding_block (bool): True if the inchworm's leading foot is holding a block. 
         """
         # Essential information for IW to keep track of
         self.id = Inchworm.next_id
         self.orientation = orientation
-        self.paths = paths
+        
         self.current_map = map_data.initialize_grid_with_structures()
-        self.final_structure = final_structure
+        self.final_structure = []
         self.lead_foot_loc = location
         self.holding_block = holding_block
 
         # Path planning relevant vars
-        self.coords_to_spawn = [] # the complete path
+        self.paths = [] # the list of coords
         self.goal = []
         self.goal_progress_index = 0
         self.found_structures = []
@@ -53,8 +49,8 @@ class Inchworm:
 
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-        self.point = CURRENT_LOC
-        self.prev_point = self.point
+        self.leading_foot = CURRENT_LOC
+        self.lagging_foot = self.leading_foot
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
@@ -85,21 +81,16 @@ class Inchworm:
 
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal[self.goal_progress_index]))
-
     
-    def plan_path(self): 
-        # TODO: transfer this function to the inchworm class 
-        
+    def plan_path(self):
         # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
-        # for index in self.goal_progress_index:
-        #     path = bfs(self.current_map, start=self.lead_foot_loc, goal=self.goal[index], holding_block=self.holding_block)
-        #     self.paths.append(path)
+        next_goal = self.get_next_block()
         
-        #     map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
+        path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation)
+    
+        map_data.set_inchworm_path_to_grid(self.current_map, path) # Sends IW path to grid
 
-        sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
-        self.coords_to_spawn, path_steps , self.goal= path_conversion.dev_total_path_steps(self.found_structures, sorted_list, self.lead_foot_loc, self.orientation) 
-        self.step_getter(path_steps)
+        self.step_getter(step_instructions)
         for point in self.goal:
             point[1] += 1  # Increment the second value
 
@@ -107,11 +98,18 @@ class Inchworm:
         """ 
         Returns the set of the next points of inchworm travel
         """
-        (self.point, holding_block) = self.coords_to_spawn.pop(0)  # Get the next point
-        x, z, y = self.point
+        (self.leading_foot, holding_block) = self.paths(0)  # Get the next point
+        x, z, y = self.leading_foot
         if holding_block:
-            z = z+1
+            z = z + 1
         return x, z, y
+    
+    def get_next_block(self):
+        # TODO: handle misc
+        sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
+        self.misc_blocks = sorted_list
+        new_next_block = BP.blueprint(self.found_structures)
+        return new_next_block
     
     def get_total_inchworms(cls):
         """
@@ -363,19 +361,19 @@ class Inchworm:
         """
         Write the steps to steps.txt
         """
-        steps = []
+        step_instructions = []
         for i in range(len(path) - 1):
             curr_coord = path[i][0]
             next_coord = path[i + 1][0] 
             
             end_flag = bool(i == len(path) - 1)
-            steps.append(map_data.convert_coordinate_to_steps(curr_coord, next_coord, self.orientation, self.is_holding_block, end_flag))
-        complete_steps = copy.deepcopy(steps)
-        file_path = "steps.txt"
+            step_instructions.append(map_data.convert_coordinate_to_steps(curr_coord, next_coord, self.orientation, self.is_holding_block, end_flag))
+        complete_step_instructions = copy.deepcopy(step_instructions)
+        file_path = f"step_instructions_{self.id}.txt"
         
         with open(file_path, 'w') as file:
-            for step in complete_steps:
-                file.write(f"{step}\n")
+            for step_instructions in complete_step_instructions:
+                file.write(f"{step_instructions}\n")
 
 if __name__ == "__main__":
     inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, CURRENT_LOC)
