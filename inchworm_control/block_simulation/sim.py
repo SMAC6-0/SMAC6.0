@@ -81,7 +81,9 @@ def update():
 
     # Search(Look) for structures
     if held_keys["l"]:
-        show_structures()
+        sim_data.generate_final_structure_map()
+        sim_data.spawn_inchworms(1)
+        # show_structures()
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
@@ -221,7 +223,11 @@ class Voxel(Button):
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
                 # only add blocks above field
                 if(voxel.position[1] > 0):
-                    sim_data.blocks_placed.append(voxel.position) 
+                    xoxel = int(voxel.position.x)
+                    yoxel = int(voxel.position.y)
+                    zoxel = int(voxel.position.z)
+                    sim_data.blocks_placed.append((xoxel, yoxel, zoxel))
+                    print("pos: ", (xoxel, yoxel, zoxel))
             if key == "right mouse down":
                 try: 
                     sim_data.blocks_placed.remove(self.position)
@@ -327,7 +333,7 @@ def spawn_cube(x, y, z, color_index):
         color_index = seed_block_texture
     else:
         color_index = smart_block_texture
-        sim_data.blocks_placed.append(target_position)  # Update the block information
+        sim_data.blocks_placed.append(int(target_position))  # Update the block information
 
     # Spawn the cube
     new_cube = Voxel(position=target_position, texture=color_index)
@@ -419,5 +425,4 @@ class FlyingFirstPersonController(FirstPersonController):
 player = FlyingFirstPersonController()
 sky = Sky()
 
-sim_data.spawn_inchworms(1)
 app.run()

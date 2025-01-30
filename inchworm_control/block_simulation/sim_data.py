@@ -25,11 +25,16 @@ class SimData:
         self.incoming_blocks = [] 
         self.all_paths = []
         self.supply_depot = []
+        self.final_structure = map_data.initialize_grid_with_structures()
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
         
 
+    def generate_final_structure_map(self): 
+        """Convert blocks placed in sim to 3D list parsable everywhere else"""
+        for block in self.blocks_placed: 
+            self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
 
     def get_next_steps(self): 
         """
@@ -85,7 +90,7 @@ class SimData:
         empty_map = map_data.initialize_grid_with_structures()
 
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, None, CURRENT_LOC))
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
         print("inchworms spawned")
 
 

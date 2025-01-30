@@ -93,7 +93,7 @@ class Inchworm:
         # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
         next_goal = self.get_next_block()
         
-        print("got goal")
+        print("got goal: ", next_goal)
         path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation)
     
         map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
@@ -116,7 +116,7 @@ class Inchworm:
         # TODO: handle misc
         # sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
         # self.misc_blocks = sorted_list
-        new_next_block = blueprint(self.final_structure)
+        new_next_block = blueprint(self.current_map, self.final_structure)
         return new_next_block
     
     def get_total_inchworms(cls):
