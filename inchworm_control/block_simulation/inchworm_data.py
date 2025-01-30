@@ -94,8 +94,9 @@ class Inchworm:
         next_goal = self.get_next_block()
         
         print("got goal: ", next_goal)
-        path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation)
-    
+        path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation)
+        path, step_instructions = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation)
+
         map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
 
         self.step_getter(step_instructions)

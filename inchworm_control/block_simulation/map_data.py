@@ -111,7 +111,6 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     """ 
     for x, z, y in inchworm_path:
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
-    
     return grid
 
 def set_neighbors(prioritize_vertical, allow_diagonal=True, allow_large_build=False):    

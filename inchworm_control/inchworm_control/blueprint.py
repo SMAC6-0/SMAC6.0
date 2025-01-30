@@ -51,7 +51,7 @@ def blueprint(curr_map, final_map) -> tuple:
                             print("Z: ", z)
 
                             print(curr_map[z][x][y])
-                            return [x, z, y]
+                            return [z, x, y]
     return (-9, -9, -9)
 
                 
