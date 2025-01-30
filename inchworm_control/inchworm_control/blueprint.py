@@ -45,13 +45,14 @@ def blueprint(curr_map, final_map) -> tuple:
             for z in range(curr_map.shape[0]): #iterate 0-2
                 for y in range(curr_map.shape[1]): #iterate 0-4
                    for x in range((curr_map.shape[2])): #iterate 0-5 
-                        if curr_map[x, z, y] == 0 and curr_map[x, z, y] != final_map[x, z, y]:
+                        if curr_map[z, y, x] == 1 and curr_map[z, y, x] != final_map[z, y, x]: #
                             print("X: ", x)
                             print("Y: ", y)
                             print("Z: ", z)
 
                             print(curr_map[z][x][y])
-                            return (x, z, y)
+                            return [x, z, y]
+    return (-9, -9, -9)
 
                 
                     

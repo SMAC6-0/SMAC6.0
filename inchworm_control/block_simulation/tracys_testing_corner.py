@@ -28,5 +28,6 @@ FINAL_MAP = np.array([
         [0, 0, 0, 0, 0, 0]
     ]])
 print(type(FINAL_MAP))
+
 my_inchy = Inchworm(InchwormOrientation.NORTH, FINAL_MAP, start_coords)
 my_inchy.plan_path()

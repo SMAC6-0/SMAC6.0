@@ -268,8 +268,8 @@ def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    grid, path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False, True)
-    return grid, path_coords, num_steps
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False, True)
+    return path_coords, num_steps
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation):
     """
@@ -287,10 +287,11 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
 
     # get the path
     path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block=False, prioritize_vertical=False)
+    print("path coords: ", path_coords)
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
-        grid, path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
+        path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
 
     # if the start is the Block Depot, it is holding a block
     is_holding_block = False
