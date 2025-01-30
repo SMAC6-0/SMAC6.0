@@ -72,6 +72,7 @@ def mark_block_depot(grid):
         x, z, y = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
             grid[x][z][y] = GridStatus.SUPPLY_DEPOT.value
+            grid[x][z + 1][y] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
     return grid
