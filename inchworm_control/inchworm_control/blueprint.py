@@ -39,6 +39,7 @@ def blueprint(curr_map: np.array) -> tuple:
             return (-1,-1,-1)
         else: 
             print(curr_map.shape)
+            # TODO: implement prioritization of found structures
             for z in range(curr_map.shape[0]): #iterate 0-2
                 for y in range(curr_map.shape[1]): #iterate 0-4
                    for x in range((curr_map.shape[2])): #iterate 0-5

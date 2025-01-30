@@ -368,7 +368,6 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
         InchwormOrientation.WEST: lambda x, z, y: (-y, z, x),  
     }
     
-    new_orientation = get_orientation(step_instructions, orientation)
     transform = orientation_transforms[orientation]
     print(f"orientation: {orientation}")
     transformed_vector = transform(*normalized_vector)
@@ -404,6 +403,8 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
             else:
                 horizontality = step_instructions
                 step_instructions = f"{magnitude}_{horizontality}"
+                
+        new_orientation = get_orientation(step_instructions, orientation)
         
         #TODO: handle any block depot
         if next_coord == BD_LOC1:

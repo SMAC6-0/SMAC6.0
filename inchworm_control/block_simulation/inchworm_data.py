@@ -114,9 +114,9 @@ class Inchworm:
     
     def get_next_block(self):
         # TODO: handle misc
-        sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
-        self.misc_blocks = sorted_list
-        new_next_block = blueprint(self.found_structures)
+        # sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
+        # self.misc_blocks = sorted_list
+        new_next_block = blueprint(self.final_structure)
         return new_next_block
     
     def get_total_inchworms(cls):

@@ -7,26 +7,26 @@ start_coords = [10, 0, 10]
 end_coords = [20, 0, 20]
 FINAL_MAP = np.array([
     [  # Z = 0
-        [1, 0, 0, 0, 0, 0], # X row
+        [0, 0, 0, 0, 0, 0], # X row
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]
     ],
     [  # Z = 1
-        [1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]
     ],
     [  # Z = 2
-        [1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]
     ]])
-my_inchy = Inchworm(FINAL_MAP, InchwormOrientation.NORTH, start_coords)
-print(Inchworm.inchworm_list)
+print(type(FINAL_MAP))
+my_inchy = Inchworm(InchwormOrientation.NORTH, FINAL_MAP, start_coords)
 my_inchy.plan_path()
