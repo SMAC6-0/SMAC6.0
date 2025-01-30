@@ -203,6 +203,7 @@ def is_valid_position_3d(grid, coords):
     x, z, y = coords[0], coords[1], coords[2]
     if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
         return True
+    return False
     # raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):

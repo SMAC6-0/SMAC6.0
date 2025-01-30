@@ -19,12 +19,14 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical=False):
     """
     print(f"BFS called with start: {start}, goal: {goal}, prioritize_vertical: {prioritize_vertical}")
     
-    neighbor_directions = map_data.set_neighbors(prioritize_vertical)
+    neighbor_directions = map_data.set_neighbors(prioritize_vertical=True)
     
     if map_data.is_valid_start_goal_3d(grid, start, goal):
         goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start, goal)
     else:
-        print(f"Invalid or obstructed start position: {start} or goal position: {goal}")
+        print(f"Invalid start {start} or goal {goal} position")
+        print(f"Start Walkable? {grid[start[0]][start[1]][start[2]] == 0}")
+        print(f"Goal Walkable? {grid[goal[0]][goal[1]][goal[2]] == 0}")
         return [], -1
 
     while queue:
@@ -44,6 +46,7 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical=False):
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
+                print(f"Expanding: {neighbor.x, neighbor.z, neighbor.y}, Steps: {steps}")
     
     print(f"No path found with BFS from {start} to {goal}")
     return [], -1

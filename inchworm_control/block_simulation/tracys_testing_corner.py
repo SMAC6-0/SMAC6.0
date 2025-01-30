@@ -5,7 +5,7 @@ from config import *
 import numpy as np
 
 start_coords = [4, 0, 1]
-end_coords = [1, 6, 5]
+end_coords = [6, 1, 5]
 bfs_path_planning.find_path(map_data.initialize_grid_with_structures(), start_coords, end_coords, False)
 
 # FINAL_MAP = np.array([
