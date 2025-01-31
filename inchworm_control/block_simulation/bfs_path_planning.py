@@ -25,11 +25,13 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
     if map_data.is_valid_start_goal_3d(grid, start, goal):
         goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start, goal)
     else:
-        print(f"Invalid start {start} or goal {goal} position")
-        print(f"Start Walkable? {grid[start[0]][start[1]][start[2]] == 0}")
-        print(f"Goal Walkable? {grid[goal[0]][goal[1]][goal[2]] == 0}")
-        return [], -1
+        raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
+                           f"Start Walkable? {grid[start[0]][start[1]][start[2]] == 0}\n",
+                           f"Goal Walkable? {grid[goal[0]][goal[1]][goal[2]] == 0}")
 
+    if holding_block:
+        queue[0].z -= 1
+    
     while queue:
         current_cell = queue.pop(0)
         steps += 1
@@ -42,7 +44,7 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
         for dx, dz, dy in neighbor_directions:
             nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
             neighbor_coord = nx, nz, ny
-            if map_data.is_valid_position_3d(grid, (neighbor_coord)) and (grid[nx][nz][ny] == 0) and not visited[nx][nz][ny]:
+            if map_data.is_valid_position_3d(grid, (neighbor_coord)) and (grid[nx][nz][ny] == 0 or grid[nx][nz][ny] == 2) and not visited[nx][nz][ny]:
                 visited[nx][nz][ny] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell

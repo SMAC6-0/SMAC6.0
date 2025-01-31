@@ -92,13 +92,15 @@ class Inchworm:
     def plan_path(self):
         # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
         next_goal = self.get_next_block()
+
+        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal)
         
         print("got goal: ", next_goal)
         path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
         path, step_instructions = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, holding_block=True)
 
         self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
-
+        # self.update_my_current_map()
         self.step_getter(step_instructions)
         for point in self.goal:
             point[1] += 1  # Increment the second value
@@ -377,7 +379,7 @@ class Inchworm:
             next_coord = path[i + 1][0] 
             
             end_flag = bool(i == len(path) - 1)
-            step_instructions.append(map_data.convert_coordinate_to_steps(curr_coord, next_coord, self.orientation, self.is_holding_block, end_flag))
+            step_instructions.append(map_data.convert_coordinate_to_steps(self.current_map, curr_coord, next_coord, self.orientation, self.holding_block, end_flag))
         complete_step_instructions = copy.deepcopy(step_instructions)
         file_path = f"step_instructions_{self.id}.txt"
         

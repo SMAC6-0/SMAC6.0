@@ -103,6 +103,28 @@ def update_grid_with_structure(grid, structure):
             grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
     return grid 
 
+def update_grid_with_incoming(grid, structure):
+    """
+    Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
+                     incoming_block (2), & supply_depot (3). 
+        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+                           position in the grid. This is a single block. 
+    Returns:
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """ 
+    # for structure in structures:        
+    x, z, y = structure
+
+    if is_valid_position_3d(grid, structure):
+        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
+        if z - 1 >= 0:
+            grid[x][z-1][y] = GridStatus.INCOMING_BLOCK.value #cell below
+    return grid 
+
 def set_inchworm_path_to_grid(grid, inchworm_path):
     """
     Sets the inchworm path on the grid.
@@ -114,7 +136,8 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    for x, z, y in inchworm_path:
+    for step in range(len(inchworm_path[0])-1): 
+        x, z, y = inchworm_path[0][step][0] # 1st index isolates path list ffrom num of steps, 2nd index gets step, 3rd index gets coord and not holding_block
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     return grid
 
@@ -157,20 +180,20 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
         
     return neighbor_directions
 
-def reverse_path_3d(curr_cell, is_holding_block):
+def reverse_path_3d(curr_cell, holding_block):
     """
     Reverse calculated path to go from start to goal.
     
     Args:
         curr_cell (Cell): The current position of an inchworm.
-        is_holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
+        holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
     Returns:
         path (list(tuple)): A reworked path found in a path planning algorithm.
         steps (int): The number of steps in a path.
     """
     path = []
     while curr_cell:
-        path.append(([curr_cell.x, curr_cell.z, curr_cell.y], is_holding_block))
+        path.append(([curr_cell.x, curr_cell.z, curr_cell.y], holding_block))
         curr_cell = curr_cell.parent
     return path[::-1], len(path) - 1
 
@@ -303,13 +326,14 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
+        print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
         path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
 
     # NOTE: because passing in holding_block, might not need this anymore
     # if the start is the Block Depot, it is holding a block
-    # is_holding_block = False
+    # holding_block = False
     # if(path_start == BD_LOC1):
-    #     is_holding_block = True
+    #     holding_block = True
 
     path_list = copy.deepcopy(path_coords[0])
     steps = []
@@ -319,9 +343,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         next_coord = path_list[i + 1][0]
 
         # offset to handle the inchworm's position when it's on the block depot
-        if current_coord == BD_LOC1:
-            x, z, y = current_coord
-            current_coord = [x, z + 1, y]
+        # if current_coord == BD_LOC1:
+        #     x, z, y = current_coord
+        #     current_coord = [x, z - 1, y]
+
+        # if holding_block:
+        #     x, z, y = current_coord
+        #     current_coord = [x, z - 1, y]
             
         end_flag = bool(next_coord == BD_LOC1)
         print("curr: ", (current_coord))
@@ -351,7 +379,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
         current_coord (tuple): The current position (x, z, y).
         next_coord (tuple): The next position (x, z, y).
         orientation (InchwormOrientation): The current orientation.
-        is_holding_block (boolean): Whether the inchworm is holding a block.
+        holding_block (boolean): Whether the inchworm is holding a block.
         end_flag (boolean): Indicates the end of path.
 
     Returns:
@@ -422,7 +450,10 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
                 
         new_orientation = get_orientation(step_instructions, orientation)
         
-        #TODO: handle any block depot
+        #TODO: handle any block depot'
+        if holding_block:
+            step_instructions = f"{step_instructions}_BLOCK"
+            
         if (next_coord == BD_LOC1).all():
             return f"GRAB_{step_instructions}", new_orientation
         elif holding_block & end_flag:
