@@ -1,6 +1,6 @@
 import map_data
 
-def find_path(grid, start, goal, holding_block, prioritize_vertical=False):
+def find_path(grid, start, goal, holding_block, prioritize_vertical):
     """
     Perform modified BFS in a 3D grid.
     
@@ -46,7 +46,6 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical=False):
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
-                print(f"Expanding: {neighbor.x, neighbor.z, neighbor.y}, Steps: {steps}")
     
     print(f"No path found with BFS from {start} to {goal}")
     return [], -1

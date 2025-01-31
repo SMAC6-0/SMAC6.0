@@ -6,7 +6,10 @@ import numpy as np
 
 start_coords = [4, 0, 1]
 end_coords = [6, 1, 5]
-bfs_path_planning.find_path(map_data.initialize_grid_with_structures(), start_coords, end_coords, False)
+grid = map_data.initialize_grid_with_structures()
+grid = map_data.update_grid_with_structure(grid, end_coords)
+# bfs_path_planning.find_path(grid, start_coords, BD_LOC1, False)
+# bfs_path_planning.find_path(grid, BD_LOC1, end_coords, True)
 
 # FINAL_MAP = np.array([
 #     [  # Z = 0
@@ -32,5 +35,5 @@ bfs_path_planning.find_path(map_data.initialize_grid_with_structures(), start_co
 #     ]])
 # print(type(FINAL_MAP))
 
-# my_inchy = Inchworm(InchwormOrientation.NORTH, FINAL_MAP, start_coords)
-# my_inchy.plan_path()
+my_inchy = Inchworm(InchwormOrientation.NORTH, grid, start_coords)
+my_inchy.plan_path()

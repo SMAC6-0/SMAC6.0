@@ -45,6 +45,7 @@ class Cell:
 def initialize_grid_with_structures():
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
+    It additionally marks the block depots if there.
 
     Returns:
         grid [list]: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
@@ -57,6 +58,8 @@ def initialize_grid_with_structures():
         for y in range(GRID_SIZE):
             grid[x][0][y] = GridStatus.WALKABLE.value
     
+    grid = mark_block_depot(grid)
+    
     return grid
 
 def mark_block_depot(grid):
@@ -68,7 +71,7 @@ def mark_block_depot(grid):
     Returns:
         grid [list]: A 3D list of the workspace with the supply depot.
     """
-    for i in BD_LOCS[i]:
+    for i in range(len(BD_LOCS)):
         x, z, y = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
             grid[x][z - 1][y] = GridStatus.SUPPLY_DEPOT.value
@@ -287,8 +290,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
     """ 
 
     # get the path
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block=False, prioritize_vertical=False)
-    print("path coords: ", path_coords)
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end)
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
@@ -309,7 +311,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
         # offset to handle the inchworm's position when it's on the block depot
         if current_coord == BD_LOC1:
             x, z, y = current_coord
-            current_coord = [x, z - 1, y]
+            current_coord = [x, z + 1, y]
             
         end_flag = bool(next_coord == BD_LOC1)
         step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord[0], next_coord[0], curr_orientation, is_holding_block, end_flag)
