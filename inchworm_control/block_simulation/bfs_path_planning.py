@@ -1,6 +1,6 @@
 import map_data
 
-def find_path(grid, start, goal, holding_block, prioritize_vertical):
+def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
     """
     Perform modified BFS in a 3D grid.
     
@@ -12,14 +12,15 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical):
         goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
         inchworm_id (int): An ID that identifies which inchworm grid, start, and goal is being taken in.
+        holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).
         prioritize_vertical (boolean): A flag that determines if vertical neighbors are prioritized (scaling walls).
     Returns:
         path (list): A list of coordinates of the path.
         steps (int): The number of steps in the path.
     """
-    print(f"BFS called with start: {start}, goal: {goal}, prioritize_vertical: {prioritize_vertical}")
+    print(f"BFS called with start: {start}, goal: {goal}")
     
-    neighbor_directions = map_data.set_neighbors(prioritize_vertical=True)
+    neighbor_directions = map_data.set_neighbors()
     
     if map_data.is_valid_start_goal_3d(grid, start, goal):
         goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start, goal)
@@ -34,7 +35,7 @@ def find_path(grid, start, goal, holding_block, prioritize_vertical):
         steps += 1
 
         if map_data.is_goal_reached_3d(current_cell, goal_cell):
-            path = map_data.rework_path_3d(current_cell, holding_block)
+            path = map_data.reverse_path_3d(current_cell, holding_block)
             print(f"Path found: {path}")
             return path, steps
         

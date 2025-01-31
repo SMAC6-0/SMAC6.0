@@ -35,7 +35,7 @@ class Inchworm:
         self.id = Inchworm.next_id
         self.orientation = orientation
         
-        self.current_map = map_data.initialize_grid_with_structures()
+        self.current_map = map_data.initialize_grid()
         self.final_structure = final_structure
         self.lead_foot_loc = location
         self.holding_block = holding_block
@@ -95,9 +95,9 @@ class Inchworm:
         
         print("got goal: ", next_goal)
         path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
-        path, step_instructions = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, self.holding_block)
+        path, step_instructions = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, holding_block=True)
 
-        map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
+        self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
 
         self.step_getter(step_instructions)
         for point in self.goal:

@@ -6,7 +6,7 @@ import numpy as np
 
 start_coords = [4, 0, 1]
 end_coords = [6, 1, 5]
-grid = map_data.initialize_grid_with_structures()
+grid = map_data.initialize_grid()
 grid = map_data.update_grid_with_structure(grid, end_coords)
 # bfs_path_planning.find_path(grid, start_coords, BD_LOC1, False)
 # bfs_path_planning.find_path(grid, BD_LOC1, end_coords, True)

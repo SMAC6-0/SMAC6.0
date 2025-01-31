@@ -44,7 +44,7 @@ def a_star_search(grid, start, goal, prioritize_vertical=False):
 
         # if goal is reached, reconstruct path w/ parent pointers
         if (current_node.x, current_node.y, current_node.z) == (goal_node.x, goal_node.y, goal_node.z):
-            return rework_path_3d(current_node, False)
+            return reverse_path_3d(current_node, False)
         
         visited.add(current_node.x, current_node.y, current_node.z)
 

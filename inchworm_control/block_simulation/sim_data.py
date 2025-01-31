@@ -25,7 +25,7 @@ class SimData:
         self.incoming_blocks = [] 
         self.all_paths = []
         self.supply_depot = []
-        self.final_structure = map_data.initialize_grid_with_structures()
+        self.final_structure = map_data.initialize_grid()
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
@@ -87,7 +87,7 @@ class SimData:
             num_inchworms (int): number of inchworms building the structure
         """
         # initialize the map as the blocks/structure knows it
-        empty_map = map_data.initialize_grid_with_structures()
+        empty_map = map_data.initialize_grid()
 
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))

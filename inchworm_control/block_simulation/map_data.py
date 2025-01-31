@@ -2,6 +2,7 @@ from enum import Enum
 import numpy as np
 from config import *
 import bfs_path_planning
+import copy
 
 class GridStatus(Enum):
     WALKABLE = 0
@@ -42,7 +43,7 @@ class Cell:
         """
         return self.f < other.f # cell comparing for priority queue
     
-def initialize_grid_with_structures():
+def initialize_grid():
     """
     Initalize the empty 3D workspace such that all cells on the bottom layer are walkable, and the rest are not walkable.
     It additionally marks the block depots if there.
@@ -117,40 +118,46 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     return grid
 
-def set_neighbors(prioritize_vertical, allow_diagonal=True, allow_large_build=False):    
+def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
     Sets the neighbors in an algorithm.
 
     Args:
-        prioritize_vertical (boolean): . 
-        allow_diagonal (boolean): . 
+        allow_vertical (boolean): . 
+        allow_vert_diagonal (boolean): . 
+        allow_horz_diagonal (boolean): . 
+        allow_alls_diagonal (boolean): . 
         allow_large_build (boolean)
     Returns:
         neighbor_directions (list(tuple)): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
     base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
     vertical_neighbors = [(0, 1, 0), (0, -1, 0)]
-    diagonal_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),
-                          (1, 0, 1), (0, 1, 1), (-1, 0, 1), (0, -1, 1),
-                          (1, 0, -1), (0, 1, -1), (-1, 0, -1), (0, -1, -1),
-                          (1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1),
-                          (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]
+    diagonal_vert_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),
+                               (0, 1, 1), (0, 1, -1), (0, -1, 1), (0, -1, -1)]
+    diagonal_horz_neighbors = [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1)]
+    diagonal_alls_neighbors = [(1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1),
+                               (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]
     large_build_neighbors = [(1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0),
                              (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)]
     
     # combined neighbor_directions based on conditions
     neighbor_directions = base_neighbors
     
-    if prioritize_vertical:
+    if allow_vertical:
         neighbor_directions += vertical_neighbors
-    if allow_diagonal:
-        neighbor_directions += diagonal_neighbors
+    if allow_vert_diagonal:
+        neighbor_directions += diagonal_vert_neighbors
+    if allow_horz_diagonal:
+        neighbor_directions += diagonal_horz_neighbors
+    if allow_alls_diagonal:
+        neighbor_directions += diagonal_alls_neighbors
     if allow_large_build:
         neighbor_directions += large_build_neighbors
         
     return neighbor_directions
 
-def rework_path_3d(curr_cell, is_holding_block):
+def reverse_path_3d(curr_cell, is_holding_block):
     """
     Reverse calculated path to go from start to goal.
     
@@ -175,7 +182,7 @@ def create_cell(grid, coords):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        coords (tuple): A coordinate within a grid.
+        coords (tuple): A coordinate within a grid (x, z, y).
     Returns:
         cell (Cell): The corresponding Cell of the given coordinate.
     """
@@ -265,17 +272,17 @@ def start_search_3d(grid, start, goal):
     return goal_cell, visited, queue, steps
 
 def handle_multiple_block_depots():
-    #TODO
+    #TODO: how path planning is affected by the existence of multiple block depots 
     pass
 
 def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False, True)
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False)
     return path_coords, num_steps
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation):
+def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -285,28 +292,31 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
                      incoming_block (2), & supply_depot (3). 
         path_start (tuple): The starting position of the path.
         path_end (tuple): The ending position of the path.
+        curr_orientation (enum): N, E, S, or W 
+        holding_block(bool): True if the inchworm is holding a block.
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
 
     # get the path
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end)
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block)
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
         path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
 
+    # NOTE: because passing in holding_block, might not need this anymore
     # if the start is the Block Depot, it is holding a block
-    is_holding_block = False
-    if(path_start == BD_LOC1):
-        is_holding_block = True
+    # is_holding_block = False
+    # if(path_start == BD_LOC1):
+    #     is_holding_block = True
 
-    path_list = path_coords[0]
+    path_list = copy.deepcopy(path_coords[0])
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
     for i in range(len(path_list) - 1):
-        current_coord = path_list[i]
-        next_coord = path_list[i + 1]
+        current_coord = path_list[i][0]
+        next_coord = path_list[i + 1][0]
 
         # offset to handle the inchworm's position when it's on the block depot
         if current_coord == BD_LOC1:
@@ -314,7 +324,9 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
             current_coord = [x, z + 1, y]
             
         end_flag = bool(next_coord == BD_LOC1)
-        step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord[0], next_coord[0], curr_orientation, is_holding_block, end_flag)
+        print("curr: ", (current_coord))
+        print("next: ", (next_coord))
+        step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)
 
         print(step_instructions, orientation)
         steps.append(step_instructions)
@@ -322,7 +334,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation):
 
     return path_coords, steps
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is_holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, holding_block, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -357,8 +369,8 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
         intermediate_coord = ((int(current_coord[0] + np.sign(movement_vector[0])), current_coord[1], current_coord[2]))
         
         # Process the two components
-        step1, orientation1 = convert_coordinate_to_steps(grid, current_coord, intermediate_coord, orientation, is_holding_block, end_flag)
-        step2, orientation2 = convert_coordinate_to_steps(grid, intermediate_coord, next_coord, orientation1, is_holding_block, end_flag)
+        step1, orientation1 = convert_coordinate_to_steps(grid, current_coord, intermediate_coord, orientation, holding_block, end_flag)
+        step2, orientation2 = convert_coordinate_to_steps(grid, intermediate_coord, next_coord, orientation1, holding_block, end_flag)
         
         combined_steps = f"{step1}\n{step2}"
         return combined_steps, orientation2
@@ -411,9 +423,9 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, is
         new_orientation = get_orientation(step_instructions, orientation)
         
         #TODO: handle any block depot
-        if next_coord == BD_LOC1:
+        if (next_coord == BD_LOC1).all():
             return f"GRAB_{step_instructions}", new_orientation
-        elif is_holding_block & end_flag:
+        elif holding_block & end_flag:
             return f"PLACE_{step_instructions}", new_orientation
         else:
             return f"STEP_{step_instructions}", new_orientation
