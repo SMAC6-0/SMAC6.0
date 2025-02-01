@@ -303,7 +303,10 @@ def determine_helper_blocks(grid, path_start, path_end):
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
     path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False)
-    return path_coords, num_steps
+    if num_steps == -1:
+        RuntimeError(f"Cannot find helper blocks for path.")
+    else:
+        return path_coords, num_steps
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
     """
@@ -320,20 +323,12 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-
-    # get the path
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block)
+    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if num_steps == -1:
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
         path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
-
-    # NOTE: because passing in holding_block, might not need this anymore
-    # if the start is the Block Depot, it is holding a block
-    # holding_block = False
-    # if(path_start == BD_LOC1):
-    #     holding_block = True
 
     path_list = copy.deepcopy(path_coords[0])
     steps = []
@@ -341,28 +336,15 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     for i in range(len(path_list) - 1):
         current_coord = path_list[i][0]
         next_coord = path_list[i + 1][0]
-
-        # offset to handle the inchworm's position when it's on the block depot
-        # if current_coord == BD_LOC1:
-        #     x, z, y = current_coord
-        #     current_coord = [x, z - 1, y]
-
-        # if holding_block:
-        #     x, z, y = current_coord
-        #     current_coord = [x, z - 1, y]
             
-        end_flag = bool(next_coord == BD_LOC1)
-        print("curr: ", (current_coord))
-        print("next: ", (next_coord))
+        end_flag = bool(next_coord == path_end) # if it is done basically
         step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)
-
-        print(step_instructions, orientation)
         steps.append(step_instructions)
         curr_orientation = orientation
 
     return path_coords, steps
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tuple[int], orientation, holding_block, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -408,12 +390,12 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
     orientation_transforms = {
         InchwormOrientation.NORTH: lambda x, z, y: (x, z, y),  
         InchwormOrientation.SOUTH: lambda x, z, y: (-x, z, -y),
-        InchwormOrientation.EAST: lambda x, z, y: (y, z, -x),  
-        InchwormOrientation.WEST: lambda x, z, y: (-y, z, x),  
+        InchwormOrientation.EAST: lambda x, z, y: (-y, z, x),  
+        InchwormOrientation.WEST: lambda x, z, y: (y, z, -x),  
     }
     
     transform = orientation_transforms[orientation]
-    print(f"orientation: {orientation}")
+    # print(f"orientation: {orientation}")
     transformed_vector = transform(*normalized_vector)
     
     # Orientation here is based on NORTH.

@@ -42,10 +42,10 @@ class Inchworm:
 
         # Path planning relevant vars
         self.paths = [] # the list of coords
-        self.goal = []
+        self.goal = [] # goal coord
         self.goal_progress_index = 0
-        self.found_structures = []
-        self.misc_blocks = []
+        # self.found_structures = []
+        # self.misc_blocks = []
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
         self.leading_foot = CURRENT_LOC
@@ -89,21 +89,51 @@ class Inchworm:
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal[self.goal_progress_index]))
     
-    def plan_path(self):
-        # TODO: blueprint algo to determine what blocks go to which IW (placeholder)
-        next_goal = self.get_next_block()
-
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal)
+    def plan_path_to_structure(self): 
+        """ Plan path from current location to block depot, then from there to the next block. """
+        next_goal = self.get_next_block() # returns the next_goal (block to be placed) based on blueprint algo
+        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
         
-        print("got goal: ", next_goal)
-        path, step_instructions = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
-        path, step_instructions = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, holding_block=True)
+        try: 
+            step_instructions = []
+            # Path plan first tto block depot, then to the next goal
+            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+            goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, holding_block=True)
+            
+            # Update inchworm path & corresponding steps to travel that path
+            step_instructions += bd_steps
+            step_instructions += goal_steps
+            self.paths += bd_path
+            self.paths += goal_path
 
-        self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, path) # Update IW's map with the path
-        # self.update_my_current_map()
-        self.step_getter(step_instructions)
-        for point in self.goal:
-            point[1] += 1  # Increment the second value
+            # Update the inchworm's internal map with the step it will take 
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
+            
+            step_getter(step_instructions)
+            # for point in self.goal:
+            #     point[1] += 1  # Increment the second value
+        except: 
+            RuntimeError("No path found, try again later.")
+    
+    def plan_path_to_(self, next_goal: tuple[int]): 
+        """ Plan path from current location to specified goal. """
+        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
+        
+        try: 
+            step_instructions = []
+            # Path plan first tto block depot, then to the next goal
+            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation, self.holding_block)
+            
+            # Update inchworm path & corresponding steps to travel that path
+            step_instructions += bd_steps
+            self.paths += bd_path
+
+            # Update the inchworm's internal map with the step it will take 
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
+            
+            step_getter(step_instructions)
+        except: 
+            RuntimeError("No path found, try again later.")
 
     def get_next_point(self): 
         """ 
@@ -115,7 +145,8 @@ class Inchworm:
             z = z + 1
         return x, z, y
     
-    def get_next_block(self):
+    def get_next_block(self) -> tuple[int]:
+        """ Uses the blueprint algorithm to determine which block should be placed next. """
         # TODO: handle misc
         # sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
         # self.misc_blocks = sorted_list
@@ -369,23 +400,17 @@ class Inchworm:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
 
-    def step_getter(self, path):
-        """
-        Write the steps to steps.txt
-        """
-        step_instructions = []
-        for i in range(len(path) - 1):
-            curr_coord = path[i][0]
-            next_coord = path[i + 1][0] 
-            
-            end_flag = bool(i == len(path) - 1)
-            step_instructions.append(map_data.convert_coordinate_to_steps(self.current_map, curr_coord, next_coord, self.orientation, self.holding_block, end_flag))
-        complete_step_instructions = copy.deepcopy(step_instructions)
-        file_path = f"step_instructions_{self.id}.txt"
-        
-        with open(file_path, 'w') as file:
-            for step_instructions in complete_step_instructions:
-                file.write(f"{step_instructions}\n")
+def step_getter(step_instructions):
+    """
+    Write the steps to steps.txt
+    """
+    complete_steps = copy.deepcopy(step_instructions)
+    file_path = "steps.txt"
+    
+    with open(file_path, 'w') as file:
+        for step in complete_steps:
+            file.write(f"{step}\n")
+
 
 if __name__ == "__main__":
     inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, CURRENT_LOC)

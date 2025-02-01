@@ -36,4 +36,4 @@ grid = map_data.update_grid_with_structure(grid, end_coords)
 # print(type(FINAL_MAP))
 
 my_inchy = Inchworm(InchwormOrientation.NORTH, grid, start_coords)
-my_inchy.plan_path()
+my_inchy.plan_path_to_structure()
