@@ -91,8 +91,8 @@ def update():
         for inchworm in sim_data.existing_inchworms:
             inchworm.plan_path_to_structure()
             show_IW_paths(inchworm)
-        seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
-        spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
+        # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
+        # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
         key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
@@ -175,12 +175,13 @@ def update():
 
 def show_IW_paths(inchworm):
     # First extract the next block the IW is going to place
-    cell = inchworm.goal[inchworm.goal_progress_index]
+    cell = inchworm.goal
     delete_cube(cell[0], cell[1], cell[2])
     spawn_cube(cell[0], cell[1], cell[2], 'incoming')
 
     # Then show the path the inchworm is going to take
-    for cell in inchworm.path: 
+    for step in range(len(inchworm.paths[0])-1): 
+        cell = inchworm.paths[0][step][0]
         delete_cube(cell[0], cell[1], cell[2])
         spawn_cube(cell[0], cell[1], cell[2], 'path')
 

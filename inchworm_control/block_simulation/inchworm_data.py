@@ -91,14 +91,14 @@ class Inchworm:
     
     def plan_path_to_structure(self): 
         """ Plan path from current location to block depot, then from there to the next block. """
-        next_goal = self.get_next_block() # returns the next_goal (block to be placed) based on blueprint algo
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
+        self.goal = self.get_next_block() # returns the next_goal (block to be placed) based on blueprint algo
+        self.current_map = map_data.update_grid_with_incoming(self.current_map, self.goal) # updates map for next_goal to be incoming_block
         
         try: 
             step_instructions = []
             # Path plan first tto block depot, then to the next goal
             bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
-            goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, next_goal, self.orientation, holding_block=True)
+            goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
             
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += bd_steps
