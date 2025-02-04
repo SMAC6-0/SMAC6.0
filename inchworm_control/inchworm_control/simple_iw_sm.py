@@ -1,6 +1,6 @@
 from enum import Enum
-from transitions import Machine
 import time
+import serial
 from time import sleep
 
 ## UART stuff
