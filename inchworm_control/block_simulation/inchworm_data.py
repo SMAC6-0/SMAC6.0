@@ -48,8 +48,8 @@ class Inchworm:
         # self.misc_blocks = []
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-        self.leading_foot = CURRENT_LOC
-        self.lagging_foot = self.leading_foot
+        self.leading_foot_loc = CURRENT_LOC
+        self.lagging_foot_loc = self.leading_foot_loc
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
@@ -77,7 +77,7 @@ class Inchworm:
     def send_my_next_steps(self, path): 
         """ Send IW path and the corresponding incoming block to the structure. """ 
         if SIMULATION: 
-            return path, self.goal[self.goal_progress_index]
+            return path
         else: 
             # TODO @ SAKSHI & MO: UART COMMUNICATION
             pass
@@ -87,7 +87,7 @@ class Inchworm:
         pass
 
     def get_loc_in_path(self): 
-        return tuple(map(float, self.goal[self.goal_progress_index]))
+        return tuple(map(float, self.goal))
     
     def plan_path_to_structure(self): 
         """ Plan path from current location to block depot, then from there to the next block. """
@@ -103,8 +103,8 @@ class Inchworm:
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += bd_steps
             step_instructions += goal_steps
-            self.paths += bd_path
-            self.paths += goal_path
+            self.paths += bd_path[0]
+            self.paths += goal_path[0]
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
@@ -126,7 +126,7 @@ class Inchworm:
             
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += bd_steps
-            self.paths += bd_path
+            self.paths += bd_path[0]
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
@@ -139,8 +139,9 @@ class Inchworm:
         """ 
         Returns the set of the next points of inchworm travel
         """
-        (self.leading_foot, holding_block) = self.paths(0)  # Get the next point
-        x, z, y = self.leading_foot
+        (self.leading_foot_loc, holding_block) = self.paths[self.goal_progress_index]  # Get the next point
+        x, z, y = self.leading_foot_loc
+        self.goal_progress_index += 1
         if holding_block:
             z = z + 1
         return x, z, y

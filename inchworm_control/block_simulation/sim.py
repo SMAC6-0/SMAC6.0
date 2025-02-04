@@ -98,7 +98,7 @@ def update():
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].coords_to_spawn: # simulates the stepping of the leading leg
+    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].paths: # simulates the stepping of the leading leg
         # coords_to_spawn verifies that a path exists before trying to do anything
 
         # TODO: consider moving block tracking to sim_data
@@ -131,7 +131,6 @@ def update():
                     # IW reaches goal coords & places block 
                     last_block_original_texture = smart_block_texture
                     new_texture = smart_block_texture 
-                    inchworm.goal_progress_index += 1
                 else:
                     # The inchworm is not yet at the goal
                     new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
@@ -148,7 +147,7 @@ def update():
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, z2, y2 = sim_data.existing_inchworms[0].prev_point
+        x2, z2, y2 = sim_data.existing_inchworms[0].lagging_foot_loc
         already_placed_block_2 = None
         for e in scene.entities:
             if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
@@ -170,7 +169,7 @@ def update():
             last_colored_block_2 = spawned_block_2
             last_block_original_texture_2 = smart_block_texture
 
-        sim_data.existing_inchworms[0].prev_point = sim_data.existing_inchworms[0].point
+        sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
 
 def show_IW_paths(inchworm):
@@ -180,8 +179,8 @@ def show_IW_paths(inchworm):
     spawn_cube(cell[0], cell[1], cell[2], 'incoming')
 
     # Then show the path the inchworm is going to take
-    for step in range(len(inchworm.paths[0])-1): 
-        cell = inchworm.paths[0][step][0]
+    for step in range(len(inchworm.paths)-1): 
+        cell = inchworm.paths[step][0]
         delete_cube(cell[0], cell[1], cell[2])
         spawn_cube(cell[0], cell[1], cell[2], 'path')
 
@@ -291,7 +290,12 @@ def check_block_color(x, y, z):
                 block_color = smart_block_texture_step_yellow
         elif existing_cube_texture == smart_block_outline:      
                 block_color = smart_block_texture
-
+        elif existing_cube_texture == incoming_block_texture:
+            block_color = smart_block_texture_step_red
+        elif existing_cube_texture == incoming_step_texture:
+            block_color = smart_block_texture_step_red
+        elif existing_cube_texture == seed_block_texture:
+            block_color = seed_block_texture
         else:
                 print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
