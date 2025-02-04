@@ -26,7 +26,7 @@ SUPPLY_LOCATION = [1, 1, 1] # config
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo
 IW_identifier = [1] # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = [0] # this is the messgae counter for sending data, IK's message counter increases
-IW_message_info = 0 # holds the status of the block 
+IW_message_info = [0] # holds the status of the block 
 
 
 # Inchworm states
