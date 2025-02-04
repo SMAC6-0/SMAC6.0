@@ -83,7 +83,7 @@ class Inchworm:
             case IW_STATE.PLACING_BLOCK:
                 if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
                         self.handle_structure_complete()
-                    else: # structure is incomplete
+                else: # structure is incomplete
                         self.handle_structure_incomplete()
             case IW_STATE.ERROR:
                 self.handle_error()
@@ -112,7 +112,7 @@ class Inchworm:
 
         print("Initializing the block")
         
-        buffer = [struct.pack('B', 0xAA)] # universal start code
+        buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
 
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) + struct.pack('B', next_block_location) + struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
@@ -133,12 +133,6 @@ class Inchworm:
         buffer.append(checksum)
         buffer.append(block_change)
         buffer.append(UART_CODES.Initialization)
-
-        print("buffer before bytearray", buffer)
-
-        buffer = bytearray(buffer)
-        print("buffer after bytearray", buffer)
-
 
         iw_serial.write(buffer)
 
