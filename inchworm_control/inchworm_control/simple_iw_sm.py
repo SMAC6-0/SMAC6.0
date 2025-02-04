@@ -134,7 +134,7 @@ class Inchworm:
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
-        buffer += msg_len + checksum + block_change + struct.pack('B', 0xFA)
+        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
 
         self.iw_serial.write(buffer)
 
