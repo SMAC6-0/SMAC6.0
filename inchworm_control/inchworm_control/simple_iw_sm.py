@@ -5,6 +5,13 @@ from time import sleep
 
 ## UART stuff
 UART_BAUD = 9600 # config
+
+# Pins 
+# GPIO 15, pin 8 = RX green
+# GPIO 14, pin 10 = TX yellow
+# ground = Pin 14
+
+
 # setup uart 
 # uart1 = UART(0,)
 
