@@ -7,13 +7,25 @@ GRID_SIZE = 50  # Define the size of your grid in one direction
                 # where every cell is 0, representing that all those cells are walkable 
 BD_LOC1 = [4, 1, 4] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, z, y).
 CURRENT_LOC = [4, 0, 1] # Starting location of the inchworm robot, where the coordinates are represented as (x, z, y).
-BD_LOCS = [[BD_LOC1]] # The locations of all block depots (if there are multiple)
+BD_LOCS = [BD_LOC1] # The locations of all block depots (if there are multiple)
 # if the simulation is for the demo, set this to True
-DEMO = False
+SIMULATION = True
 LARGE_BUILD = False
 
 # Define the possible orientations of the inchworm
-InchwormOrientation = Enum('InchwormOrientaton', ['NORTH', 'SOUTH', 'EAST', 'WEST', 'UNDEFINED'])
+class InchwormOrientation(Enum):
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
+
+    def rotate(self, steps):
+        """
+        Rotate the orientation by a number of steps.
+        Positive steps rotate clockwise, negative steps rotate counterclockwise.
+        """
+        new_value = (self.value + steps) % len(InchwormOrientation)
+        return InchwormOrientation(new_value)
 CURRENT_ORIENTATION = InchwormOrientation.NORTH
 
 # have inchworm starting inline with BD 

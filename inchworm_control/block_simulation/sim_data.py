@@ -12,25 +12,29 @@ is located at its final position from the beginning.
 import copy
 from config import *
 # from inchworm_data import Inchworm
-import path_planning
-from path_conversion import * 
+import map_data
 from search import search
-from TEMP import Inchworm
+from inchworm_data import Inchworm
 
 
 
 class SimData: 
     def __init__(self): 
+        self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
         self.blocks_placed = []
-        self.found_structures = []
-        self.misc_blocks = []
-
-        # initialize the map as the blocks/structure knows it
-        # empty_map = map_data.initialize_grid_with_structures()
+        self.incoming_blocks = [] 
+        self.all_paths = []
+        self.supply_depot = []
+        self.final_structure = map_data.initialize_grid()
+        
         self.existing_inchworms = []
         self.initialized_inchworms = []
         
 
+    def generate_final_structure_map(self): 
+        """Convert blocks placed in sim to 3D list parsable everywhere else"""
+        for block in self.blocks_placed: 
+            self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
 
     def get_next_steps(self): 
         """
@@ -62,21 +66,32 @@ class SimData:
         simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
+    
+    def receive_IW_update(self, update_msg): 
+        """
+        Structure receives update & processes it
+        """
+        # if sim detects iw is in contact w structure, send map snapshot, receive the incoming block, update self
+        # TODO: @ SAKSHI & MO: processing msg structure to update the 3D list 
+        pass 
+
+    def send_current_map(self): 
+        """ send current structure to IWs in contact w structure"""
+        pass
 
 
 
-    def run_sim(self): 
-
+    def spawn_inchworms(self, num_inchworms: int): 
+        """
+        Args: 
+            num_inchworms (int): number of inchworms building the structure
+        """
         # initialize the map as the blocks/structure knows it
-        empty_map = path_planning.initialize_grid_with_structures(path_planning.grid_size)
-        # TODO: replace the param --> set grid size in config?
+        empty_map = map_data.initialize_grid()
 
-        # Initialize inchworms 
-        inchworm_1 = Inchworm(1, CURRENT_ORIENTATION, None, empty_map, CURRENT_LOC)
-        self.existing_inchworms.append(inchworm_1)
-
+        for i in range(num_inchworms): 
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
         print("inchworms spawned")
-        #TODO: could set up for loop to initialize desired num of inchworms 
 
 
 def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):

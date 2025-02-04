@@ -3,30 +3,35 @@ from transitions import Machine
 import time
 from time import sleep
 
+## UART stuff
+UART_BAUD = 9600 # config
+# setup uart 
+# uart1 = UART(0,)
+
+SUPPLY_LOCATION = [1, 1, 1] # config
+
+
 # Inchworm states
 class IW_STATE(Enum):
-    IDLE = 0 # added this incase we need to use it
-    INITIALIZATION = 1
-    PATH_PLANNING = 2
-    TRAVELLING_TO_SUPPLY = 3
-    TRANSPORTING_BLOCK = 4
-    PLACING_BLOCK = 5
-    ERROR = 6
-    STRUCTURE_COMPLETE = 7
-
-
+    IDLE = 1 # added this incase we need to use it
+    INITIALIZATION = 2
+    PATH_PLANNING = 3
+    TRAVELLING_TO_SUPPLY = 4
+    TRANSPORTING_BLOCK = 5
+    PLACING_BLOCK = 6
+    ERROR = 7
+    STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 3
 class Inchworm:
     def __init__(self):
         self.state = IW_STATE.INITIALIZATION
-
         self.initilization_flag = True
+        self.print_flag = True
 
-        while True: 
+    def run(self):
+        while self.state != IW_STATE.STRUCTURE_COMPLETE:
             self.update_state()
-
-        pass
 
     def update_state(self):
         match self.state:
@@ -35,31 +40,36 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 if self.initilization_flag:
                     self.handle_initilization()
-                if (self.IW_gets_Map_Snapshot()): # IW got the mapsnap shot 
+                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
-                if (self.is_Path_Available()): # Path exists!
+                if self.is_Path_Available(): # Path exists!
                     self.path_exists()
                 else: # Path doesn't exist!
                     print("Retrying path planning after waiting")
-                    # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-                    sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code 
+                    self.retry_path() 
             case IW_STATE.TRAVELLING_TO_SUPPLY:
-                if (self.is_IW_in_supply()):
+                if self.is_IW_in_supply():
                     self.handle_travelling_to_supply()
                 else:
                     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
-                if (self.is_IW_in_block()):
+                if self.is_IW_in_block():
                     self.handle_transporting_block()
                 else:
                     self.handle_error()
-            # case IW_STATE.PLACING_BLOCK:
-            #     self.handle_placing_block()
-            # case IW_STATE.ERROR:
-            #     self.handle_error()
-            # case IW_STATE.STRUCTURE_COMPLETE:
-            #     self.handle_structure_complete()
+            case IW_STATE.PLACING_BLOCK:
+                if self.incorrect_block_location(): # block is placed in the wrong location
+                    self.handle_error()
+                elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
+                    if self.is_structure_complete(): # structure is complete
+                        self.handle_structure_complete()
+                    else: # structure is incomplete
+                        self.handle_structure_incomplete()
+            case IW_STATE.ERROR:
+                self.handle_error()
+            case IW_STATE.STRUCTURE_COMPLETE:
+                self.handle_structure_complete()
 
     
     ##### Checkers and Handlers
@@ -67,8 +77,11 @@ class Inchworm:
     # Handlers 
 
     # added this func incase we need it in the future
-    def handle_idle():
-        print("IDLINGGG....")
+    def handle_idle(self):
+        if self.print_flag:
+            print("IDLINGGG....")
+            self.print_flag = False
+
     
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
@@ -104,6 +117,12 @@ class Inchworm:
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(f"Current inchworm state: {self.state}")
     
+    def retry_path(self):
+        # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+        sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+        # or stay here until the IW gets a new map!!
+        # MOOO HELPPP
+
     def handle_travelling_to_supply(self):
         print("Touching the new block")
         # touch the new block
@@ -136,7 +155,24 @@ class Inchworm:
 
         self.state = IW_STATE.IDLE
         print(f"Current inchworm state: {self.state}")
+    
+    def handle_structure_complete(self):
+        print("Structure is complete YIppeee")
+
+        # stop the iW
+        print("IW Stopped")
         
+        # flash green light
+        print("flash Green LED")
+
+        self.state = IW_STATE.STRUCTURE_COMPLETE
+        print(f"Current inchworm state: {self.state}")
+
+    def handle_structure_incomplete(self):
+        print("Structure is incomplete")
+
+        self.state = IW_STATE.PATH_PLANNING
+        print(f"Current inchworm state: {self.state}")
 
     # Checkers
     def IW_gets_Map_Snapshot(self):
@@ -193,6 +229,33 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
+    def incorrect_block_location(self):
+        # return true if the IW gets "incorrectly placed block" from the structure 
+        # MOOOO HELLPOPPPP
+
+        incorrect_block = input("IW got error 'Incorrectly Placed Block'? (yes/no) \n")
+        if incorrect_block.lower() == 'yes':
+            return True
+        elif incorrect_block.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+        pass
+    
+    def is_structure_complete(self):
+        print("Checking if structure is complete")
+
+        # compare the current map and the blueprint
+        # return true if structure is complete and false otherwise
+
+        structure_complete = input("Is structure complete? (yes/no) \n")
+        if structure_complete.lower() == 'yes':
+            return True
+        elif structure_complete.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+        pass
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
 
@@ -201,75 +264,8 @@ def run_Inchworm ():
     print("Current inchworm state:")
 
 if __name__ == "__main__":
-    run_Inchworm()
-
-'''
-# Define states
-Inchworm_States = ["INITIALIZATION", "PATH_PLANNING", "TRAVELLING_TO_SUPPLY", "TRANSPORTING_BLOCK", "PLACING_BLOCK", "ERROR", "STRUCTURE_COMPLETE"]
-
-class Inchworm:
-    def __init__(self):
-        # Initialize the state machine
-        self.machine = Machine(model=self, states=Inchworm_States, initial="INITIALIZATION")
-        print(f"Initial State: {self.state}")  
-
-        # Set up state hooks
-        self.machine.on_enter_INITIALIZATION(self.check_map_snapshot)
-        self.machine.on_enter_PATH_PLANNING(self.check_path_availability)
-        self.machine.on_enter_TRAVELLING_TO_SUPPLY(self.check_supply_location)
-        self.machine.on_enter_TRANSPORTING_BLOCK(self.check_block_location)
-        self.machine.on_enter_PLACING_BLOCK(self.check_structure_completion)
-
-    # Callback for state hooks
-    
-
-    
-
-    
-
-    def check_block_location(self):
-        print("Checking if at block location...")
-        if self.is_IW_in_block_location():
-            print("At block location. Transitioning to PLACING_BLOCK...")
-            self.to_PLACING_BLOCK()  # Move to the next state automatically
-
-    def check_structure_completion(self):
-        print("Checking if structure is complete...")
-        if self.is_structure_complete():
-            print("Structure complete. Transitioning to STRUCTURE_COMPLETE...")
-            self.to_STRUCTURE_COMPLETE()  # Move to the next state automatically
-
-    # State action callbacks
-    def on_enter_STRUCTURE_COMPLETE(self):
-        print("Structure completed!")
-
-    def on_enter_ERROR(self):
-        print("An error occurred.")
-
-    # Condition methods
-
-
-    
-
-    
-
-    def is_IW_in_block_location(self):
-        IW_in_block_location = input("Is IW in block location? \n")
-        return IW_in_block_location
-
-    def is_structure_complete(self):
-        structure_complete = input("Is Structure Complete? \n")
-        return structure_complete
-
-# Instantiate and run
-inchworm_sm = Inchworm()
-
-# Explicitly call to initialize the first state transition
-inchworm_sm.to_INITIALIZATION()  # Explicitly enter the INITIALIZATION state
-
-# Simulate the state machine running
-while inchworm_sm.state != "STRUCTURE_COMPLETE":
-    print(f"Current State: {inchworm_sm.state}")
-    time.sleep(1)  # Simulate time passing
-
-'''
+    inchworm = Inchworm()
+    try:
+        inchworm.run()
+    except KeyboardInterrupt:
+        print("Stopping the inchworm system.")
