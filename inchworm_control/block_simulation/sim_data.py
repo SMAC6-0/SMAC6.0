@@ -21,10 +21,11 @@ from inchworm_data import Inchworm
 class SimData: 
     def __init__(self): 
         self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
-        self.blocks_placed = []
+        self.blocks_placed = [] # list of blocks user places in sim
         self.incoming_blocks = [] 
         self.all_paths = []
-        self.final_structure = map_data.initialize_grid()
+        self.final_structure = map_data.initialize_grid() # Struct IWs are trying to build 
+        self.current_map = map_data.initialize_grid() # overall progress towards final struct
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
@@ -66,13 +67,18 @@ class SimData:
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
     
-    def receive_IW_update(self, update_msg): 
+    def receive_IW_update(self, inchworm): 
         """
         Structure receives update & processes it
         """
+        if SIMULATION: 
+            pass
+            # if inchworm.leading_foot_loc == 
+            # TODO: implement curr struct getting data from IW
+            # self.all_paths.remove()
+            # self.all_paths.extend(inchworm.paths)
         # if sim detects iw is in contact w structure, send map snapshot, receive the incoming block, update self
-        # TODO: @ SAKSHI & MO: processing msg structure to update the 3D list 
-        pass 
+ 
 
     def send_current_map(self): 
         """ send current structure to IWs in contact w structure"""

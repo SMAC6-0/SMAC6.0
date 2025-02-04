@@ -98,8 +98,8 @@ def update():
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].paths[sim_data.existing_inchworms[0].goal_progress_index]: # simulates the stepping of the leading leg
-        # coords_to_spawn verifies that a path exists before trying to do anything
+    if held_keys["n"] and not key_n_pressed and any(state == sim_data.existing_inchworms[0].state.value for state in [2, 4, 5]): # simulates the stepping of the leading leg
+        # mess at the end prevents stepping through path if not in a state that moves 
 
         # TODO: consider moving block tracking to sim_data
         for inchworm in sim_data.existing_inchworms: 
@@ -143,7 +143,8 @@ def update():
                 spawn_x, spawn_y, spawn_z = x, y, z
                 last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
-          
+        
+        inchworm.update_state()
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
@@ -177,6 +178,7 @@ def update():
     if held_keys["m"]:
         for inchworm in sim_data.existing_inchworms: 
             inchworm.update_state()
+            sim_data.receive_IW_update(inchworm)
             show_IW_paths(inchworm)
 
 def show_IW_paths(inchworm):
