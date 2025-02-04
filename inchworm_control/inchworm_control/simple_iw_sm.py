@@ -136,7 +136,7 @@ class Inchworm:
 
         buffer += msg_len + checksum + block_change + struct.pack('B', 0xFA)
 
-        iw_serial.write(buffer)
+        self.iw_serial.write(buffer)
 
         print("sent data yippee")
 
