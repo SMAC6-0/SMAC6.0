@@ -1,6 +1,7 @@
 from enum import Enum
 import time
 import serial
+import struct
 from time import sleep
 
 ###### UART stuff
@@ -80,10 +81,7 @@ class Inchworm:
                 else:
                     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
-                if self.incorrect_block_location(): # block is placed in the wrong location
-                    self.handle_error()
-                elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    if self.is_structure_complete(): # structure is complete
+                if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
                         self.handle_structure_incomplete()
@@ -114,22 +112,17 @@ class Inchworm:
 
         print("Initializing the block")
         
-        buffer = [0XAA] # universal start code
+        buffer = [struct.pack('B', 0xAA)] # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = IW_identifier + next_block_location + IW_message_info + IW_message_counter
-        # block_change.append(next_block_location)
-
-        # print(block_change)
-        # block_change.append(IW_message_info)
-        # block_change.append(IW_message_counter)
+        block_change = struct.pack('B', IW_identifier) + struct.pack('B', next_block_location) + struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
 
         print("Block change", block_change)
 
         # calculate message length and checksum
 
-        msg_len = len(block_change).to_bytes
-        checksum = self.crc16(block_change)
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
 
         print("msg_len", msg_len)
         print("checksum", checksum)
