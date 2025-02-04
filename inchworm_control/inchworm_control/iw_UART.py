@@ -2,26 +2,34 @@ import serial
 from time import sleep
 
 ser = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
+while True:
+    received_data = ser.read()              #read serial port
+    sleep(0.03)
+    data_left = ser.inWaiting()             #check for remaining byte
+    received_data += ser.read(data_left)
+    print (received_data)                   #print received data
+    ser.write(received_data)                #transmit data serially 
 
-sample_change = [1,2,3,2,1,0]
 
-def crc16(data: bytes, poly=0x8408):
-    '''
-    CRC-16-CCITT Algorithm
-    '''
-    data = bytearray(data)
-    crc = 0xFFFF
-    for b in data:
-        cur_byte = 0xFF & b
-        for _ in range(0, 8):
-            if (crc & 0x0001) ^ (cur_byte & 0x0001):
-                crc = (crc >> 1) ^ poly
-            else:
-                crc >>= 1
-            cur_byte >>= 1
-    crc = (~crc & 0xFFFF)
-    crc = (crc << 8) | ((crc >> 8) & 0xFF)
+# sample_change = [1,2,3,2,1,0]
 
-    return crc & 0xFFFF
+# def crc16(data: bytes, poly=0x8408):
+#     '''
+#     CRC-16-CCITT Algorithm
+#     '''
+#     data = bytearray(data)
+#     crc = 0xFFFF
+#     for b in data:
+#         cur_byte = 0xFF & b
+#         for _ in range(0, 8):
+#             if (crc & 0x0001) ^ (cur_byte & 0x0001):
+#                 crc = (crc >> 1) ^ poly
+#             else:
+#                 crc >>= 1
+#             cur_byte >>= 1
+#     crc = (~crc & 0xFFFF)
+#     crc = (crc << 8) | ((crc >> 8) & 0xFF)
 
-print(crc16(sample_change))
+#     return crc & 0xFFFF
+
+# print(crc16(sample_change))

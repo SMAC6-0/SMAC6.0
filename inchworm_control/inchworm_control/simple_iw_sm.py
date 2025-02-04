@@ -117,7 +117,10 @@ class Inchworm:
         buffer = [0XAA] # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = IW_identifier.append(next_block_location)
+        block_change = []
+        block_change.append(IW_identifier.append(next_block_location))
+
+        print(block_change)
         block_change.append(IW_message_info)
         block_change.append(IW_message_counter)
 
