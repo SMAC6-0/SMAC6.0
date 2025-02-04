@@ -61,7 +61,7 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 if self.initilization_flag:
-                    self.handle_initilization()
+                    self.handle_initialization()
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -104,7 +104,7 @@ class Inchworm:
     
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
-    def handle_initilization(self):
+    def handle_initialization(self):
         print("MOVINGGG...")
         # path plan to the seed block location from the supply depot
         
@@ -134,7 +134,7 @@ class Inchworm:
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
-        buffer += msg_len + checksum + block_change + struct.pack('B', UART_CODES.Initialization)
+        buffer += msg_len + checksum + block_change + struct.pack('B', 0xFA)
 
         iw_serial.write(buffer)
 
