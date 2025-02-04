@@ -133,8 +133,8 @@ class Inchworm:
         print(type(block_change_list))
         print(block_change_list)
 
-        msg_len = len(block_change).to_bytes(2,'little')
-        checksum = self.crc16(block_change).to_bytes(2, 'little')
+        msg_len = len(block_change_list).to_bytes(2,'little')
+        checksum = self.crc16(block_change_list).to_bytes(2, 'little')
 
         print("msg_len", msg_len)
         print("checksum", checksum)
