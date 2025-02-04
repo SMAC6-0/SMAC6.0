@@ -18,6 +18,13 @@ class IW_STATE(Enum):
 
 PATH_PLANNING_TIMER = 3
 
+lagging_transform = {
+    InchwormOrientation.NORTH: lambda x, z, y: (x, z, y-1),  
+    InchwormOrientation.SOUTH: lambda x, z, y: (x, z, y+1),
+    InchwormOrientation.EAST: lambda x, z, y: (x-1, z, y), 
+    InchwormOrientation.WEST: lambda x, z, y: (x+1, z, y) 
+}
+
 class Inchworm:
     next_id = 1
     inchworm_list = []
@@ -49,7 +56,7 @@ class Inchworm:
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
         self.leading_foot_loc = CURRENT_LOC
-        self.lagging_foot_loc = self.leading_foot_loc
+        self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
@@ -99,7 +106,8 @@ class Inchworm:
             # Path plan first tto block depot, then to the next goal
             bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
             goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
-            
+            goal_path[0].pop(0) # Remove repeat coord
+   
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += bd_steps
             step_instructions += goal_steps
@@ -407,7 +415,6 @@ def step_getter(step_instructions):
     """
     complete_steps = copy.deepcopy(step_instructions)
     file_path = "steps.txt"
-    
     with open(file_path, 'w') as file:
         for step in complete_steps:
             file.write(f"{step}\n")

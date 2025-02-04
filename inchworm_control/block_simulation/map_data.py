@@ -136,8 +136,9 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    for step in range(len(inchworm_path[0])-1): 
-        x, z, y = inchworm_path[0][step][0] # 1st index isolates path list ffrom num of steps, 2nd index gets step, 3rd index gets coord and not holding_block
+    print("set the path to grid")
+    for step in range(len(inchworm_path)-1): 
+        x, z, y = inchworm_path[step][0] # 1st index gets step, 2nd index gets coord and not holding_block
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     return grid
 
@@ -192,7 +193,14 @@ def reverse_path_3d(curr_cell, holding_block):
         steps (int): The number of steps in a path.
     """
     path = []
+    print("reversing the past")
+    prev_holding_block = holding_block
     while curr_cell:
+        if [curr_cell.x, curr_cell.z, curr_cell.y] == BD_LOCS[0]:
+            curr_cell.z -= 1
+            holding_block = True
+        else:
+            holding_block = prev_holding_block
         path.append(([curr_cell.x, curr_cell.z, curr_cell.y], holding_block))
         curr_cell = curr_cell.parent
     return path[::-1], len(path) - 1
@@ -436,7 +444,7 @@ def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tup
         if holding_block:
             step_instructions = f"{step_instructions}_BLOCK"
             
-        if (next_coord == BD_LOC1).all():
+        if (next_coord == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]).all():
             return f"GRAB_{step_instructions}", new_orientation
         elif holding_block & end_flag:
             return f"PLACE_{step_instructions}", new_orientation

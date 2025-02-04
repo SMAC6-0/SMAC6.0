@@ -1,4 +1,5 @@
 import map_data
+import config
 
 def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
     """
