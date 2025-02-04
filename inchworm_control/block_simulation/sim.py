@@ -174,6 +174,11 @@ def update():
         sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
 
+    if held_keys["m"]:
+        for inchworm in sim_data.existing_inchworms: 
+            inchworm.update_state()
+            show_IW_paths(inchworm)
+
 def show_IW_paths(inchworm):
     # First extract the next block the IW is going to place
     cell = inchworm.goal

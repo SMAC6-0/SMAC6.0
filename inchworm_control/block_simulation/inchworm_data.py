@@ -29,7 +29,7 @@ class Inchworm:
     next_id = 1
     inchworm_list = []
     
-    def __init__(self, orientation, final_structure, location: tuple[int], holding_block=False):
+    def __init__(self, orientation, final_structure, location: tuple[int]=CURRENT_LOC, holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
@@ -44,7 +44,6 @@ class Inchworm:
         
         self.current_map = map_data.initialize_grid()
         self.final_structure = final_structure
-        self.lead_foot_loc = location
         self.holding_block = holding_block
 
         # Path planning relevant vars
@@ -55,7 +54,7 @@ class Inchworm:
         # self.misc_blocks = []
 
         # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-        self.leading_foot_loc = CURRENT_LOC
+        self.leading_foot_loc = location
         self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
 
         # pertaining to the state machine 
@@ -81,11 +80,9 @@ class Inchworm:
         # TODO: does this belong in checker, handler, or outside? @Mo 
         self.current_map = map
 
-    def send_my_next_steps(self, path): 
+    def send_my_next_steps(self): 
         """ Send IW path and the corresponding incoming block to the structure. """ 
-        if SIMULATION: 
-            return path
-        else: 
+        if not SIMULATION: 
             # TODO @ SAKSHI & MO: UART COMMUNICATION
             pass
 
@@ -104,7 +101,7 @@ class Inchworm:
         try: 
             step_instructions = []
             # Path plan first tto block depot, then to the next goal
-            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
             goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
             goal_path[0].pop(0) # Remove repeat coord
    
@@ -125,12 +122,13 @@ class Inchworm:
     
     def plan_path_to_(self, next_goal: tuple[int]): 
         """ Plan path from current location to specified goal. """
+        self.goal = next_goal
         self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
         
         try: 
             step_instructions = []
             # Path plan first tto block depot, then to the next goal
-            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lead_foot_loc, next_goal, self.orientation, self.holding_block)
+            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
             
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += bd_steps
@@ -231,16 +229,22 @@ class Inchworm:
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
     def handle_initilization(self):
-        print("MOVINGGG...")
+        print("MOVINGGG TO SEED BLOCK")
         # path plan to the seed block location from the supply depot
+        x, z, y = self.get_next_block() # TODO: for now assuming that first block is seed
+        self.plan_path_to_([x, z, y])
         # if path exists 
-        # self.get_next_point() 
         # alternatively do try except
-
+        if self.paths: 
+            # move IW in sim
+            pass
+            if self.goal_progress_index >= len(self.paths): 
+                pass
+                self.initilization_flag = False
         print("Initializing the block")
         # touch the block infornt of it
 
-        self.initilization_flag = False
+        
         
     def handle_IW_gets_Map(self):
         print("Map snapshot successful.")
@@ -329,33 +333,42 @@ class Inchworm:
         # blah blah low level language 
         # TODO: ask Mo for help when the IW gets the map SnapShot back 
         # return true if the IW got the map snapshot
-
-        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        if got_map_snapshot.lower() == 'yes':
+        if SIMULATION: 
+            if self.leading_foot_loc == self.goal:
+                return True
+            return False 
+        else: 
+            # TODO @ Mo & Sakshi
             return True
-        elif got_map_snapshot.lower() == 'no':
-            return False
-        else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+        # got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+        # if got_map_snapshot.lower() == 'yes':
+        #     return True
+        # elif got_map_snapshot.lower() == 'no':
+        #     return False
+        # else:
+        #     print("Invalid input. Please answer with 'yes' or 'no'.")
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
         # return not IW_Path == [] # return if IW_path is empty or not (True: if not empty)
-        # TODO: add the path planning stuff 
         print("Planning path from supply to the next block")
         # IW path plans to the supply and to the next block
         # store that path in IW_path 
-        # self.plan_path()
-        # TODO: make the path planning compatible with the sim
+        self.plan_path_to_structure()
 
-        print("Checking path availability...")
-        is_Path_Available = input("Is Path Available? (yes/no) \n")
-        if is_Path_Available.lower() == 'yes':
+        print("Checking path availability... ")
+        if self.paths and self.goal:
             return True
-        elif is_Path_Available.lower() == 'no':
+        else: 
             return False
-        else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+
+        # is_Path_Available = input("Is Path Available? (yes/no) \n")
+        # if is_Path_Available.lower() == 'yes':
+        #     return True
+        # elif is_Path_Available.lower() == 'no':
+        #     return False
+        # else:
+        #     print("Invalid input. Please answer with 'yes' or 'no'.")
 
     def is_IW_in_supply(self):
         # return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)

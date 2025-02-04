@@ -24,7 +24,6 @@ class SimData:
         self.blocks_placed = []
         self.incoming_blocks = [] 
         self.all_paths = []
-        self.supply_depot = []
         self.final_structure = map_data.initialize_grid()
         
         self.existing_inchworms = []
