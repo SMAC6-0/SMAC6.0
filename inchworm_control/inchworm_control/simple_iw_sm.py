@@ -129,7 +129,7 @@ class Inchworm:
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
-        checksum = self.crc16(block_change).to_bytes(2, 'little')
+        checksum = self.crc16(list(block_change)).to_bytes(2, 'little')
 
         print("msg_len", msg_len)
         print("checksum", checksum)
