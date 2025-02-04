@@ -22,6 +22,13 @@ class UART_CODES(Enum):
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
+
+next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo
+IW_identifier = [1] # this is the idenifier that goes infornt of the message to be sent to the block 
+IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+IW_message_info = 0 # holds the status of the block 
+
+
 # Inchworm states
 class IW_STATE(Enum):
     IDLE = 1 # added this incase we need to use it
@@ -102,9 +109,41 @@ class Inchworm:
     def handle_initilization(self):
         print("MOVINGGG...")
         # path plan to the seed block location from the supply depot
+        
+        # touch the block infornt of it
 
         print("Initializing the block")
-        # touch the block infornt of it
+        
+        buffer = [0XAA] # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = IW_identifier.append(next_block_location)
+        block_change.append(IW_message_info)
+        block_change.append(IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer.append(msg_len, checksum, block_change, UART_CODES.Initialization)
+
+        print("buffer before bytearray", buffer)
+
+        buffer = bytearray(buffer)
+        print("buffer after bytearray", buffer)
+
+
+        iw_serial.write(buffer)
+
+        print("sent data yippee")
 
 
         self.initilization_flag = False
@@ -272,26 +311,26 @@ class Inchworm:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
 
+    
+    # Checksum protocol for the IW and Block communication
+    def crc16(data: bytes, poly=0x8408):
+        '''
+        CRC-16-CCITT Algorithm
+        '''
+        data = bytearray(data)
+        crc = 0xFFFF
+        for b in data:
+            cur_byte = 0xFF & b
+            for _ in range(0, 8):
+                if (crc & 0x0001) ^ (cur_byte & 0x0001):
+                    crc = (crc >> 1) ^ poly
+                else:
+                    crc >>= 1
+                cur_byte >>= 1
+        crc = (~crc & 0xFFFF)
+        crc = (crc << 8) | ((crc >> 8) & 0xFF)
 
-def crc16(data: bytes, poly=0x8408):
-    '''
-    CRC-16-CCITT Algorithm
-    '''
-    data = bytearray(data)
-    crc = 0xFFFF
-    for b in data:
-        cur_byte = 0xFF & b
-        for _ in range(0, 8):
-            if (crc & 0x0001) ^ (cur_byte & 0x0001):
-                crc = (crc >> 1) ^ poly
-            else:
-                crc >>= 1
-            cur_byte >>= 1
-    crc = (~crc & 0xFFFF)
-    crc = (crc << 8) | ((crc >> 8) & 0xFF)
-    
-    
-    return crc & 0xFFFF
+        return crc & 0xFFFF
 
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
