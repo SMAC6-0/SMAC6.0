@@ -145,12 +145,12 @@ class Inchworm:
 
     def get_next_point(self): 
         """ 
-        Returns the set of the next points of inchworm travel
+        Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
         (self.leading_foot_loc, holding_block) = self.paths[self.goal_progress_index]  # Get the next point
         x, z, y = self.leading_foot_loc
         self.goal_progress_index += 1
-        if holding_block:
+        if holding_block and [x, z, y] != self.goal:
             z = z + 1
         return x, z, y
     

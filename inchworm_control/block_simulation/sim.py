@@ -98,7 +98,7 @@ def update():
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].paths: # simulates the stepping of the leading leg
+    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].paths[sim_data.existing_inchworms[0].goal_progress_index]: # simulates the stepping of the leading leg
         # coords_to_spawn verifies that a path exists before trying to do anything
 
         # TODO: consider moving block tracking to sim_data
