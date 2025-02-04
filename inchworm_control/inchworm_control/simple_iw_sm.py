@@ -3,20 +3,24 @@ import time
 import serial
 from time import sleep
 
-## UART stuff
+###### UART stuff
 UART_BAUD = 9600 # config
 
 # Pins 
-# GPIO 15, pin 8 = RX green
-# GPIO 14, pin 10 = TX yellow
+# GPIO 15, pin 8 = RX green wire 
+# GPIO 14, pin 10 = TX yellow wire
 # ground = Pin 14
 
-
-# setup uart 
-# uart1 = UART(0,)
+class UART_CODES(Enum):
+    StartByte=0xAA, 
+    Initialization=0xFA, 
+    BeingPlaced=0xFB, 
+    MapSnapshot=0xFC, 
+    NewBlock=0xFD, 
+    Changes=0xFE, 
+    Failed=0xFF
 
 SUPPLY_LOCATION = [1, 1, 1] # config
-
 
 # Inchworm states
 class IW_STATE(Enum):
@@ -35,6 +39,9 @@ class Inchworm:
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
         self.print_flag = True
+
+        # UART stuff
+        self.iw_serial = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
 
     def run(self):
         while self.state != IW_STATE.STRUCTURE_COMPLETE:
@@ -98,6 +105,7 @@ class Inchworm:
 
         print("Initializing the block")
         # touch the block infornt of it
+
 
         self.initilization_flag = False
         
@@ -263,6 +271,28 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
+
+
+def crc16(data: bytes, poly=0x8408):
+    '''
+    CRC-16-CCITT Algorithm
+    '''
+    data = bytearray(data)
+    crc = 0xFFFF
+    for b in data:
+        cur_byte = 0xFF & b
+        for _ in range(0, 8):
+            if (crc & 0x0001) ^ (cur_byte & 0x0001):
+                crc = (crc >> 1) ^ poly
+            else:
+                crc >>= 1
+            cur_byte >>= 1
+    crc = (~crc & 0xFFFF)
+    crc = (crc << 8) | ((crc >> 8) & 0xFF)
+    
+    
+    return crc & 0xFFFF
+
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
 
