@@ -115,7 +115,12 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) + struct.pack('B', next_block_location) + struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
+        block_change = struct.pack('B', IW_identifier) + struct.pack('B', next_block_location)
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
 
         print("Block change", block_change)
 
