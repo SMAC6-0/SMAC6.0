@@ -137,7 +137,9 @@ class Inchworm:
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
         buffer.append(msg_len)
-        # + checksum + block_change + UART_CODES.Initialization
+        buffer.append(checksum)
+        buffer.append(block_change)
+        buffer.append(UART_CODES.Initialization)
 
         print("buffer before bytearray", buffer)
 
