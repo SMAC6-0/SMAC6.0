@@ -142,6 +142,8 @@ class Inchworm:
         print("sent data yippee")
 
         self.initilization_flag = False
+
+        print(self.initilization_flag)
         
     def handle_IW_gets_Map(self):
         print("Map snapshot successful.")
@@ -228,18 +230,18 @@ class Inchworm:
         # blah blah low level language 
         # TODO: ask Mo for help when the IW gets the map SnapShot back 
         # return true if the IW got the map snapshot
-        received_data = self.IW_SERIAL.read()              #read serial port
-        sleep(0.03)
-        data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-        received_data += self.IW_SERIAL.read(data_left)
-        print (received_data)                   #print received data
+        # received_data = self.IW_SERIAL.read()              #read serial port
+        # sleep(0.03)
+        # data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+        # received_data += self.IW_SERIAL.read(data_left)
+        # print (received_data)                   #print received data
 
-        # verify if it's a map?? 
-        is_a_map = True
-        if is_a_map:
-            # call the update map
-            self.update_my_current_map()
-        # return is_a_map
+        # # verify if it's a map?? 
+        # is_a_map = True
+        # if is_a_map:
+        #     # call the update map
+        #     self.update_my_current_map()
+        # # return is_a_map
 
         got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
         if got_map_snapshot.lower() == 'yes':
