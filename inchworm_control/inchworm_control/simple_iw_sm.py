@@ -251,8 +251,6 @@ class Inchworm:
                 # call the update map
                 self.update_my_current_map()
             # return is_a_map
-
-        
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
