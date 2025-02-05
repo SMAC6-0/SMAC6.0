@@ -47,6 +47,8 @@ class Inchworm:
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
         self.print_flag = True
+        self.seed_block_flag = True
+
 
         # UART stuff
         self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
@@ -142,8 +144,6 @@ class Inchworm:
         print("sent data yippee")
 
         self.initilization_flag = False
-
-        print(self.initilization_flag)
         
     def handle_IW_gets_Map(self):
         print("Map snapshot successful.")
@@ -227,29 +227,32 @@ class Inchworm:
 
     # Checkers
     def IW_gets_Map_Snapshot(self):
-        # blah blah low level language 
-        # TODO: ask Mo for help when the IW gets the map SnapShot back 
-        # return true if the IW got the map snapshot
-        # received_data = self.IW_SERIAL.read()              #read serial port
-        # sleep(0.03)
-        # data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-        # received_data += self.IW_SERIAL.read(data_left)
-        # print (received_data)                   #print received data
-
-        # # verify if it's a map?? 
-        # is_a_map = True
-        # if is_a_map:
-        #     # call the update map
-        #     self.update_my_current_map()
-        # # return is_a_map
-
-        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        if got_map_snapshot.lower() == 'yes':
-            return True
-        elif got_map_snapshot.lower() == 'no':
-            return False
+        if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
+            got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+            if got_map_snapshot.lower() == 'yes':
+                return True
+            elif got_map_snapshot.lower() == 'no':
+                return False
+            else:
+                print("Invalid input. Please answer with 'yes' or 'no'.")
         else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+            # blah blah low level language 
+            # TODO: ask Mo for help when the IW gets the map SnapShot back 
+            # return true if the IW got the map snapshot
+            received_data = self.IW_SERIAL.read()              #read serial port
+            sleep(0.03)
+            data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+            received_data += self.IW_SERIAL.read(data_left)
+            print (received_data)                   #print received data
+
+            # verify if it's a map?? 
+            is_a_map = True
+            if is_a_map:
+                # call the update map
+                self.update_my_current_map()
+            # return is_a_map
+
+        
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
