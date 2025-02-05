@@ -241,13 +241,13 @@ class Inchworm:
             self.update_my_current_map()
         return is_a_map
 
-        # got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        # if got_map_snapshot.lower() == 'yes':
-        #     return True
-        # elif got_map_snapshot.lower() == 'no':
-        #     return False
-        # else:
-        #     print("Invalid input. Please answer with 'yes' or 'no'.")
+        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+        if got_map_snapshot.lower() == 'yes':
+            return True
+        elif got_map_snapshot.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
