@@ -49,7 +49,7 @@ class Inchworm:
         self.print_flag = True
 
         # UART stuff
-        self.iw_serial = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
+        self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
 
     def run(self):
         while self.state != IW_STATE.STRUCTURE_COMPLETE:
@@ -136,10 +136,10 @@ class Inchworm:
 
         buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
 
-        self.iw_serial.write(buffer)
-
+        self.IW_SERIAL.write(buffer)
+        
+        # TODO IW gets the error messgae back if the transmission is failed 
         print("sent data yippee")
-
 
         self.initilization_flag = False
         
@@ -228,14 +228,26 @@ class Inchworm:
         # blah blah low level language 
         # TODO: ask Mo for help when the IW gets the map SnapShot back 
         # return true if the IW got the map snapshot
+        received_data = self.IW_SERIAL.read()              #read serial port
+        sleep(0.03)
+        data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+        received_data += self.IW_SERIAL.read(data_left)
+        print (received_data)                   #print received data
 
-        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        if got_map_snapshot.lower() == 'yes':
-            return True
-        elif got_map_snapshot.lower() == 'no':
-            return False
-        else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+        # verify if it's a map?? 
+        is_a_map = True
+        if is_a_map:
+            # call the update map
+            self.update_my_current_map()
+        return is_a_map
+
+        # got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+        # if got_map_snapshot.lower() == 'yes':
+        #     return True
+        # elif got_map_snapshot.lower() == 'no':
+        #     return False
+        # else:
+        #     print("Invalid input. Please answer with 'yes' or 'no'.")
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -305,8 +317,23 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
-
     
+    # other functionsss
+
+    def update_my_current_map(self, map): 
+        """
+        Updates the inchworm's map based on received updates from the structure. 
+        Args: 
+            map: xzy (3D) list storing the current status of the map, as the structure knows it.  
+        """
+        # TODO: does this belong in checker, handler, or outside? @Mo 
+
+        # map updates so we need to manually update the x, z, y
+        # self.current_map = map
+        print("Current map updated")
+        pass
+
+
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def crc16(data: bytes, poly=0x8408):
