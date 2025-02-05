@@ -239,7 +239,7 @@ class Inchworm:
         if is_a_map:
             # call the update map
             self.update_my_current_map()
-        return is_a_map
+        # return is_a_map
 
         got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
         if got_map_snapshot.lower() == 'yes':
