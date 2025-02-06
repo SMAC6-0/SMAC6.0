@@ -17,14 +17,13 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
         prioritize_vertical (boolean): A flag that determines if vertical neighbors are prioritized (scaling walls).
     Returns:
         path (list): A list of coordinates of the path.
-        steps (int): The number of steps in the path.
     """
     print(f"BFS called with start: {start}, goal: {goal}")
     
     neighbor_directions = map_data.set_neighbors()
     
     if map_data.is_valid_start_goal_3d(grid, start, goal):
-        goal_cell, visited, queue, steps = map_data.start_search_3d(grid, start, goal)
+        goal_cell, visited, queue = map_data.start_search_3d(grid, start, goal)
     else:
         raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
                            f"Start Walkable? {grid[start[0]][start[1]][start[2]] == 0}\n",
@@ -35,12 +34,11 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
     
     while queue:
         current_cell = queue.pop(0)
-        steps += 1
 
         if map_data.is_goal_reached_3d(current_cell, goal_cell):
             path = map_data.reverse_path_3d(current_cell, holding_block)
             print(f"Path found: {path}")
-            return path, steps
+            return path
         
         for dx, dz, dy in neighbor_directions:
             nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
@@ -52,4 +50,4 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
                 queue.append(neighbor)
     
     print(f"No path found with BFS from {start} to {goal}")
-    return [], -1
+    return []

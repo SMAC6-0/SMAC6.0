@@ -60,7 +60,6 @@ def initialize_grid():
             grid[x][0][y] = GridStatus.WALKABLE.value
     
     grid = mark_block_depot(grid)
-    
     return grid
 
 def mark_block_depot(grid):
@@ -118,7 +117,6 @@ def update_grid_with_incoming(grid, structure):
     """ 
     # for structure in structures:        
     x, z, y = structure
-
     if is_valid_position_3d(grid, structure):
         grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
         if z - 1 >= 0:
@@ -190,7 +188,6 @@ def reverse_path_3d(curr_cell, holding_block):
         holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
     Returns:
         path (list(tuple)): A reworked path found in a path planning algorithm.
-        steps (int): The number of steps in a path.
     """
     path = []
     print("reversing the past")
@@ -225,7 +222,6 @@ def create_cell(grid, coords):
             new_cell.is_obs = False
         else:
             new_cell.is_obs = True
-            
         return new_cell
     raise ValueError(f"Error: Invalid position at {coords}.")
     
@@ -245,7 +241,6 @@ def is_valid_position_3d(grid, coords):
     if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
         return True
     return False
-    # raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):
     """
@@ -292,15 +287,13 @@ def start_search_3d(grid, start, goal):
         goal_cell (Cell): .
         visited (list(boolean)): .
         queue (list(Cell)): .
-        steps (int): The number of steps in a path.
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(len(grid[0][0]))]
     queue = [start_cell]
     visited[start_cell.x][start_cell.z][start_cell.y] = True
-    steps = 0
-    return goal_cell, visited, queue, steps
+    return goal_cell, visited, queue
 
 def handle_multiple_block_depots():
     #TODO: how path planning is affected by the existence of multiple block depots 
@@ -310,11 +303,11 @@ def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False)
-    if num_steps == -1:
+    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
+    if path_coords == []:
         RuntimeError(f"Cannot find helper blocks for path.")
     else:
-        return path_coords, num_steps
+        return path_coords
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
     """
@@ -331,12 +324,12 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
+    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
-    if num_steps == -1:
+    if path_coords == []:
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
+        path_coords = determine_helper_blocks(grid, path_start, path_end)
 
     path_list = copy.deepcopy(path_coords[0])
     steps = []

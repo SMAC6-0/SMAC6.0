@@ -87,6 +87,8 @@ class Inchworm:
             pass
 
     def clear_my_path(self): 
+        """ Clears path to prepare for more path finding. """
+        self.paths=[]
         print("i cleared my path")
         pass
 
