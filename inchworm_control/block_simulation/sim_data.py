@@ -15,12 +15,14 @@ from config import *
 import map_data
 from search import search
 from inchworm_data import Inchworm
+from inchworm_control.blueprint import blueprint 
+
 
 
 
 class SimData: 
     def __init__(self): 
-        self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
+        self.seed_block = [] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
         self.blocks_placed = [] # list of blocks user places in sim
         self.incoming_blocks = [] 
         self.all_paths = []
@@ -31,10 +33,12 @@ class SimData:
         self.initialized_inchworms = []
         
 
-    def generate_final_structure_map(self): 
-        """Convert blocks placed in sim to 3D list parsable everywhere else"""
-        for block in self.blocks_placed: 
+    def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
+        """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
+        block to be placed according to blueprint algorithm. """
+        for block in blocks_placed: 
             self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
+        # self.seed_block = blueprint(self.current_map, self.final_structure)
 
     def get_next_steps(self): 
         """
@@ -71,14 +75,16 @@ class SimData:
         """
         Structure receives update & processes it
         """
-        if SIMULATION: 
-            pass
-            # if inchworm.leading_foot_loc == 
-            # TODO: implement curr struct getting data from IW
-            # self.all_paths.remove()
-            # self.all_paths.extend(inchworm.paths)
-        # if sim detects iw is in contact w structure, send map snapshot, receive the incoming block, update self
- 
+        
+
+        # gets newly placed block's coords from iw 
+        # structure verifies that block is in correct location (sim.py-side??)
+        # update current_map w new block 
+        # update current_map by clearing the iw path 
+        # send current_map to iw 
+
+        # get path & new incoming block from iw
+        # update current map with incoming block and paths 
 
     def send_current_map(self): 
         """ send current structure to IWs in contact w structure"""

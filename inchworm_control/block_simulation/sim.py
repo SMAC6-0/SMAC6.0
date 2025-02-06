@@ -81,9 +81,8 @@ def update():
 
     # Search(Look) for structures
     if held_keys["l"]:
-        sim_data.generate_final_structure_map()
+        generate_final_structure()
         sim_data.spawn_inchworms(1)
-        # show_structures()
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
@@ -193,22 +192,34 @@ def show_IW_paths(inchworm):
         delete_cube(cell[0], cell[1], cell[2])
         spawn_cube(cell[0], cell[1], cell[2], 'path')
 
-def show_structures():
+def generate_final_structure():
     """
-    Searches for known structures and changes the color of structures found. 
+    Show what the final structure will look like. 
     """
-    for inchworm in sim_data.existing_inchworms:
-        inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
-        for structure in inchworm.found_structures:
-            structure_pos = structure[1]  
-            structure_name = structure[0] #string
-            for block in structure_pos:
-                delete_cube(block[0], block[1], block[2])
-                spawn_cube(block[0], block[1], block[2], structure_name[-1])
-                #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
-        for block in inchworm.misc_blocks:
-                delete_cube(block[0], block[1], block[2])
-                spawn_cube(block[0], block[1], block[2], 'misc')
+    blocks_placed = list(sim_data.blocks_placed)
+    for block in blocks_placed: # makes a shallow copy of the list 
+        delete_cube(block[0], block[1], block[2])
+        spawn_cube(block[0], block[1], block[2], 'misc')
+    sim_data.generate_final_structure_map(blocks_placed)
+
+# def show_structures():
+#     """
+#     Searches for known structures and changes the color of structures found. 
+#     """
+#     # TODO: If planning on using substructures for the blueprint algo, make use of this system: 
+
+#     for inchworm in sim_data.existing_inchworms:
+#         inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
+#         for structure in inchworm.found_structures:
+#             structure_pos = structure[1]  
+#             structure_name = structure[0] #string
+#             for block in structure_pos:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], structure_name[-1])
+#                 #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
+#         for block in inchworm.misc_blocks:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], 'misc')
 
 # Voxel (block) properties
 class Voxel(Button):
@@ -338,7 +349,7 @@ def spawn_cube(x, y, z, color_index):
     elif color_index == 'step':
         color_index = smart_block_texture_step
     elif color_index == 'misc':
-        color_index = smart_block_outline    
+        color_index = smart_block_outline   
     elif color_index == 'incoming':
         color_index = incoming_block_texture
     elif color_index == 'path':
