@@ -89,7 +89,7 @@ def update():
     if held_keys["p"] and not key_p_pressed:
         spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
         for inchworm in sim_data.existing_inchworms:
-            inchworm.plan_path_to_structure()
+            inchworm.plan_path()
             show_IW_paths(inchworm)
         # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
         # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
@@ -187,7 +187,7 @@ def show_IW_paths(inchworm):
 
     # Then show the path the inchworm is going to take
     for step in range(len(inchworm.paths)-1): 
-        cell = inchworm.paths[step][0]
+        cell = inchworm.paths[step]
         delete_cube(cell[0], cell[1], cell[2])
         spawn_cube(cell[0], cell[1], cell[2], 'path')
 

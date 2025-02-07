@@ -126,54 +126,57 @@ class Inchworm:
         """ Plan path from current location to specified goal. """
         if next_goal == None:
             self.goal = self.get_next_block() # gets goal from blueprint if none is given
-            self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
-
+            
             if self.goal == (-9, -9, -9):
                 raise ValueError(f"Erm... No goal was given...")
+            
+            self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
         else:
             self.goal = next_goal
         
+        x, z, y = self.goal
         # flags if iw is only traveling instead of placing block
-        is_traveling = bool(self.current_map[self.goal.x][self.goal.z][self.goal.y] == map_data.GridStatus.WALKABLE.value)
+        if map_data.is_valid_position_3d(self.current_map, self.goal):
+            is_traveling = (self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value)
+        else: 
+            is_traveling = False
         
         try: 
-            step_instructions = []
+            step_instructions, steps, path = [], [], []
             
-            if is_traveling:
+            if is_traveling or self.holding_block:
                 path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
             else:
-                if self.holding_block:
-                    path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
-                else:
-                    bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
-                    goal_path, goal_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
-                    goal_path[0].pop(0) # Remove repeat coord
-                    
-                    # combines start to block depot and block depot to goal
-                    steps += bd_steps
-                    steps += goal_steps
-                    path += bd_path[0]
-                    path += goal_path[0]
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
+                goal_path.pop(0) # Remove repeat coord
+                
+                # combines start to block depot and block depot to goal
+                steps += bd_steps
+                steps += goal_steps
+                path += bd_path
+                path += goal_path
             
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += steps
-            self.paths += bd_path[0]
+            self.paths += path
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
             
             step_getter(step_instructions)
-        except: 
-            RuntimeError("No path found, try again later.")
+        except RuntimeError as e:
+            print(f"Error: {e}. No path found, try again later.")
+            return
 
     def get_next_point(self): 
         """ 
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
-        (self.leading_foot_loc, holding_block) = self.paths[self.goal_progress_index]  # Get the next point
+        self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
         x, z, y = self.leading_foot_loc
         self.goal_progress_index += 1
-        if holding_block and [x, z, y] != self.goal:
+        if self.holding_block and [x, z, y] != self.goal:
             z = z + 1
         return x, z, y
     
@@ -257,7 +260,7 @@ class Inchworm:
         print("MOVINGGG TO SEED BLOCK")
         # path plan to the seed block location from the supply depot
         x, z, y = self.get_next_block() # TODO: for now assuming that first block is seed
-        self.plan_path_to_([x, z, y])
+        self.plan_path([x, z, y])
         # if path exists 
         # alternatively do try except
         if self.paths: 
@@ -379,7 +382,7 @@ class Inchworm:
         print("Planning path from supply to the next block")
         # IW path plans to the supply and to the next block
         # store that path in IW_path 
-        self.plan_path_to_structure()
+        self.plan_path()
 
         print("Checking path availability... ")
         if self.paths and self.goal:

@@ -1,7 +1,7 @@
 import map_data
 import config
 
-def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
+def find_path(grid, start, goal, holding_block) -> list[int]:
     """
     Perform modified BFS in a 3D grid.
     
@@ -12,11 +12,9 @@ def find_path(grid, start, goal, holding_block) -> tuple[list, int]:
                        The initial starting position can be configurable in config.py
         goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
-        inchworm_id (int): An ID that identifies which inchworm grid, start, and goal is being taken in.
         holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).
-        prioritize_vertical (boolean): A flag that determines if vertical neighbors are prioritized (scaling walls).
     Returns:
-        path (list): A list of coordinates of the path.
+        path (list[int]): A list of coordinates of the path.
     """
     print(f"BFS called with start: {start}, goal: {goal}")
     

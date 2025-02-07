@@ -116,7 +116,7 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     """ 
     print("set the path to grid")
     for step in range(len(inchworm_path)-1): 
-        x, z, y = inchworm_path[step][0] # 1st index gets step, 2nd index gets coord and not holding_block
+        x, z, y = inchworm_path[step]
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
     return grid
 
@@ -159,15 +159,15 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
         
     return neighbor_directions
 
-def reverse_path_3d(curr_cell, holding_block):
+def reverse_path_3d(curr_cell, holding_block) -> list[int]:
     """
     Reverse calculated path to go from start to goal.
     
     Args:
         curr_cell (Cell): The current position of an inchworm.
-        holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
+        holding_block (bool): A boolean indicating if the inchworm is holding a block or not.
     Returns:
-        path (list(tuple)): A reworked path found in a path planning algorithm.
+        path (list[int]): A reworked path found in a path planning algorithm of coord and holding_block.
     """
     path = []
     print("reversing the past")
@@ -178,9 +178,9 @@ def reverse_path_3d(curr_cell, holding_block):
             holding_block = True
         else:
             holding_block = prev_holding_block
-        path.append(([curr_cell.x, curr_cell.z, curr_cell.y], holding_block))
+        path.append([curr_cell.x, curr_cell.z, curr_cell.y])
         curr_cell = curr_cell.parent
-    return path[::-1], len(path) - 1
+    return path[::-1]
 
 def create_cell(grid, coords):
     """
@@ -311,12 +311,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
         path_coords = determine_helper_blocks(grid, path_start, path_end)
 
-    path_list = copy.deepcopy(path_coords[0])
+    print(path_coords)
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    for i in range(len(path_list) - 1):
-        current_coord = path_list[i][0]
-        next_coord = path_list[i + 1][0]
+    for i in range(len(path_coords) - 1):
+        current_coord = path_coords[i]
+        next_coord = path_coords[i + 1]
+        print(f"curr: ", current_coord, "\n next: ", next_coord)
             
         end_flag = bool(next_coord == path_end) # if it is done basically
         step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)
