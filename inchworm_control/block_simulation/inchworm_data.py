@@ -79,7 +79,6 @@ class Inchworm:
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
         self.current_map = map
-
     def send_my_next_steps(self): 
         """ Send IW path and the corresponding incoming block to the structure. """ 
         if not SIMULATION: 
@@ -89,6 +88,9 @@ class Inchworm:
     def clear_my_path(self): 
         print("i cleared my path")
         pass
+    
+    def is_structure_complete(self):
+        print("Checking if structure is complete")
 
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal))

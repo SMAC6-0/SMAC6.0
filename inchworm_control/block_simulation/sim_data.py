@@ -15,8 +15,8 @@ from config import *
 import map_data
 from search import search
 from inchworm_data import Inchworm
-from inchworm_control.blueprint import blueprint 
 
+from inchworm_control.blueprint import blueprint 
 
 
 
@@ -32,7 +32,6 @@ class SimData:
         self.existing_inchworms = []
         self.initialized_inchworms = []
         
-
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
         block to be placed according to blueprint algorithm. """
@@ -90,7 +89,6 @@ class SimData:
 
         # get path & new incoming block from iw
         # update current map with incoming block and paths 
-
     def send_current_map(self): 
         """ send current structure to IWs in contact w structure"""
         pass

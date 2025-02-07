@@ -96,7 +96,6 @@ def update():
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
-
     if held_keys["n"] and not key_n_pressed and any(state == sim_data.existing_inchworms[0].state.value for state in [2, 4, 5]): # simulates the stepping of the leading leg
         # mess at the end prevents stepping through path if not in a state that moves 
 
@@ -173,6 +172,7 @@ def update():
 
         sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
+
 
     if held_keys["m"]:
         for inchworm in sim_data.existing_inchworms: 
