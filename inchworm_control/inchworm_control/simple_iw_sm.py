@@ -28,9 +28,12 @@ class BLOCK_STATUS(Enum): # holds the status of the block
 SUPPLY_LOCATION = [1, 1, 1] # config
 
 
-next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo
+next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+
+IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
+
 
 
 # Inchworm states
@@ -88,7 +91,7 @@ class Inchworm:
                     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
                 if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
-                        self.handle_structure_complete()
+                    self.handle_structure_complete()
                 else: # structure is incomplete
                         self.handle_structure_incomplete()
             case IW_STATE.ERROR:
