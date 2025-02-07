@@ -382,7 +382,7 @@ class Inchworm:
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
-        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization)
+        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
         self.IW_SERIAL.write(buffer)
         print("block data sent!!")
