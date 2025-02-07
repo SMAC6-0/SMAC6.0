@@ -33,7 +33,7 @@ class SimData:
     def generate_final_structure_map(self): 
         """Convert blocks placed in sim to 3D list parsable everywhere else"""
         for block in self.blocks_placed: 
-            self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]), map_data.GridStatus.NOT_WALKABLE)
 
     def get_next_steps(self): 
         """

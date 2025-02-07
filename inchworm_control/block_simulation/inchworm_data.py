@@ -98,7 +98,7 @@ class Inchworm:
     def plan_path_to_structure(self): 
         """ Plan path from current location to block depot, then from there to the next block. """
         self.goal = self.get_next_block() # returns the next_goal (block to be placed) based on blueprint algo
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, self.goal) # updates map for next_goal to be incoming_block
+        self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
         
         try: 
             step_instructions = []
@@ -126,7 +126,7 @@ class Inchworm:
         """ Plan path from current location to specified goal. """
         if next_goal == None:
             self.goal = self.get_next_block() # gets goal from blueprint if none is given
-            self.current_map = map_data.update_grid_with_incoming(self.current_map, self.goal) # updates map for next_goal to be incoming_block
+            self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
 
             if self.goal == (-9, -9, -9):
                 raise ValueError(f"Erm... No goal was given...")
