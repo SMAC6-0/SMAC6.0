@@ -114,7 +114,6 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    print("set the path to grid")
     for step in range(len(inchworm_path)-1): 
         x, z, y = inchworm_path[step]
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
@@ -170,7 +169,6 @@ def reverse_path_3d(curr_cell, holding_block) -> list[int]:
         path (list[int]): A reworked path found in a path planning algorithm of coord and holding_block.
     """
     path = []
-    print("reversing the past")
     prev_holding_block = holding_block
     while curr_cell:
         if [curr_cell.x, curr_cell.z, curr_cell.y] == BD_LOCS[0]:

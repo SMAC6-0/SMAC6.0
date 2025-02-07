@@ -124,37 +124,37 @@ class Inchworm:
     
     def plan_path(self, next_goal: tuple[int] = None): 
         """ Plan path from current location to specified goal. """
+        is_traveling = True # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             self.goal = self.get_next_block() # gets goal from blueprint if none is given
             
             if self.goal == (-9, -9, -9):
-                raise ValueError(f"Erm... No goal was given...")
+                raise ValueError(f"Erm... No goal was given... No structure was found...")
+            
+            x, z, y = self.goal
+            # TODO: handle all block depots
+            if ([x, z, y] != BD_LOC1) and (map_data.is_valid_position_3d(self.current_map, self.goal)) and ((self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value)):
+                is_traveling = True
+            else: 
+                is_traveling = False
             
             self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
         else:
             self.goal = next_goal
         
-        x, z, y = self.goal
-        # flags if iw is only traveling instead of placing block
-        if map_data.is_valid_position_3d(self.current_map, self.goal):
-            is_traveling = (self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value)
-        else: 
-            is_traveling = False
-        
         try: 
             step_instructions, steps, path = [], [], []
-            print(f"WALKABLE? ", self.current_map[x][z][y])
-            print(f"TRAVELING? ", is_traveling)
             if is_traveling or self.holding_block:
-                print(f"HOLDING BLOCK? ", self.holding_block)
+                print(f"traveling in progress")
                 path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
-                print(f"HOLDING BLOCK? ", self.holding_block)
             else:
-                print(f"HOLDING BLOCK? ", self.holding_block)
+                print(f"block grabbing in progress")
                 bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
-                print(f"HOLDING BLOCK? ", self.holding_block)
-                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
-                print(f"HOLDING BLOCK? ", self.holding_block)
+                self.holding_block = True
+                
+                print(f"block placing in progress")
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block)
+                self.holding_block = False
                 goal_path.pop(0) # Remove repeat coord
                 
                 # combines start to block depot and block depot to goal
@@ -182,6 +182,12 @@ class Inchworm:
         self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
         x, z, y = self.leading_foot_loc
         self.goal_progress_index += 1
+        
+        if ([x, z, y] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
+            self.holding_block = True
+        elif self.holding_block & ([x, z, y] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
+            self.holding_block = False
+        
         if self.holding_block and [x, z, y] != self.goal:
             z = z + 1
         return x, z, y

@@ -242,8 +242,8 @@ class Voxel(Button):
                     print("Block not found")
                 destroy(self)
                 
-        if key == "escape":
-            stop_simulation()
+        # if key == "escape":
+        #     stop_simulation()
 
 # Skybox
 class Sky(Entity):
