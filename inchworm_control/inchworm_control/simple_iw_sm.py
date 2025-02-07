@@ -34,8 +34,6 @@ IW_message_counter = 0 # this is the messgae counter for sending data, IK's mess
 
 IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
 
-
-
 # Inchworm states
 class IW_STATE(Enum):
     IDLE = 1 # added this incase we need to use it
@@ -63,7 +61,6 @@ class Inchworm:
     def run(self):
         while self.state != IW_STATE.STRUCTURE_COMPLETE:
             self.update_state()
-
     def update_state(self):
         match self.state:
             case IW_STATE.IDLE:
@@ -71,6 +68,7 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 if self.initilization_flag:
                     self.handle_initialization()
+
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:

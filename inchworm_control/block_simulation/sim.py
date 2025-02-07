@@ -81,9 +81,8 @@ def update():
 
     # Search(Look) for structures
     if held_keys["l"]:
-        sim_data.generate_final_structure_map()
+        generate_final_structure()
         sim_data.spawn_inchworms(1)
-        # show_structures()
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
@@ -97,9 +96,8 @@ def update():
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
-
-    if held_keys["n"] and not key_n_pressed and sim_data.existing_inchworms[0].paths[sim_data.existing_inchworms[0].goal_progress_index]: # simulates the stepping of the leading leg
-        # coords_to_spawn verifies that a path exists before trying to do anything
+    if held_keys["n"] and not key_n_pressed and any(state == sim_data.existing_inchworms[0].state.value for state in [2, 4, 5]): # simulates the stepping of the leading leg
+        # mess at the end prevents stepping through path if not in a state that moves 
 
         # TODO: consider moving block tracking to sim_data
         for inchworm in sim_data.existing_inchworms: 
@@ -143,7 +141,8 @@ def update():
                 spawn_x, spawn_y, spawn_z = x, y, z
                 last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
-          
+        
+        inchworm.update_state()
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
@@ -174,6 +173,13 @@ def update():
         sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
 
+
+    if held_keys["m"]:
+        for inchworm in sim_data.existing_inchworms: 
+            inchworm.update_state()
+            sim_data.receive_IW_update(inchworm)
+            show_IW_paths(inchworm)
+
 def show_IW_paths(inchworm):
     # First extract the next block the IW is going to place
     cell = inchworm.goal
@@ -186,22 +192,38 @@ def show_IW_paths(inchworm):
         delete_cube(cell[0], cell[1], cell[2])
         spawn_cube(cell[0], cell[1], cell[2], 'path')
 
-def show_structures():
+def generate_final_structure():
     """
-    Searches for known structures and changes the color of structures found. 
+    Clear the map, visualizing where final structure must be. Spawns seed block. 
     """
-    for inchworm in sim_data.existing_inchworms:
-        inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
-        for structure in inchworm.found_structures:
-            structure_pos = structure[1]  
-            structure_name = structure[0] #string
-            for block in structure_pos:
-                delete_cube(block[0], block[1], block[2])
-                spawn_cube(block[0], block[1], block[2], structure_name[-1])
-                #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
-        for block in inchworm.misc_blocks:
-                delete_cube(block[0], block[1], block[2])
-                spawn_cube(block[0], block[1], block[2], 'misc')
+    blocks_placed = list(sim_data.blocks_placed) # makes a shallow copy of the list 
+    for block in blocks_placed: 
+        delete_cube(block[0], block[1], block[2])
+        spawn_cube(block[0], block[1], block[2], 'misc')
+    sim_data.generate_final_structure_map(blocks_placed)
+    
+    seed_block = sim_data.seed_block
+    delete_cube(seed_block[0], seed_block[1], seed_block[2])
+    spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
+
+# def show_structures():
+#     """
+#     Searches for known structures and changes the color of structures found. 
+#     """
+#     # TODO: If planning on using substructures for the blueprint algo, make use of this system: 
+
+#     for inchworm in sim_data.existing_inchworms:
+#         inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
+#         for structure in inchworm.found_structures:
+#             structure_pos = structure[1]  
+#             structure_name = structure[0] #string
+#             for block in structure_pos:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], structure_name[-1])
+#                 #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
+#         for block in inchworm.misc_blocks:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], 'misc')
 
 # Voxel (block) properties
 class Voxel(Button):
@@ -314,32 +336,26 @@ def spawn_cube(x, y, z, color_index):
     Spawns a cube in the simulation at the specified xyz position and with the specified color. 
     Not always a smart block, but rather any sim update happening in a cube. 
     Args:
-        color_index (str): 'n' for red, 'step' for green floor
+        color_index (str): 'n' for red, 'step' for green floor, etc
     """
     # check if the position is already occupied
     target_position = Vec3(x, y, z)
 
     # Assign color_index based on the input. The first few are based on different substructures. 
-    if color_index == 'n': 
-        color_index = smart_block_texture_red
-    elif color_index == 's':
-        color_index = smart_block_texture_blue
-    elif color_index == 'e':
-        color_index = smart_block_texture_yellow
-    elif color_index == 'w':
-        color_index = smart_block_texture_green
-    elif color_index == 'step':
-        color_index = smart_block_texture_step
-    elif color_index == 'misc':
-        color_index = smart_block_outline    
-    elif color_index == 'incoming':
-        color_index = incoming_block_texture
-    elif color_index == 'path':
-        color_index = incoming_step_texture
-    elif color_index == 'seed':
-        color_index = seed_block_texture
-    else:
-        color_index = smart_block_texture
+    choose_texture = {
+        'n': smart_block_texture_red,
+        's': smart_block_texture_blue, 
+        'e': smart_block_texture_yellow, 
+        'w': smart_block_texture_green, 
+        'step': smart_block_texture_step, 
+        'misc': smart_block_outline, 
+        'incoming': incoming_block_texture, 
+        'path': incoming_step_texture,
+        'seed': seed_block_texture,
+        '': smart_block_texture
+    }
+    color_index = choose_texture[color_index]
+    if color_index == smart_block_texture:
         sim_data.blocks_placed.append(int(target_position))  # Update the block information
 
     # Spawn the cube
@@ -353,7 +369,7 @@ def delete_cube(x, y, z):
     for e in scene.entities:
         if hasattr(e, 'position') and e.position == target_position:
             destroy(e)
-            if target_position in sim_data.blocks_placed:
+            if (target_position in sim_data.blocks_placed): #and (target_position not in sim_data.seed_block):
                 sim_data.blocks_placed.remove(target_position)
             break
 
