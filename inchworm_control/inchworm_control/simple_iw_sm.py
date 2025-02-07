@@ -48,6 +48,7 @@ class Inchworm:
         self.initilization_flag = True
         self.print_flag = True
         self.seed_block_flag = True
+        self.retry_path_flag = True
 
 
         # UART stuff
@@ -113,7 +114,17 @@ class Inchworm:
         # touch the block infornt of it
 
         print("Initializing the block")
+
+        # different for the seed block logic
+        # TODO: update this logic after Mo implements his seed block logic 
+        print("Sending data about the seed block")
         
+        '''
+        # transfer the block location data 
+        # TODO: MOOO help 
+        # send a 1D array ended with the Initialization enum OxFA 
+        # flash block that it's in unplaced location
+
         buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
 
         # block_change is the data that needs to be sent
@@ -139,20 +150,15 @@ class Inchworm:
         buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
 
         self.IW_SERIAL.write(buffer)
+        '''
         
         # TODO IW gets the error messgae back if the transmission is failed 
-        print("sent data yippee")
 
+        # print("sent data yippee")
         self.initilization_flag = False
         
     def handle_IW_gets_Map(self):
         print("Map snapshot successful.")
-
-        print("Transferring the block data")
-        # transfer the block location data 
-        # TODO: MOOO help 
-        # send a 1D array ended with the Initialization enum OxFA 
-        # flash block that it's in unplaced location
 
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
@@ -172,6 +178,9 @@ class Inchworm:
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
+        # TODO: call map snapshot? 
+        if self.IW_gets_Map_Snapshot():
+            print("IW got map snap shot, retry again")
         # MOOO HELPPP
 
     def handle_travelling_to_supply(self):
@@ -228,8 +237,18 @@ class Inchworm:
     # Checkers
     def IW_gets_Map_Snapshot(self):
         if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
-            got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
+            got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
             if got_map_snapshot.lower() == 'yes':
+                self.seed_block_flag = False
+                return True
+            elif got_map_snapshot.lower() == 'no':
+                return False
+            else:
+                print("Invalid input. Please answer with 'yes' or 'no'.")
+        elif self.retry_path_flag: # skip the seed block since Mo has to implement this in the block communication
+            got_map_snapshot = input("Did the inchworm get the map? (retry path) (yes/no): \n")
+            if got_map_snapshot.lower() == 'yes':
+                self.retry_path_flag = False
                 return True
             elif got_map_snapshot.lower() == 'no':
                 return False
