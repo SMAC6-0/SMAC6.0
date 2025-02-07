@@ -193,6 +193,10 @@ class Inchworm:
         print("IW flashes block with it's location")
         self.send_block_location()
 
+        # pause so that the block has enough time to process the info
+        sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+
+
         print("IW sends a messgae indicating block is being placed")
         # IW sends a messgae indicating block is being placed
         # MOOOOO HELPPPP
