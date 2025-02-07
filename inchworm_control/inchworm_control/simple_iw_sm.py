@@ -360,7 +360,6 @@ class Inchworm:
         IW does the UART communication to send the block location 
         """
 
-        print("this UART", hex(UART_CODES.StartByte.value))
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
@@ -383,9 +382,10 @@ class Inchworm:
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
-        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization)
 
         self.IW_SERIAL.write(buffer)
+        print("block data sent!!")
         # TODO: handle transmission error
 
     def send_block_being_placed(self):
