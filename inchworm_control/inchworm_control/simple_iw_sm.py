@@ -46,6 +46,7 @@ class IW_STATE(Enum):
     STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 3
+
 class Inchworm:
     def __init__(self):
         self.state = IW_STATE.INITIALIZATION
@@ -84,7 +85,7 @@ class Inchworm:
                     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
                 if self.is_IW_in_block_location():
-                    self.handle_transporting_block()
+                    self.handle_transported_block()
                 else:
                     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
@@ -210,9 +211,8 @@ class Inchworm:
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
-    def handle_transporting_block(self):
+    def handle_transported_block(self):
         
-
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
