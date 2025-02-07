@@ -336,33 +336,26 @@ def spawn_cube(x, y, z, color_index):
     Spawns a cube in the simulation at the specified xyz position and with the specified color. 
     Not always a smart block, but rather any sim update happening in a cube. 
     Args:
-        color_index (str): 'n' for red, 'step' for green floor
+        color_index (str): 'n' for red, 'step' for green floor, etc
     """
     # check if the position is already occupied
     target_position = Vec3(x, y, z)
 
     # Assign color_index based on the input. The first few are based on different substructures. 
-    if color_index == 'n': 
-        color_index = smart_block_texture_red
-    elif color_index == 's':
-        color_index = smart_block_texture_blue
-    elif color_index == 'e':
-        color_index = smart_block_texture_yellow
-    elif color_index == 'w':
-        color_index = smart_block_texture_green
-    elif color_index == 'step':
-        color_index = smart_block_texture_step
-    elif color_index == 'misc':
-        color_index = smart_block_outline   
-    elif color_index == 'incoming':
-        color_index = incoming_block_texture
-    elif color_index == 'path':
-        color_index = incoming_step_texture
-    elif color_index == 'seed':
-        color_index = seed_block_texture
-        # sim_data.blocks_placed.append(int(target_position)) 
-    else:
-        color_index = smart_block_texture
+    choose_texture = {
+        'n': smart_block_texture_red,
+        's': smart_block_texture_blue, 
+        'e': smart_block_texture_yellow, 
+        'w': smart_block_texture_green, 
+        'step': smart_block_texture_step, 
+        'misc': smart_block_outline, 
+        'incoming': incoming_block_texture, 
+        'path': incoming_step_texture,
+        'seed': seed_block_texture,
+        '': smart_block_texture
+    }
+    color_index = choose_texture[color_index]
+    if color_index == smart_block_texture:
         sim_data.blocks_placed.append(int(target_position))  # Update the block information
 
     # Spawn the cube
