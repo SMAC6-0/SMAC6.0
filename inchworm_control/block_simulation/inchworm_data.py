@@ -123,6 +123,8 @@ class Inchworm:
             pass
 
     def clear_my_path(self): 
+        """ Clears path to prepare for more path finding. """
+        self.paths=[]
         print("i cleared my path")
         pass
     
@@ -132,62 +134,73 @@ class Inchworm:
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal))
     
-    def plan_path_to_structure(self): 
-        """ Plan path from current location to block depot, then from there to the next block. """
-        self.goal = self.get_next_block() # returns the next_goal (block to be placed) based on blueprint algo
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, self.goal) # updates map for next_goal to be incoming_block
-        
-        try: 
-            step_instructions = []
-            # Path plan first tto block depot, then to the next goal
-            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
-            goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
-            goal_path[0].pop(0) # Remove repeat coord
-   
-            # Update inchworm path & corresponding steps to travel that path
-            step_instructions += bd_steps
-            step_instructions += goal_steps
-            self.paths += bd_path[0]
-            self.paths += goal_path[0]
-
-            # Update the inchworm's internal map with the step it will take 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
-            
-            step_getter(step_instructions)
-            # for point in self.goal:
-            #     point[1] += 1  # Increment the second value
-        except: 
-            RuntimeError("No path found, try again later.")
-    
-    def plan_path_to_(self, next_goal: tuple[int]): 
+    def plan_path(self, next_goal: tuple[int] = None): 
         """ Plan path from current location to specified goal. """
-        self.goal = next_goal
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
+        is_traveling = True # assumes that if not specified, objective is to travel, not place
+        if next_goal == None:
+            self.goal = self.get_next_block() # gets goal from blueprint if none is given
+            
+            if self.goal == (-9, -9, -9):
+                raise ValueError(f"Erm... No goal was given... No structure was found...")
+            
+            x, z, y = self.goal
+            # TODO: handle all block depots
+            if ([x, z, y] != BD_LOC1) and (map_data.is_valid_position_3d(self.current_map, self.goal)) and ((self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value)):
+                is_traveling = True
+            else: 
+                is_traveling = False
+            
+            self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
+        else:
+            self.goal = next_goal
         
         try: 
-            step_instructions = []
-            # Path plan first tto block depot, then to the next goal
-            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
+            step_instructions, steps, path = [], [], []
+            if is_traveling or self.holding_block:
+                print(f"traveling in progress")
+                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+            else:
+                print(f"block grabbing in progress")
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+                self.holding_block = True
+                
+                print(f"block placing in progress")
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block)
+                self.holding_block = False
+                goal_path.pop(0) # Remove repeat coord
+                
+                # combines start to block depot and block depot to goal
+                steps += bd_steps
+                steps += goal_steps
+                path += bd_path
+                path += goal_path
             
             # Update inchworm path & corresponding steps to travel that path
-            step_instructions += bd_steps
-            self.paths += bd_path[0]
+            step_instructions += steps
+            self.paths += path
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
             
             step_getter(step_instructions)
-        except: 
-            RuntimeError("No path found, try again later.")
+        except RuntimeError as e:
+            print(f"Error: {e}. No path found, try again later.")
+            return
 
     def get_next_point(self): 
         """ 
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
-        (self.leading_foot_loc, holding_block) = self.paths[self.goal_progress_index]  # Get the next point
+        self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
         x, z, y = self.leading_foot_loc
         self.goal_progress_index += 1
-        if holding_block and [x, z, y] != self.goal:
+        
+        if ([x, z, y] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
+            self.holding_block = True
+        elif self.holding_block & ([x, z, y] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
+            self.holding_block = False
+        
+        if self.holding_block and [x, z, y] != self.goal:
             z = z + 1
         return x, z, y
     
@@ -378,13 +391,13 @@ class Inchworm:
         else: # this happens first 
             # Find & path plan to seed block 
             x, z, y = self.get_next_block() # TODO: for now assuming that first block is seed
-            self.plan_path_to_([x, z, y])
+            self.plan_path([x, z, y])
 
         
         
     def handle_IW_gets_Map(self):
         print("Map snapshot successful. Now path planning...")
-        self.plan_path_to_structure()
+        self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
 
@@ -404,7 +417,7 @@ class Inchworm:
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
-        self.plan_path_to_structure()
+        self.plan_path()
 
     def handle_at_supply(self):
         print("Touching the new block (move)")
