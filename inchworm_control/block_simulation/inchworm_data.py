@@ -124,29 +124,39 @@ class Inchworm:
     
     def plan_path(self, next_goal: tuple[int] = None): 
         """ Plan path from current location to specified goal. """
-        self.goal = next_goal or self.get_next_block() # gets goal from blue print if none is given
+        if next_goal == None:
+            self.goal = self.get_next_block() # gets goal from blueprint if none is given
+            self.current_map = map_data.update_grid_with_incoming(self.current_map, self.goal) # updates map for next_goal to be incoming_block
+
+            if self.goal == (-9, -9, -9):
+                raise ValueError(f"Erm... No goal was given...")
+        else:
+            self.goal = next_goal
         
-        traveling_flag = bool(self.current_map[self.goal.x][self.goal.z][self.goal.y] == map_data.GridStatus.WALKABLE.value)
-        
-        self.current_map = map_data.update_grid_with_incoming(self.current_map, next_goal) # updates map for next_goal to be incoming_block
+        # flags if iw is only traveling instead of placing block
+        is_traveling = bool(self.current_map[self.goal.x][self.goal.z][self.goal.y] == map_data.GridStatus.WALKABLE.value)
         
         try: 
             step_instructions = []
             
-            if traveling_flag:
-                travel_path, travel_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
+            if is_traveling:
+                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
             else:
                 if self.holding_block:
-                    goal_path, goal_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
+                    path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
                 else:
-                    bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
-                    goal_path, goal_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
-
-            # Path plan first to block depot, then to the next goal
-            bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, next_goal, self.orientation, self.holding_block)
+                    bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+                    goal_path, goal_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+                    goal_path[0].pop(0) # Remove repeat coord
+                    
+                    # combines start to block depot and block depot to goal
+                    steps += bd_steps
+                    steps += goal_steps
+                    path += bd_path[0]
+                    path += goal_path[0]
             
             # Update inchworm path & corresponding steps to travel that path
-            step_instructions += bd_steps
+            step_instructions += steps
             self.paths += bd_path[0]
 
             # Update the inchworm's internal map with the step it will take 

@@ -80,7 +80,7 @@ def mark_block_depot(grid):
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
     return grid
     
-def update_grid_with_structure(grid, structure):
+def update_grid_with_coord(grid, coord, status: GridStatus):
     """
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 
@@ -88,40 +88,20 @@ def update_grid_with_structure(grid, structure):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+        coord (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
                            position in the grid. This is a single block. 
+        status (GridStatus): The GridStatus needed for coord.
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
     # for structure in structures:        
-    x, z, y = structure
+    x, z, y = coord
 
-    if is_valid_position_3d(grid, structure):
+    if is_valid_position_3d(grid, coord):
         grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
         if z - 1 >= 0:
-            grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
-    return grid 
-
-def update_grid_with_incoming(grid, structure):
-    """
-    Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
-
-    Args:
-        grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
-        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
-                           position in the grid. This is a single block. 
-    Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot. 
-    """ 
-    # for structure in structures:        
-    x, z, y = structure
-    if is_valid_position_3d(grid, structure):
-        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
-        if z - 1 >= 0:
-            grid[x][z-1][y] = GridStatus.INCOMING_BLOCK.value #cell below
-    return grid 
+            grid[x][z-1][y] = status.value #cell below
+    return grid
 
 def set_inchworm_path_to_grid(grid, inchworm_path):
     """
