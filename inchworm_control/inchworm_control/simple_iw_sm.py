@@ -13,12 +13,12 @@ UART_BAUD = 9600 # config
 # ground = Pin 14
 
 class UART_CODES(Enum):
-    StartByte=0xAA, 
-    Initialization=0xFA, 
-    BeingPlaced=0xFB, 
-    MapSnapshot=0xFC, 
-    NewBlock=0xFD, 
-    Changes=0xFE, 
+    StartByte=0xAA 
+    Initialization=0xFA
+    BeingPlaced=0xFB 
+    MapSnapshot=0xFC
+    NewBlock=0xFD
+    Changes=0xFE
     Failed=0xFF
 
 class BLOCK_STATUS(Enum): # holds the status of the block 
