@@ -23,7 +23,7 @@ class UART_CODES(Enum):
 
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
-    Placing = -1
+    Placing = 2
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
