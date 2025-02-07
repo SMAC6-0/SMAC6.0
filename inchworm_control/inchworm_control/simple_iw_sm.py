@@ -392,7 +392,7 @@ class Inchworm:
         """
         IW sends the Hex code back to the block indicating that it's being placed
         """
-        buffer = bytearray(struct.pack('B', UART_CODES.StartByte)) # universal start code
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
@@ -400,7 +400,7 @@ class Inchworm:
         for c in next_block_location:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Placing) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
 
         print("Block change", block_change)
 
@@ -414,9 +414,11 @@ class Inchworm:
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
-        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
 
         self.IW_SERIAL.write(buffer)
+
+        print("Indicated block is in placing status!!")
         # TODO: handle transmission error
 
 
