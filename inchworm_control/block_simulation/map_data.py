@@ -311,13 +311,11 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
         path_coords = determine_helper_blocks(grid, path_start, path_end)
 
-    print(path_coords)
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
     for i in range(len(path_coords) - 1):
         current_coord = path_coords[i]
         next_coord = path_coords[i + 1]
-        print(f"curr: ", current_coord, "\n next: ", next_coord)
             
         end_flag = bool(next_coord == path_end) # if it is done basically
         step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)

@@ -143,12 +143,18 @@ class Inchworm:
         
         try: 
             step_instructions, steps, path = [], [], []
-            
+            print(f"WALKABLE? ", self.current_map[x][z][y])
+            print(f"TRAVELING? ", is_traveling)
             if is_traveling or self.holding_block:
+                print(f"HOLDING BLOCK? ", self.holding_block)
                 path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+                print(f"HOLDING BLOCK? ", self.holding_block)
             else:
+                print(f"HOLDING BLOCK? ", self.holding_block)
                 bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+                print(f"HOLDING BLOCK? ", self.holding_block)
                 goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, holding_block=True)
+                print(f"HOLDING BLOCK? ", self.holding_block)
                 goal_path.pop(0) # Remove repeat coord
                 
                 # combines start to block depot and block depot to goal
