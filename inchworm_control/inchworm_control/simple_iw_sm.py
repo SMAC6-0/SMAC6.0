@@ -359,6 +359,8 @@ class Inchworm:
         """
         IW does the UART communication to send the block location 
         """
+
+        print(UART_CODES.StartByte)
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte)) # universal start code
 
         # block_change is the data that needs to be sent
