@@ -75,7 +75,7 @@ class Inchworm:
                     self.retry_path() 
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
-                    self.handle_travelling_to_supply()
+                    self.handle_at_supply()
                 else:
                     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
@@ -179,17 +179,42 @@ class Inchworm:
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # TODO: call map snapshot? 
-        if self.IW_gets_Map_Snapshot():
-            print("IW got map snap shot, retry again")
+        # if self.IW_gets_Map_Snapshot():
+        #     print("IW got map snap shot, retry again")
         # MOOO HELPPP
 
-    def handle_travelling_to_supply(self):
-        print("Touching the new block")
+    def handle_at_supply(self):
+        print("Touching the new block (move)")
         # touch the new block
 
         print("IW flashes block with it's location")
-        # MO HHELLPP MEEEE 
-        
+
+        buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+
+        self.IW_SERIAL.write(buffer)
+
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
@@ -240,15 +265,6 @@ class Inchworm:
             got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
             if got_map_snapshot.lower() == 'yes':
                 self.seed_block_flag = False
-                return True
-            elif got_map_snapshot.lower() == 'no':
-                return False
-            else:
-                print("Invalid input. Please answer with 'yes' or 'no'.")
-        elif self.retry_path_flag: # skip the seed block since Mo has to implement this in the block communication
-            got_map_snapshot = input("Did the inchworm get the map? (retry path) (yes/no): \n")
-            if got_map_snapshot.lower() == 'yes':
-                self.retry_path_flag = False
                 return True
             elif got_map_snapshot.lower() == 'no':
                 return False
