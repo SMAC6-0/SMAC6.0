@@ -16,24 +16,33 @@ import map_data
 from search import search
 from inchworm_data import Inchworm
 
+from inchworm_control.blueprint import blueprint 
+
 
 
 class SimData: 
     def __init__(self): 
-        self.seed_block = [8, 1, 8] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
-        self.blocks_placed = []
+        self.seed_block = [] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
+        self.blocks_placed = [] # list of blocks user places in sim
         self.incoming_blocks = [] 
         self.all_paths = []
-        self.final_structure = map_data.initialize_grid()
+        self.final_structure = map_data.initialize_grid() # Struct IWs are trying to build 
+        self.current_map = map_data.initialize_grid() # overall progress towards final struct
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
         
+    def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
+        """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
+        block to be placed according to blueprint algorithm. """
+        # Store final struct in 3D list 
+        for block in blocks_placed: 
+            self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
 
-    def generate_final_structure_map(self): 
-        """Convert blocks placed in sim to 3D list parsable everywhere else"""
-        for block in self.blocks_placed: 
-            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]), map_data.GridStatus.NOT_WALKABLE)
+        # Find seed block and consider it placed. 
+        self.seed_block = blueprint(self.current_map, self.final_structure)
+        # self.blocks_placed.append(self.seed_block) #TODO: confirm if necessary. 
+        self.current_map = map_data.update_grid_with_structure(self.current_map, self.seed_block)
 
     def get_next_steps(self): 
         """
@@ -66,14 +75,20 @@ class SimData:
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
     
-    def receive_IW_update(self, update_msg): 
+    def receive_IW_update(self, inchworm): 
         """
         Structure receives update & processes it
         """
-        # if sim detects iw is in contact w structure, send map snapshot, receive the incoming block, update self
-        # TODO: @ SAKSHI & MO: processing msg structure to update the 3D list 
-        pass 
+        
 
+        # gets newly placed block's coords from iw 
+        # structure verifies that block is in correct location (sim.py-side??)
+        # update current_map w new block 
+        # update current_map by clearing the iw path 
+        # send current_map to iw 
+
+        # get path & new incoming block from iw
+        # update current map with incoming block and paths 
     def send_current_map(self): 
         """ send current structure to IWs in contact w structure"""
         pass
@@ -85,9 +100,6 @@ class SimData:
         Args: 
             num_inchworms (int): number of inchworms building the structure
         """
-        # initialize the map as the blocks/structure knows it
-        empty_map = map_data.initialize_grid()
-
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
         print("inchworms spawned")
