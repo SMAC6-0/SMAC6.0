@@ -360,8 +360,8 @@ class Inchworm:
         IW does the UART communication to send the block location 
         """
 
-        print(UART_CODES.StartByte)
-        buffer = bytearray(struct.pack('B', UART_CODES.StartByte)) # universal start code
+        print(UART_CODES.StartByte.value)
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
@@ -369,7 +369,7 @@ class Inchworm:
         for c in next_block_location:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Unplaced) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
 
         print("Block change", block_change)
 
