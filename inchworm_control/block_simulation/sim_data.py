@@ -36,9 +36,14 @@ class SimData:
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
         block to be placed according to blueprint algorithm. """
+        # Store final struct in 3D list 
         for block in blocks_placed: 
             self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
-        # self.seed_block = blueprint(self.current_map, self.final_structure)
+
+        # Find seed block and consider it placed. 
+        self.seed_block = blueprint(self.current_map, self.final_structure)
+        # self.blocks_placed.append(self.seed_block) #TODO: confirm if necessary. 
+        self.current_map = map_data.update_grid_with_structure(self.current_map, self.seed_block)
 
     def get_next_steps(self): 
         """
@@ -97,9 +102,6 @@ class SimData:
         Args: 
             num_inchworms (int): number of inchworms building the structure
         """
-        # initialize the map as the blocks/structure knows it
-        empty_map = map_data.initialize_grid()
-
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
         print("inchworms spawned")

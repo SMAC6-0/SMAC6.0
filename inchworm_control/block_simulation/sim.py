@@ -194,13 +194,17 @@ def show_IW_paths(inchworm):
 
 def generate_final_structure():
     """
-    Show what the final structure will look like. 
+    Clear the map, visualizing where final structure must be. Spawns seed block. 
     """
-    blocks_placed = list(sim_data.blocks_placed)
-    for block in blocks_placed: # makes a shallow copy of the list 
+    blocks_placed = list(sim_data.blocks_placed) # makes a shallow copy of the list 
+    for block in blocks_placed: 
         delete_cube(block[0], block[1], block[2])
         spawn_cube(block[0], block[1], block[2], 'misc')
     sim_data.generate_final_structure_map(blocks_placed)
+    
+    seed_block = sim_data.seed_block
+    delete_cube(seed_block[0], seed_block[1], seed_block[2])
+    spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
 
 # def show_structures():
 #     """
@@ -356,6 +360,7 @@ def spawn_cube(x, y, z, color_index):
         color_index = incoming_step_texture
     elif color_index == 'seed':
         color_index = seed_block_texture
+        # sim_data.blocks_placed.append(int(target_position)) 
     else:
         color_index = smart_block_texture
         sim_data.blocks_placed.append(int(target_position))  # Update the block information
@@ -371,7 +376,7 @@ def delete_cube(x, y, z):
     for e in scene.entities:
         if hasattr(e, 'position') and e.position == target_position:
             destroy(e)
-            if target_position in sim_data.blocks_placed:
+            if (target_position in sim_data.blocks_placed): #and (target_position not in sim_data.seed_block):
                 sim_data.blocks_placed.remove(target_position)
             break
 
