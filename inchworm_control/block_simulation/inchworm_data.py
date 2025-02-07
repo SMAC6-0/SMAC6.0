@@ -99,7 +99,8 @@ class Inchworm:
         Inchworm.inchworm_list.append(self)
 
         # UART stuff
-        self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
+        if not SIMULATION: 
+            self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
     
     def __del__(self):
         """
