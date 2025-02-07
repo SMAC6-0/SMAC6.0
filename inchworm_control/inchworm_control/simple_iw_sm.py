@@ -21,13 +21,16 @@ class UART_CODES(Enum):
     Changes=0xFE, 
     Failed=0xFF
 
+class BLOCK_STATUS(Enum): # holds the status of the block 
+    Unplaced = 0
+    Placing = 0.5
+
 SUPPLY_LOCATION = [1, 1, 1] # config
 
 
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
-IW_message_info = 0 # holds the status of the block 
 
 
 # Inchworm states
@@ -79,7 +82,7 @@ class Inchworm:
                 else:
                     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
-                if self.is_IW_in_block():
+                if self.is_IW_in_block_location():
                     self.handle_transporting_block()
                 else:
                     self.handle_error()
@@ -133,7 +136,7 @@ class Inchworm:
         for c in next_block_location:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', BLOCK_STATUS.Unplaced) + struct.pack('B', IW_message_counter)
 
         print("Block change", block_change)
 
@@ -188,43 +191,22 @@ class Inchworm:
         # touch the new block
 
         print("IW flashes block with it's location")
+        self.send_block_location()
 
-        buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
+        print("IW sends a messgae indicating block is being placed")
+        # IW sends a messgae indicating block is being placed
+        # MOOOOO HELPPPP
+        self.send_block_being_placed()
 
-        # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
-        for c in next_block_location:
-            block_change += struct.pack('B', c)
-
-        block_change += struct.pack('B', IW_message_info) + struct.pack('B', IW_message_counter)
-
-        print("Block change", block_change)
-
-        # calculate message length and checksum
-
-        msg_len = len(block_change).to_bytes(2,'little')
-        checksum = self.crc16(block_change).to_bytes(2, 'little')
-
-        print("msg_len", msg_len)
-        print("checksum", checksum)
-
-        # append msg_len, block_change, checksum, ending_code(enum) to buffer
-
-        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
-
-        self.IW_SERIAL.write(buffer)
+        print("Travelling to the block location")
+        # IW begins travelling to block location
 
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
     def handle_transporting_block(self):
-        print("IW sends a messgae indicating block is being placed")
-        # IW sends a messgae indicating block is being placed
-        # MOOOOO HELPPPP
-
-        print("Travelling to the block location")
-        # IW begins travelling to block location
+        
 
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
@@ -316,7 +298,7 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
-    def is_IW_in_block(self):
+    def is_IW_in_block_location(self):
         #  return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
         print("Checking if at block location...")
 
@@ -370,6 +352,70 @@ class Inchworm:
         # self.current_map = map
         print("Current map updated")
         pass
+    
+    # ---------------------------- IW block communication functions ----------------------------- 
+
+    def send_block_location(self):
+        """
+        IW does the UART communication to send the block location 
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', BLOCK_STATUS.Unplaced) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+
+        self.IW_SERIAL.write(buffer)
+        # TODO: handle transmission error
+
+    def send_block_being_placed(self):
+        """
+        IW sends the Hex code back to the block indicating that it's being placed
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', BLOCK_STATUS.Placing) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+
+        self.IW_SERIAL.write(buffer)
+        # TODO: handle transmission error
 
 
     # Checksum protocol for the IW and Block communication
@@ -392,6 +438,8 @@ class Inchworm:
         crc = (crc << 8) | ((crc >> 8) & 0xFF)
 
         return crc & 0xFFFF
+    
+    
 
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
