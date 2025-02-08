@@ -48,7 +48,7 @@ window.exit_button.visible = False
 key_g_pressed = False  
 key_t_pressed = False  
 key_n_pressed = False 
-key_p_pressed = False
+key_p_pressed, key_l_pressed = False, False
 
 spawned = False
 spawn_x, spawn_y, spawn_z = 0, 0, 0
@@ -57,7 +57,7 @@ spawn_x, spawn_y, spawn_z = 0, 0, 0
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z
+    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z
 
 
     # Generate the pyramid coordinates
@@ -80,9 +80,13 @@ def update():
         key_t_pressed = False
 
     # Search(Look) for structures
-    if held_keys["l"]:
+    if held_keys["l"] and not key_l_pressed:
         generate_final_structure()
         sim_data.spawn_inchworms(1)
+        key_l_pressed = True
+
+    if not held_keys["l"]:
+        key_l_pressed = False
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
@@ -290,38 +294,29 @@ def check_block_color(x, y, z):
 
     # If the position is occupied for stepping 
     if existing_cube_texture is not None:
-        if existing_cube_texture == smart_block_texture: 
-                block_color = smart_block_texture_step
-        elif existing_cube_texture == white_block_texture: 
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_red: 
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_green: 
-                block_color = smart_block_texture_step_green
-        elif existing_cube_texture == smart_block_texture_blue: 
-                block_color = smart_block_texture_step_blue 
-        elif existing_cube_texture == smart_block_texture_yellow: 
-                block_color = smart_block_texture_step_yellow
-        elif existing_cube_texture == smart_block_texture_step: 
-                block_color = smart_block_texture
-        elif existing_cube_texture == smart_block_texture_step_red:
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_step_green:
-                block_color = smart_block_texture_step_green
-        elif existing_cube_texture == smart_block_texture_step_blue:
-                block_color = smart_block_texture_step_blue
-        elif existing_cube_texture == smart_block_texture_step_yellow:      
-                block_color = smart_block_texture_step_yellow
-        elif existing_cube_texture == smart_block_outline:      
-                block_color = smart_block_texture
-        elif existing_cube_texture == incoming_block_texture:
-            block_color = smart_block_texture_step_red
-        elif existing_cube_texture == incoming_step_texture:
-            block_color = smart_block_texture_step_red
-        elif existing_cube_texture == seed_block_texture:
-            block_color = seed_block_texture
-        else:
-                print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
+        transition = {
+            # Step on top of block, retaining the same color 
+            smart_block_texture: smart_block_texture_step,
+            white_block_texture: smart_block_texture_step_red,
+            smart_block_texture_red: smart_block_texture_step_red, 
+            smart_block_texture_green: smart_block_texture_step_green,
+            smart_block_texture_blue: smart_block_texture_step_blue, 
+            smart_block_texture_yellow: smart_block_texture_step_yellow,
+            smart_block_texture_step: smart_block_texture,
+            # Transition from color step to color step --> for the second foot
+            smart_block_texture_step_red: smart_block_texture_step_red, 
+            smart_block_texture_step_green: smart_block_texture_step_green,
+            smart_block_texture_step_blue: smart_block_texture_step_blue, 
+            smart_block_texture_step_yellow: smart_block_texture_step_yellow, 
+            smart_block_outline: smart_block_texture, 
+            incoming_block_texture: smart_block_texture_step_red, 
+            incoming_step_texture: smart_block_texture_step_red, # step over the incoming path 
+            seed_block_texture: seed_block_texture
+        }
+        try: 
+            block_color = transition[existing_cube_texture]
+        except:
+            print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
     return block_color
 

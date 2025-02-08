@@ -81,6 +81,7 @@ class Inchworm:
         self.paths = [] # the list of coords
         self.goal = [] # goal coord
         self.goal_progress_index = 0
+        self.seed_block = []
         # self.found_structures = []
         # self.misc_blocks = []
 
@@ -108,14 +109,15 @@ class Inchworm:
         """
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
 
-    def update_my_current_map(self, map): 
+    def update_my_current_map(self, coord): 
         """
         Updates the inchworm's map based on received updates from the structure. 
         Args: 
-            map: xzy (3D) list storing the current status of the map, as the structure knows it.  
+            cood:  [x, z, y] location
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
-        self.current_map = map
+        self.current_map = map_data.update_grid_status(self.current_map, coord, map_data.GridStatus.NOT_WALKABLE)
+
     def send_my_next_steps(self): 
         """ Send IW path and the corresponding incoming block to the structure. """ 
         if not SIMULATION: 
@@ -134,7 +136,7 @@ class Inchworm:
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal))
     
-    def plan_path(self, next_goal: tuple[int] = None): 
+    def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
         is_traveling = True # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
@@ -390,8 +392,7 @@ class Inchworm:
 
         else: # this happens first 
             # Find & path plan to seed block 
-            x, z, y = self.get_next_block() # TODO: for now assuming that first block is seed
-            self.plan_path([x, z, y])
+            self.plan_path(self.seed_block)
 
         
         

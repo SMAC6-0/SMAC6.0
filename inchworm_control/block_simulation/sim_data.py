@@ -37,12 +37,11 @@ class SimData:
         block to be placed according to blueprint algorithm. """
         # Store final struct in 3D list 
         for block in blocks_placed: 
-            self.final_structure = map_data.update_grid_with_structure(self.final_structure, (block[0], block[2], block[1]))
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]), map_data.GridStatus.NOT_WALKABLE)
 
         # Find seed block and consider it placed. 
         self.seed_block = blueprint(self.current_map, self.final_structure)
-        # self.blocks_placed.append(self.seed_block) #TODO: confirm if necessary. 
-        self.current_map = map_data.update_grid_with_structure(self.current_map, self.seed_block)
+        self.current_map = map_data.update_grid_status(self.current_map, self.seed_block, map_data.GridStatus.NOT_WALKABLE)
 
     def get_next_steps(self): 
         """
@@ -102,6 +101,8 @@ class SimData:
         """
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
+            self.existing_inchworms[i].seed_block = self.seed_block
+            self.existing_inchworms[i].update_my_current_map(self.seed_block)
         print("inchworms spawned")
 
 
