@@ -42,7 +42,6 @@ class SimData:
         # Find seed block and consider it placed. 
         self.seed_block = blueprint(self.current_map, self.final_structure)
         self.current_map = map_data.update_grid_status(self.current_map, self.seed_block)
-        print("Struct's final map: ", self.final_structure)
         print("Struct's seed block: ", self.seed_block)
 
     def get_next_steps(self): 

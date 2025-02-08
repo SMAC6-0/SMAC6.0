@@ -139,27 +139,21 @@ class Inchworm:
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
-        is_traveling = True # assumes that if not specified, objective is to travel, not place
-        print("IW's final map: ", self.final_structure)
+        is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
+            print("goal not given... finding goal now")
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             # self.goal = [self.goal[0], self.goal[2], self.goal[1]]
-            print("goal 1: ", self.goal)
-            if self.goal == (-9, -9, -9):
+            print("goal found: ", self.goal)
+            if self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
             
-            x, z, y = self.goal
-            # TODO: handle all block depots
-            if ([x, z, y] != BD_LOC1) and (map_data.is_valid_position_3d(self.current_map, self.goal)) and ((self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value)):
-                is_traveling = True
-            else: 
-                is_traveling = False
-            
             self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
-            print("IW current map after updating w incoming block: ", self.current_map)        
         else:
+            is_traveling = True
             self.goal = next_goal
-        print("goal 2: ", self.goal)
+        
+        print("finalized goal: ", self.goal)
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
