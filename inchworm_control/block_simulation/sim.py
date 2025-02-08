@@ -295,7 +295,7 @@ def check_block_color(x, y, z):
     # If the position is occupied for stepping 
     if existing_cube_texture is not None:
         transition = {
-            # Step on top of block, retaining the same color 
+            # Step on top of block, retaining the same color: 
             smart_block_texture: smart_block_texture_step,
             white_block_texture: smart_block_texture_step_red,
             smart_block_texture_red: smart_block_texture_step_red, 
@@ -303,11 +303,12 @@ def check_block_color(x, y, z):
             smart_block_texture_blue: smart_block_texture_step_blue, 
             smart_block_texture_yellow: smart_block_texture_step_yellow,
             smart_block_texture_step: smart_block_texture,
-            # Transition from color step to color step --> for the second foot
+            # Transition from color step toff color step --> for the second foot:
             smart_block_texture_step_red: smart_block_texture_step_red, 
             smart_block_texture_step_green: smart_block_texture_step_green,
             smart_block_texture_step_blue: smart_block_texture_step_blue, 
             smart_block_texture_step_yellow: smart_block_texture_step_yellow, 
+            # Textures indicating block/steps --> it's there: 
             smart_block_outline: smart_block_texture, 
             incoming_block_texture: smart_block_texture_step_red, 
             incoming_step_texture: smart_block_texture_step_red, # step over the incoming path 

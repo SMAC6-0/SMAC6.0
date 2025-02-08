@@ -37,11 +37,13 @@ class SimData:
         block to be placed according to blueprint algorithm. """
         # Store final struct in 3D list 
         for block in blocks_placed: 
-            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]), map_data.GridStatus.NOT_WALKABLE)
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]))
 
         # Find seed block and consider it placed. 
         self.seed_block = blueprint(self.current_map, self.final_structure)
-        self.current_map = map_data.update_grid_status(self.current_map, self.seed_block, map_data.GridStatus.NOT_WALKABLE)
+        self.current_map = map_data.update_grid_status(self.current_map, self.seed_block)
+        print("Struct's final map: ", self.final_structure)
+        print("Struct's seed block: ", self.seed_block)
 
     def get_next_steps(self): 
         """
@@ -78,7 +80,10 @@ class SimData:
         """
         Structure receives update & processes it
         """
-        
+        x, z, y = inchworm.leading_foot_loc
+        # if self.current_map[x][z][y] == map_data.GridStatus.INCOMING_BLOCK.value:
+            
+        #     pass
 
         # gets newly placed block's coords from iw 
         # structure verifies that block is in correct location (sim.py-side??)

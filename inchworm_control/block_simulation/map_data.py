@@ -80,7 +80,7 @@ def mark_block_depot(grid):
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
     return grid
     
-def update_grid_status(grid, coord, status: GridStatus):
+def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
     """
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 

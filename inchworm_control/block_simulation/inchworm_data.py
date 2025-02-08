@@ -116,7 +116,8 @@ class Inchworm:
             cood:  [x, z, y] location
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
-        self.current_map = map_data.update_grid_status(self.current_map, coord, map_data.GridStatus.NOT_WALKABLE)
+        self.current_map = map_data.update_grid_status(self.current_map, coord)
+        print("updated my map")
 
     def send_my_next_steps(self): 
         """ Send IW path and the corresponding incoming block to the structure. """ 
@@ -139,9 +140,11 @@ class Inchworm:
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
         is_traveling = True # assumes that if not specified, objective is to travel, not place
+        print("IW's final map: ", self.final_structure)
         if next_goal == None:
-            self.goal = self.get_next_block() # gets goal from blueprint if none is given
-            
+            self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
+            # self.goal = [self.goal[0], self.goal[2], self.goal[1]]
+            print("goal 1: ", self.goal)
             if self.goal == (-9, -9, -9):
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
             
@@ -153,9 +156,10 @@ class Inchworm:
                 is_traveling = False
             
             self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
+            print("IW current map after updating w incoming block: ", self.current_map)        
         else:
             self.goal = next_goal
-        
+        print("goal 2: ", self.goal)
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -206,7 +210,7 @@ class Inchworm:
             z = z + 1
         return x, z, y
     
-    def get_next_block(self) -> tuple[int]:
+    def get_next_block(self) :
         """ Uses the blueprint algorithm to determine which block should be placed next. """
         # TODO: handle misc
         # sorted_list = sorted(self.misc_blocks, key=lambda coordinate: coordinate[1])
@@ -423,18 +427,18 @@ class Inchworm:
     def handle_at_supply(self):
         print("Touching the new block (move)")
         # touch the new block
+        if not SIMULATION: 
+            print("IW flashes block with it's location")
+            self.send_block_location()
 
-        print("IW flashes block with it's location")
-        self.send_block_location()
-
-        # pause so that the block has enough time to process the info
-        sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+            # pause so that the block has enough time to process the info
+            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
 
 
-        print("IW sends a messgae indicating block is being placed")
-        # IW sends a messgae indicating block is being placed
-        # MOOOOO HELPPPP
-        self.send_block_being_placed()
+            print("IW sends a messgae indicating block is being placed")
+            # IW sends a messgae indicating block is being placed
+            # MOOOOO HELPPPP
+            self.send_block_being_placed()
 
 
         print("Travelling to the block location")
@@ -472,7 +476,10 @@ class Inchworm:
         print(f"Current inchworm state: {self.state}")
 
     def handle_structure_incomplete(self):
-        print("Structure is incomplete")
+        print("Structure is incomplete. Update IW's map with placed block")
+        self.current_map = self.update_my_current_map(self.goal)
+
+        self.plan_path()
 
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
@@ -484,6 +491,7 @@ class Inchworm:
         # return true if the IW got the map snapshot
         if SIMULATION: 
             if self.leading_foot_loc == self.goal:
+                self.update_my_current_map(self.goal)
                 # TODO: you forgot about sim_data's current_map 
                 return True
             return False 
