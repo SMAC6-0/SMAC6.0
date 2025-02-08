@@ -210,9 +210,10 @@ class Inchworm:
 
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(f"Current inchworm state: {self.state}")
-
+        
     def handle_transported_block(self):
         
+
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
