@@ -18,11 +18,10 @@ def blueprint(curr_map, final_map) -> list:
         if np.array_equal(curr_map, final_map):
             return [-1,-1,-1]
         else: 
-            print(curr_map.shape)
             # TODO: implement prioritization of found structures
             for z in range(curr_map.shape[0]): #iterate 0-2 
                 for y in range(curr_map.shape[1]): #iterate 0-4
                    for x in range((curr_map.shape[2])): #iterate 0-5 
                         if curr_map[z, x, y] == 1 and curr_map[z, x, y] != final_map[z, x, y]:
-                            return (z, y, x)
+                            return [z, y, x]
     return [-9, -9, -9]
