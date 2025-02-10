@@ -15,6 +15,7 @@ UART_BAUD = 9600 # config
 # GPIO 15, pin 8 = RX green wire 
 # GPIO 14, pin 10 = TX yellow wire
 # ground = Pin 14
+# test
 
 class UART_CODES(Enum):
     StartByte=0xAA 
