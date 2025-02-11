@@ -280,6 +280,7 @@ class Inchworm:
         # MOOOO HELPPP 
         if self.seed_block_flag:
             print("Sending the IW path to the structure (seed block)")
+            self.seed_block_flag = False
             # IW sends it's path to the structure 
         else:
             self.send_IW_path_to_block(IW_PATH)
