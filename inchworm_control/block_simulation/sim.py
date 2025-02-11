@@ -145,7 +145,9 @@ def update():
                 spawn_x, spawn_y, spawn_z = x, y, z
                 last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
-        
+
+        sim_data.handle_IW_at_goal(inchworm)
+        sim_data.handle_new_IW_path(inchworm)
         inchworm.update_state()
         key_n_pressed = True
 
@@ -180,15 +182,22 @@ def update():
 
     if held_keys["m"]:
         for inchworm in sim_data.existing_inchworms: 
+            sim_data.handle_IW_at_goal(inchworm)
+            sim_data.handle_new_IW_path(inchworm)
             inchworm.update_state()
-            sim_data.receive_IW_update(inchworm)
             show_IW_paths(inchworm)
+
+def show_structure_map(): 
+    """Show how the structure views the map. """
+    pass
 
 def show_IW_paths(inchworm):
     # First extract the next block the IW is going to place
-    cell = inchworm.goal
-    delete_cube(cell[0], cell[1], cell[2])
-    spawn_cube(cell[0], cell[1], cell[2], 'incoming')
+    if inchworm.goal != inchworm.seed_block: 
+        print("goal is not the seed block")
+        cell = inchworm.goal
+        delete_cube(cell[0], cell[1], cell[2])
+        spawn_cube(cell[0], cell[1], cell[2], 'incoming')
 
     # Then show the path the inchworm is going to take
     for step in range(len(inchworm.paths)-1): 

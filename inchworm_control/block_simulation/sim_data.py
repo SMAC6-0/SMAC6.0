@@ -43,6 +43,48 @@ class SimData:
         self.seed_block = blueprint(self.current_map, self.final_structure)
         self.current_map = map_data.update_grid_status(self.current_map, self.seed_block)
         print("Struct's seed block: ", self.seed_block)
+    
+    def handle_IW_at_goal(self, inchworm): 
+        """
+        Structure receives update & processes it
+        """
+        x, z, y = inchworm.leading_foot_loc
+        # TODO: far future: check if IW is adjacent to blocks (use map_data.set_neighbors)
+        # If yes, get newly placed block's coords from iw 
+
+        # Structure verifies that block is in correct location 
+        if inchworm.leading_foot_loc == inchworm.goal: 
+            if (self.current_map[x][z][y] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value):
+                # Update current_map w new block 
+                self.current_map == map_data.update_grid_status(self.current_map, [x, z, y])
+
+                # Update current_map by clearing the iw path 
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
+
+                # Send current_map to IW 
+                inchworm.current_map = self.current_map
+                print("Struct should have updated the IW's map")
+        # return self.current_map # TODO: maybe unnecessary
+
+    def handle_new_IW_path(self, inchworm): 
+        if inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths)
+            x, z, y = inchworm.goal
+            self.current_map[x][z][y] == map_data.update_grid_status(self.current_map, [x, z, y], map_data.GridStatus.INCOMING_BLOCK)
+            print("struct's map updated w new IW path")
+        # get path & new incoming block from iw - DIFFERENT FUNC 
+        # update current map with incoming block and paths 
+
+    def spawn_inchworms(self, num_inchworms: int): 
+        """
+        Args: 
+            num_inchworms (int): number of inchworms building the structure
+        """
+        for i in range(num_inchworms): 
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
+            self.existing_inchworms[i].seed_block = self.seed_block #TODO: IW shouldn't have its own seed block 
+            self.existing_inchworms[i].update_my_current_map(self.seed_block)
+        print("inchworms spawned")
 
     def get_next_steps(self): 
         """
@@ -74,40 +116,6 @@ class SimData:
         simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
-    
-    def receive_IW_update(self, inchworm): 
-        """
-        Structure receives update & processes it
-        """
-        x, z, y = inchworm.leading_foot_loc
-        # if self.current_map[x][z][y] == map_data.GridStatus.INCOMING_BLOCK.value:
-            
-        #     pass
-
-        # gets newly placed block's coords from iw 
-        # structure verifies that block is in correct location (sim.py-side??)
-        # update current_map w new block 
-        # update current_map by clearing the iw path 
-        # send current_map to iw 
-
-        # get path & new incoming block from iw
-        # update current map with incoming block and paths 
-    def send_current_map(self): 
-        """ send current structure to IWs in contact w structure"""
-        pass
-
-
-
-    def spawn_inchworms(self, num_inchworms: int): 
-        """
-        Args: 
-            num_inchworms (int): number of inchworms building the structure
-        """
-        for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
-            self.existing_inchworms[i].seed_block = self.seed_block
-            self.existing_inchworms[i].update_my_current_map(self.seed_block)
-        print("inchworms spawned")
 
 
 def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):
