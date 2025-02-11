@@ -27,12 +27,37 @@ class BLOCK_STATUS(Enum): # holds the status of the block
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
-
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
 IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
+
+current_map = [
+    [  # Layer 0
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ],
+    [  # Layer 1
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ],
+    [  # Layer 2
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+    ]
+]
+
+
 
 # Inchworm states
 class IW_STATE(Enum):
@@ -97,10 +122,8 @@ class Inchworm:
                 self.handle_error()
             case IW_STATE.STRUCTURE_COMPLETE:
                 self.handle_structure_complete()
-
     
     ##### Checkers and Handlers
-
     # Handlers 
 
     # added this func incase we need it in the future
@@ -260,7 +283,7 @@ class Inchworm:
                 print("Invalid input. Please answer with 'yes' or 'no'.")
         else:
             # blah blah low level language 
-            # TODO: ask Mo for help when the IW gets the map SnapShot back 
+            # TODO: ask Mo for help when the IW gets the map SnapShot back  q1
             # return true if the IW got the map snapshot
             received_data = self.IW_SERIAL.read()              #read serial port
             sleep(0.03)
@@ -274,6 +297,18 @@ class Inchworm:
                 # call the update map
                 self.update_my_current_map()
             # return is_a_map
+
+            layers, rows, cols = 3, 5, 6
+            array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+            index = 0
+            for l in range(layers):
+                for r in range(rows):
+                    for c in range(cols):
+                        if index < len(map_data):
+                            array[l][r][c] = map_data[index]
+                            index += 1
+            return array  
+            print("Received 3D Array:", array)
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -450,7 +485,6 @@ class Inchworm:
         return crc & 0xFFFF
     
     
-
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
 
