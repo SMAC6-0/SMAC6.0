@@ -559,7 +559,7 @@ class Inchworm:
             iw_path [list[list]]: the path of the inchworm 
         """
         # iterate through the iw_path
-        for grid in range(len(iw_path)):
+        for grid in iw_path:
             print("grid", grid)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
