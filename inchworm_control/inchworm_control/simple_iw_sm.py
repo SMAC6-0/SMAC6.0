@@ -278,8 +278,11 @@ class Inchworm:
 
     def path_exists(self):
         # MOOOO HELPPP 
-        print("Sending the IW path to the structure")
-        # IW sends it's path to the structure 
+        if self.seed_block_flag:
+            print("Sending the IW path to the structure (seed block)")
+            # IW sends it's path to the structure 
+        else:
+            IW_PATH
 
         print("Travelling to the supply")
         # IW begins travelling to supply location
@@ -360,7 +363,7 @@ class Inchworm:
         if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
             got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
             if got_map_snapshot.lower() == 'yes':
-                self.seed_block_flag = False
+                # self.seed_block_flag = False
                 return True
             elif got_map_snapshot.lower() == 'no':
                 return False
@@ -383,17 +386,17 @@ class Inchworm:
                 self.update_my_current_map()
             # return is_a_map
 
-            layers, rows, cols = 3, 5, 6
-            array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
-            index = 0
-            for l in range(layers):
-                for r in range(rows):
-                    for c in range(cols):
-                        if index < len(map_data):
-                            array[l][r][c] = map_data[index]
-                            index += 1
-            return array  
-            print("Received 3D Array:", array)
+            # layers, rows, cols = 3, 5, 6
+            # array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+            # index = 0
+            # for l in range(layers):
+            #     for r in range(rows):
+            #         for c in range(cols):
+            #             if index < len(map_data):
+            #                 array[l][r][c] = map_data[index]
+            #                 index += 1
+            # return array  
+            # print("Received 3D Array:", array)
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -496,15 +499,15 @@ class Inchworm:
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
 
-        print("Block change", block_change)
+        # print("Block change", block_change)
 
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print("msg_len", msg_len)
-        print("checksum", checksum)
+        # print("msg_len", msg_len)
+        # print("checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
@@ -528,15 +531,15 @@ class Inchworm:
 
         block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
 
-        print("Block change", block_change)
+        # print("Block change", block_change)
 
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print("msg_len", msg_len)
-        print("checksum", checksum)
+        # print("msg_len", msg_len)
+        # print("checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
@@ -546,6 +549,24 @@ class Inchworm:
 
         print("Indicated block is in placing status!!")
         # TODO: handle transmission error
+
+    def send_IW_path_to_block(self, iw_path):
+        """
+        Sends the IW path to the structure one grid at a time 
+
+        Args: 
+            iw_path [list[list]]: the path of the inchworm 
+        """
+        # iterate through the iw_path
+        for grid in range(len(iw_path)):
+            print("grid", grid)
+            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+            # block_change is the data that needs to be sent
+            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+
+
 
 
     # Checksum protocol for the IW and Block communication
