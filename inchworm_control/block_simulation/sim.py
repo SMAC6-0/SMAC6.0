@@ -8,7 +8,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
-from config import CURRENT_LOC, BD_LOC1, BD_LOCS, SIMULATION
+from config import CURRENT_LOC, BD_LOC1, BD_LOCS, SIMULATION, SEED_BK
 import copy 
 from sim_data import SimData
 
@@ -93,7 +93,7 @@ def update():
         spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
         for inchworm in sim_data.existing_inchworms:
             inchworm.plan_path()
-            show_IW_paths(inchworm)
+            vis_IW_paths(inchworm)
         # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
         # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
         key_p_pressed = True
@@ -145,10 +145,13 @@ def update():
                 spawn_x, spawn_y, spawn_z = x, y, z
                 last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
-
-        sim_data.handle_IW_at_goal(inchworm)
-        sim_data.handle_new_IW_path(inchworm)
+        
+        IW_is_at_goal = sim_data.send_map_to_IW(inchworm)
+        if IW_is_at_goal: # clear the path visually before 
+            vis_IW_paths(inchworm, clear_path=True)
         inchworm.update_state()
+        sim_data.handle_new_IW_path(inchworm)
+        vis_IW_paths(inchworm)
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
@@ -181,19 +184,18 @@ def update():
 
 
     if held_keys["m"]:
+        # Begin the state machine !
         for inchworm in sim_data.existing_inchworms: 
-            sim_data.handle_IW_at_goal(inchworm)
-            sim_data.handle_new_IW_path(inchworm)
             inchworm.update_state()
-            show_IW_paths(inchworm)
 
 def show_structure_map(): 
     """Show how the structure views the map. """
     pass
 
-def show_IW_paths(inchworm):
+def vis_IW_paths(inchworm, clear_path=False):
+    """Visualize the IW's path, or clear it"""
     # First extract the next block the IW is going to place
-    if inchworm.goal != inchworm.seed_block: 
+    if inchworm.goal != SEED_BK: 
         print("goal is not the seed block")
         cell = inchworm.goal
         delete_cube(cell[0], cell[1], cell[2])
@@ -203,7 +205,15 @@ def show_IW_paths(inchworm):
     for step in range(len(inchworm.paths)-1): 
         cell = inchworm.paths[step]
         delete_cube(cell[0], cell[1], cell[2])
-        spawn_cube(cell[0], cell[1], cell[2], 'path')
+        if clear_path: 
+            # last_block_original_texture_2 = cell.texture
+            # new_texture2 = check_block_color(cell.position.x, cell.position.y, cell.position.z)
+            # cell.texture = new_texture2
+            # TODO: like in stepping, check for prev block color
+            spawn_cube(cell[0], cell[1], cell[2], 'clear')
+            print("cleared path from sim")
+        else:
+            spawn_cube(cell[0], cell[1], cell[2], 'path')
 
 def generate_final_structure():
     """
@@ -215,9 +225,8 @@ def generate_final_structure():
         spawn_cube(block[0], block[1], block[2], 'misc')
     sim_data.generate_final_structure_map(blocks_placed)
     
-    seed_block = sim_data.seed_block
-    delete_cube(seed_block[0], seed_block[1], seed_block[2])
-    spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
+    delete_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2])
+    spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
 
 # def show_structures():
 #     """
@@ -357,6 +366,7 @@ def spawn_cube(x, y, z, color_index):
         'incoming': incoming_block_texture, 
         'path': incoming_step_texture,
         'seed': seed_block_texture,
+        'clear': white_block_texture,
         '': smart_block_texture
     }
     color_index = choose_texture[color_index]
