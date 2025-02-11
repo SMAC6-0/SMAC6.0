@@ -558,13 +558,34 @@ class Inchworm:
         Args: 
             iw_path [list[list]]: the path of the inchworm 
         """
+        # TODO: IW_path is in X, Z, Y format!!
         # iterate through the iw_path
-        for grid in iw_path:
-            print("grid", grid)
+        for grid_cell in iw_path:
+            print("grid", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
             block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+            for c in grid_cell:
+                block_change += struct.pack('B', c)
+            
+            msg_len = len(block_change).to_bytes(2,'little')
+            checksum = self.crc16(block_change).to_bytes(2, 'little')
+            
+            print("msg_len", msg_len)
+            print("checksum", checksum)
+
+            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+
+            self.IW_SERIAL.write(buffer)
+
+            # delay to make sure all the data is transmitted 
+            sleep(0.1)
+
+        print("Transferred the IW path!!")
+        # TODO: handle transmission error
+
+            
 
 
 
