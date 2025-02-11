@@ -580,7 +580,7 @@ class Inchworm:
             self.IW_SERIAL.write(buffer)
 
             # delay to make sure all the data is transmitted 
-            sleep(0.1)
+            sleep(PATH_PLANNING_TIMER)
 
         print("Transferred the IW path!!")
         # TODO: handle transmission error
