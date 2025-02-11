@@ -1,5 +1,4 @@
 import map_data
-import config
 
 def find_path(grid, start, goal, holding_block) -> list[int]:
     """
@@ -41,7 +40,9 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
         for dx, dz, dy in neighbor_directions:
             nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
             neighbor_coord = nx, nz, ny
-            if map_data.is_valid_position_3d(grid, (neighbor_coord)) and (grid[nx][nz][ny] == 0 or grid[nx][nz][ny] == 2) and not visited[nx][nz][ny]:
+            if (map_data.is_valid_position_3d(grid, (neighbor_coord))  
+                and (grid[nx][nz][ny] == map_data.GridStatus.WALKABLE.value or grid[nx][nz][ny] == map_data.GridStatus.INCOMING_BLOCK.value)  
+                and not visited[nx][nz][ny]):
                 visited[nx][nz][ny] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell

@@ -103,7 +103,7 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
             grid[x][z-1][y] = status.value #cell below
     return grid
 
-def set_inchworm_path_to_grid(grid, inchworm_path):
+def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
     """
     Sets the inchworm path on the grid.
 
@@ -116,7 +116,7 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     """ 
     for step in range(len(inchworm_path)-1): 
         x, z, y = inchworm_path[step]
-        grid[x][z][y] = GridStatus.INCHWORM_PATH.value
+        grid[x][z][y] = iw_id * GridStatus.INCHWORM_PATH.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
@@ -435,3 +435,29 @@ def get_orientation(movement: str, orientation: InchwormOrientation):
     else:
         return orientation    
     
+def buffer_iw_paths(grid, iw_id):
+    # if on the map there is another iw path, have its neighbors also turn into iw_path
+    
+    # check all of grid for inchworm paths
+    buffer_list = [] # list of coords that need to be updated for buffering
+
+    # Make the bottom layer (z = 0) WALKABLE
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+            for z in range(GRID_SIZE):
+                cell_status = grid[x][z][y]
+                
+                if (cell_status != iw_id * GridStatus.INCHWORM_PATH.value and cell_status < 0): # is some inchworm path, but not its own
+                    neighbor_directions = set_neighbors()
+                    
+                    for dx, dz, dy in neighbor_directions:
+                        nx, nz, ny = x + dx, z + dz, y + dy
+                        n_status = grid[nx][nz][ny]
+                        if (is_valid_position_3d(grid, [nx, nz, ny])
+                            and (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value)):
+                            buffer_list.append((nx, nz, ny, cell_status))
+    
+    for nx, nz, ny, new_status in buffer_list:
+        grid[nx][nz][ny] = new_status
+    
+    return grid

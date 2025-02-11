@@ -15,7 +15,7 @@ UART_BAUD = 9600 # config
 # GPIO 15, pin 8 = RX green wire 
 # GPIO 14, pin 10 = TX yellow wire
 # ground = Pin 14
-# test
+# test 
 
 class UART_CODES(Enum):
     StartByte=0xAA 
@@ -181,7 +181,7 @@ class Inchworm:
             self.paths += path
 
             # Update the inchworm's internal map with the step it will take 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
+            self.current_map = map_data.set_inchworm_path_to_grid(self.id, self.current_map, self.paths) # Update IW's map with the path
             
             step_getter(step_instructions)
         except RuntimeError as e:
