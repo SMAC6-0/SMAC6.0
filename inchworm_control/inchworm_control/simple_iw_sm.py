@@ -282,7 +282,7 @@ class Inchworm:
             print("Sending the IW path to the structure (seed block)")
             # IW sends it's path to the structure 
         else:
-            IW_PATH
+            self.send_IW_path_to_block(IW_PATH)
 
         print("Travelling to the supply")
         # IW begins travelling to supply location
