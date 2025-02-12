@@ -32,7 +32,7 @@ IW_identifier = 1 # this is the idenifier that goes infornt of the message to be
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
 # in X, Y, Z format to be consistent with Mo's code
-IW_PATH = [[1, 1, 0], [2, 1, 0]] 
+IW_PATH = [[1, 1, 0], [2, 1, 0], [2, 2, 0]] 
 
 # final_map = [
 #     [ # X = 0
@@ -154,7 +154,7 @@ class IW_STATE(Enum):
     ERROR = 7
     STRUCTURE_COMPLETE = 8
 
-PATH_PLANNING_TIMER = 3
+PATH_PLANNING_TIMER = 5
 
 class Inchworm:
     def __init__(self):
@@ -560,7 +560,7 @@ class Inchworm:
         Args: 
             iw_path [list[list]]: the path of the inchworm 
         """
-        # TODO: IW_path is in X, Z, Y format!!
+        # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
         for grid_cell in iw_path:
             print("grid", grid_cell)
