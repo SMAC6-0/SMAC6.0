@@ -33,6 +33,7 @@ IW_message_counter = 0 # this is the messgae counter for sending data, IK's mess
 
 # in X, Y, Z format to be consistent with Mo's code
 IW_PATH = [[4, 1, 0], [5, 1, 0], [6, 1, 0], [7, 1, 0], [7, 2, 0], [7, 3, 0], [7, 4, 0], [7, 5, 0], [7, 6, 0], [7, 7, 0], [7, 8, 1]] 
+
 # final_map = [
 #     [ # X = 0
 #         [0, 0, 0, 0, 0, 0, 0, 0], 
