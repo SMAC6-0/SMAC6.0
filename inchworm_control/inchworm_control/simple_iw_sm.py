@@ -32,7 +32,7 @@ IW_identifier = 1 # this is the idenifier that goes infornt of the message to be
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
 # in X, Y, Z format to be consistent with Mo's code
-IW_PATH = [[1, 1, 0], [2, 1, 0], [2, 2, 0]] 
+IW_PATH = [[0, 0, 0], [1, 1, 0], [2, 1, 0], [2, 2, 0]] 
 
 # final_map = [
 #     [ # X = 0
