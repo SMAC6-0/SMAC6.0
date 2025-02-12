@@ -501,7 +501,7 @@ class Inchworm:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
-        IW_message_counter += 1
+        # IW_message_counter += 1
 
         # print("Block change", block_change)
 
@@ -534,7 +534,7 @@ class Inchworm:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
-        IW_message_counter += 1
+        # IW_message_counter += 1
 
         # print("Block change", block_change)
 
@@ -576,7 +576,7 @@ class Inchworm:
                 block_change += struct.pack('B', c)
 
             block_change += struct.pack('B', BLOCK_STATUS.iw_path.value) + struct.pack('B', IW_message_counter)
-            IW_message_counter += 1
+            # IW_message_counter += 1
 
             # print("Block change", block_change)
             # calculate message length and checksum
