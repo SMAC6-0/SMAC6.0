@@ -24,7 +24,7 @@ class UART_CODES(Enum):
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
     Placing = 2
-    iw_path = -1
+    iw_path = 4 
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
