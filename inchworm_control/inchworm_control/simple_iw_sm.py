@@ -24,6 +24,7 @@ class UART_CODES(Enum):
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
     Placing = 2
+    iw_path = -1
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
@@ -568,8 +569,11 @@ class Inchworm:
 
             # block_change is the data that needs to be sent
             block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
             for c in grid_cell:
                 block_change += struct.pack('B', c)
+
+            block_change += struct.pack('B', BLOCK_STATUS.iw_path.value) + struct.pack('B', IW_message_counter)
             
             msg_len = len(block_change).to_bytes(2,'little')
             checksum = self.crc16(block_change).to_bytes(2, 'little')
