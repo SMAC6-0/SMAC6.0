@@ -574,11 +574,12 @@ class Inchworm:
             msg_len = len(block_change).to_bytes(2,'little')
             checksum = self.crc16(block_change).to_bytes(2, 'little')
             
-            print("msg_len", msg_len)
-            print("checksum", checksum)
+            # print("msg_len", msg_len)
+            # print("checksum", checksum)
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
 
+            print(buffer)
             self.IW_SERIAL.write(buffer)
 
             # delay to make sure all the data is transmitted 
