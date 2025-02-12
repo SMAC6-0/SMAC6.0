@@ -546,6 +546,7 @@ class Inchworm:
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
+        print(buffer)
 
         self.IW_SERIAL.write(buffer)
 
@@ -587,11 +588,6 @@ class Inchworm:
         # TODO: handle transmission error
 
             
-
-
-
-
-
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def crc16(data: bytes, poly=0x8408):
