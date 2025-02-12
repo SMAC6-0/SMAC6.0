@@ -31,8 +31,8 @@ next_block_location = [2, 3, 2] # location of next block, need to change this wi
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
-IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
-
+# in X, Y, Z format to be consistent with Mo's code
+IW_PATH = [[4, 1, 0], [5, 1, 0], [6, 1, 0], [7, 1, 0], [7, 2, 0], [7, 3, 0], [7, 4, 0], [7, 5, 0], [7, 6, 0], [7, 7, 0], [7, 8, 1]] 
 # final_map = [
 #     [ # X = 0
 #         [0, 0, 0, 0, 0, 0, 0, 0], 
