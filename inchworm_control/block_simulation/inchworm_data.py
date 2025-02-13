@@ -51,10 +51,10 @@ class IW_STATE(Enum):
 PATH_PLANNING_TIMER = 3
 
 lagging_transform = {
-    InchwormOrientation.NORTH: lambda x, z, y: (x, z, y-1),  
-    InchwormOrientation.SOUTH: lambda x, z, y: (x, z, y+1),
-    InchwormOrientation.EAST: lambda x, z, y: (x-1, z, y), 
-    InchwormOrientation.WEST: lambda x, z, y: (x+1, z, y) 
+    InchwormOrientation.NORTH: lambda x, y, z: (x, y, z-1),  
+    InchwormOrientation.SOUTH: lambda x, y, z: (x, y, z+1),
+    InchwormOrientation.EAST: lambda x, y, z: (x-1, y, z), 
+    InchwormOrientation.WEST: lambda x, y, z: (x+1, y, z) 
 }
 
 class Inchworm:
@@ -114,7 +114,7 @@ class Inchworm:
         """
         Updates the inchworm's map based on received updates from the structure. 
         Args: 
-            cood:  [x, z, y] location
+            cood:  [x, y, z] location
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
         self.current_map = map_data.update_grid_status(self.current_map, coord)
@@ -193,17 +193,17 @@ class Inchworm:
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
         self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-        x, z, y = self.leading_foot_loc
+        x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
-        if ([x, z, y] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
+        if ([x, y, z] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
             self.holding_block = True
-        elif self.holding_block & ([x, z, y] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
+        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
             self.holding_block = False
         
-        if self.holding_block and [x, z, y] != self.goal:
+        if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
-        return x, z, y
+        return x, y, z
     
     def get_next_block(self) :
         """ Uses the blueprint algorithm to determine which block should be placed next. """
