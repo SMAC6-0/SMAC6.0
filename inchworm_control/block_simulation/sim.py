@@ -223,8 +223,6 @@ def generate_final_structure():
     blocks_placed.append((SEED_BK[0], SEED_BK[1], SEED_BK[2]))
     sim_data.generate_final_structure_map(blocks_placed)
     
-    # delete_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2])
-    # spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
 
 # def show_structures():
 #     """

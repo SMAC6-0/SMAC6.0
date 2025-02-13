@@ -126,7 +126,7 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print("goal not given... finding goal now")
-            # print("current_map: ", self.current_map)
+            print("current_map: ", self.current_map)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
