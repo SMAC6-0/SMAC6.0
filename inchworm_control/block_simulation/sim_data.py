@@ -79,7 +79,7 @@ class SimData:
         """
         Structure receives update & processes it
         """
-        x, z, y = inchworm.leading_foot_loc
+        x, y, z = inchworm.leading_foot_loc
         # if self.current_map[x][z][y] == map_data.GridStatus.INCOMING_BLOCK.value:
             
         #     pass

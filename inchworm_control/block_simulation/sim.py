@@ -105,11 +105,11 @@ def update():
 
         # TODO: consider moving block tracking to sim_data
         for inchworm in sim_data.existing_inchworms: 
-            x, z, y = inchworm.get_next_point() 
+            x, y, z = inchworm.get_next_point() 
         
             # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
             if spawned:
-                delete_cube(spawn_x, spawn_z, spawn_y)
+                delete_cube(spawn_x, spawn_y, spawn_z)
                 spawned = False
 
             # If there is a previously colored block, restore to original texture
@@ -119,7 +119,7 @@ def update():
             # This checks if there are existing block entities at the next point 
             already_placed_block = None
             for e in scene.entities:
-                if hasattr(e, 'position') and e.position == Vec3(x, z, y):
+                if hasattr(e, 'position') and e.position == Vec3(x, y, z):
                     already_placed_block = e
                     break
 
@@ -141,7 +141,7 @@ def update():
     
             else: # Walking with block in empty space
                 spawned = True
-                spawned_block = spawn_cube(x, z, y,'step')
+                spawned_block = spawn_cube(x, y, z,'step')
                 spawn_x, spawn_y, spawn_z = x, y, z
                 last_colored_block = spawned_block
                 last_block_original_texture = smart_block_texture
@@ -150,10 +150,10 @@ def update():
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, z2, y2 = sim_data.existing_inchworms[0].lagging_foot_loc
+        x2, y2, z2 = sim_data.existing_inchworms[0].lagging_foot_loc
         already_placed_block_2 = None
         for e in scene.entities:
-            if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
+            if hasattr(e, 'position') and e.position == Vec3(x2, y2, z2):
                 already_placed_block_2 = e
                 break
 
@@ -168,7 +168,7 @@ def update():
             already_placed_block_2.texture = new_texture2
             last_colored_block_2 = already_placed_block_2
         else:
-            spawned_block_2 = spawn_cube(x2, z2, y2,'step')
+            spawned_block_2 = spawn_cube(x2, y2, z2,'step')
             last_colored_block_2 = spawned_block_2
             last_block_original_texture_2 = smart_block_texture
         # print("leading foot loc ", sim_data.existing_inchworms[0].leading_foot_loc)
@@ -416,27 +416,27 @@ class FlyingFirstPersonController(FirstPersonController):
         if self.flying_enabled:
             # Change the psotion of the player here: 
             if held_keys['q']:  
-                self.position += Vec3(0, 0.1, 0)  
+                self.position += Vec3(0, 0, 0.1)  
             if held_keys['e']:  # Move down
-                self.position += Vec3(0, -0.1, 0)
+                self.position += Vec3(0, 0, -0.1)
             if held_keys['1']:  
-                self.position = Vec3(20, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 0))
+                self.position = Vec3(20, 0, 10)  
+                pitch_degrees, yaw_degrees = look_at((10, 10, 1), (20, 0, 10))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['2']:  
-                self.position = Vec3(20, 10, 20) 
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 20))
+                self.position = Vec3(20, 20, 10) 
+                pitch_degrees, yaw_degrees = look_at((10, 10, 1), (20, 20, 10))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['3']:  
-                self.position = Vec3(0,10, 20)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0,10, 20))
+                self.position = Vec3(0, 20, 10)  
+                pitch_degrees, yaw_degrees = look_at((10, 10, 1), (0, 20, 10))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['4']:  
-                self.position = Vec3(0, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0, 10, 0))
+                self.position = Vec3(0, 0, 10)  
+                pitch_degrees, yaw_degrees = look_at((10, 10, 1), (0, 0, 10))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
 
