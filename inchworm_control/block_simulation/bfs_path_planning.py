@@ -7,9 +7,9 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0) or not (1). 
-        start (tuple): A tuple containing the (x, z, y) coordinate of the starting cell in a path.
+        start (tuple): A tuple containing the (x, y, z) coordinate of the starting cell in a path.
                        The initial starting position can be configurable in config.py
-        goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
+        goal (tuple): A tuple containing the (x, y, z) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
         holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).
     Returns:
@@ -37,13 +37,13 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
             print(f"Path found: {path}")
             return path
         
-        for dx, dz, dy in neighbor_directions:
-            nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
-            neighbor_coord = nx, nz, ny
+        for dx, dy, dz in neighbor_directions:
+            nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
+            neighbor_coord = nx, ny, nz
             if (map_data.is_valid_position_3d(grid, (neighbor_coord))  
-                and (grid[nx][nz][ny] == map_data.GridStatus.WALKABLE.value or grid[nx][nz][ny] == map_data.GridStatus.INCOMING_BLOCK.value)  
-                and not visited[nx][nz][ny]):
-                visited[nx][nz][ny] = True
+                and (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)  
+                and not visited[nx][ny][nz]):
+                visited[nx][ny][nz] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
