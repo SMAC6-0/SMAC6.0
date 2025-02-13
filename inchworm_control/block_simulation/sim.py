@@ -150,8 +150,8 @@ def update():
         if IW_is_at_goal: # clear the path visually before 
             vis_IW_paths(inchworm, clear_path=True)
         inchworm.update_state()
-        sim_data.handle_new_IW_path(inchworm)
-        vis_IW_paths(inchworm)
+        if sim_data.new_IW_paths_received(inchworm):
+            vis_IW_paths(inchworm)
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
@@ -187,6 +187,7 @@ def update():
         # Begin the state machine !
         for inchworm in sim_data.existing_inchworms: 
             inchworm.update_state()
+            vis_IW_paths(inchworm)
 
 def show_structure_map(): 
     """Show how the structure views the map. """
@@ -205,28 +206,25 @@ def vis_IW_paths(inchworm, clear_path=False):
     for step in range(len(inchworm.paths)-1): 
         cell = inchworm.paths[step]
         delete_cube(cell[0], cell[1], cell[2])
-        if clear_path: 
-            # last_block_original_texture_2 = cell.texture
-            # new_texture2 = check_block_color(cell.position.x, cell.position.y, cell.position.z)
-            # cell.texture = new_texture2
-            # TODO: like in stepping, check for prev block color
+        if clear_path: # clear the old inchworm path 
             spawn_cube(cell[0], cell[1], cell[2], 'clear')
-            print("cleared path from sim")
-        else:
+        else: # show the inchworm path
             spawn_cube(cell[0], cell[1], cell[2], 'path')
 
 def generate_final_structure():
     """
-    Clear the map, visualizing where final structure must be. Spawns seed block. 
+    Clear the map, visualizing where final structure must be. 
     """
+    # the shallow copy lets loop go through every placed block without changing what blocks are in the final struct 
     blocks_placed = list(sim_data.blocks_placed) # makes a shallow copy of the list 
     for block in blocks_placed: 
-        delete_cube(block[0], block[1], block[2])
+        delete_cube(block[0], block[1], block[2]) # func deletes blocks from sim_data
         spawn_cube(block[0], block[1], block[2], 'misc')
+    blocks_placed.append((SEED_BK[0], SEED_BK[1], SEED_BK[2]))
     sim_data.generate_final_structure_map(blocks_placed)
     
-    delete_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2])
-    spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
+    # delete_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2])
+    # spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
 
 # def show_structures():
 #     """
@@ -388,15 +386,18 @@ def delete_cube(x, y, z):
                 sim_data.blocks_placed.remove(target_position)
             break
 
-# Increase the numbers for a bigger field. 
+# Generate the simulation floor. Increase the numbers for a bigger field. 
 if not SIMULATION:
     for z in range(5): 
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))
 else:
-     for z in range(21): # 5
+    for z in range(21): # 5
         for x in range(21): # 6 
             voxel = Voxel(position = (x, 0, z))
+    # spawn seed block & supply depot
+    spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
+    spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n')
 
 def look_at(target_pos, player_pos):
     if isinstance(target_pos, tuple):

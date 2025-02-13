@@ -126,7 +126,7 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print("goal not given... finding goal now")
-            print("current_map: ", self.current_map)
+            # print("current_map: ", self.current_map)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
@@ -137,8 +137,9 @@ class Inchworm:
         else:
             is_traveling = True
             self.goal = next_goal
-            print("Setting IW's goal to be incoming block")
-            self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
+            if self.goal != SEED_BK: 
+                print("Goal is not seed block. Setting IW's goal to be incoming block")
+                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
 
         
         print("finalized goal: ", self.goal)
@@ -352,10 +353,10 @@ class Inchworm:
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
     def handle_initilization(self):
-        print("MOVINGGG TO SEED BLOCK")
+        print("MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            print("If sim, press n to step to seed block ")
+            # print("If sim, press n to step to seed block ")
             if self.goal_progress_index >= len(self.paths): 
                 print("Touching the seed block")
                 self.initilization_flag = False 

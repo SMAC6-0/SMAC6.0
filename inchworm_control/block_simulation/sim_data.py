@@ -64,20 +64,22 @@ class SimData:
                 self.current_map == map_data.update_grid_status(self.current_map, [x, z, y])
 
                 # Send current_map to IW 
-                inchworm.current_map = self.current_map
+                inchworm.current_map = copy.deepcopy(self.current_map)
                 print("Struct should have sent its map to the IW")
                 return True
         # return self.current_map # TODO: maybe unnecessary
 
-    def handle_new_IW_path(self, inchworm): 
+    def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
         if inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths)
             x, z, y = inchworm.goal
             self.current_map[x][z][y] == map_data.update_grid_status(self.current_map, [x, z, y], map_data.GridStatus.INCOMING_BLOCK)
             print("struct's map updated w new IW path")
+            return True
         else: 
             print("struct did not receive new IW path")
+            return False
         # get path & new incoming block from iw - DIFFERENT FUNC 
         # update current map with incoming block and paths 
 
