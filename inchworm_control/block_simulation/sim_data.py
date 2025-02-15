@@ -31,13 +31,17 @@ class SimData:
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
+        self.cleared_path_flag = False
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
         block to be placed according to blueprint algorithm. """
         # Store final struct in 3D list 
         self.final_structure = map_data.update_grid_status(self.final_structure, SEED_BK)
+
+        blocks_placed.sort(key=lambda lowest: lowest[1]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
+            print("block coord: ", block)
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
             x, z, y = block
             print("block placed value: Below:  ", self.final_structure[x][z-1][y], " itself: ", self.final_structure[x][z][y], " above: ", self.final_structure[x][z+1][y])
@@ -73,16 +77,18 @@ class SimData:
                 # Send current_map to IW 
                 inchworm.current_map = copy.deepcopy(self.current_map)
                 print("Struct should have sent its map to the IW")
+                self.cleared_path_flag = True
                 return True
         # return self.current_map # TODO: maybe unnecessary
 
     def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
-        if inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
+        if self.cleared_path_flag:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths)
             x, z, y = inchworm.goal
             self.current_map[x][z][y] == map_data.update_grid_status(self.current_map, [x, z, y], map_data.GridStatus.INCOMING_BLOCK)
             print("struct's map updated w new IW path")
+            self.cleared_path_flag = False
             return True
         else: 
             print("struct did not receive new IW path")
