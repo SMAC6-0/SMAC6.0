@@ -142,19 +142,16 @@ class Inchworm:
         """ Plan path from current location to specified goal. """
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
-            print("goal not given... finding goal now")
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             # self.goal = [self.goal[0], self.goal[2], self.goal[1]]
-            print("goal found: ", self.goal)
             if self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
-            
             self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
         else:
             is_traveling = True
             self.goal = next_goal
         
-        print("finalized goal: ", self.goal)
+        print("goal: ", self.goal)
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -181,7 +178,7 @@ class Inchworm:
             self.paths += path
 
             # Update the inchworm's internal map with the step it will take 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.id, self.current_map, self.paths) # Update IW's map with the path
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
             step_getter(step_instructions)
         except RuntimeError as e:
