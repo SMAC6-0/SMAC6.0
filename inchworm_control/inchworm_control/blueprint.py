@@ -33,8 +33,8 @@ def blueprint(curr_map, final_map) -> list:
             return [-1,-1,-1]
         else: 
             # TODO: implement prioritization of found structures
-            print("map dims: ", curr_map.shape[0], curr_map.shape[1],curr_map.shape[2])
-            print(curr_map[4,0,4])
+            # print("map dims: ", curr_map.shape[0], curr_map.shape[1],curr_map.shape[2])
+            # print(curr_map[4,0,4])
             for y in range(curr_map.shape[0]): #iterate 0-7
                 for z in range(curr_map.shape[1]): #iterate 0-7
                    for x in range((curr_map.shape[2])): #iterate 0-7

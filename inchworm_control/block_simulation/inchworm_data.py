@@ -114,9 +114,6 @@ class Inchworm:
         if not SIMULATION: 
             # TODO @ SAKSHI & MO: UART COMMUNICATION
             pass
-    
-    def is_structure_complete(self):
-        print("Checking if structure is complete")
 
     def get_loc_in_path(self): 
         return tuple(map(float, self.goal))
@@ -126,10 +123,11 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print("goal not given... finding goal now")
-            print("current_map: ", self.current_map)
+            # print("current_map: ", self.current_map)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
-                raise ValueError(f"erm blueprint done in the wrong place")
+                print("erm blueprint done in the wrong place")
+                return
             elif self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
             
@@ -320,13 +318,14 @@ class Inchworm:
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
                     self.handle_at_supply()
-                else:
-                    self.handle_error()
+                # elif not on path, then handle error????
+                # else: # TODO: Commented out bc the IW has to step multiple times before its at the supply, it'd default to thinking it's in error
+                #     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
                 if self.is_IW_in_block():
                     self.handle_transported_block()
-                else:
-                    self.handle_error()
+                # else:
+                #     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
@@ -427,6 +426,15 @@ class Inchworm:
         print(f"Current inchworm state: {self.state}")
 
     def handle_transported_block(self):
+
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+        self.paths = [] # Reset current path 
+        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+
+        self.holding_block = False
+
+        print("Reset the path")
+
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
 
@@ -455,9 +463,7 @@ class Inchworm:
         print(f"Current inchworm state: {self.state}")
 
     def handle_structure_incomplete(self):
-        print("Structure is incomplete. Update IW's map with placed block")
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
-        self.paths = []
+        print("Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
 
@@ -473,6 +479,7 @@ class Inchworm:
             if self.leading_foot_loc == self.goal: 
                 x, z, y = self.leading_foot_loc
                 if self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value:
+                    print("IW got map snapshot")
                     return True
             return False
         else:             
@@ -515,10 +522,12 @@ class Inchworm:
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
         print("Checking if at supply location...")
         print("If in sim, press n to step")
-        if any(bd_loc == self.leading_foot_loc for bd_loc in BD_LOCS): 
-            return True 
-        else: 
-            return False
+        for bd_loc in BD_LOCS:
+            if [bd_loc[0], bd_loc[1]-1, bd_loc[2]] == self.leading_foot_loc: 
+                print("IW thinks it's at the supply depot")
+                return True 
+            else: 
+                return False
 
 
     def is_IW_in_block(self):
@@ -526,6 +535,7 @@ class Inchworm:
         print("Checking if at block location...")
 
         if self.leading_foot_loc == self.goal: 
+            print("IW thinks it's at the incoming block loc")
             return True 
         else: 
             return False
