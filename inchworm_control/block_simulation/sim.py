@@ -252,10 +252,10 @@ class Voxel(Button):
                 # only add blocks above field
                 if(voxel.position[1] > 0):
                     xoxel = int(voxel.position.x)
-                    yoxel = int(voxel.position.y)
-                    zoxel = int(voxel.position.z)
-                    sim_data.blocks_placed.append((xoxel, yoxel, zoxel))
-                    print("pos: ", (xoxel, yoxel, zoxel))
+                    zoxel = int(voxel.position.y)
+                    yoxel = int(voxel.position.z)
+                    sim_data.blocks_placed.append([xoxel, yoxel, zoxel])
+                    print("pos: ", [xoxel, yoxel, zoxel])
             if key == "right mouse down":
                 try: 
                     sim_data.blocks_placed.remove(self.position)

@@ -452,7 +452,7 @@ def buffer_iw_paths(grid, iw_id):
                     
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
-                        n_status = grid[nx][nz][ny]
+                        n_status = grid[nx][ny][nz]
                         if (is_valid_position_3d(grid, [nx, ny, nz])
                             and (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value)):
                             buffer_list.append((nx, ny, nz, cell_status))

@@ -18,8 +18,6 @@ from inchworm_data import Inchworm
 
 from inchworm_control.blueprint import blueprint 
 
-
-
 class SimData: 
     def __init__(self): 
         self.seed_block = [] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)

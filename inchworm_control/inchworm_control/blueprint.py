@@ -22,6 +22,7 @@ def blueprint(curr_map, final_map) -> list:
             for z in range(curr_map.shape[0]): #iterate 0-2 
                 for y in range(curr_map.shape[1]): #iterate 0-4
                    for x in range((curr_map.shape[2])): #iterate 0-5 
-                        if curr_map[z, x, y] == 1 and curr_map[z, x, y] != final_map[z, x, y]:
-                            return [z, y, x]
+                        if curr_map[x, z, y] == 1 and curr_map[x, z, y] != final_map[x, z, y]: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
+                            print(f"x: {x} y: {y} z: {z}")
+                            return [x, y, z]
     return [-9, -9, -9]
