@@ -220,7 +220,6 @@ def generate_final_structure():
     for block in blocks_placed: 
         delete_cube(block[0], block[1], block[2]) # func deletes blocks from sim_data
         spawn_cube(block[0], block[1], block[2], 'misc')
-    blocks_placed.append((SEED_BK[0], SEED_BK[1], SEED_BK[2]))
     sim_data.generate_final_structure_map(blocks_placed)
     
 

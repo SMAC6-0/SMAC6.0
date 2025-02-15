@@ -128,7 +128,9 @@ class Inchworm:
             print("goal not given... finding goal now")
             print("current_map: ", self.current_map)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            if self.goal == [-9, -9, -9]:
+            if self.goal == [-1, -1, -1]:
+                raise ValueError(f"erm blueprint done in the wrong place")
+            elif self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
             
             if [self.goal[0], self.goal[1]+1, self.goal[2]] != SEED_BK:
@@ -361,7 +363,6 @@ class Inchworm:
                 print("Touching the seed block")
                 self.initilization_flag = False 
                 x, z, y = SEED_BK
-                print("IW's evaluation of seed block. Below:  ", self.current_map[x][z-1][y], " itself: ", self.current_map[x][z][y], " above: ", self.current_map[x][z+1][y])
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 print("IW's evaluation of seed block. Below:  ", self.current_map[x][z-1][y], " itself: ", self.current_map[x][z][y], " above: ", self.current_map[x][z+1][y])
                 self.paths = [] # Reset current path 

@@ -36,14 +36,21 @@ class SimData:
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
         block to be placed according to blueprint algorithm. """
         # Store final struct in 3D list 
+        self.final_structure = map_data.update_grid_status(self.final_structure, SEED_BK)
         for block in blocks_placed: 
-            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]))
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
+            x, z, y = block
+            print("block placed value: Below:  ", self.final_structure[x][z-1][y], " itself: ", self.final_structure[x][z][y], " above: ", self.final_structure[x][z+1][y])
+
 
         print("sample final struct: ", self.final_structure)
-        # Find seed block and consider it placed. 
+        x, z, y = SEED_BK
+        # print("final struct's evaluation of seed block. Below:  ", self.final_structure[x][z-1][y], " itself: ", self.final_structure[x][z][y], " above: ", self.final_structure[x][z+1][y])
+       # Find seed block and consider it placed. 
         # self.seed_block = blueprint(self.current_map, self.final_structure)
         self.current_map = map_data.update_grid_status(self.current_map, SEED_BK)
-        x, z, y = SEED_BK
+        
+        print("struct's current map: ", self.current_map)
         print("struct's evaluation of seed block. Below:  ", self.current_map[x][z-1][y], " itself: ", self.current_map[x][z][y], " above: ", self.current_map[x][z+1][y])
     
     def send_map_to_IW(self, inchworm): 
