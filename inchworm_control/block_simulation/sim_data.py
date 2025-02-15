@@ -47,7 +47,7 @@ class SimData:
         Returns all of the next steps that all inchworms will be taking
         """
         for inchworm in self.existing_inchworms: 
-            return inchworm.get_next_point()
+            return inchworm.get_next_point() # x, z, y
         # TODO: return a list of all the next points of travel
     
     def generate_pyramid(self, base_size):

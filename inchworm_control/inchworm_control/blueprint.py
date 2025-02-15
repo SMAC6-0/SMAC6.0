@@ -19,10 +19,10 @@ def blueprint(curr_map, final_map) -> list:
             return [-1,-1,-1]
         else: 
             # TODO: implement prioritization of found structures
-            for z in range(curr_map.shape[0]): #iterate 0-2 
-                for y in range(curr_map.shape[1]): #iterate 0-4
+            for y in range(curr_map.shape[0]): #iterate 0-2 
+                for z in range(curr_map.shape[1]): #iterate 0-4
                    for x in range((curr_map.shape[2])): #iterate 0-5 
-                        if curr_map[x, z, y] == 1 and curr_map[x, z, y] != final_map[x, z, y]: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
-                            print(f"x: {x} y: {y} z: {z}")
-                            return [x, y, z]
+                        if curr_map[y, z, x] == 1 and curr_map[y, z, x] != final_map[y, z, x]: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
+                            print(f"x: {y} y: {x} z: {z}")
+                            return [y, x, z]
     return [-9, -9, -9]

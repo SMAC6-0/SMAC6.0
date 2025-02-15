@@ -193,14 +193,14 @@ class Inchworm:
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
-        if ([x, y, z] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
+        if ([x, y, z] == [BD_LOC1[0], BD_LOC1[1], BD_LOC1[2]-1]):
             self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
+        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
             self.holding_block = False
         
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
-        return x, y, z
+        return x, z, y # !!!change because interacting with sim.py!!!
     
     def get_next_block(self) :
         """ Uses the blueprint algorithm to determine which block should be placed next. """
