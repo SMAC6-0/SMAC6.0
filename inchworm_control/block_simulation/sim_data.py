@@ -41,22 +41,10 @@ class SimData:
 
         blocks_placed.sort(key=lambda lowest: lowest[1]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
-            # print("block coord: ", block)
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
-            x, z, y = block
-            # print("block placed value: Below:  ", self.final_structure[x][z-1][y], " itself: ", self.final_structure[x][z][y], " above: ", self.final_structure[x][z+1][y])
-
-
-        # print("sample final struct: ", self.final_structure)
-        x, z, y = SEED_BK
-        # print("final struct's evaluation of seed block. Below:  ", self.final_structure[x][z-1][y], " itself: ", self.final_structure[x][z][y], " above: ", self.final_structure[x][z+1][y])
-       # Find seed block and consider it placed. 
-        # self.seed_block = blueprint(self.current_map, self.final_structure)
+        # Find seed block and consider it placed. 
         self.current_map = map_data.update_grid_status(self.current_map, SEED_BK)
         
-        # print("struct's current map: ", self.current_map)
-        # print("struct's evaluation of seed block. Below:  ", self.current_map[x][z-1][y], " itself: ", self.current_map[x][z][y], " above: ", self.current_map[x][z+1][y])
-    
     def send_map_to_IW(self, inchworm): 
         """
         If the IW is at its goal, structure removes the IW path from its map and sends the IW a map snapshot

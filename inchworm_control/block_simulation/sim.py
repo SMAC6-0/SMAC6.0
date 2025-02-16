@@ -129,7 +129,6 @@ def update():
                 if already_placed_block: # When you aren't simulating walking with cube 
 
                     last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
-                    # TODO: modify path planning so that not every inchworm goes to every block (just do every other or split)
 
                     # Checks for visuals at goal location
                     if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == inchworm.get_loc_in_path():
@@ -325,7 +324,7 @@ def check_block_color(x, y, z):
             smart_block_texture_step_yellow: smart_block_texture_step_yellow, 
             # Textures indicating block/steps --> it's there: 
             smart_block_outline: smart_block_texture, 
-            incoming_block_texture: smart_block_texture_step_red, 
+            incoming_block_texture: smart_block_texture, 
             incoming_step_texture: smart_block_texture_step_red, # step over the incoming path 
             seed_block_texture: seed_block_texture
         }
@@ -342,7 +341,7 @@ def stop_simulation():
     application.quit()
 
 # spawns a cude in the simulation at the specified position and with the specified color
-def spawn_cube(x, y, z, color_index):
+def spawn_cube(x, y, z, color_index=''):
     """
     Spawns a cube in the simulation at the specified xyz position and with the specified color. 
     Not always a smart block, but rather any sim update happening in a cube. 
