@@ -17,7 +17,7 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     """
     print(f"BFS called with start: {start}, goal: {goal}")
     
-    neighbor_directions = map_data.set_neighbors()
+    neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     
     if map_data.is_valid_start_goal_3d(grid, start, goal):
         goal_cell, visited, queue = map_data.start_search_3d(grid, start, goal)

@@ -140,7 +140,9 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
     diagonal_alls_neighbors = [(1, 1, 1), (1, 1, -1), (-1, 1, 1), (-1, 1, -1),
                                (1, -1, 1), (1, -1, -1), (-1, -1, 1), (-1, -1, -1)]
     large_build_neighbors = [(1, 0, 2), (1, 0, -2), (-1, 0, 2), (-1, 0, -2),
-                             (0, -1, 2), (0, -1, -2), (0, 1, -2), (0, 1, 2)]
+                             (0, -1, 2), (0, -1, -2), (0, 1, -2), (0, 1, 2),
+                             (1, 0, 3), (1, 0, -3), (-1, 0, 3), (-1, 0, -3),
+                             (0, -1, 3), (0, -1, -3), (0, 1, -3), (0, 1, 3)]
     
     # combined neighbor_directions based on conditions
     neighbor_directions = base_neighbors
@@ -281,13 +283,14 @@ def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
+    
     path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
     if path_coords == []:
         RuntimeError(f"Cannot find helper blocks for path.")
     else:
         return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
+def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block, iw_id):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -302,12 +305,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
+    c_space_grid = buffer_iw_paths(grid, iw_id)
+    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords = determine_helper_blocks(grid, path_start, path_end)
+        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end)
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
@@ -447,7 +451,7 @@ def buffer_iw_paths(grid, iw_id):
             for z in range(GRID_SIZE):
                 cell_status = grid[x][y][z]
                 
-                if (cell_status != iw_id * GridStatus.INCHWORM_PATH.value and cell_status < 0): # is some inchworm path, but not its own
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0): # is some inchworm path, but not its own
                     neighbor_directions = set_neighbors()
                     
                     for dx, dy, dz in neighbor_directions:

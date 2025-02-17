@@ -156,14 +156,14 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 print(f"traveling in progress")
-                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 print(f"block grabbing in progress")
-                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
                 
                 print(f"block placing in progress")
-                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block)
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block, self.id)
                 self.holding_block = False
                 goal_path.pop(0) # Remove repeat coord
                 
