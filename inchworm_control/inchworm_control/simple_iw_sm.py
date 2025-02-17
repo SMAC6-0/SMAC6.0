@@ -23,6 +23,7 @@ class UART_CODES(Enum):
 
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
+    Block = 1
     Placing = 2
     iw_path = 4 
 
@@ -500,7 +501,7 @@ class Inchworm:
         for c in next_block_location:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', BLOCK_STATUS.Block.value) + struct.pack('B', IW_message_counter)
         # IW_message_counter += 1
 
         # print("Block change", block_change)
@@ -530,10 +531,11 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
+        # TODO: no need to resend the next_block_location
         for c in next_block_location:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', BLOCK_STATUS.Block.value) + struct.pack('B', IW_message_counter)
         # IW_message_counter += 1
 
         # print("Block change", block_change)
