@@ -276,6 +276,10 @@ class Inchworm:
         print("Indicated block is in placing status!!")
         # TODO: handle transmission error
 
+    def received_block_confirmation(self): 
+        print("We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
+        pass
+
 
     # Checksum protocol for the IW and Block communication
     @staticmethod
@@ -322,14 +326,9 @@ class Inchworm:
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
                     self.handle_at_supply()
-                # elif not on path, then handle error????
-                # else: # TODO: Commented out bc the IW has to step multiple times before its at the supply, it'd default to thinking it's in error
-                #     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
                 if self.is_IW_in_block():
                     self.handle_transported_block()
-                # else:
-                #     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
@@ -409,15 +408,16 @@ class Inchworm:
         if not SIMULATION: 
             print("IW flashes block with it's location")
             self.send_block_location()
-
             # pause so that the block has enough time to process the info
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
 
-
-            print("IW sends a messgae indicating block is being placed")
-            # IW sends a messgae indicating block is being placed
-            # MOOOOO HELPPPP
-            self.send_block_being_placed()
+            if self.received_block_confirmation():
+                print("IW sends a messgae indicating block is being placed")
+                # IW sends a messgae indicating block is being placed
+                # MOOOOO HELPPPP
+                self.send_block_being_placed()
+            else: 
+                self.handle_error()
 
 
         print("Travelling to the block location")
@@ -431,8 +431,6 @@ class Inchworm:
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
-        x, y, z =self.goal
-        print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
         self.holding_block = False
 
         print("Reset the path")
