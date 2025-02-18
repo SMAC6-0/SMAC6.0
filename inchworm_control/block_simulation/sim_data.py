@@ -37,7 +37,7 @@ class SimData:
         # Store final struct in 3D list. Update Final Map with all other blocks. (Supply depot & seed bk already marked)
         blocks_placed.sort(key=lambda lowest: lowest[2]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
-            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]))
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
     
     def send_map_to_IW(self, inchworm): 
         """

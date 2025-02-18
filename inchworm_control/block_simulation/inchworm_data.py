@@ -123,7 +123,8 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print("goal not given... finding goal now")
-            # print("current_map: ", self.current_map)
+            print("(PP) current_map: ", self.current_map)
+            print("(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print("erm blueprint done in the wrong place")
@@ -143,6 +144,9 @@ class Inchworm:
 
         
         print("goal: ", self.goal)
+        x, y, z =self.goal
+        print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
+
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -357,13 +361,10 @@ class Inchworm:
         print("MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            # print("If sim, press n to step to seed block ")
             if self.goal_progress_index >= len(self.paths): 
                 print("Touching the seed block")
                 self.initilization_flag = False 
-                x, y, z = SEED_BK
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
-                print("IW's evaluation of seed block. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
@@ -430,7 +431,8 @@ class Inchworm:
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
-
+        x, y, z =self.goal
+        print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
         self.holding_block = False
 
         print("Reset the path")
