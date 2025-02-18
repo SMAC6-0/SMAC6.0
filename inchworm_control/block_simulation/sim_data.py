@@ -106,12 +106,12 @@ class SimData:
         """
         pyramid = []
         # Each layer
-        for y in range(base_size):
+        for z in range(base_size):
             # Each row
-            for x in range(base_size - y):
+            for x in range(base_size - z):
                 # Each column
-                for z in range(base_size - y):
-                    pyramid.append((x+10, y+1, z+10))
+                for y in range(base_size - z):
+                    pyramid.append((x+10, y+10, z+1))
         return pyramid
     
     def generate_building(self): 
@@ -173,7 +173,7 @@ def read_and_place_voxels_from_file(file_path):
             # Assuming `spawn_cube` is a function to call for placing the cube, which you might or might not need
             # spawn_cube(x, y, z, '')  # Uncomment and use if needed
             # cube = Voxel(position=Vec3(x, y, z), texture=smart_block_texture)
-            coordinates_from_file.append(((x/10)-60, z/10,(y/10)+20))
+            coordinates_from_file.append(((x/10)-60,(y/10)+20, z/10))
             # blocks_placed.append(coordinates_from_file)
 
     return coordinates_from_file

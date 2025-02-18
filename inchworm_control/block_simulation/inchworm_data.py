@@ -123,8 +123,8 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print("goal not given... finding goal now")
-            print("(PP) current_map: ", self.current_map)
-            print("(PP) final_map: ", self.final_structure)
+            # print("(PP) current_map: ", self.current_map)
+            # print("(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print("erm blueprint done in the wrong place")
@@ -143,9 +143,9 @@ class Inchworm:
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
 
         
-        print("goal: ", self.goal)
-        x, y, z =self.goal
-        print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
+        # print("goal: ", self.goal)
+        # x, y, z =self.goal
+        # print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
 
         try: 
             step_instructions, steps, path = [], [], []
@@ -195,7 +195,7 @@ class Inchworm:
         
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
-        return x, z, y # !!!change because interacting with sim.py!!!
+        return x, y, z # !!!change because interacting with sim.py!!!
     
     def get_total_inchworms(cls):
         """
