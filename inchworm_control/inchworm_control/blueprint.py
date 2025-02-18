@@ -38,8 +38,8 @@ def blueprint(curr_map, final_map) -> list:
             for y in range(curr_map.shape[0]): #iterate 0-7
                 for z in range(curr_map.shape[1]): #iterate 0-7
                    for x in range((curr_map.shape[2])): #iterate 0-7
-                        if curr_map[y, z, x] == 1 and curr_map[y, z, x] != final_map[y, z, x]:
-                            return [y, z, x] # eventually, should return as x, y, z
+                        if curr_map[y, z, x] == 1 and curr_map[y, z, x] != final_map[y, z, x]: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
+                            return [y, x, z] # should return as x, y, z
     return [-9, -9, -9]
 
 print(blueprint(sample_map, sample_final))

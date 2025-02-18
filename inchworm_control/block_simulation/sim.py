@@ -90,7 +90,7 @@ def update():
 
     # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n') # consider changing accessing the supply depot to be through sim_data.py
+        spawn_cube(BD_LOCS[0][0], BD_LOCS[0][2], BD_LOCS[0][1], 'n') # consider changing accessing the supply depot to be through sim_data.py
         for inchworm in sim_data.existing_inchworms:
             inchworm.plan_path()
             vis_IW_paths(inchworm)
@@ -158,7 +158,7 @@ def update():
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, z2, y2 = sim_data.existing_inchworms[0].lagging_foot_loc
+        x2, y2, z2 = sim_data.existing_inchworms[0].lagging_foot_loc
         already_placed_block_2 = None
         for e in scene.entities:
             if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
@@ -200,17 +200,17 @@ def vis_IW_paths(inchworm, clear_path=False):
     if inchworm.goal != SEED_BK: 
         print("goal is not the seed block")
         cell = inchworm.goal
-        delete_cube(cell[0], cell[1], cell[2])
-        spawn_cube(cell[0], cell[1], cell[2], 'incoming')
+        delete_cube(cell[0], cell[2], cell[1])
+        spawn_cube(cell[0], cell[2], cell[1], 'incoming')
 
     # Then show the path the inchworm is going to take
     for step in range(len(inchworm.paths)-1): 
         cell = inchworm.paths[step]
-        delete_cube(cell[0], cell[1], cell[2])
+        delete_cube(cell[0], cell[2], cell[1])
         if clear_path: # clear the old inchworm path 
-            spawn_cube(cell[0], cell[1], cell[2], 'clear')
+            spawn_cube(cell[0], cell[2], cell[1], 'clear')
         else: # show the inchworm path
-            spawn_cube(cell[0], cell[1], cell[2], 'path')
+            spawn_cube(cell[0], cell[2], cell[1], 'path')
 
 def generate_final_structure():
     """
@@ -219,10 +219,9 @@ def generate_final_structure():
     # the shallow copy lets loop go through every placed block without changing what blocks are in the final struct 
     blocks_placed = list(sim_data.blocks_placed) # makes a shallow copy of the list 
     for block in blocks_placed: 
-        delete_cube(block[0], block[1], block[2]) # func deletes blocks from sim_data
-        spawn_cube(block[0], block[1], block[2], 'misc')
+        delete_cube(block[0], block[2], block[1]) # func deletes blocks from sim_data
+        spawn_cube(block[0], block[2], block[1], 'misc')
     sim_data.generate_final_structure_map(blocks_placed)
-    
 
 # def show_structures():
 #     """
@@ -266,8 +265,8 @@ class Voxel(Button):
                 # only add blocks above field
                 if(voxel.position[1] > 0):
                     xoxel = int(voxel.position.x)
-                    yoxel = int(voxel.position.y)
-                    zoxel = int(voxel.position.z)
+                    yoxel = int(voxel.position.z)
+                    zoxel = int(voxel.position.y)
                     sim_data.blocks_placed.append((xoxel, yoxel, zoxel))
                     print("pos: ", (xoxel, yoxel, zoxel))
             if key == "right mouse down":
@@ -439,23 +438,22 @@ class FlyingFirstPersonController(FirstPersonController):
                 self.position += Vec3(0, -0.1, 0)
             if held_keys['1']:  
                 self.position = Vec3(20, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 0))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (20, 10, 0))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['2']:  
                 self.position = Vec3(20, 10, 20) 
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 20))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (20, 10, 20))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['3']:  
                 self.position = Vec3(0,10, 20)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0,10, 20))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (0,10, 20))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['4']:  
                 self.position = Vec3(0, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0, 10, 0))
-                player.rotation_y = yaw_degrees
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (0, 10, 0))
                 player.camera_pivot.rotation_x = pitch_degrees
 
 

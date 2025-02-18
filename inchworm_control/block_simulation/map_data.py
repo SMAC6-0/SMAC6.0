@@ -12,21 +12,21 @@ class GridStatus(Enum):
     SUPPLY_DEPOT = 3
 
 class Cell:
-    def __init__(self, x: int, z: int, y: int, is_obs: bool = False, g = 0, h = 0): 
+    def __init__(self, x: int, y: int, z: int, is_obs: bool = False, g = 0, h = 0): 
         """
         Initialize the Cell class. It represents a single cell (location) within the map or grid, and is used for path planning purposes. 
         
         Args:
             x (int): x location of the cell.
-            z (int): z location of the cell.
             y (int): y location of the cell.
+            z (int): z location of the cell.
             is_obs (bool): True if this cell is occupied, not walkable. False if walkable. 
             g (int): The cost to reach this cell. 
             h (int): Evaluated additional heuristic cost to reach this cell. 
         """
         self.x = x
-        self.z = z
         self.y = y
+        self.z = z
         self.is_obs = is_obs
         self.g = g
         self.h = h 
@@ -57,7 +57,7 @@ def initialize_grid():
     # Make the bottom layer (z = 0) WALKABLE
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
-            grid[x][0][y] = GridStatus.WALKABLE.value
+            grid[x][y][0] = GridStatus.WALKABLE.value
     
     grid = mark_depot_and_seed(grid)
     return grid
@@ -72,10 +72,10 @@ def mark_depot_and_seed(grid):
         grid [list]: A 3D list of the workspace with the supply depot.
     """
     for i in range(len(BD_LOCS)):
-        x, z, y = BD_LOCS[i]
+        x, y, z = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
-            grid[x][z - 1][y] = GridStatus.SUPPLY_DEPOT.value
-            grid[x][z][y] = GridStatus.WALKABLE.value
+            grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value
+            grid[x][y][z] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
         
@@ -92,22 +92,22 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        coord (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+        coord (tuple): A tuple containing the (x, y, z) coordinates of the structure's 
                            position in the grid. This is a single block. 
         status (GridStatus): The GridStatus needed for coord.
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
     # for structure in structures:        
-    x, z, y = coord
+    x, y, z = coord
 
     if is_valid_position_3d(grid, coord):
-        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
+        grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
         if z - 1 >= 0:
-            grid[x][z-1][y] = status.value #cell below
+            grid[x][y][z-1] = status.value #cell below
     return grid
 
-def set_inchworm_path_to_grid(grid, inchworm_path):
+def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
     """
     Sets the inchworm path on the grid.
 
@@ -119,8 +119,8 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
     for step in range(len(inchworm_path)-1): 
-        x, z, y = inchworm_path[step]
-        grid[x][z][y] = GridStatus.INCHWORM_PATH.value
+        x, y, z = inchworm_path[step]
+        grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH.value
     return grid
 
 def rm_inchworm_path_from_grid(grid, inchworm_path):
@@ -153,15 +153,17 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
     Returns:
         neighbor_directions (list(tuple)): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
     """ 
-    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
-    vertical_neighbors = [(0, 1, 0), (0, -1, 0)]
-    diagonal_vert_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0),
+    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
+    vertical_neighbors = [(0, 0, 1), (0, 0, -1)]
+    diagonal_vert_neighbors = [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1),
                                (0, 1, 1), (0, 1, -1), (0, -1, 1), (0, -1, -1)]
-    diagonal_horz_neighbors = [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1)]
-    diagonal_alls_neighbors = [(1, 1, 1), (1, -1, 1), (-1, 1, 1), (-1, -1, 1),
-                               (1, 1, -1), (1, -1, -1), (-1, 1, -1), (-1, -1, -1)]
-    large_build_neighbors = [(1, 2, 0), (1, -2, 0), (-1, 2, 0), (-1, -2, 0),
-                             (0, 2, -1), (0, -2, -1), (0, -2, 1), (0, 2, 1)]
+    diagonal_horz_neighbors = [(1, 1, 0), (1, -1, 0), (-1, 1, 0), (-1, -1, 0)]
+    diagonal_alls_neighbors = [(1, 1, 1), (1, 1, -1), (-1, 1, 1), (-1, 1, -1),
+                               (1, -1, 1), (1, -1, -1), (-1, -1, 1), (-1, -1, -1)]
+    large_build_neighbors = [(1, 0, 2), (1, 0, -2), (-1, 0, 2), (-1, 0, -2),
+                             (0, -1, 2), (0, -1, -2), (0, 1, -2), (0, 1, 2),
+                             (1, 0, 3), (1, 0, -3), (-1, 0, 3), (-1, 0, -3),
+                             (0, -1, 3), (0, -1, -3), (0, 1, -3), (0, 1, 3)]
     
     # combined neighbor_directions based on conditions
     neighbor_directions = base_neighbors
@@ -192,12 +194,12 @@ def reverse_path_3d(curr_cell, holding_block) -> list[int]:
     path = []
     prev_holding_block = holding_block
     while curr_cell:
-        if [curr_cell.x, curr_cell.z, curr_cell.y] == BD_LOCS[0]:
+        if [curr_cell.x, curr_cell.y, curr_cell.z] == BD_LOCS[0]:
             curr_cell.z -= 1
             holding_block = True
         else:
             holding_block = prev_holding_block
-        path.append([curr_cell.x, curr_cell.z, curr_cell.y])
+        path.append([curr_cell.x, curr_cell.y, curr_cell.z])
         curr_cell = curr_cell.parent
     return path[::-1]
 
@@ -209,15 +211,15 @@ def create_cell(grid, coords):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        coords (tuple): A coordinate within a grid (x, z, y).
+        coords (tuple): A coordinate within a grid (x, y, z).
     Returns:
         cell (Cell): The corresponding Cell of the given coordinate.
     """
-    x, z, y = coords[0], coords[1], coords[2]
-    if is_valid_position_3d(grid, [x, z, y]):
-        new_cell = Cell(x, z, y)
+    x, y, z = coords[0], coords[1], coords[2]
+    if is_valid_position_3d(grid, [x, y, z]):
+        new_cell = Cell(x, y, z)
         
-        if grid[x][z][y] == GridStatus.WALKABLE.value:  
+        if grid[x][y][z] == GridStatus.WALKABLE.value:  
             new_cell.is_obs = False
         else:
             new_cell.is_obs = True
@@ -232,12 +234,12 @@ def is_valid_position_3d(grid, coords):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        coords (tuple): A tuple containing the (x, z, y) coordinates of a position. 
+        coords (tuple): A tuple containing the (x, y, z) coordinates of a position. 
     Returns:
         (boolean): A boolean confirming or denying a coordinate. 
     """ 
-    x, z, y = coords[0], coords[1], coords[2]
-    if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
+    x, y, z = coords[0], coords[1], coords[2]
+    if 0 <= x < len(grid) and 0 <= y < len(grid[0]) and 0 <= z < len(grid[0][0]):
         return True
     return False
 
@@ -302,13 +304,14 @@ def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
+    
     path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
     if path_coords == []:
         RuntimeError(f"Cannot find helper blocks for path.")
     else:
         return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
+def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block, iw_id):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -323,12 +326,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
+    c_space_grid = buffer_iw_paths(grid, iw_id)
+    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords = determine_helper_blocks(grid, path_start, path_end)
+        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end)
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
@@ -357,8 +361,8 @@ def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tup
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        current_coord (tuple): The current position (x, z, y).
-        next_coord (tuple): The next position (x, z, y).
+        current_coord (tuple): The current position (x, y, z).
+        next_coord (tuple): The next position (x, y, z).
         orientation (InchwormOrientation): The current orientation.
         holding_block (boolean): Whether the inchworm is holding a block.
         end_flag (boolean): Indicates the end of path.
@@ -387,10 +391,10 @@ def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tup
     normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
     
     orientation_transforms = {
-        InchwormOrientation.NORTH: lambda x, z, y: (x, z, y),  
-        InchwormOrientation.SOUTH: lambda x, z, y: (-x, z, -y),
-        InchwormOrientation.EAST: lambda x, z, y: (-y, z, x),  
-        InchwormOrientation.WEST: lambda x, z, y: (y, z, -x),  
+        InchwormOrientation.NORTH: lambda x, y, z: (x, y, z),  
+        InchwormOrientation.SOUTH: lambda x, y, z: (-x, -y, z),
+        InchwormOrientation.EAST: lambda x, y, z: (-y, x, z),  
+        InchwormOrientation.WEST: lambda x, y, z: (y, -x, z),  
     }
     
     transform = orientation_transforms[orientation]
@@ -402,18 +406,18 @@ def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tup
         # Horizontal movements
         ( 1,  0,  0): ("RIGHT"),
         (-1,  0,  0): ("LEFT"),
-        ( 0,  0,  1): ("FORWARD"),
-        ( 0,  0, -1): ("BACK"),
-        ( 0,  1,  0): ("UP"),
-        ( 0, -1,  0): ("DOWN"),
+        ( 0,  1,  0): ("FORWARD"),
+        ( 0, -1,  0): ("BACK"),
+        ( 0,  0,  1): ("UP"),
+        ( 0,  0, -1): ("DOWN"),
         # Vertically diagonal movements
-        ( 1,  1,  0): ("UP_RIGHT"),
-        (-1,  1,  0): ("UP_LEFT"),
+        ( 1,  0,  1): ("UP_RIGHT"),
+        (-1,  0,  1): ("UP_LEFT"),
         ( 0,  1,  1): ("UP_FORWARD"),
-        ( 0,  1, -1): ("UP_BACK"),
-        ( 1, -1,  0): ("DOWN_RIGHT"),
-        (-1, -1,  0): ("DOWN_LEFT"),
-        ( 0, -1,  1): ("DOWN_FORWARD"),
+        ( 0, -1,  1): ("UP_BACK"),
+        ( 1,  0, -1): ("DOWN_RIGHT"),
+        (-1,  0, -1): ("DOWN_LEFT"),
+        ( 0,  1, -1): ("DOWN_FORWARD"),
         ( 0, -1, -1): ("DOWN_BACK")
     }
 
@@ -456,3 +460,29 @@ def get_orientation(movement: str, orientation: InchwormOrientation):
     else:
         return orientation    
     
+def buffer_iw_paths(grid, iw_id):
+    # if on the map there is another iw path, have its neighbors also turn into iw_path
+    
+    # check all of grid for inchworm paths
+    buffer_list = [] # list of coords that need to be updated for buffering
+
+    # Make the bottom layer (z = 0) WALKABLE
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+            for z in range(GRID_SIZE):
+                cell_status = grid[x][y][z]
+                
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0): # is some inchworm path, but not its own
+                    neighbor_directions = set_neighbors()
+                    
+                    for dx, dy, dz in neighbor_directions:
+                        nx, ny, nz = x + dx, y + dy, z + dz
+                        n_status = grid[nx][ny][nz]
+                        if (is_valid_position_3d(grid, [nx, ny, nz])
+                            and (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value)):
+                            buffer_list.append((nx, ny, nz, cell_status))
+    
+    for nx, ny, nz, new_status in buffer_list:
+        grid[nx][ny][nz] = new_status
+    
+    return grid

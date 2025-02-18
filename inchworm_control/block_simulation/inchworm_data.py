@@ -15,7 +15,7 @@ UART_BAUD = 9600 # config
 # GPIO 15, pin 8 = RX green wire 
 # GPIO 14, pin 10 = TX yellow wire
 # ground = Pin 14
-# test
+# test 
 
 class UART_CODES(Enum):
     StartByte=0xAA 
@@ -51,10 +51,10 @@ class IW_STATE(Enum):
 PATH_PLANNING_TIMER = 3
 
 lagging_transform = {
-    InchwormOrientation.NORTH: lambda x, z, y: (x, z, y-1),  
-    InchwormOrientation.SOUTH: lambda x, z, y: (x, z, y+1),
-    InchwormOrientation.EAST: lambda x, z, y: (x-1, z, y), 
-    InchwormOrientation.WEST: lambda x, z, y: (x+1, z, y) 
+    InchwormOrientation.NORTH: lambda x, y, z: (x, y, z-1),  
+    InchwormOrientation.SOUTH: lambda x, y, z: (x, y, z+1),
+    InchwormOrientation.EAST: lambda x, y, z: (x-1, y, z), 
+    InchwormOrientation.WEST: lambda x, y, z: (x+1, y, z) 
 }
 
 class Inchworm:
@@ -131,7 +131,7 @@ class Inchworm:
             elif self.goal == [-9, -9, -9]:
                 raise ValueError(f"Erm... No goal was given... No structure was found...")
             
-            if [self.goal[0], self.goal[1]+1, self.goal[2]] != SEED_BK:
+            if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                 print("Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
         else:
@@ -142,7 +142,7 @@ class Inchworm:
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
 
         
-        print("finalized goal: ", self.goal)
+        print("goal: ", self.goal)
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -169,7 +169,7 @@ class Inchworm:
             self.paths += path
 
             # Update the inchworm's internal map with the step it will take 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths) # Update IW's map with the path
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
             step_getter(step_instructions)
         except RuntimeError as e:
@@ -181,17 +181,17 @@ class Inchworm:
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
         self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-        x, z, y = self.leading_foot_loc
+        x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
-        if ([x, z, y] == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]):
+        if ([x, y, z] == [BD_LOC1[0], BD_LOC1[1], BD_LOC1[2]-1]):
             self.holding_block = True
-        elif self.holding_block & ([x, z, y] == [self.goal[0], self.goal[1]-1, self.goal[2]]):
+        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
             self.holding_block = False
         
-        if self.holding_block and [x, z, y] != self.goal:
+        if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
-        return x, z, y
+        return x, z, y # !!!change because interacting with sim.py!!!
     
     def get_total_inchworms(cls):
         """

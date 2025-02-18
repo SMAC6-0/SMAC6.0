@@ -18,8 +18,6 @@ from inchworm_data import Inchworm
 
 from inchworm_control.blueprint import blueprint 
 
-
-
 class SimData: 
     def __init__(self): 
         self.seed_block = [] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
@@ -95,7 +93,7 @@ class SimData:
         Returns all of the next steps that all inchworms will be taking
         """
         for inchworm in self.existing_inchworms: 
-            return inchworm.get_next_point()
+            return inchworm.get_next_point() # x, z, y
         # TODO: return a list of all the next points of travel
     
     def generate_pyramid(self, base_size):
@@ -120,7 +118,6 @@ class SimData:
         simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)
         coordinates = read_and_place_voxels_from_file("inchworm_control/block_simulation/Assets/Structures/empire2.xyz")
         return coordinates
-
 
 def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):
     """
