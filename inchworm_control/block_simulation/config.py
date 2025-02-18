@@ -7,6 +7,7 @@ GRID_SIZE = 50  # Define the size of your grid in one direction
                 # where every cell is 0, representing that all those cells are walkable 
 BD_LOC1 = [4, 1, 4] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, z, y).
 CURRENT_LOC = [4, 0, 1] # Starting location of the inchworm robot, where the coordinates are represented as (x, z, y).
+SEED_BK = [6, 1, 6]
 BD_LOCS = [BD_LOC1] # The locations of all block depots (if there are multiple)
 # if the simulation is for the demo, set this to True
 SIMULATION = True

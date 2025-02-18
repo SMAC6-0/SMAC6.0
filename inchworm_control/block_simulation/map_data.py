@@ -59,13 +59,12 @@ def initialize_grid():
         for y in range(GRID_SIZE):
             grid[x][0][y] = GridStatus.WALKABLE.value
     
-    grid = mark_block_depot(grid)
-    
+    grid = mark_depot_and_seed(grid)
     return grid
 
-def mark_block_depot(grid):
+def mark_depot_and_seed(grid):
     """
-    Initalize all block depots in grid. This is configured in config.py
+    Initalize all block depots and the seed block in grid. This is configured in config.py
     
     Args:
         grid [list]: A 3D list of the workspace
@@ -79,9 +78,13 @@ def mark_block_depot(grid):
             grid[x][z][y] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
+        
+    x, z, y = SEED_BK
+    grid[x][z - 1][y] = GridStatus.NOT_WALKABLE.value
+    grid[x][z][y] = GridStatus.WALKABLE.value
     return grid
     
-def update_grid_with_structure(grid, structure):
+def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
     """
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 
@@ -89,41 +92,20 @@ def update_grid_with_structure(grid, structure):
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
                      incoming_block (2), & supply_depot (3). 
-        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
+        coord (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
                            position in the grid. This is a single block. 
+        status (GridStatus): The GridStatus needed for coord.
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
     # for structure in structures:        
-    x, z, y = structure
+    x, z, y = coord
 
-    if is_valid_position_3d(grid, structure):
+    if is_valid_position_3d(grid, coord):
         grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
         if z - 1 >= 0:
-            grid[x][z-1][y] = GridStatus.NOT_WALKABLE.value #cell below
-    return grid 
-
-def update_grid_with_incoming(grid, structure):
-    """
-    Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
-
-    Args:
-        grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
-        structure (tuple): A tuple containing the (x, z, y) coordinates of the structure's 
-                           position in the grid. This is a single block. 
-    Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot. 
-    """ 
-    # for structure in structures:        
-    x, z, y = structure
-
-    if is_valid_position_3d(grid, structure):
-        grid[x][z][y] = GridStatus.WALKABLE.value #curr cell
-        if z - 1 >= 0:
-            grid[x][z-1][y] = GridStatus.INCOMING_BLOCK.value #cell below
-    return grid 
+            grid[x][z-1][y] = status.value #cell below
+    return grid
 
 def set_inchworm_path_to_grid(grid, inchworm_path):
     """
@@ -136,10 +118,26 @@ def set_inchworm_path_to_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    print("set the path to grid")
     for step in range(len(inchworm_path)-1): 
-        x, z, y = inchworm_path[step][0] # 1st index gets step, 2nd index gets coord and not holding_block
+        x, z, y = inchworm_path[step]
         grid[x][z][y] = GridStatus.INCHWORM_PATH.value
+    return grid
+
+def rm_inchworm_path_from_grid(grid, inchworm_path):
+    """
+    Remove the inchworm path from the grid.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
+                     incoming_block (2), & supply_depot (3). 
+    Returns:
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """ 
+    inchworm_path.pop(-1)
+    for step in range(len(inchworm_path)-1): 
+        x, z, y = inchworm_path[step]
+        grid[x][z][y] = GridStatus.WALKABLE.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
@@ -181,19 +179,17 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
         
     return neighbor_directions
 
-def reverse_path_3d(curr_cell, holding_block):
+def reverse_path_3d(curr_cell, holding_block) -> list[int]:
     """
     Reverse calculated path to go from start to goal.
     
     Args:
         curr_cell (Cell): The current position of an inchworm.
-        holding_block (boolean): A boolean indicating if the inchworm is holding a block or not.
+        holding_block (bool): A boolean indicating if the inchworm is holding a block or not.
     Returns:
-        path (list(tuple)): A reworked path found in a path planning algorithm.
-        steps (int): The number of steps in a path.
+        path (list[int]): A reworked path found in a path planning algorithm of coord and holding_block.
     """
     path = []
-    print("reversing the past")
     prev_holding_block = holding_block
     while curr_cell:
         if [curr_cell.x, curr_cell.z, curr_cell.y] == BD_LOCS[0]:
@@ -201,9 +197,9 @@ def reverse_path_3d(curr_cell, holding_block):
             holding_block = True
         else:
             holding_block = prev_holding_block
-        path.append(([curr_cell.x, curr_cell.z, curr_cell.y], holding_block))
+        path.append([curr_cell.x, curr_cell.z, curr_cell.y])
         curr_cell = curr_cell.parent
-    return path[::-1], len(path) - 1
+    return path[::-1]
 
 def create_cell(grid, coords):
     """
@@ -225,7 +221,6 @@ def create_cell(grid, coords):
             new_cell.is_obs = False
         else:
             new_cell.is_obs = True
-            
         return new_cell
     raise ValueError(f"Error: Invalid position at {coords}.")
     
@@ -245,7 +240,6 @@ def is_valid_position_3d(grid, coords):
     if 0 <= x < len(grid) and 0 <= z < len(grid[0]) and 0 <= y < len(grid[0][0]):
         return True
     return False
-    # raise ValueError(f"Error: Invalid position at {coords}.") 
 
 def is_goal_reached_3d(curr_cell, goal_cell):
     """
@@ -292,15 +286,13 @@ def start_search_3d(grid, start, goal):
         goal_cell (Cell): .
         visited (list(boolean)): .
         queue (list(Cell)): .
-        steps (int): The number of steps in a path.
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(len(grid[0][0]))]
     queue = [start_cell]
     visited[start_cell.x][start_cell.z][start_cell.y] = True
-    steps = 0
-    return goal_cell, visited, queue, steps
+    return goal_cell, visited, queue
 
 def handle_multiple_block_depots():
     #TODO: how path planning is affected by the existence of multiple block depots 
@@ -310,11 +302,11 @@ def determine_helper_blocks(grid, path_start, path_end):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, False)
-    if num_steps == -1:
+    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
+    if path_coords == []:
         RuntimeError(f"Cannot find helper blocks for path.")
     else:
-        return path_coords, num_steps
+        return path_coords
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block):
     """
@@ -331,19 +323,18 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    path_coords, num_steps = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
+    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
-    if num_steps == -1:
+    if path_coords == []:
         print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords, num_steps = determine_helper_blocks(grid, path_start, path_end)
+        path_coords = determine_helper_blocks(grid, path_start, path_end)
 
-    path_list = copy.deepcopy(path_coords[0])
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    for i in range(len(path_list) - 1):
-        current_coord = path_list[i][0]
-        next_coord = path_list[i + 1][0]
+    for i in range(len(path_coords) - 1):
+        current_coord = path_coords[i]
+        next_coord = path_coords[i + 1]
             
         end_flag = bool(next_coord == path_end) # if it is done basically
         step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)

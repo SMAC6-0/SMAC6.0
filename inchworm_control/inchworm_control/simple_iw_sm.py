@@ -1,15 +1,38 @@
 from enum import Enum
-from transitions import Machine
 import time
+import serial
+import struct
 from time import sleep
 
-## UART stuff
+###### UART stuff
 UART_BAUD = 9600 # config
-# setup uart 
-# uart1 = UART(0,)
+
+# Pins 
+# GPIO 15, pin 8 = RX green wire 
+# GPIO 14, pin 10 = TX yellow wire
+# ground = Pin 14
+
+class UART_CODES(Enum):
+    StartByte=0xAA 
+    Initialization=0xFA
+    BeingPlaced=0xFB 
+    MapSnapshot=0xFC
+    NewBlock=0xFD
+    Changes=0xFE
+    Failed=0xFF
+
+class BLOCK_STATUS(Enum): # holds the status of the block 
+    Unplaced = 0
+    Placing = 2
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
+
+next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
+IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
+IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+
+IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
 
 # Inchworm states
 class IW_STATE(Enum):
@@ -23,23 +46,30 @@ class IW_STATE(Enum):
     STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 3
+
 class Inchworm:
     def __init__(self):
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
         self.print_flag = True
+        self.seed_block_flag = True
+        self.retry_path_flag = True
+
+
+        # UART stuff
+        self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
 
     def run(self):
         while self.state != IW_STATE.STRUCTURE_COMPLETE:
             self.update_state()
-
     def update_state(self):
         match self.state:
             case IW_STATE.IDLE:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 if self.initilization_flag:
-                    self.handle_initilization()
+                    self.handle_initialization()
+
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -50,21 +80,18 @@ class Inchworm:
                     self.retry_path() 
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
-                    self.handle_travelling_to_supply()
+                    self.handle_at_supply()
                 else:
                     self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
-                if self.is_IW_in_block():
-                    self.handle_transporting_block()
+                if self.is_IW_in_block_location():
+                    self.handle_transported_block()
                 else:
                     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
-                if self.incorrect_block_location(): # block is placed in the wrong location
-                    self.handle_error()
-                elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    if self.is_structure_complete(): # structure is complete
-                        self.handle_structure_complete()
-                    else: # structure is incomplete
+                if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
+                    self.handle_structure_complete()
+                else: # structure is incomplete
                         self.handle_structure_incomplete()
             case IW_STATE.ERROR:
                 self.handle_error()
@@ -85,23 +112,58 @@ class Inchworm:
     
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
-    def handle_initilization(self):
+    def handle_initialization(self):
         print("MOVINGGG...")
         # path plan to the seed block location from the supply depot
-
-        print("Initializing the block")
+        
         # touch the block infornt of it
 
-        self.initilization_flag = False
-        
-    def handle_IW_gets_Map(self):
-        print("Map snapshot successful.")
+        print("Initializing the block")
 
-        print("Transferring the block data")
+        # different for the seed block logic
+        # TODO: update this logic after Mo implements his seed block logic 
+        print("Sending data about the seed block")
+        
+        '''
         # transfer the block location data 
         # TODO: MOOO help 
         # send a 1D array ended with the Initialization enum OxFA 
         # flash block that it's in unplaced location
+
+        buffer = bytearray(struct.pack('B', 0xAA)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', BLOCK_STATUS.Unplaced) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', 0xFA)
+
+        self.IW_SERIAL.write(buffer)
+        '''
+        
+        # TODO IW gets the error messgae back if the transmission is failed 
+
+        # print("sent data yippee")
+        self.initilization_flag = False
+        
+    def handle_IW_gets_Map(self):
+        print("Map snapshot successful.")
 
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
@@ -121,25 +183,36 @@ class Inchworm:
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
+        # TODO: call map snapshot? 
+        # if self.IW_gets_Map_Snapshot():
+        #     print("IW got map snap shot, retry again")
         # MOOO HELPPP
 
-    def handle_travelling_to_supply(self):
-        print("Touching the new block")
+    def handle_at_supply(self):
+        print("Touching the new block (move)")
         # touch the new block
 
         print("IW flashes block with it's location")
-        # MO HHELLPP MEEEE 
-        
-        self.state = IW_STATE.TRANSPORTING_BLOCK
-        print(f"Current inchworm state: {self.state}")
+        self.send_block_location()
 
-    def handle_transporting_block(self):
+        # pause so that the block has enough time to process the info
+        sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+
+
         print("IW sends a messgae indicating block is being placed")
         # IW sends a messgae indicating block is being placed
         # MOOOOO HELPPPP
+        self.send_block_being_placed()
+
 
         print("Travelling to the block location")
         # IW begins travelling to block location
+
+        self.state = IW_STATE.TRANSPORTING_BLOCK
+        print(f"Current inchworm state: {self.state}")
+        
+    def handle_transported_block(self):
+        
 
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
@@ -176,17 +249,31 @@ class Inchworm:
 
     # Checkers
     def IW_gets_Map_Snapshot(self):
-        # blah blah low level language 
-        # TODO: ask Mo for help when the IW gets the map SnapShot back 
-        # return true if the IW got the map snapshot
-
-        got_map_snapshot = input("Did the inchworm get the map? (yes/no): \n")
-        if got_map_snapshot.lower() == 'yes':
-            return True
-        elif got_map_snapshot.lower() == 'no':
-            return False
+        if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
+            got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
+            if got_map_snapshot.lower() == 'yes':
+                self.seed_block_flag = False
+                return True
+            elif got_map_snapshot.lower() == 'no':
+                return False
+            else:
+                print("Invalid input. Please answer with 'yes' or 'no'.")
         else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+            # blah blah low level language 
+            # TODO: ask Mo for help when the IW gets the map SnapShot back 
+            # return true if the IW got the map snapshot
+            received_data = self.IW_SERIAL.read()              #read serial port
+            sleep(0.03)
+            data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+            received_data += self.IW_SERIAL.read(data_left)
+            print (received_data)                   #print received data
+
+            # verify if it's a map?? 
+            is_a_map = True
+            if is_a_map:
+                # call the update map
+                self.update_my_current_map()
+            # return is_a_map
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -217,7 +304,7 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
-    def is_IW_in_block(self):
+    def is_IW_in_block_location(self):
         #  return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)
         print("Checking if at block location...")
 
@@ -256,6 +343,114 @@ class Inchworm:
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
+    
+    # other functionsss
+
+    def update_my_current_map(self, map): 
+        """
+        Updates the inchworm's map based on received updates from the structure. 
+        Args: 
+            map: xzy (3D) list storing the current status of the map, as the structure knows it.  
+        """
+        # TODO: does this belong in checker, handler, or outside? @Mo 
+
+        # map updates so we need to manually update the x, z, y
+        # self.current_map = map
+        print("Current map updated")
+        pass
+    
+    # ---------------------------- IW block communication functions ----------------------------- 
+
+    def send_block_location(self):
+        """
+        IW does the UART communication to send the block location 
+        """
+
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
+
+        self.IW_SERIAL.write(buffer)
+        print("block data sent!!")
+        # TODO: handle transmission error
+
+    def send_block_being_placed(self):
+        """
+        IW sends the Hex code back to the block indicating that it's being placed
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        for c in next_block_location:
+            block_change += struct.pack('B', c)
+
+        block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
+
+        print("Block change", block_change)
+
+        # calculate message length and checksum
+
+        msg_len = len(block_change).to_bytes(2,'little')
+        checksum = self.crc16(block_change).to_bytes(2, 'little')
+
+        print("msg_len", msg_len)
+        print("checksum", checksum)
+
+        # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+        buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
+
+        self.IW_SERIAL.write(buffer)
+
+        print("Indicated block is in placing status!!")
+        # TODO: handle transmission error
+
+
+    # Checksum protocol for the IW and Block communication
+    @staticmethod
+    def crc16(data: bytes, poly=0x8408):
+        '''
+        CRC-16-CCITT Algorithm
+        '''
+        data = bytearray(data)
+        crc = 0xFFFF
+        for b in data:
+            cur_byte = 0xFF & b
+            for _ in range(0, 8):
+                if (crc & 0x0001) ^ (cur_byte & 0x0001):
+                    crc = (crc >> 1) ^ poly
+                else:
+                    crc >>= 1
+                cur_byte >>= 1
+        crc = (~crc & 0xFFFF)
+        crc = (crc << 8) | ((crc >> 8) & 0xFF)
+
+        return crc & 0xFFFF
+    
+    
+
 # an instance of Inchworm Statemachine
 inchworm_sm = Inchworm()
 

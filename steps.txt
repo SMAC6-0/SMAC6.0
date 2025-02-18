@@ -1,33 +1,20 @@
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('GRAB_{movement_direction}', False)
-('STEP_LEFT', True)
-('STEP_FORWARD', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('PLACE_{movement_direction}', True)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('GRAB_{movement_direction}', False)
-('STEP_LEFT', True)
-('STEP_FORWARD', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('PLACE_{movement_direction}', True)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('ERROR: invalid orientation', False)
-('GRAB_{movement_direction}', False)
-('STEP_LEFT', True)
-('STEP_FORWARD', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('ERROR: invalid orientation', True)
-('PLACE_{movement_direction}', True)
+STEP_FORWARD
+STEP_FORWARD
+GRAB_FORWARD
+STEP_RIGHT_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_LEFT_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+STEP_FORWARD_BLOCK
+PLACE_UP_FORWARD_BLOCK
