@@ -393,8 +393,8 @@ else:
         for x in range(21): # 6 
             voxel = Voxel(position = (x, 0, z))
     # spawn seed block & supply depot
-    spawn_cube(SEED_BK[0], SEED_BK[1], SEED_BK[2], 'seed')
-    spawn_cube(BD_LOCS[0][0], BD_LOCS[0][1], BD_LOCS[0][2], 'n')
+    spawn_cube(SEED_BK[0], SEED_BK[2], SEED_BK[1], 'seed')
+    spawn_cube(BD_LOCS[0][0], BD_LOCS[0][2], BD_LOCS[0][1], 'n')
 
 def look_at(target_pos, player_pos):
     if isinstance(target_pos, tuple):

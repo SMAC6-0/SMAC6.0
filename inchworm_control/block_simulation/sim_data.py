@@ -35,26 +35,26 @@ class SimData:
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
         block to be placed according to blueprint algorithm. """
         # Store final struct in 3D list. Update Final Map with all other blocks. (Supply depot & seed bk already marked)
-        blocks_placed.sort(key=lambda lowest: lowest[1]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
+        blocks_placed.sort(key=lambda lowest: lowest[2]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
-            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
+            self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[2], block[1]))
     
     def send_map_to_IW(self, inchworm): 
         """
         If the IW is at its goal, structure removes the IW path from its map and sends the IW a map snapshot
         """
-        x, z, y = inchworm.leading_foot_loc
+        x, y, z = inchworm.leading_foot_loc
         # TODO: far future: check if IW is adjacent to blocks (use map_data.set_neighbors)
         # If yes, get newly placed block's coords from iw 
 
         # Structure verifies that block is in correct location 
         if inchworm.leading_foot_loc == inchworm.goal and inchworm.paths: 
-            if (self.current_map[x][z][y] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value):
+            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
 
                 # Update current_map w new block 
-                self.current_map == map_data.update_grid_status(self.current_map, [x, z, y])
+                self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
 
                 # Send current_map to IW 
                 inchworm.current_map = copy.deepcopy(self.current_map)
@@ -66,9 +66,9 @@ class SimData:
     def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
         if self.cleared_path_flag and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths)
-            x, z, y = inchworm.goal
-            self.current_map[x][z][y] == map_data.update_grid_status(self.current_map, [x, z, y], map_data.GridStatus.INCOMING_BLOCK)
+            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
+            x, y, z = inchworm.goal
+            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
             print("struct's map updated w new IW path")
             self.cleared_path_flag = False
             return True

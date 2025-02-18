@@ -79,9 +79,9 @@ def mark_depot_and_seed(grid):
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
         
-    x, z, y = SEED_BK
-    grid[x][z - 1][y] = GridStatus.NOT_WALKABLE.value
-    grid[x][z][y] = GridStatus.WALKABLE.value
+    x, y, z = SEED_BK
+    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value
+    grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
     
 def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
@@ -136,8 +136,8 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     """ 
     inchworm_path.pop(-1)
     for step in range(len(inchworm_path)-1): 
-        x, z, y = inchworm_path[step]
-        grid[x][z][y] = GridStatus.WALKABLE.value
+        x, y, z = inchworm_path[step]
+        grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
@@ -293,7 +293,7 @@ def start_search_3d(grid, start, goal):
     goal_cell = create_cell(grid, goal)
     visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(len(grid[0][0]))]
     queue = [start_cell]
-    visited[start_cell.x][start_cell.z][start_cell.y] = True
+    visited[start_cell.x][start_cell.y][start_cell.z] = True
     return goal_cell, visited, queue
 
 def handle_multiple_block_depots():
@@ -341,13 +341,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         next_coord = path_coords[i + 1]
             
         end_flag = bool(next_coord == path_end) # if it is done basically
-        step_instructions, orientation = convert_coordinate_to_steps(grid, np.array(current_coord), np.array(next_coord), curr_orientation, holding_block, end_flag)
+        step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord, next_coord, curr_orientation, holding_block, end_flag)
         steps.append(step_instructions)
         curr_orientation = orientation
 
     return path_coords, steps
 
-def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tuple[int], orientation, holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, holding_block, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -438,8 +438,9 @@ def convert_coordinate_to_steps(grid, current_coord: tuple[int], next_coord: tup
         #TODO: handle any block depot'
         if holding_block:
             step_instructions = f"{step_instructions}_BLOCK"
-            
-        if (next_coord == [BD_LOC1[0], BD_LOC1[1]-1, BD_LOC1[2]]).all():
+        
+        # for bd_loc in BD_LOCS:
+        if (next_coord == [BD_LOC1[0], BD_LOC1[1], BD_LOC1[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
             return f"GRAB_{step_instructions}", new_orientation
         elif holding_block & end_flag:
             return f"PLACE_{step_instructions}", new_orientation

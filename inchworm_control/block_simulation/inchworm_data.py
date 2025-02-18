@@ -32,7 +32,7 @@ class BLOCK_STATUS(Enum): # holds the status of the block
 
 SUPPLY_LOCATION = [1, 1, 1] # config
 
-
+# TODO: sakshi this you? is it in xyz?
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
@@ -147,14 +147,14 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block)
+                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block)
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block)
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block, self.id)
                 self.holding_block = False
                 goal_path.pop(0) # Remove repeat coord
                 
@@ -361,9 +361,9 @@ class Inchworm:
             if self.goal_progress_index >= len(self.paths): 
                 print("Touching the seed block")
                 self.initilization_flag = False 
-                x, z, y = SEED_BK
+                x, y, z = SEED_BK
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
-                print("IW's evaluation of seed block. Below:  ", self.current_map[x][z-1][y], " itself: ", self.current_map[x][z][y], " above: ", self.current_map[x][z+1][y])
+                print("IW's evaluation of seed block. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
@@ -479,8 +479,8 @@ class Inchworm:
         # return true if the IW got the map snapshot
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
-                x, z, y = self.leading_foot_loc
-                if self.current_map[x][z][y] == map_data.GridStatus.WALKABLE.value:
+                x, y, z = self.leading_foot_loc
+                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
                     print("IW got map snapshot")
                     return True
             return False
@@ -525,7 +525,7 @@ class Inchworm:
         print("Checking if at supply location...")
         print("If in sim, press n to step")
         for bd_loc in BD_LOCS:
-            if [bd_loc[0], bd_loc[1]-1, bd_loc[2]] == self.leading_foot_loc: 
+            if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print("IW thinks it's at the supply depot")
                 return True 
             else: 
