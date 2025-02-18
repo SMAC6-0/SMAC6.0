@@ -59,12 +59,12 @@ def initialize_grid():
         for y in range(GRID_SIZE):
             grid[x][y][0] = GridStatus.WALKABLE.value
     
-    grid = mark_block_depot(grid)
+    grid = mark_depot_and_seed(grid)
     return grid
 
-def mark_block_depot(grid):
+def mark_depot_and_seed(grid):
     """
-    Initalize all block depots in grid. This is configured in config.py
+    Initalize all block depots and the seed block in grid. This is configured in config.py
     
     Args:
         grid [list]: A 3D list of the workspace
@@ -78,6 +78,10 @@ def mark_block_depot(grid):
             grid[x][y][z] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
+        
+    x, z, y = SEED_BK
+    grid[x][z - 1][y] = GridStatus.NOT_WALKABLE.value
+    grid[x][z][y] = GridStatus.WALKABLE.value
     return grid
     
 def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
@@ -117,6 +121,23 @@ def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step]
         grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH.value
+    return grid
+
+def rm_inchworm_path_from_grid(grid, inchworm_path):
+    """
+    Remove the inchworm path from the grid.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
+                     incoming_block (2), & supply_depot (3). 
+    Returns:
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """ 
+    inchworm_path.pop(-1)
+    for step in range(len(inchworm_path)-1): 
+        x, z, y = inchworm_path[step]
+        grid[x][z][y] = GridStatus.WALKABLE.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
