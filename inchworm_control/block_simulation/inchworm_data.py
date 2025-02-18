@@ -468,8 +468,6 @@ class Inchworm:
         print("Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
-        print("current IW: ", self.current_map)
-        print("final map: ", self.final_structure)
 
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
@@ -530,8 +528,8 @@ class Inchworm:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print("IW thinks it's at the supply depot")
                 return True 
-            else: 
-                return False
+             
+        return False
 
 
     def is_IW_in_block(self):

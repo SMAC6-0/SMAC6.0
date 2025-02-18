@@ -134,10 +134,13 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    inchworm_path.pop(-1)
+    # inchworm_path.pop(-1)
     for step in range(len(inchworm_path)-1): 
-        x, y, z = inchworm_path[step]
-        grid[x][y][z] = GridStatus.WALKABLE.value
+        x, y, z = inchworm_path[step] 
+        if [x, y, z+1] == BD_LOC1: 
+            grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
+        else:
+            grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
