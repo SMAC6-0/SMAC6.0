@@ -180,7 +180,6 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 if self.initilization_flag:
                     self.handle_initialization()
-
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -192,8 +191,6 @@ class Inchworm:
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
                     self.handle_at_supply()
-                else:
-                    self.handle_error()
             case IW_STATE.TRANSPORTING_BLOCK:
                 if self.is_IW_in_block_location():
                     self.handle_transported_block()
@@ -229,11 +226,13 @@ class Inchworm:
         
         # touch the block infornt of it
 
-        print("Initializing the block")
+        print("Touching the seed block")
 
         # different for the seed block logic
         # TODO: update this logic after Mo implements his seed block logic 
-        print("Sending data about the seed block")
+        print("Requesting map snapshot")
+        self.request_map_snapshot()
+
         
         '''
         # transfer the block location data 
@@ -313,6 +312,13 @@ class Inchworm:
         # pause so that the block has enough time to process the info
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
 
+        if self.received_block_confirmation():
+            print("IW sends a messgae indicating block is being placed")
+            # IW sends a messgae indicating block is being placed
+            # MOOOOO HELPPPP
+            self.send_block_being_placed()
+        else: 
+            self.handle_error()
 
         print("IW sends a messgae indicating block is being placed")
         # IW sends a messgae indicating block is being placed
@@ -601,6 +607,13 @@ class Inchworm:
 
         print("Transferred the IW path!!")
         # TODO: handle transmission error
+
+    def received_block_confirmation(self): 
+        print("We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
+        pass
+
+    def request_map_snapshot(self):
+        print("Gimme map plsss")
 
             
     # Checksum protocol for the IW and Block communication
