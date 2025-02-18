@@ -59,12 +59,12 @@ def initialize_grid():
         for y in range(GRID_SIZE):
             grid[x][0][y] = GridStatus.WALKABLE.value
     
-    grid = mark_block_depot(grid)
+    grid = mark_depot_and_seed(grid)
     return grid
 
-def mark_block_depot(grid):
+def mark_depot_and_seed(grid):
     """
-    Initalize all block depots in grid. This is configured in config.py
+    Initalize all block depots and the seed block in grid. This is configured in config.py
     
     Args:
         grid [list]: A 3D list of the workspace
@@ -78,6 +78,10 @@ def mark_block_depot(grid):
             grid[x][z][y] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
+        
+    x, z, y = SEED_BK
+    grid[x][z - 1][y] = GridStatus.NOT_WALKABLE.value
+    grid[x][z][y] = GridStatus.WALKABLE.value
     return grid
     
 def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):

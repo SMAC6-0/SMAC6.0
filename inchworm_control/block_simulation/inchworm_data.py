@@ -466,6 +466,8 @@ class Inchworm:
         print("Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
+        print("current IW: ", self.current_map)
+        print("final map: ", self.final_structure)
 
         self.state = IW_STATE.PATH_PLANNING
         print(f"Current inchworm state: {self.state}")
