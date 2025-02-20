@@ -51,10 +51,10 @@ class IW_STATE(Enum):
 PATH_PLANNING_TIMER = 3
 
 lagging_transform = {
-    InchwormOrientation.NORTH: lambda x, y, z: (x, y, z-1),  
-    InchwormOrientation.SOUTH: lambda x, y, z: (x, y, z+1),
-    InchwormOrientation.EAST: lambda x, y, z: (x-1, y, z), 
-    InchwormOrientation.WEST: lambda x, y, z: (x+1, y, z) 
+    InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
+    InchwormOrientation.SOUTH: lambda x, y, z: (x, y + 1, z),
+    InchwormOrientation.EAST: lambda x, y, z: (x - 1, y, z), 
+    InchwormOrientation.WEST: lambda x, y, z: (x + 1, y, z) 
 }
 
 class Inchworm:
@@ -87,7 +87,10 @@ class Inchworm:
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
-        self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
+        if (location == self.goal):
+            self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
+        else:
+            self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
@@ -151,10 +154,10 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
+                path, steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, BD_LOC1, self.orientation, self.holding_block, self.id)
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_LOC1, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
                 
                 # Find path to where the next block will be placed

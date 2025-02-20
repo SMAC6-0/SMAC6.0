@@ -38,9 +38,12 @@ smart_block_texture_step_red = load_texture("Assets/Textures/smart_block_red_ste
 smart_block_texture_step_blue = load_texture("Assets/Textures/smart_block_blue_step.png")
 smart_block_texture_step_yellow = load_texture("Assets/Textures/smart_block_yellow_step.png")
 smart_block_texture_step_green = load_texture("Assets/Textures/smart_block_green_step.png") 
+seed_block_texture_step = load_texture("Assets/Textures/seed_block_step.png") 
 
 # Incoming Blocks / Steps 
 incoming_step_texture = load_texture("Assets/Textures/incoming_path_red.png")
+incoming_step_block_texture = load_texture("Assets/Textures/incoming_path_smart.png")
+incoming_step_seed_texture = load_texture("Assets/Textures/incoming_path_seed.png")
 incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
 
 # More Variables
@@ -155,6 +158,9 @@ def update():
             IW_is_at_goal = sim_data.send_map_to_IW(inchworm)
             if IW_is_at_goal: # clear the path visually before 
                 vis_IW_paths(inchworm, clear_path=True)
+                x, y, z = inchworm.leading_foot_loc
+                delete_cube(x, y, z)
+                spawn_cube(x, y, z, '')
             inchworm.update_state()
             if sim_data.new_IW_paths_received(inchworm):
                 vis_IW_paths(inchworm)
@@ -210,11 +216,33 @@ def vis_IW_paths(inchworm, clear_path=False):
     # Then show the path the inchworm is going to take
     for step in range(len(inchworm.paths)-1): 
         cell = inchworm.paths[step]
-        delete_cube(cell[0], cell[1], cell[2])
-        if clear_path: # clear the old inchworm path 
-            spawn_cube(cell[0], cell[1], cell[2], 'clear')
-        else: # show the inchworm path
-            spawn_cube(cell[0], cell[1], cell[2], 'path')
+
+        already_placed_block = None
+        for e in scene.entities:
+            if hasattr(e, 'position') and e.position == Vec3(cell[0], cell[2], cell[1]):
+                already_placed_block = e
+                break
+        print("existing texture: ", already_placed_block.texture)
+        transition = {
+            white_block_texture : incoming_step_texture, #'path',
+            incoming_step_texture : white_block_texture, #'clear',
+            smart_block_texture : incoming_step_block_texture,
+            incoming_step_block_texture : smart_block_texture,
+            seed_block_texture : seed_block_texture_step, 
+            seed_block_texture_step : seed_block_texture,
+            smart_block_texture_step : smart_block_texture, 
+            smart_block_texture_step_red : white_block_texture
+        }
+        block_color = transition[already_placed_block.texture]
+        print("new texture: ", block_color)
+        already_placed_block.texture = block_color
+        # if already_placed_block.texture == white_block_texture or already_placed_block.texture == incoming_step_texture:
+        # delete_cube(cell[0], cell[1], cell[2])
+        # spawn_cube(cell[0], cell[1], cell[2], block_color)
+            # if clear_path: # clear the old inchworm path 
+            #     spawn_cube(cell[0], cell[1], cell[2], 'clear')
+            # else: # show the inchworm path
+            #     spawn_cube(cell[0], cell[1], cell[2], 'path')
 
 def generate_final_structure():
     """
@@ -330,7 +358,8 @@ def check_block_color(x, y, z):
             smart_block_outline: smart_block_texture, 
             incoming_block_texture: smart_block_texture, 
             incoming_step_texture: smart_block_texture_step_red, # step over the incoming path 
-            seed_block_texture: seed_block_texture
+            seed_block_texture: seed_block_texture_step,
+            incoming_step_block_texture: smart_block_texture_step
         }
         try: 
             block_color = transition[existing_cube_texture]

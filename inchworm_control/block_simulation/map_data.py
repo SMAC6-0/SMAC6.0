@@ -134,6 +134,7 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
+    #TODO: specify inchworm
     # inchworm_path.pop(-1)
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step] 
