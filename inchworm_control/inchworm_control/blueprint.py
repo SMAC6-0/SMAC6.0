@@ -35,9 +35,9 @@ def blueprint(curr_map, final_map) -> list:
             # TODO: implement prioritization of found structures
             # print("map dims: ", curr_map.shape[0], curr_map.shape[1],curr_map.shape[2])
             # print(curr_map[4,4,0])
-            for x in range(curr_map.shape[0]): #iterate 0-7
-                for y in range(curr_map.shape[1]): #iterate 0-7
-                   for z in range((curr_map.shape[2])): #iterate 0-7
+            for z in range((curr_map.shape[2])): #iterate 0-7
+                for x in range(curr_map.shape[0]): #iterate 0-7
+                    for y in range(curr_map.shape[1]): #iterate 0-7
                         if curr_map[x, y, z] == 1 and curr_map[x, y, z] != final_map[x, y, z]: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
                             return [x, y, z] # should return as x, y, z
     return [-9, -9, -9]

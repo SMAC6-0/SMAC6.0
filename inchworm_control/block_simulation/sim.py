@@ -222,7 +222,7 @@ def vis_IW_paths(inchworm, clear_path=False):
             if hasattr(e, 'position') and e.position == Vec3(cell[0], cell[2], cell[1]):
                 already_placed_block = e
                 break
-        print("existing texture: ", already_placed_block.texture)
+        # print("existing texture: ", already_placed_block.texture)
         transition = {
             white_block_texture : incoming_step_texture, #'path',
             incoming_step_texture : white_block_texture, #'clear',
@@ -234,7 +234,7 @@ def vis_IW_paths(inchworm, clear_path=False):
             smart_block_texture_step_red : white_block_texture
         }
         block_color = transition[already_placed_block.texture]
-        print("new texture: ", block_color)
+        # print("new texture: ", block_color)
         already_placed_block.texture = block_color
         # if already_placed_block.texture == white_block_texture or already_placed_block.texture == incoming_step_texture:
         # delete_cube(cell[0], cell[1], cell[2])
