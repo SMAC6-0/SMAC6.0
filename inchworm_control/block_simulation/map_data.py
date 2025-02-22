@@ -148,6 +148,23 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
                 grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
+def rm_inchworm_path_from_grid(grid, inchworm_path):
+    """
+    Remove the inchworm path from the grid.
+
+    Args:
+        grid (list): A 3D list representing the workspace, where each element indicates whether
+                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
+                     incoming_block (2), & supply_depot (3). 
+    Returns:
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """ 
+    inchworm_path.pop(-1)
+    for step in range(len(inchworm_path)-1): 
+        x, z, y = inchworm_path[step]
+        grid[x][z][y] = GridStatus.WALKABLE.value
+    return grid
+
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
     Sets the neighbors in an algorithm.
