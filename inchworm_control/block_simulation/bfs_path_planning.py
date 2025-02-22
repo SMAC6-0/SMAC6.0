@@ -1,5 +1,6 @@
 import map_data
-from colorama import Fore, Style, init
+from colorama import Fore, init
+init(autoreset=True)
 
 def find_path(grid, start, goal, holding_block) -> list[int]:
     """

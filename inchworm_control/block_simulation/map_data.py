@@ -2,7 +2,8 @@ from enum import Enum
 import numpy as np
 from config import *
 import bfs_path_planning
-from colorama import Fore, Style, init
+from colorama import Fore, init
+init(autoreset=True)
 
 class GridStatus(Enum):
     WALKABLE = 0

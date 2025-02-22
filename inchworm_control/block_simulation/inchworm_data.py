@@ -6,7 +6,8 @@ from inchworm_control.blueprint import blueprint as blueprint
 from time import sleep
 import serial
 import struct
-from colorama import Fore, Style, init
+from colorama import Fore, init
+init(autoreset=True)
 
 ###### UART stuff
 UART_BAUD = 9600 # config

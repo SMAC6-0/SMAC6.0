@@ -15,7 +15,8 @@ from config import *
 import map_data
 from search import search
 from inchworm_data import Inchworm
-from colorama import Fore, Style, init
+from colorama import Fore, init
+init(autoreset=True)
 
 from inchworm_control.blueprint import blueprint 
 
