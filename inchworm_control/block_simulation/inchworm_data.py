@@ -90,6 +90,8 @@ class Inchworm:
         self.leading_foot_loc = location
         if not (location == self.goal):
             self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
+        else:
+            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
