@@ -354,7 +354,7 @@ class Inchworm:
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
 
-        # map updates so we need to manually update the x, z, y
+        # map updates so we need to manually update the x, y, z
         # self.current_map = map
         print("Current map updated")
         pass
