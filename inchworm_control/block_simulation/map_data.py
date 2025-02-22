@@ -139,10 +139,13 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     # inchworm_path.pop(-1)
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step] 
-        if [x, y, z+1] == BD_LOC1: 
+        if [x, y, z + 1] == BD_1_LOC: 
             grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
         else:
-            grid[x][y][z] = GridStatus.WALKABLE.value
+            if grid[x][y][z + 1] == GridStatus.WALKABLE.value:
+                grid[x][y][z] = GridStatus.NOT_WALKABLE.value
+            else:
+                grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
@@ -445,7 +448,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
             step_instructions = f"{step_instructions}_BLOCK"
         
         # for bd_loc in BD_LOCS:
-        if (next_coord == [BD_LOC1[0], BD_LOC1[1], BD_LOC1[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
+        if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
             return f"GRAB_{step_instructions}", new_orientation
         elif holding_block & end_flag:
             return f"PLACE_{step_instructions}", new_orientation

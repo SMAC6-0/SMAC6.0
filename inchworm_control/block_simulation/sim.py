@@ -12,7 +12,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
-from config import CURRENT_LOC, BD_LOC1, BD_LOCS, SIMULATION, SEED_BK
+from config import *
 import copy 
 from sim_data import SimData
 
@@ -103,7 +103,7 @@ def update():
             vis_IW_paths(inchworm)
         # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
         # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
-        key_p_pressed = True
+        key_p_prensed = True
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False

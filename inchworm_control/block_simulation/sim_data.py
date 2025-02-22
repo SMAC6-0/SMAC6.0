@@ -54,12 +54,18 @@ class SimData:
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
-
                 # Update current_map w new block 
+
+                # print(Fore.GREEN + "Before update:", self.current_map)
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
+                # print(Fore.GREEN + "structure map: ", self.current_map)
+                # print(Fore.GREEN + "final map: ", self.final_structure)
 
                 # Send current_map to IW 
+                # print("IW before copy", inchworm.current_map)
                 inchworm.current_map = copy.deepcopy(self.current_map)
+                # print("IW after copy", inchworm.current_map)
+
                 print(Fore.GREEN + "Struct should have sent its map to the IW")
                 self.cleared_path_flag = True
                 return True
@@ -86,7 +92,7 @@ class SimData:
             num_inchworms (int): number of inchworms building the structure
         """
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_1_LOC))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
         print(Fore.GREEN + "inchworms spawned")
 

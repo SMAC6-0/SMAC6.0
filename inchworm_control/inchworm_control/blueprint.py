@@ -56,7 +56,7 @@ def blueprint(curr_map, final_map) -> list:
                             if curr_is_walkable:
                                 lowest_z = zz
                         
-                        if is_different and final_is_walkable:# and curr_below_is_walkable: # ursina is in x, z, y, so in order to get x, y, z, we need to translate it
+                        if is_different and final_is_walkable:
                             for zz in range(lowest_z + 1, z + 1):
                                 priority_queue.append((x, y, zz))
             

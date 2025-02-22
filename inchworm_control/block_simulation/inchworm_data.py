@@ -62,7 +62,7 @@ class Inchworm:
     next_id = 1
     inchworm_list = []
     
-    def __init__(self, orientation, final_structure, location: tuple[int]=CURRENT_LOC, holding_block=False):
+    def __init__(self, orientation, final_structure, location: tuple[int]=IW_1_LOC, holding_block=False):
         """
         Initialize one inchworm (abbreviated as IW) in the system.
         Args:
@@ -127,8 +127,8 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print(Fore.MAGENTA + "goal not given... finding goal now")
-            # print("(PP) current_map: ", self.current_map)
-            # print("(PP) final_map: ", self.final_structure)
+            print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
+            print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + "erm blueprint done in the wrong place")
@@ -158,11 +158,11 @@ class Inchworm:
                 path, steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_LOC1, self.orientation, self.holding_block, self.id)
+                bd_path, bd_steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_LOC1, self.goal, self.orientation, self.holding_block, self.id)
+                goal_path, goal_steps = map_data.initiate_find_path(self.current_map, BD_1_LOC, self.goal, self.orientation, self.holding_block, self.id)
                 self.holding_block = False
                 goal_path.pop(0) # Remove repeat coord
                 
@@ -192,7 +192,7 @@ class Inchworm:
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
-        if ([x, y, z] == [BD_LOC1[0], BD_LOC1[1], BD_LOC1[2]-1]):
+        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
             self.holding_block = True
         elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
             self.holding_block = False
@@ -432,7 +432,7 @@ class Inchworm:
 
     def handle_transported_block(self):
 
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+        # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.holding_block = False
@@ -571,6 +571,7 @@ class Inchworm:
 
         # compare the current map and the blueprint
         # return true if structure is complete and false otherwise
+
         return self.current_map == self.final_structure
         # structure_complete = input("Is structure complete? (yes/no) \n")
         # if structure_complete.lower() == 'yes':
@@ -593,7 +594,7 @@ def step_getter(step_instructions):
 
 
 if __name__ == "__main__":
-    inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, CURRENT_LOC)
+    inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, IW_1_LOC)
     try:
         inchworm.run()
     except KeyboardInterrupt:
