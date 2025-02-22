@@ -1,4 +1,5 @@
 import map_data
+from colorama import Fore, Style, init
 
 def find_path(grid, start, goal, holding_block) -> list[int]:
     """
@@ -15,7 +16,7 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
-    print(f"BFS called with start: {start}, goal: {goal}")
+    print(Fore.MAGENTA + f"BFS called with start: {start}, goal: {goal}")
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     
@@ -34,7 +35,7 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
 
         if map_data.is_goal_reached_3d(current_cell, goal_cell):
             path = map_data.reverse_path_3d(current_cell, holding_block)
-            print(f"Path found: {path}")
+            print(Fore.MAGENTA + f"Path found: {path}")
             return path
         
         for dx, dy, dz in neighbor_directions:
@@ -48,5 +49,5 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
                 neighbor.parent = current_cell
                 queue.append(neighbor)
     
-    print(f"No path found with BFS from {start} to {goal}")
+    print(Fore.MAGENTA + f"No path found with BFS from {start} to {goal}")
     return []

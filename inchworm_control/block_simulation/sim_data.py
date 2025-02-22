@@ -15,6 +15,7 @@ from config import *
 import map_data
 from search import search
 from inchworm_data import Inchworm
+from colorama import Fore, Style, init
 
 from inchworm_control.blueprint import blueprint 
 
@@ -58,7 +59,7 @@ class SimData:
 
                 # Send current_map to IW 
                 inchworm.current_map = copy.deepcopy(self.current_map)
-                print("Struct should have sent its map to the IW")
+                print(Fore.GREEN + "Struct should have sent its map to the IW")
                 self.cleared_path_flag = True
                 return True
         # return self.current_map # TODO: maybe unnecessary
@@ -69,7 +70,7 @@ class SimData:
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
-            print("struct's map updated w new IW path")
+            print(Fore.GREEN + "struct's map updated w new IW path")
             self.cleared_path_flag = False
             return True
         else: 
@@ -86,7 +87,7 @@ class SimData:
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, CURRENT_LOC))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
-        print("inchworms spawned")
+        print(Fore.GREEN + "inchworms spawned")
 
     def get_next_steps(self): 
         """

@@ -2,7 +2,7 @@ from enum import Enum
 import numpy as np
 from config import *
 import bfs_path_planning
-import copy
+from colorama import Fore, Style, init
 
 class GridStatus(Enum):
     WALKABLE = 0
@@ -335,7 +335,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
-        print(f"Checking for helper block now for start: {path_start}, goal: {path_end}")
+        print(Fore.MAGENTA + f"Checking for helper block now for start: {path_start}, goal: {path_end}")
         path_coords = determine_helper_blocks(c_space_grid, path_start, path_end)
 
     steps = []
@@ -378,7 +378,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
     magnitude = int(np.linalg.norm(movement_vector))
     
     if magnitude == 0:
-        print("Warning: No movement required.")
+        print(Fore.MAGENTA + "Warning: No movement required.")
         return [], "null"
     
     # If horizontally diagonal, needs to split into 2 sequential steps.
@@ -452,7 +452,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
             return f"STEP_{step_instructions}", new_orientation
 
     # Handle undefined or unexpected movements
-    print(f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
+    print(Fore.MAGENTA + f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
     return ["UNKNOWN_STEP"], "null"
 
 def get_orientation(movement: str, orientation: InchwormOrientation):
