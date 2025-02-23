@@ -103,9 +103,15 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
     x, y, z = coord
 
     if is_valid_position_3d(grid, coord):
-        grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
-        if z - 1 >= 0:
-            grid[x][y][z-1] = status.value #cell below
+        if status != GridStatus.INCOMING_BLOCK:
+            grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
+            if z - 1 >= 0:
+                grid[x][y][z-1] = status.value #cell below
+        else:
+            grid[x][y][z] = GridStatus.INCOMING_BLOCK.value
+            if z - 1 >= 0:
+                grid[x][y][z-1] = GridStatus.NOT_WALKABLE.value #cell below
+
     return grid
 
 def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
@@ -148,22 +154,6 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
                 grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
-def rm_inchworm_path_from_grid(grid, inchworm_path):
-    """
-    Remove the inchworm path from the grid.
-
-    Args:
-        grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
-    Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot. 
-    """ 
-    inchworm_path.pop(-1)
-    for step in range(len(inchworm_path)-1): 
-        x, z, y = inchworm_path[step]
-        grid[x][z][y] = GridStatus.WALKABLE.value
-    return grid
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """

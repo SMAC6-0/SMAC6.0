@@ -190,7 +190,7 @@ def update():
             last_colored_block_2 = spawned_block_2
             last_block_original_texture_2 = smart_block_texture
 
-        sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
+        # sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
 
 
@@ -232,7 +232,9 @@ def vis_IW_paths(inchworm, clear_path=False):
             seed_block_texture_step : seed_block_texture,
             smart_block_texture_step : smart_block_texture, 
             smart_block_texture_step_red : white_block_texture, 
-            smart_block_outline : incoming_step_block_texture
+            smart_block_outline : incoming_step_block_texture, 
+            incoming_block_texture : incoming_block_texture
+
         }
         block_color = transition[already_placed_block.texture]
         # print("new texture: ", block_color)
