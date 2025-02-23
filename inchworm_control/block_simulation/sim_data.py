@@ -77,7 +77,6 @@ class SimData:
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
-            # print("struct map: ", self.current_map)
             print(Fore.GREEN + "struct's map updated w new IW path")
             self.cleared_path_flag = False
             return True

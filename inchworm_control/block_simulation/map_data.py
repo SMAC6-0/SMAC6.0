@@ -111,6 +111,7 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
             grid[x][y][z] = GridStatus.INCOMING_BLOCK.value
             if z - 1 >= 0:
                 grid[x][y][z-1] = GridStatus.NOT_WALKABLE.value #cell below
+
     return grid
 
 def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):

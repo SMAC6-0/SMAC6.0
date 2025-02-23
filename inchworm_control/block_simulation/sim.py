@@ -234,6 +234,7 @@ def vis_IW_paths(inchworm, clear_path=False):
             smart_block_texture_step_red : white_block_texture, 
             smart_block_outline : incoming_step_block_texture, 
             incoming_block_texture : incoming_block_texture
+
         }
         block_color = transition[already_placed_block.texture]
         # print("new texture: ", block_color)
