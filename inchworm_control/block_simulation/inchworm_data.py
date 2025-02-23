@@ -124,8 +124,8 @@ class Inchworm:
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print(Fore.MAGENTA + "goal not given... finding goal now")
-            print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
-            print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
+            # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
+            # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + "erm blueprint done in the wrong place")
