@@ -49,7 +49,8 @@ def blueprint(curr_map, final_map) -> list:
                     for y in range(curr_map.shape[1]): #iterate 0-7
                         is_different = curr_map[x, y, z] != final_map[x, y, z]
                         final_is_walkable = final_map[x, y, z] == 0
-                        lowest_z = None
+                        lowest_z = z
+
                         
                         for zz in range((curr_map.shape[2])):
                             curr_is_walkable = curr_map[x, y, zz] == 0

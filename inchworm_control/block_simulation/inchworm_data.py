@@ -121,11 +121,12 @@ class Inchworm:
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
+        print(Fore.MAGENTA +"lagging foot loc: ", self.lagging_foot_loc)
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print(Fore.MAGENTA + "goal not given... finding goal now")
-            print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
-            print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
+            # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
+            # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + "erm blueprint done in the wrong place")
@@ -186,6 +187,8 @@ class Inchworm:
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
         self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
+        self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+        
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
