@@ -85,10 +85,7 @@ class Inchworm:
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
-        if not (location == self.goal):
-            self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
-        else:
-            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+        self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
 
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
@@ -121,6 +118,7 @@ class Inchworm:
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
+        print(Fore.MAGENTA +"lagging foot loc: ", self.lagging_foot_loc)
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print(Fore.MAGENTA + "goal not given... finding goal now")
@@ -186,6 +184,8 @@ class Inchworm:
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
         self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
+        self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+        
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
