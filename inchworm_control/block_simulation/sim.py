@@ -23,7 +23,7 @@ sim_data = SimData()
 
 # Variables
 sky_texture = load_texture("Assets/Textures/Skybox.png")
-sans_texture = load_texture("Assets/Textures/sky_texture.png")
+skynt_texture = load_texture("Assets/Textures/sky_texture.png")
 white_block_texture = load_texture("Assets/Textures/white_block.png")
 smart_block_texture = load_texture("Assets/Textures/smart_block_new.png")
 smart_block_texture_step = load_texture("Assets/Textures/smart_block_step_new.png")
@@ -48,7 +48,7 @@ incoming_path_seed_texture = load_texture("Assets/Textures/incoming_path_seed.pn
 incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
 
 # More Variables
-last_colored_block = None
+last_cell = None
 last_block_original_texture = None
 last_colored_block_2 = None
 last_block_original_texture_2 = None
@@ -59,13 +59,13 @@ key_n_pressed = False
 key_p_pressed, key_l_pressed = False, False
 
 spawned = False
-spawn_x, spawn_y, spawn_z = 0, 0, 0
+prev_held_block_loc = [0, 0, 0]
 
 
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, spawn_x, spawn_y, spawn_z
+    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_cell, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, prev_held_block_loc
 
 
     # Generate the pyramid coordinates
@@ -111,7 +111,7 @@ def update():
 
     if held_keys["z"]: 
         sky.model = "Assets/Models/Block"
-        sky.texture = sans_texture
+        sky.texture = skynt_texture
 
     if held_keys["n"] and not key_n_pressed: # simulates the stepping of the leading leg #  and any(state == sim_data.existing_inchworms[0].state.value for state in [2, 3, 4, 5])
         # mess at the end prevents stepping through path if not in a state that moves 
@@ -121,18 +121,19 @@ def update():
 
             if inchworm.paths: 
                 x, y, z = inchworm.get_next_point() 
-                # print("leading foot loc: ", inchworm.leading_foot_loc)
+                print("leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
             
-                # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
+                # If the IW is holding a block (the bool spawned) despawn that block from old location before it can be moved/respawned to next step
                 if spawned:
-                    delete_cube([spawn_x, spawn_y, spawn_z])
+                    delete_cube(prev_held_block_loc)
                     spawned = False
 
                 # If there is a previously colored block, restore to original texture
-                elif last_colored_block is not None:
-                        last_colored_block.texture = last_block_original_texture
+                # Restore texture from "where the leading foot is" to the actual texture that cell is supposed to have
+                elif last_cell is not None:
+                    last_cell.texture = last_block_original_texture
 
-                # This checks if there are existing block entities at the next point 
+                # This checks if there are existing block entities at the next leading foot location 
                 already_placed_block = None
                 for e in scene.entities:
                     if hasattr(e, 'position') and e.position == Vec3(x, z, y):
@@ -144,28 +145,28 @@ def update():
                     last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
 
                     # Checks for visuals at goal location
-                    if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == inchworm.get_loc_in_path():
+                    if [already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z] == inchworm.goal:
                         # IW reaches goal coords & places block 
-                        last_block_original_texture = smart_block_texture
-                        new_texture = smart_block_texture 
+                        pass
+                        # last_block_original_texture = smart_block_texture
+                        # new_texture = smart_block_texture 
                     else:
                         # The inchworm is not yet at the goal
                         new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
-                    already_placed_block.texture = new_texture
-                    last_colored_block = already_placed_block
+                    already_placed_block.texture = new_texture # whatever texture the block had before, now the IW is stepping on top of it 
+                    last_cell = already_placed_block # The new leading foot loc will now me moving from this last cell
         
                 else: # Walking with block in empty space
                     spawned = True
-                    spawned_block = spawn_cube([x, y, z], smart_block_texture_step)
-                    spawn_x, spawn_y, spawn_z = x, y, z
-                    last_colored_block = spawned_block
-                    last_block_original_texture = smart_block_texture
+                    spawn_cube([x, y, z], smart_block_texture_step) # Spawn the block the IW is holding, with green to show the leading foot is holding it
+                    prev_held_block_loc = [x, y, z]
             
             IW_is_at_goal = sim_data.send_map_to_IW(inchworm)
             if IW_is_at_goal: # clear the path visually before 
                 vis_IW_paths(inchworm, clear_path=True)
-                delete_cube(inchworm.leading_foot_loc)
-                spawn_cube(inchworm.leading_foot_loc)
+                if inchworm.leading_foot_loc != SEED_BK:
+                    delete_cube(inchworm.leading_foot_loc)
+                    spawn_cube(inchworm.leading_foot_loc)
             inchworm.update_state()
             if sim_data.new_IW_paths_received(inchworm):
                 vis_IW_paths(inchworm)
@@ -213,7 +214,6 @@ def vis_IW_paths(inchworm, clear_path=False):
     """Visualize the IW's path, or clear it"""
     # First extract the next block the IW is going to place
     if inchworm.goal != SEED_BK: 
-        print("goal is not the seed block")
         delete_cube(inchworm.goal)
         spawn_cube(inchworm.goal, incoming_block_texture)
 

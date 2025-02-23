@@ -85,11 +85,8 @@ class Inchworm:
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
-        if not (location == self.goal):
-            self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
-        else:
-            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
-
+        self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
+        
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
@@ -115,9 +112,6 @@ class Inchworm:
         if not SIMULATION: 
             # TODO @ SAKSHI & MO: UART COMMUNICATION
             pass
-
-    def get_loc_in_path(self): 
-        return tuple(map(float, self.goal))
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
@@ -186,8 +180,9 @@ class Inchworm:
         """ 
         Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
         """
-        self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-        self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+        if self.goal_progress_index > 0:
+            self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
+            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
         
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
@@ -199,7 +194,7 @@ class Inchworm:
         
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
-        return x, y, z # !!!change because interacting with sim.py!!!
+        return x, y, z
     
     def get_total_inchworms(cls):
         """
