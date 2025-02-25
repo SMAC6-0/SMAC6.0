@@ -90,7 +90,7 @@ def update():
     # Search(Look) for structures
     if held_keys["l"] and not key_l_pressed:
         generate_final_structure()
-        sim_data.spawn_inchworms(1)
+        sim_data.spawn_inchworms(2)
         key_l_pressed = True
 
     if not held_keys["l"]:
@@ -104,7 +104,7 @@ def update():
             vis_IW_paths(inchworm)
         # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
         # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
-        key_p_prensed = True
+        key_p_pressed = True
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
@@ -121,7 +121,7 @@ def update():
 
             if inchworm.paths: 
                 x, y, z = inchworm.get_next_point() 
-                print("leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
+                print("IW", inchworm.id, " leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
             
                 # If the IW is holding a block (the bool spawned) despawn that block from old location before it can be moved/respawned to next step
                 if spawned:
@@ -174,30 +174,32 @@ def update():
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, y2, z2 = sim_data.existing_inchworms[0].lagging_foot_loc
-        already_placed_block_2 = None
-        for e in scene.entities:
-            if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
-                already_placed_block_2 = e
-                break
+        for inchworm in sim_data.existing_inchworms:  
 
-        # If there is a previously colored block, restore to original texture
-        if last_colored_block_2 is not None:
-            last_colored_block_2.texture = last_block_original_texture_2
-        
-        if already_placed_block_2:
-            # Store the original texture before changing it
-            last_block_original_texture_2 = already_placed_block_2.texture
-            new_texture2 = check_block_color(already_placed_block_2.position.x, already_placed_block_2.position.y, already_placed_block_2.position.z)
-            already_placed_block_2.texture = new_texture2
-            last_colored_block_2 = already_placed_block_2
-        else:
-            spawned_block_2 = spawn_cube([x2, y2, z2], smart_block_texture_step)
-            last_colored_block_2 = spawned_block_2
-            last_block_original_texture_2 = smart_block_texture
+            if inchworm.paths: 
+                x2, y2, z2 = inchworm.lagging_foot_loc
+                already_placed_block_2 = None
+                for e in scene.entities:
+                    if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
+                        already_placed_block_2 = e
+                        break
 
-        # sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
-        key_n_pressed = False
+                # If there is a previously colored block, restore to original texture
+                if last_colored_block_2 is not None:
+                    last_colored_block_2.texture = last_block_original_texture_2
+                
+                if already_placed_block_2:
+                    # Store the original texture before changing it
+                    last_block_original_texture_2 = already_placed_block_2.texture
+                    new_texture2 = check_block_color(already_placed_block_2.position.x, already_placed_block_2.position.y, already_placed_block_2.position.z)
+                    already_placed_block_2.texture = new_texture2
+                    last_colored_block_2 = already_placed_block_2
+                else:
+                    spawned_block_2 = spawn_cube([x2, y2, z2], smart_block_texture_step)
+                    last_colored_block_2 = spawned_block_2
+                    last_block_original_texture_2 = smart_block_texture
+
+                key_n_pressed = False
 
 
     if held_keys["m"]:

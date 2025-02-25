@@ -66,7 +66,7 @@ class SimData:
                 inchworm.current_map = copy.deepcopy(self.current_map)
                 # print("IW after copy", inchworm.current_map)
 
-                print(Fore.GREEN + "Struct should have sent its map to the IW")
+                print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
                 self.cleared_path_flag = True
                 return True
         # return self.current_map # TODO: maybe unnecessary
@@ -77,7 +77,7 @@ class SimData:
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
-            print(Fore.GREEN + "struct's map updated w new IW path")
+            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
             self.cleared_path_flag = False
             return True
         else: 
@@ -92,9 +92,10 @@ class SimData:
             num_inchworms (int): number of inchworms building the structure
         """
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_1_LOC))
+            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_LOCS[i]))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
-        print(Fore.GREEN + "inchworms spawned")
+        # print(Fore.GREEN + "inchworms spawned")
+        print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
 
     def get_next_steps(self): 
         """
