@@ -639,7 +639,7 @@ class Inchworm:
             print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
-            if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
+            if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
                 print("start byte detected")
                 buffer = []  
                 bytesRead = 0
