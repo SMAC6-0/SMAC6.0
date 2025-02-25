@@ -651,9 +651,9 @@ class Inchworm:
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
                 print("Collecting Message Length")
                 msgLenBytes.append(byte)
+                print("msgLenBytes", msgLenBytes)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
-                    print("msgLenBytes", msgLenBytes)
                     msgLenBytes = bytearray(struct.pack('B', msgLenBytes))
                     print("msgLenBytes after bytearray", msgLenBytes)
                     msgLen = int.from_bytes(msgLenBytes,'little',True)
