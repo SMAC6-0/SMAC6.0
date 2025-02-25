@@ -633,10 +633,11 @@ class Inchworm:
         bytesRead = 0
         collecting_data = False
         while True:
-            print(self.IW_SERIAL.read(1))
+            # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
 
             if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
+                print("start byte detected")
                 buffer = []  
                 bytesRead = 0
                 msgLenCollected = False
@@ -645,6 +646,7 @@ class Inchworm:
                 collecting_data = True
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
+                print("Collecting Message Length")
                 msgLenBytes.append(byte)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
@@ -652,6 +654,7 @@ class Inchworm:
                     msgLen = int.from_bytes(msgLenBytes,'little',True)
 
             elif byte == UART_CODES.MapSnapshot.value and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                print("Receiving Map Snapshot from Structure")
                 if collecting_data:
                     print("Map snapshot buffer: ", buffer)
                     checksum = Inchworm.get_checksum(buffer)
