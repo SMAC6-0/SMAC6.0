@@ -16,6 +16,7 @@ import map_data
 from search import search
 from inchworm_data import Inchworm
 from colorama import Fore, init
+import numpy as np
 init(autoreset=True)
 
 from inchworm_control.blueprint import blueprint 
@@ -31,7 +32,7 @@ class SimData:
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
-        self.cleared_path_flag = False
+        self.cleared_path_flags = {}
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
@@ -51,14 +52,19 @@ class SimData:
 
         # Structure verifies that block is in correct location 
         if inchworm.leading_foot_loc == inchworm.goal and inchworm.paths: 
+            # print(Fore.GREEN + f"IW{inchworm.id} is touvhing the struct, which has a value of {self.current_map[x][y][z]}")
+            # a = np.array(self.current_map)
+            # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
                 # Update current_map w new block 
 
-                # print(Fore.GREEN + "Before update:", self.current_map)
+                # a = np.array(self.current_map)
+                # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
-                # print(Fore.GREEN + "structure map: ", self.current_map)
+                # a = np.array(self.current_map)
+                # print(Fore.GREEN + f"struct map after all updates: ", a[:9, :9, :4])
                 # print(Fore.GREEN + "final map: ", self.final_structure)
 
                 # Send current_map to IW 
@@ -67,18 +73,18 @@ class SimData:
                 # print("IW after copy", inchworm.current_map)
 
                 print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
-                self.cleared_path_flag = True
+                self.cleared_path_flags[inchworm.id] = True # Path is cleared flag, meaning struct is set to receive updates with a new path 
                 return True
         # return self.current_map # TODO: maybe unnecessary
 
     def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
-        if self.cleared_path_flag and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
+        if self.cleared_path_flags[inchworm.id] and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
             print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
-            self.cleared_path_flag = False
+            self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
             return True
         else: 
             # print("struct did not receive new IW path")
@@ -94,6 +100,9 @@ class SimData:
         for i in range(num_inchworms): 
             self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_LOCS[i]))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
+
+            # For however many IWs exist, store flag in dictionary 
+            self.cleared_path_flags[i+1] = False # The key is i+1 to correspond to the IW ID
         # print(Fore.GREEN + "inchworms spawned")
         print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
 
