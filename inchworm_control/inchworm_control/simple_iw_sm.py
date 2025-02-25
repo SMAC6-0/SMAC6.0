@@ -636,8 +636,8 @@ class Inchworm:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
             print(byte)
-            print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
-            print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+            # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+            # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
                 print("start byte detected")
@@ -656,7 +656,7 @@ class Inchworm:
                     msgLenBytes = bytearray(msgLenBytes)
                     msgLen = int.from_bytes(msgLenBytes,'little',True)
 
-            elif byte == UART_CODES.MapSnapshot.value and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+            elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
                 print("Receiving Map Snapshot from Structure")
                 if collecting_data:
                     print("Map snapshot buffer: ", buffer)
@@ -675,7 +675,7 @@ class Inchworm:
             elif collecting_data:
                 buffer.append(byte) # Append bytes to buffer if between start and end delimiters
                 bytesRead += 1
-            elif byte == UART_CODES.MapSnapshot.value:
+            elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
                 break
                 
         print (received_data)                   #print received data
