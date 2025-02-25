@@ -636,6 +636,7 @@ class Inchworm:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
             print(byte)
+            print(UART_CODES.StartByte.value)
             print(byte == UART_CODES.StartByte.value)
 
             if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
