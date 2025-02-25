@@ -653,8 +653,9 @@ class Inchworm:
                 msgLenBytes.append(byte)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
-                    msgLenBytes = bytearray(struct.pack('B', msgLenBytes))
                     print("msgLenBytes", msgLenBytes)
+                    msgLenBytes = bytearray(struct.pack('B', msgLenBytes))
+                    print("msgLenBytes after bytearray", msgLenBytes)
                     msgLen = int.from_bytes(msgLenBytes,'little',True)
                     print("msgLen", msgLen)
 
