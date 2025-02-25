@@ -382,6 +382,7 @@ class Inchworm:
             print("getting map snapshot")
 
             self.inchworm_gets_map()
+            return True 
 
             # received_data = self.IW_SERIAL.read()              #read serial port
             # sleep(0.03)
@@ -515,7 +516,7 @@ class Inchworm:
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
-        checksum = self.crc16(block_change).to_bytes(2, 'little')
+        checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
         # print("msg_len", msg_len)
         # print("checksum", checksum)
@@ -549,7 +550,7 @@ class Inchworm:
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
-        checksum = self.crc16(block_change).to_bytes(2, 'little')
+        checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
         # print("msg_len", msg_len)
         # print("checksum", checksum)
@@ -590,7 +591,7 @@ class Inchworm:
             # calculate message length and checksum
 
             msg_len = len(block_change).to_bytes(2,'little')
-            checksum = self.crc16(block_change).to_bytes(2, 'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
             print("msg_len", msg_len)
             print("checksum", checksum)
@@ -621,11 +622,85 @@ class Inchworm:
 
     def inchworm_gets_map(self):
         print("Getting the map RAHHHHHHHHHHH")
-        received_data = self.IW_SERIAL.read()              #read serial port
+
+        # Receiving Map Snapshot from Structure
+        received_data = []
+        buffer = []
+        msgLenBytes = []
+        msgLen = 0
+        msgLenCollected = True
+        msgLenReceivedCounter = 0
+        bytesRead = 0
+        collecting_data = False
+        while True:
+            byte = int.from_bytes(self.IW_SERIAL.read(1))              #read serial port
+            
+            try:
+                if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
+                    buffer = []  
+                    bytesRead = 0
+                    msgLenCollected = False
+                    msgLenBytes = []
+                    msgLenReceivedCounter = 0
+                    collecting_data = True
+                    
+                elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
+                    msgLenBytes.append(byte)
+                    msgLenReceivedCounter += 1
+                    if msgLenReceivedCounter == 2:
+                        msgLenBytes = bytearray(msgLenBytes)
+                        msgLen = int.from_bytes(msgLenBytes,'little',True)
+
+                elif byte == UART_CODES.MapSnapshot.value and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                    if collecting_data:
+                        print("Map snapshot buffer: ", buffer)
+                        checksum = Inchworm.get_checksum(buffer)
+                        calculated_check_sum = Inchworm.crc16(buffer)
+                        
+                        if checksum == calculated_check_sum:
+                            current_map = Inchworm.process_received_map_snapshot(buffer)
+                            print("Current map")
+                            print(current_map)
+                        else:
+                            self.state = IW_STATE.ERROR
+
+                        collecting_data = False
+                
+                elif collecting_data:
+                    buffer.append(byte) # Append bytes to buffer if between start and end delimiters
+                    bytesRead += 1
+                elif byte == UART_CODES.MapSnapshot.value:
+                    break
+                
         print (received_data)                   #print received data
+
+    @staticmethod
+    def process_received_map_snapshot(map_data):
+        layers, rows, cols = 3, 5, 6
+        array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+        index = 0
+        for l in range(layers):
+            for r in range(rows):
+                for c in range(cols):
+                    if index < len(map_data):
+                        array[l][r][c] = map_data[index]
+                        index += 1
+        return array  
+        print("Received 3D Array:", array)
 
     def request_map_snapshot(self):
         print("Gimme map plsss")
+
+    # Checksum protocol for the IW and Block communication
+    @staticmethod
+    def get_checksum(buffer): # Get checksum from buffer
+        checksum = []
+        checksum.append(buffer.pop())
+        checksum.append(buffer.pop())
+        checksum = bytearray(checksum)
+        checksum = int.from_bytes(checksum,'big',False)
+        
+        return checksum
 
             
     # Checksum protocol for the IW and Block communication
