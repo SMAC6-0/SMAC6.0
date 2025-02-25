@@ -653,8 +653,10 @@ class Inchworm:
                 msgLenBytes.append(byte)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
-                    msgLenBytes = bytearray(msgLenBytes)
+                    msgLenBytes = bytearray(struct.pack('B', msgLenBytes))
+                    print("msgLenBytes", msgLenBytes)
                     msgLen = int.from_bytes(msgLenBytes,'little',True)
+                    print("msgLen", msgLen)
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
                 print("Receiving Map Snapshot from Structure")
