@@ -610,6 +610,13 @@ class Inchworm:
 
     def received_block_confirmation(self): 
         print("We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
+        block_confirm = input("IW got confirmation from block? (yes/no) \n")
+        if block_confirm.lower() == 'yes':
+            return True
+        elif block_confirm.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
         pass
 
     def inchworm_gets_map(self):
