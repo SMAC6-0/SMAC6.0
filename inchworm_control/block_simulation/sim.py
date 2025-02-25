@@ -1,39 +1,54 @@
 # Install Ursina before using this "pip install ursina"
 # Tutorial https://www.youtube.com/watch?v=DHSRaVeQxIk
 # What are you doing here?!
+"""
+This file facilitates the operation of the simulation itself: frame updates, button presses, etc.
+Important note on coordinates. Voxels are x, z, y. They consider y to be upwards, rather than z. So, 
+when spawning a block, a Vec3 is used with xzy rather than xyz. If it's not a Voxel, use xyz !
+"""
 
 # Imports
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 import random 
 from search import search
-from path_conversion import * 
-from config import CURRENT_LOC, BD_LOC, DEMO
+from config import *
 import copy 
+from sim_data import SimData
 
 app = Ursina()
+sim_data = SimData()
 
 # stltovoxel /Users/canguven/Downloads/tower.stl /Users/canguven/Downloads/yarrak.xyz  --resolution 50
 
 # Variables
-sky_texture = load_texture("Assets/Textures/skybox.png")
+sky_texture = load_texture("Assets/Textures/Skybox.png")
+skynt_texture = load_texture("Assets/Textures/sky_texture.png")
 white_block_texture = load_texture("Assets/Textures/white_block.png")
 smart_block_texture = load_texture("Assets/Textures/smart_block_new.png")
 smart_block_texture_step = load_texture("Assets/Textures/smart_block_step_new.png")
-smart_block_texture_red = load_texture("Assets/Textures/smart_block_red_outline.png")
-smart_block_texture_blue = load_texture("Assets/Textures/smart_block_blue_outline.png")
-smart_block_texture_yellow = load_texture("Assets/Textures/smart_block_yellow_outline.png")
-smart_block_texture_green = load_texture("Assets/Textures/smart_block_neon_green_outline.png")
-smart_block_outline = load_texture("Assets/Textures/smart_block_outline.png")
+supply_depot_texture = load_texture("Assets/Textures/smart_block_red_outline.png")
+outline_texture_blue = load_texture("Assets/Textures/smart_block_blue_outline.png")
+outline_texture_yellow = load_texture("Assets/Textures/smart_block_yellow_outline.png")
+outline_texture_green = load_texture("Assets/Textures/smart_block_neon_green_outline.png")
+final_struct_outline = load_texture("Assets/Textures/smart_block_outline.png")
+seed_block_texture = load_texture("Assets/Textures/seed_block.png")
 
 # Color Steps
-smart_block_texture_step_red = load_texture("Assets/Textures/smart_block_red_step.png")
-smart_block_texture_step_blue = load_texture("Assets/Textures/smart_block_blue_step.png")
-smart_block_texture_step_yellow = load_texture("Assets/Textures/smart_block_yellow_step.png")
-smart_block_texture_step_green = load_texture("Assets/Textures/smart_block_green_step.png") 
+outline_step_texture_red = load_texture("Assets/Textures/smart_block_red_step.png")
+outline_step_texture_blue = load_texture("Assets/Textures/smart_block_blue_step.png")
+outline_step_texture_yellow = load_texture("Assets/Textures/smart_block_yellow_step.png")
+outline_step_texture_green = load_texture("Assets/Textures/smart_block_green_step.png") 
+seed_block_texture_step = load_texture("Assets/Textures/seed_block_step.png") 
+
+# Incoming Blocks / Steps 
+incoming_path_texture = load_texture("Assets/Textures/incoming_path_red.png")
+incoming_path_block_texture = load_texture("Assets/Textures/incoming_path_smart.png")
+incoming_path_seed_texture = load_texture("Assets/Textures/incoming_path_seed.png")
+incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
 
 # More Variables
-last_colored_block = None
+last_cell = None
 last_block_original_texture = None
 last_colored_block_2 = None
 last_block_original_texture_2 = None
@@ -41,121 +56,125 @@ window.exit_button.visible = False
 key_g_pressed = False  
 key_t_pressed = False  
 key_n_pressed = False 
-key_p_pressed = False
-placed_block = None 
+key_p_pressed, key_l_pressed = False, False
+
 spawned = False
-spawn_x, spawn_y, spawn_z = 0, 0, 0
-blocks_placed = []
-found_structures = []
-coords_to_spawn = []
-misc_blocks = []
-complete_steps = []
-path_steps = None 
-number = 0 
-# Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
-point = CURRENT_LOC
-prev_point = point
+prev_held_block_loc = [0, 0, 0]
+
+
 
 # Updates every frame
 def update():
-    global blocks_placed, key_g_pressed, key_t_pressed,key_p_pressed, key_n_pressed, coords_to_spawn, last_colored_block, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, found_structures, misc_blocks, prev_point, point, placed_block, spawned, spawn_x, spawn_y, spawn_z, goal, number, path_steps
+    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, last_cell, last_block_original_texture, last_colored_block_2, last_block_original_texture_2, spawned, prev_held_block_loc
+
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
-        pyramid_coordinates = generate_pyramid(5)
-        # Spawn cubes for each coordinate in the pyramid
-        for x, y, z in pyramid_coordinates:
-            spawn_cube(x, y, z,'')  # Replace
-            cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            blocks_placed.append(cube.position) 
+        pyramid_coordinates = sim_data.generate_pyramid(5)
+        for coord in pyramid_coordinates:
+            spawn_cube(coord)  
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
         key_g_pressed = False
 
     if held_keys["t"] and not key_t_pressed:
-        # To use this function, just pass the path to your 'empire.xyz' file
-        # file_path = '/Users/canguven/Downloads/yarrak.xyz'
-        # UPDATE THE FILES HERE
-        simplify_and_ensure_connectivity('/Users/canguven/Downloads/empire.xyz', '/Users/canguven/Downloads/empire2.xyz', grid_size=10)
-        coordinates = read_and_place_voxels_from_file('/Users/canguven/Downloads/empire2.xyz')
-        # pyramid_coordinates = generate_pyramid(5)
-        # # Spawn cubes for each coordinate in the pyramid
-        # for x, y, z in pyramid_coordinates:
-        #     spawn_cube(x, y, z,'')  # Replace
-        #     cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture) 
-        #     blocks_placed.append(cube.position) 
-        for x, y, z in coordinates:
-            spawn_cube(x, y, z,'')  # Replace
-            cube = Voxel(position=Vec3(x, y, z),  texture=smart_block_texture)
-            blocks_placed.append(cube.position) 
-        key_t_pressed = True  # Set the flag to True after printing
+        coordinates = sim_data.generate_building()
+        for coord in coordinates:
+            spawn_cube(coord)  
+        key_t_pressed = True  
     
     if not held_keys["t"]:
         key_t_pressed = False
 
     # Search(Look) for structures
-    if held_keys["l"]:
-        found_structures, misc_blocks = show_structures()
+    if held_keys["l"] and not key_l_pressed:
+        generate_final_structure()
+        sim_data.spawn_inchworms(1)
+        key_l_pressed = True
 
-    # Generate paths and inchworm steps
+    if not held_keys["l"]:
+        key_l_pressed = False
+
+    # Generate paths and inchworm steps. Spawns the supply depot block. 
     if held_keys["p"] and not key_p_pressed:
-        spawn_cube(BD_LOC[0], BD_LOC[1], BD_LOC[2], 'n')
-        sorted_list = sorted(misc_blocks, key=lambda coordinate: coordinate[1])
-        coords_to_spawn, path_steps , goal= dev_total_path_steps(found_structures, sorted_list)
-        step_getter(path_steps)
-        for point in goal:
-            point[1] += 1  # Increment the second value
-
-        key_p_pressed = True
+        # spawn_cube(BD_LOCS[0], outline_texture_red) # consider changing accessing the supply depot to be through sim_data.py
+        for inchworm in sim_data.existing_inchworms:
+            inchworm.plan_path()
+            vis_IW_paths(inchworm)
+        # seed_block = sim_data.existing_inchworms[0].goal[0] # for now, assume that the first block in the blueprint is the seed block
+        # spawn_cube(seed_block[0], seed_block[1], seed_block[2], 'seed')
+        key_p_prensed = True
 
     if not held_keys["p"] and key_p_pressed:
         key_p_pressed = False
 
-    if held_keys["n"] and not key_n_pressed and coords_to_spawn:
-        (point, holding_block) = coords_to_spawn.pop(0)  # Get the next point
-        x, z, y = point
-        if holding_block:
-            z = z+1
+    if held_keys["z"]: 
+        sky.model = "Assets/Models/Block"
+        sky.texture = skynt_texture
 
-        already_placed_block = None
-        for e in scene.entities:
-            if hasattr(e, 'position') and e.position == Vec3(x, z, y):
-                already_placed_block = e
-                break
+    if held_keys["n"] and not key_n_pressed: # simulates the stepping of the leading leg #  and any(state == sim_data.existing_inchworms[0].state.value for state in [2, 3, 4, 5])
+        # mess at the end prevents stepping through path if not in a state that moves 
 
-        # first check if the last_colored_block was spawned bc we need to delete that block from blocks_placed and despawn it
-        if spawned:
-            delete_cube(spawn_x, spawn_z, spawn_y)
-            spawned = False
+        # TODO: consider moving block tracking to sim_data
+        for inchworm in sim_data.existing_inchworms:  
 
-        # If there is a previously colored block, restore to original texture
-        elif last_colored_block is not None:
-                last_colored_block.texture = last_block_original_texture
-        if already_placed_block:
+            if inchworm.paths: 
+                x, y, z = inchworm.get_next_point() 
+                print("leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
+            
+                # If the IW is holding a block (the bool spawned) despawn that block from old location before it can be moved/respawned to next step
+                if spawned:
+                    delete_cube(prev_held_block_loc)
+                    spawned = False
 
-            # Store the original texture before changing it
-            last_block_original_texture = already_placed_block.texture
-            if (already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z) == tuple(map(float, goal[number])):
-                last_block_original_texture = smart_block_texture
-                new_texture = smart_block_texture 
-                number += 1
-            else:
-                new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
-            already_placed_block.texture = new_texture
-            last_colored_block = already_placed_block
+                # If there is a previously colored block, restore to original texture
+                # Restore texture from "where the leading foot is" to the actual texture that cell is supposed to have
+                elif last_cell is not None:
+                    last_cell.texture = last_block_original_texture
 
-        else:
-            spawned = True
-            spawned_block = spawn_cube(x, z, y,'step')
-            spawn_x, spawn_y, spawn_z = x, y, z
-            last_colored_block = spawned_block
-            last_block_original_texture = smart_block_texture
+                # This checks if there are existing block entities at the next leading foot location 
+                already_placed_block = None
+                for e in scene.entities:
+                    if hasattr(e, 'position') and e.position == Vec3(x, z, y):
+                        already_placed_block = e
+                        break
+
+                if already_placed_block: # When you aren't simulating walking with cube 
+
+                    last_block_original_texture = already_placed_block.texture # Store the original texture before changing it
+
+                    # Checks for visuals at goal location
+                    if [already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z] == inchworm.goal:
+                        # IW reaches goal coords & places block 
+                        pass
+                        # last_block_original_texture = smart_block_texture
+                        # new_texture = smart_block_texture 
+                    else:
+                        # The inchworm is not yet at the goal
+                        new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
+                    already_placed_block.texture = new_texture # whatever texture the block had before, now the IW is stepping on top of it 
+                    last_cell = already_placed_block # The new leading foot loc will now me moving from this last cell
+        
+                else: # Walking with block in empty space
+                    spawned = True
+                    spawn_cube([x, y, z], smart_block_texture_step) # Spawn the block the IW is holding, with green to show the leading foot is holding it
+                    prev_held_block_loc = [x, y, z]
+            
+            IW_is_at_goal = sim_data.send_map_to_IW(inchworm)
+            if IW_is_at_goal: # clear the path visually before 
+                vis_IW_paths(inchworm, clear_path=True)
+                if inchworm.leading_foot_loc != SEED_BK:
+                    delete_cube(inchworm.leading_foot_loc)
+                    spawn_cube(inchworm.leading_foot_loc)
+            inchworm.update_state()
+            if sim_data.new_IW_paths_received(inchworm):
+                vis_IW_paths(inchworm)
 
         key_n_pressed = True
 
     if not held_keys["n"] and key_n_pressed:
-        x2, z2, y2 = prev_point
+        x2, y2, z2 = sim_data.existing_inchworms[0].lagging_foot_loc
         already_placed_block_2 = None
         for e in scene.entities:
             if hasattr(e, 'position') and e.position == Vec3(x2, z2, y2):
@@ -173,38 +192,101 @@ def update():
             already_placed_block_2.texture = new_texture2
             last_colored_block_2 = already_placed_block_2
         else:
-            spawned_block_2 = spawn_cube(x2, z2, y2,'step')
+            spawned_block_2 = spawn_cube([x2, y2, z2], smart_block_texture_step)
             last_colored_block_2 = spawned_block_2
             last_block_original_texture_2 = smart_block_texture
 
-        prev_point = point
+        # sim_data.existing_inchworms[0].lagging_foot_loc = sim_data.existing_inchworms[0].leading_foot_loc
         key_n_pressed = False
 
 
+    if held_keys["m"]:
+        # Begin the state machine !
+        for inchworm in sim_data.existing_inchworms: 
+            inchworm.update_state()
+            vis_IW_paths(inchworm)
 
-# writes steps to a txt file              
-def step_getter(steps):
-    complete_steps = copy.deepcopy(steps)
-    file_path = "steps.txt"
-    
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
+def show_structure_map(): 
+    """Show how the structure views the map. """
+    pass
 
-# Searches for known structures and changes the color of strucutres found 
-def show_structures():
-    found_structures, misc_blocks = search(blocks_placed)
-    for structure in found_structures:
-        structure_pos = structure[1]  
-        structure_name = structure[0] #string
-        for block in structure_pos:
-            delete_cube(block[0], block[1], block[2])
-            spawn_cube(block[0], block[1], block[2], structure_name[-1])
-            #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
-    for block in misc_blocks:
-            delete_cube(block[0], block[1], block[2])
-            spawn_cube(block[0], block[1], block[2], 'misc')
-    return found_structures, misc_blocks
+def vis_IW_paths(inchworm, clear_path=False):
+    """Visualize the IW's path, or clear it"""
+    # First extract the next block the IW is going to place
+    if inchworm.goal != SEED_BK: 
+        delete_cube(inchworm.goal)
+        spawn_cube(inchworm.goal, incoming_block_texture)
+
+    # Then show the path the inchworm is going to take
+    for step in range(len(inchworm.paths)-1): 
+        cell = inchworm.paths[step]
+
+        already_placed_block = None
+        for e in scene.entities:
+            if hasattr(e, 'position') and e.position == Vec3(cell[0], cell[2], cell[1]):
+                already_placed_block = e
+                break
+        if clear_path: # clear the old inchworm path 
+            transition = {
+                incoming_path_texture : white_block_texture, 
+                incoming_path_block_texture : smart_block_texture,
+                incoming_path_seed_texture : seed_block_texture,
+                incoming_block_texture : incoming_block_texture, 
+                seed_block_texture_step : seed_block_texture,
+                smart_block_texture_step : smart_block_texture_step, 
+                outline_step_texture_red : white_block_texture, 
+                # Maintain textures if repeating the cleared visualization: 
+                white_block_texture : white_block_texture, 
+                smart_block_texture : smart_block_texture,
+                seed_block_texture : seed_block_texture,              
+            }
+        else: # show the inchworm path
+            transition = {
+                white_block_texture : incoming_path_texture, 
+                smart_block_texture : incoming_path_block_texture,
+                seed_block_texture : incoming_path_seed_texture, 
+                seed_block_texture_step : incoming_path_seed_texture,
+                outline_step_texture_red : incoming_path_texture,
+                smart_block_texture_step : incoming_path_block_texture,
+                # Maintain textures if repeating the visualization: 
+                incoming_block_texture : incoming_block_texture,
+                incoming_path_texture : incoming_path_texture, 
+                incoming_path_block_texture : incoming_path_block_texture,
+                incoming_path_seed_texture : incoming_path_seed_texture
+            }
+        block_color = transition[already_placed_block.texture]
+        delete_cube(cell)
+        spawn_cube(cell, block_color)
+
+def generate_final_structure():
+    """
+    Clear the map, visualizing where final structure must be. 
+    """
+    # the shallow copy lets loop go through every placed block without changing what blocks are in the final struct 
+    blocks_placed = list(sim_data.blocks_placed) # makes a shallow copy of the list 
+    for block in blocks_placed: 
+        delete_cube(block) # func deletes blocks from sim_data
+        spawn_cube(block, final_struct_outline)
+    sim_data.generate_final_structure_map(blocks_placed)
+
+# def show_structures():
+#     """
+#     Searches for known structures and changes the color of structures found. 
+#     """
+#     # TODO: If planning on using substructures for the blueprint algo, make use of this system: 
+
+#     for inchworm in sim_data.existing_inchworms:
+#         inchworm.found_structures, inchworm.misc_blocks = search(sim_data.blocks_placed)
+#         for structure in inchworm.found_structures:
+#             structure_pos = structure[1]  
+#             structure_name = structure[0] #string
+#             for block in structure_pos:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], structure_name[-1])
+#                 #WHEN WE ARE IMPLEMENTING THE COLORS  spawn_cube(block[0], block[1], block[2], color_index)
+#         for block in inchworm.misc_blocks:
+#                 delete_cube(block[0], block[1], block[2])
+#                 spawn_cube(block[0], block[1], block[2], 'misc')
 
 # Voxel (block) properties
 class Voxel(Button):
@@ -220,20 +302,29 @@ class Voxel(Button):
             scale = 0.5
         )
 
-    # What happens to blocks on inputs
+    # What happens to blocks on mouse inputs
     def input(self,key):
+
         if self.hovered:
             if key == "left mouse down":
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
                 # only add blocks above field
                 if(voxel.position[1] > 0):
-                    blocks_placed.append(voxel.position) 
+                    xoxel = int(voxel.position.x)
+                    yoxel = int(voxel.position.z)
+                    zoxel = int(voxel.position.y)
+                    sim_data.blocks_placed.append([xoxel, yoxel, zoxel])
+                    print("pos: ", (xoxel, yoxel, zoxel))
             if key == "right mouse down":
                 try: 
-                    blocks_placed.remove(self.position)
+                    block = [self.position.x, self.position.z, self.position.y]
+                    sim_data.blocks_placed.remove(block)
                 except Exception as e: 
                     print("Block not found")
                 destroy(self)
+                
+        if key == "escape":
+            stop_simulation()
 
 # Skybox
 class Sky(Entity):
@@ -248,83 +339,10 @@ class Sky(Entity):
 
 
 # HELPER FUNCTIONS
-        
-def simplify_and_ensure_connectivity(input_file_path, output_file_path, grid_size):
-    """
-    Simplifies an XYZ file and ensures each voxel is at least connected to one other voxel.
 
-    Parameters:
-    - input_file_path: Path to the input XYZ file.
-    - output_file_path: Path to the output simplified XYZ file.
-    - grid_size: Size of the grid cell for downsampling and connectivity checks.
-    """
-    voxel_grid = {}  # Use a dictionary to represent a sparse grid
-    with open(input_file_path, 'r') as file:
-        for line in file:
-            x, y, z = map(float, line.strip().split())
-            # Convert coordinates to a grid position
-            grid_pos = (round(x / grid_size), round(y / grid_size), round(z / grid_size))
-            
-            # Check for connectivity: Ensure at least one neighbor exists
-            neighbors = [
-                (grid_pos[0] + dx, grid_pos[1] + dy, grid_pos[2] + dz)
-                for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)
-                if not (dx == dy == dz == 0)  # Exclude the voxel itself
-            ]
-            if any(neighbor in voxel_grid for neighbor in neighbors):
-                voxel_grid[grid_pos] = True
-            else:
-                # If no neighbors, check if it's the first voxel; if so, add it anyway to start the connectivity chain
-                if not voxel_grid:
-                    voxel_grid[grid_pos] = True
-
-    # Write the simplified and connected voxels to the output file
-    with open(output_file_path, 'w') as file:
-        for grid_pos in voxel_grid.keys():
-            # Convert grid positions back to coordinates
-            x, y, z = [coord * grid_size for coord in grid_pos]
-            file.write(f"{x} {y} {z}\n")
-
-# Example usage
-# simplify_and_ensure_connectivity('path/to/your/original_file.xyz', 'path/to/your/simplified_file.xyz', grid_size=10)
-
-        
-# Generates a quarter section of a 10-by-10 pyramid of blocks
-def generate_pyramid(base_size):
-    pyramid = []
-    # Each layer
-    for y in range(base_size):
-        # Each row
-        for x in range(base_size - y):
-            # Each column
-            for z in range(base_size - y):
-                pyramid.append((x+10, y+1, z+10))
-    return pyramid
-
-def read_and_place_voxels_from_file(file_path):
-    coordinates_from_file = []
-
-    with open(file_path, 'r') as file:
-        for line in file:
-            # Split the line into coordinates and convert them to integers
-            x, y, z = [int(float(coord)) for coord in line.strip().split()]
-            
-            # Your voxel placement logic here
-            # Replace `spawn_cube` and `Voxel` with your actual function and class names
-            # Assuming `spawn_cube` is a function to call for placing the cube, which you might or might not need
-            # spawn_cube(x, y, z, '')  # Uncomment and use if needed
-            # cube = Voxel(position=Vec3(x, y, z), texture=smart_block_texture)
-            coordinates_from_file.append(((x/10)-60, z/10,(y/10)+20))
-            # blocks_placed.append(coordinates_from_file)
-
-    return coordinates_from_file
-
-
-
-
-# Checks the color of the block at the specified position
-# This is used to simulate the steping on a already placed block and def check_block_color(x, y, z):
+ 
 def check_block_color(x, y, z):
+    """ Checks the color of the block at the specified position. This is used to simulate the stepping on an already placed block. """
     block_color = None
     target_position = Vec3(x, y, z)
     existing_cube_texture = None
@@ -336,80 +354,79 @@ def check_block_color(x, y, z):
 
     # If the position is occupied for stepping 
     if existing_cube_texture is not None:
-        if existing_cube_texture == smart_block_texture: 
-                block_color = smart_block_texture_step
-        elif existing_cube_texture == white_block_texture: 
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_red: 
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_green: 
-                block_color = smart_block_texture_step_green
-        elif existing_cube_texture == smart_block_texture_blue: 
-                block_color = smart_block_texture_step_blue 
-        elif existing_cube_texture == smart_block_texture_yellow: 
-                block_color = smart_block_texture_step_yellow
-        elif existing_cube_texture == smart_block_texture_step: 
-                block_color = smart_block_texture
-        elif existing_cube_texture == smart_block_texture_step_red:
-                block_color = smart_block_texture_step_red
-        elif existing_cube_texture == smart_block_texture_step_green:
-                block_color = smart_block_texture_step_green
-        elif existing_cube_texture == smart_block_texture_step_blue:
-                block_color = smart_block_texture_step_blue
-        elif existing_cube_texture == smart_block_texture_step_yellow:      
-                block_color = smart_block_texture_step_yellow
-        elif existing_cube_texture == smart_block_outline:      
-                block_color = smart_block_texture
-
-        else:
-                print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
+        transition = {
+            # Step on top of block, retaining the same color: 
+            smart_block_texture: smart_block_texture_step,
+            white_block_texture: outline_step_texture_red,
+            supply_depot_texture: outline_step_texture_red, 
+            outline_texture_green: outline_step_texture_green,
+            outline_texture_blue: outline_step_texture_blue, 
+            outline_texture_yellow: outline_step_texture_yellow,
+            smart_block_texture_step: smart_block_texture, #*******
+            # Transition from color step toff color step --> for the second foot:
+            outline_step_texture_red: outline_step_texture_red, 
+            outline_step_texture_green: outline_step_texture_green,
+            outline_step_texture_blue: outline_step_texture_blue, 
+            outline_step_texture_yellow: outline_step_texture_yellow, 
+            # Textures indicating block/steps --> it's there: 
+            seed_block_texture_step : seed_block_texture,
+            final_struct_outline: smart_block_texture, 
+            incoming_block_texture: smart_block_texture, 
+            incoming_path_texture: outline_step_texture_red, # step over the incoming path 
+            seed_block_texture: seed_block_texture_step,
+            incoming_path_block_texture: smart_block_texture_step
+        }
+        try: 
+            block_color = transition[existing_cube_texture]
+        except:
+            print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
 
     return block_color
 
-# spawns a cude in the simulation at the specified position and with the specified color
-def spawn_cube(x, y, z, color_index):
-    # check if the position is already occupied
-    target_position = Vec3(x, y, z)
 
-    # Assign color_index based on the input
-    if color_index == 'n':
-        color_index = smart_block_texture_red
-    elif color_index == 's':
-        color_index = smart_block_texture_blue
-    elif color_index == 'e':
-        color_index = smart_block_texture_yellow
-    elif color_index == 'w':
-        color_index = smart_block_texture_green
-    elif color_index == 'step':
-        color_index = smart_block_texture_step
-    elif color_index == 'misc':
-        color_index = smart_block_outline    
-    else:
-        color_index = smart_block_texture
+def stop_simulation():
+    print("User pressed 'ESC'. Stopping simulation...")
+    application.quit()
+
+# spawns a cude in the simulation at the specified position and with the specified color
+def spawn_cube(coord: list[int], texture=smart_block_texture):
+    """
+    Spawns a cube in the simulation at the specified xyz position and with the specified color. 
+    Not always a smart block, but rather any sim update happening in a cube. 
+    """
+    # check if the position is already occupied
+    target_position = Vec3(coord[0], coord[2], coord[1])
+
+    if texture == smart_block_texture:
+        sim_data.blocks_placed.append(coord)  # Update the block information
 
     # Spawn the cube
-    new_cube = Voxel(position=target_position, texture=color_index)
-    blocks_placed.append(target_position)  # Optionally update the blocks_placed list
+    new_cube = Voxel(position=target_position, texture=texture)
 
-# delete a block from the simulation at the specified position
-def delete_cube(x, y, z):
-    target_position = Vec3(x, y, z)
+def delete_cube(coord: list[int]):
+    """
+    Delete a block from the simulation at the specified xyz position
+    """
+    target_position = Vec3(coord[0], coord[2], coord[1])
     for e in scene.entities:
         if hasattr(e, 'position') and e.position == target_position:
             destroy(e)
-            if target_position in blocks_placed:
-                blocks_placed.remove(target_position)
+            if coord in sim_data.blocks_placed: #and (target_position not in sim_data.seed_block):
+                sim_data.blocks_placed.remove(coord)
             break
 
-# Increase the numbers for a bigger field. 
-if DEMO:
+# Generate the simulation floor. Increase the numbers for a bigger field. 
+if not SIMULATION:
     for z in range(5): 
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))
 else:
-     for z in range(21): # 5
+    for z in range(21): # 5
         for x in range(21): # 6 
             voxel = Voxel(position = (x, 0, z))
+    # spawn seed block & supply depot
+    spawn_cube(SEED_BK, seed_block_texture)
+    spawn_cube(BD_LOCS[0], supply_depot_texture)
 
 def look_at(target_pos, player_pos):
     if isinstance(target_pos, tuple):
@@ -453,23 +470,22 @@ class FlyingFirstPersonController(FirstPersonController):
                 self.position += Vec3(0, -0.1, 0)
             if held_keys['1']:  
                 self.position = Vec3(20, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 0))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (20, 10, 0))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['2']:  
                 self.position = Vec3(20, 10, 20) 
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (20, 10, 20))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (20, 10, 20))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['3']:  
                 self.position = Vec3(0,10, 20)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0,10, 20))
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (0,10, 20))
                 player.rotation_y = yaw_degrees
                 player.camera_pivot.rotation_x = pitch_degrees
             if held_keys['4']:  
                 self.position = Vec3(0, 10, 0)  
-                pitch_degrees, yaw_degrees = look_at((10,1,10), (0, 10, 0))
-                player.rotation_y = yaw_degrees
+                pitch_degrees, yaw_degrees = look_at((10, 1, 10), (0, 10, 0))
                 player.camera_pivot.rotation_x = pitch_degrees
 
 
