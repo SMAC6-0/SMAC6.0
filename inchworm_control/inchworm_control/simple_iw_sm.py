@@ -636,7 +636,8 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
-            print(sys.stdout.buffer.write(bytes(byte)))
+            # print(sys.stdout.buffer.write(bytes(byte)))
+            print(byte)
             # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
