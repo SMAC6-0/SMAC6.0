@@ -198,12 +198,14 @@ class Inchworm:
                 else:
                     self.handle_error()
             case IW_STATE.PLACING_BLOCK:
-                if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
-                    self.handle_error()
-                if self.is_structure_complete():
-                    self.handle_structure_complete()
-                else: # structure is incomplete
+                if self.IW_gets_Map_Snapshot():
+                    if self.is_structure_complete():
+                        self.handle_structure_complete()
+                    else:
                         self.handle_structure_incomplete()
+                elif self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
+                    self.handle_error()
+                        
             case IW_STATE.ERROR:
                 self.handle_error()
             case IW_STATE.STRUCTURE_COMPLETE:
@@ -321,12 +323,6 @@ class Inchworm:
         else: 
             self.handle_error()
 
-        print("IW sends a messgae indicating block is being placed")
-        # IW sends a messgae indicating block is being placed
-        # MOOOOO HELPPPP
-        self.send_block_being_placed()
-
-
         print("Travelling to the block location")
         # IW begins travelling to block location
 
@@ -334,7 +330,6 @@ class Inchworm:
         print(f"Current inchworm state: {self.state}")
         
     def handle_transported_block(self):
-        
 
         self.state = IW_STATE.PLACING_BLOCK
         print(f"Current inchworm state: {self.state}")
