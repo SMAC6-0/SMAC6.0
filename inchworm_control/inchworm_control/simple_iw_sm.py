@@ -373,7 +373,7 @@ class Inchworm:
         if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
             got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
             if got_map_snapshot.lower() == 'yes':
-                # self.seed_block_flag = False
+                self.seed_block_flag = False
                 return True
             elif got_map_snapshot.lower() == 'no':
                 return False
@@ -383,30 +383,34 @@ class Inchworm:
             # blah blah low level language 
             # TODO: ask Mo for help when the IW gets the map SnapShot back  q1
             # return true if the IW got the map snapshot
-            received_data = self.IW_SERIAL.read()              #read serial port
-            sleep(0.03)
-            data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-            received_data += self.IW_SERIAL.read(data_left)
-            print (received_data)                   #print received data
+            print("getting map snapshot")
 
-            # verify if it's a map?? 
-            is_a_map = True
-            if is_a_map:
-                # call the update map
-                self.update_my_current_map()
-            # return is_a_map
+            self.inchworm_gets_map()
 
-            # layers, rows, cols = 3, 5, 6
-            # array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
-            # index = 0
-            # for l in range(layers):
-            #     for r in range(rows):
-            #         for c in range(cols):
-            #             if index < len(map_data):
-            #                 array[l][r][c] = map_data[index]
-            #                 index += 1
-            # return array  
-            # print("Received 3D Array:", array)
+            # received_data = self.IW_SERIAL.read()              #read serial port
+            # sleep(0.03)
+            # data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+            # received_data += self.IW_SERIAL.read(data_left)
+            # print (received_data)                   #print received data
+
+            # # verify if it's a map?? 
+            # is_a_map = True
+            # if is_a_map:
+            #     # call the update map
+            #     self.update_my_current_map()
+            # # return is_a_map
+
+            # # layers, rows, cols = 3, 5, 6
+            # # array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+            # # index = 0
+            # # for l in range(layers):
+            # #     for r in range(rows):
+            # #         for c in range(cols):
+            # #             if index < len(map_data):
+            # #                 array[l][r][c] = map_data[index]
+            # #                 index += 1
+            # # return array  
+            # # print("Received 3D Array:", array)
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -611,6 +615,9 @@ class Inchworm:
     def received_block_confirmation(self): 
         print("We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
         pass
+
+    def inchworm_gets_map(self):
+        print("Getting the map")
 
     def request_map_snapshot(self):
         print("Gimme map plsss")
