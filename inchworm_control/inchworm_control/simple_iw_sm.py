@@ -634,43 +634,42 @@ class Inchworm:
         collecting_data = False
         while True:
             byte = int.from_bytes(self.IW_SERIAL.read(1))              #read serial port
-            
-            try:
-                if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
-                    buffer = []  
-                    bytesRead = 0
-                    msgLenCollected = False
-                    msgLenBytes = []
-                    msgLenReceivedCounter = 0
-                    collecting_data = True
-                    
-                elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
-                    msgLenBytes.append(byte)
-                    msgLenReceivedCounter += 1
-                    if msgLenReceivedCounter == 2:
-                        msgLenBytes = bytearray(msgLenBytes)
-                        msgLen = int.from_bytes(msgLenBytes,'little',True)
 
-                elif byte == UART_CODES.MapSnapshot.value and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
-                    if collecting_data:
-                        print("Map snapshot buffer: ", buffer)
-                        checksum = Inchworm.get_checksum(buffer)
-                        calculated_check_sum = Inchworm.crc16(buffer)
-                        
-                        if checksum == calculated_check_sum:
-                            current_map = Inchworm.process_received_map_snapshot(buffer)
-                            print("Current map")
-                            print(current_map)
-                        else:
-                            self.state = IW_STATE.ERROR
-
-                        collecting_data = False
+            if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
+                buffer = []  
+                bytesRead = 0
+                msgLenCollected = False
+                msgLenBytes = []
+                msgLenReceivedCounter = 0
+                collecting_data = True
                 
-                elif collecting_data:
-                    buffer.append(byte) # Append bytes to buffer if between start and end delimiters
-                    bytesRead += 1
-                elif byte == UART_CODES.MapSnapshot.value:
-                    break
+            elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
+                msgLenBytes.append(byte)
+                msgLenReceivedCounter += 1
+                if msgLenReceivedCounter == 2:
+                    msgLenBytes = bytearray(msgLenBytes)
+                    msgLen = int.from_bytes(msgLenBytes,'little',True)
+
+            elif byte == UART_CODES.MapSnapshot.value and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                if collecting_data:
+                    print("Map snapshot buffer: ", buffer)
+                    checksum = Inchworm.get_checksum(buffer)
+                    calculated_check_sum = Inchworm.crc16(buffer)
+                    
+                    if checksum == calculated_check_sum:
+                        current_map = Inchworm.process_received_map_snapshot(buffer)
+                        print("Current map")
+                        print(current_map)
+                    else:
+                        self.state = IW_STATE.ERROR
+
+                    collecting_data = False
+            
+            elif collecting_data:
+                buffer.append(byte) # Append bytes to buffer if between start and end delimiters
+                bytesRead += 1
+            elif byte == UART_CODES.MapSnapshot.value:
+                break
                 
         print (received_data)                   #print received data
 
