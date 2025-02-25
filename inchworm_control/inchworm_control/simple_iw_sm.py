@@ -165,6 +165,7 @@ class Inchworm:
         self.print_flag = True
         self.seed_block_flag = True
         self.retry_path_flag = True
+        self.seed_block__path_flag = True
 
 
         # UART stuff
@@ -280,9 +281,9 @@ class Inchworm:
 
     def path_exists(self):
         # MOOOO HELPPP 
-        if self.seed_block_flag:
+        if self.seed_block__path_flag:
             print("Sending the IW path to the structure (seed block)")
-            self.seed_block_flag = False
+            self.seed_block__path_flag = False
             # IW sends it's path to the structure 
         else:
             self.send_IW_path_to_block(IW_PATH)
