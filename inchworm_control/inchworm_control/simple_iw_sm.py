@@ -621,10 +621,10 @@ class Inchworm:
 
     def inchworm_gets_map(self):
         print("Getting the map RAHHHHHHHHHHH")
-        received_data = IW_SERIAL.read()              #read serial port
+        received_data = self.IW_SERIAL.read()              #read serial port
         sleep(0.03)
-        data_left = IW_SERIAL.inWaiting()             #check for remaining byte
-        received_data += IW_SERIAL.read(data_left)
+        data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
+        received_data += self.IW_SERIAL.read(data_left)
         print (received_data)                   #print received data
 
     def request_map_snapshot(self):
