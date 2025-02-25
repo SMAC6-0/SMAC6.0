@@ -634,7 +634,7 @@ class Inchworm:
         collecting_data = False
         while True:
             print(self.IW_SERIAL.read(1))
-            byte = bytearray(struct.pack('B', self.IW_SERIAL.read(1)))              #read serial port
+            byte = self.IW_SERIAL.read(1)           #read serial port
 
             if byte == UART_CODES.StartByte.value and collecting_data == False:  # Start byte detected
                 buffer = []  
