@@ -100,6 +100,9 @@ class Inchworm:
         # UART stuff
         if not SIMULATION: 
             self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
+        else: 
+            # These are vars that the simulation uses to simulate each of the inchworm feet
+            self.last_cell, self.last_bk_og_texture, self.last_cell_2, self.last_bk_og_texture_2, self.spawned, self.prev_held_block_loc = None, None, None, None, False, [0,0,0]
     
     def __del__(self):
         """
@@ -138,11 +141,6 @@ class Inchworm:
             if self.goal != SEED_BK: 
                 print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
-
-        
-        # print("goal: ", self.goal)
-        # x, y, z =self.goal
-        # print("IW's evaluation of goal. Below:  ", self.current_map[x][y][z-1], " itself: ", self.current_map[x][y][z], " above: ", self.current_map[x][y][z+1])
 
         try: 
             step_instructions, steps, path = [], [], []
