@@ -203,7 +203,7 @@ class Inchworm:
                         self.handle_structure_complete()
                     else:
                         self.handle_structure_incomplete()
-                elif self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
+                if self.incorrect_block_location(): # blocto_bytes(2, 'little')tructure is complete
                     self.handle_error()
                         
             case IW_STATE.ERROR:
@@ -613,7 +613,7 @@ class Inchworm:
         pass
 
     def inchworm_gets_map(self):
-        print("Getting the map")
+        print("Getting the map RAHHHHHHHHHHH")
 
     def request_map_snapshot(self):
         print("Gimme map plsss")
