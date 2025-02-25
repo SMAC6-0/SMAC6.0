@@ -3,6 +3,7 @@ import time
 import serial
 import struct
 from time import sleep
+import sys
 
 ###### UART stuff
 UART_BAUD = 9600 # config
@@ -635,7 +636,7 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
-            print(byte)
+            print(sys.stdout.buffer.write(bytes(byte)))
             # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
@@ -650,7 +651,6 @@ class Inchworm:
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
                 print("Collecting Message Length")
-                print(byte)
                 msgLenBytes.append(byte)
                 print("msgLenBytes", msgLenBytes)
                 msgLenReceivedCounter += 1
