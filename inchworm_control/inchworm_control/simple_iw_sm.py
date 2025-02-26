@@ -723,16 +723,16 @@ class Inchworm:
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def get_checksum(buffer): # Get checksum from buffer
-        print("buffer", buffer)
-        checksum = buffer[-2:]
-        print("Checksum: ", checksum)
+        # print("buffer", buffer)
+        # checksum = buffer[-2:]
+        # print("Checksum: ", checksum)
         # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-        checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
+        # checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
 
-        # checksum.append(buffer.pop())
-        # checksum.append(buffer.pop())
+        checksum.append(buffer.pop())
+        checksum.append(buffer.pop())
         # checksum = bytearray(checksum)
-        # checksum = int.from_bytes(checksum,'big',False)
+        checksum = int.from_bytes(checksum,'big',False)
         return checksum
 
             
