@@ -677,6 +677,7 @@ class Inchworm:
                 print("Receiving Map Snapshot from Structure")
                 if collecting_data:
                     print("Map snapshot buffer: ", buffer)
+                    buffer = b''.join(buffer) # convert to bytes object
                     checksum = Inchworm.get_checksum(buffer)
                     calculated_check_sum = Inchworm.crc16(buffer)
                     
@@ -717,7 +718,6 @@ class Inchworm:
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def get_checksum(buffer): # Get checksum from buffer
-        buffer = b''.join(buffer) # convert to bytes object
         print("buffer", buffer)
         checksum = buffer[-2:]
         print("Checksum: ", checksum)
