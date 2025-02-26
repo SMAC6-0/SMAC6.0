@@ -668,7 +668,7 @@ class Inchworm:
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
                     # Convert collected bytes to integer (assuming big-endian format)
-                    msgLen = int.from_bytes(bytes(msgLenBytes), 'big')
+                    msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
                     print("msgLen", msgLen)
                     msgLenCollected = True
                     print(f"Message Length Determined: {msgLen} bytes")
