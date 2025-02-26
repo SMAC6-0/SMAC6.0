@@ -660,7 +660,8 @@ class Inchworm:
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
                 print("Collecting Message Length")
-                msgLenBytes.append(byte)
+                byte_in_hex = hex(ord(byte)) 
+                msgLenBytes.append(byte_in_hex)
                 print("msgLenBytes", msgLenBytes)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
