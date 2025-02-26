@@ -646,8 +646,10 @@ class Inchworm:
             # print(byte)
             # print(sys.stdout.buffer.write(bytes(byte)))
             # print(ord(byte))
-            print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
-            print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+            print("Recieved byte", byte)
+
+            # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+            # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
                 print("start byte detected")
@@ -660,15 +662,16 @@ class Inchworm:
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
                 print("Collecting Message Length")
-                byte_in_hex = hex(ord(byte)) 
-                msgLenBytes.append(byte_in_hex)
+                # byte_in_int = ord(byte)
+                msgLenBytes.append(byte[0])
                 print("msgLenBytes", msgLenBytes)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
-                    msgLenBytes = bytearray(struct.pack('B', msgLenBytes))
-                    print("msgLenBytes after bytearray", msgLenBytes)
-                    msgLen = int.from_bytes(msgLenBytes,'big',True)
+                    # Convert collected bytes to integer (assuming big-endian format)
+                    msgLen = int.from_bytes(bytes(msgLenBytes), 'big')
                     print("msgLen", msgLen)
+                    msgLenCollected = True
+                    print(f"Message Length Determined: {msgLen} bytes")
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
                 print("Receiving Map Snapshot from Structure")
