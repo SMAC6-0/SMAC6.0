@@ -642,10 +642,10 @@ class Inchworm:
             byte = hex(byte) 
             print(byte)
 
-            byte = bytearray(struct.pack('B', byte))
-            print(byte)
+            # byte = bytearray(struct.pack('B', byte))
+            # print(byte)
             # print(sys.stdout.buffer.write(bytes(byte)))
-            print(ord(byte))
+            # print(ord(byte))
             # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
