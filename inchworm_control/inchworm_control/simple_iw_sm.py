@@ -727,7 +727,6 @@ class Inchworm:
         # checksum.append(buffer.pop())
         # checksum = bytearray(checksum)
         # checksum = int.from_bytes(checksum,'big',False)
-        
         return checksum
 
             
