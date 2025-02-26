@@ -679,9 +679,12 @@ class Inchworm:
                     print("Map snapshot buffer: ", buffer)
                     buffer = b''.join(buffer) # convert to bytes object
                     checksum = Inchworm.get_checksum(buffer)
+                    print("checksum: ", checksum)
                     calculated_check_sum = Inchworm.crc16(buffer)
+                    print("calculated_check_sum: ", calculated_check_sum)
                     
                     if checksum == calculated_check_sum:
+                        print("Checksum matched yippeeee")
                         current_map = Inchworm.process_received_map_snapshot(buffer)
                         print("Current map")
                         print(current_map)
@@ -700,6 +703,7 @@ class Inchworm:
 
     @staticmethod
     def process_received_map_snapshot(map_data):
+        print("Processing map data")
         layers, rows, cols = 3, 5, 6
         array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
         index = 0
