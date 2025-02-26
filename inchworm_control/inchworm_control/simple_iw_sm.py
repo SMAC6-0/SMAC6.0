@@ -639,7 +639,7 @@ class Inchworm:
             print(byte)
             byte = ord(byte) # turn it into a decimal value
             print(byte)
-            byte = byte.hex() 
+            byte = hex(byte) 
             print(byte)
 
             byte = bytearray(struct.pack('B', byte))
