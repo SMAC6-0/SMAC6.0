@@ -688,6 +688,7 @@ class Inchworm:
                         print("Current map")
                         print(current_map)
                     else:
+                        print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
                         break
 
@@ -723,7 +724,7 @@ class Inchworm:
     @staticmethod
     def get_checksum(buffer): # Get checksum from buffer
         print("buffer", buffer)
-        checksum = buffer[-2:]
+        checksum = buffer[-3:]
         print("Checksum: ", checksum)
         # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
         checksum =  int.from_bytes(checksum, 'little')  # Convert to integer
