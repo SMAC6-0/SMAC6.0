@@ -625,7 +625,6 @@ class Inchworm:
         print("Getting the map RAHHHHHHHHHHH")
 
         # Receiving Map Snapshot from Structure
-        received_data = []
         buffer = []
         msgLenBytes = []
         msgLen = 0
@@ -690,6 +689,7 @@ class Inchworm:
                         print(current_map)
                     else:
                         self.state = IW_STATE.ERROR
+                        break
 
                     collecting_data = False
             
@@ -698,8 +698,8 @@ class Inchworm:
                 bytesRead += 1
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
                 break
-                
-        print (received_data)                   #print received data
+        
+        print("Out da while looopppp")
 
     @staticmethod
     def process_received_map_snapshot(map_data):
@@ -726,7 +726,7 @@ class Inchworm:
         checksum = buffer[-2:]
         print("Checksum: ", checksum)
         # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-        checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
+        checksum =  int.from_bytes(checksum, 'little')  # Convert to integer
 
         # checksum.append(buffer.pop())
         # checksum.append(buffer.pop())
