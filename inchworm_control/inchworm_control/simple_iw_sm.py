@@ -636,11 +636,11 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
-            print(byte)
-            byte = ord(byte) # turn it into a decimal value
-            print(byte)
-            byte = hex(byte) 
-            print(byte)
+            # print(byte) # b'\xaa'
+            # byte = ord(byte) # turn it into a decimal value  # 170
+            # print(byte)
+            # byte = hex(byte) # 0xaa
+            # print(byte)
 
             # byte = bytearray(struct.pack('B', byte))
             # print(byte)
