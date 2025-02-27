@@ -108,7 +108,7 @@ def update():
 
             if inchworm.paths: 
                 x, y, z = inchworm.get_next_point() 
-                print("IW", inchworm.id, " leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
+                # print("IW", inchworm.id, " leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
             
                 # If the IW is holding a block (the bool spawned) despawn that block from old location before it can be moved/respawned to next step
                 if inchworm.spawned:

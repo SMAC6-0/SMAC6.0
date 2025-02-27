@@ -130,8 +130,9 @@ class Inchworm:
                 print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
                 return
             elif self.goal == [-9, -9, -9]:
-                raise ValueError(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
-            
+                print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
+                path = []
+                return
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                 # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
