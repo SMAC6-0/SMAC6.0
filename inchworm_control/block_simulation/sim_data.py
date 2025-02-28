@@ -116,10 +116,10 @@ class SimData:
 
     def generate_demo(self):
         coordinates = []
-        coordinates.append([SEED_BK[0], SEED_BK[1]+1, SEED_BK[2]])
+        coordinates.append([SEED_BK[0]+1, SEED_BK[1], SEED_BK[2]])
         for z in (2, 3): 
             coordinates.append([SEED_BK[0], SEED_BK[1], z])
-            coordinates.append([SEED_BK[0], SEED_BK[1]+1, z])
+            coordinates.append([SEED_BK[0]+1, SEED_BK[1], z])
         return coordinates            
     
     def generate_pyramid(self, base_size):
