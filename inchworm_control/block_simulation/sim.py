@@ -53,11 +53,12 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed, key_l_pressed = False, False
+key_k_pressed = False
 
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed
+    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, key_k_pressed
 
 
     # Generate the pyramid coordinates
@@ -78,6 +79,15 @@ def update():
     
     if not held_keys["t"]:
         key_t_pressed = False
+
+    if held_keys["k"] and not key_k_pressed:
+        coordinates = sim_data.generate_demo()
+        for coord in coordinates:
+            spawn_cube(coord)  
+        key_k_pressed = True  
+    
+    if not held_keys["k"]:
+        key_k_pressed = False
 
     # Search(Look) for structures
     if held_keys["l"] and not key_l_pressed:

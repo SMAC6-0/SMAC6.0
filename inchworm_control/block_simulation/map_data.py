@@ -103,14 +103,18 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
     x, y, z = coord
 
     if is_valid_position_3d(grid, coord):
-        if status != GridStatus.INCOMING_BLOCK:
-            grid[x][y][z] = GridStatus.WALKABLE #curr cell
-            if z - 1 >= 0:
-                grid[x][y][z-1] = status #cell below
-        else:
+        if status == GridStatus.INCOMING_BLOCK:
             grid[x][y][z] = GridStatus.INCOMING_BLOCK
             if z - 1 >= 0:
                 grid[x][y][z - 1] = GridStatus.NOT_WALKABLE #cell below
+        elif status == GridStatus.SUPPLY_DEPOT:
+            grid[x][y][z] = GridStatus.WALKABLE
+            if z - 1 >= 0:
+                grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT #cell below
+        else:
+            grid[x][y][z] = GridStatus.WALKABLE #curr cell
+            if z - 1 >= 0:
+                grid[x][y][z-1] = status #cell below
 
     return grid
 
@@ -342,8 +346,6 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
-    c_space_grid = update_grid_status(grid, SEED_BK)
-    c_space_grid = update_grid_status(grid, BD_1_LOC, GridStatus.SUPPLY_DEPOT)
     path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
@@ -483,6 +485,8 @@ def buffer_iw_paths(grid, iw_id):
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
+    neighbor_directions = set_neighbors()
+    path_count = []
 
     # Make the bottom layer (z = 0) WALKABLE
     for x in range(GRID_SIZE):
@@ -490,16 +494,33 @@ def buffer_iw_paths(grid, iw_id):
             for z in range(GRID_SIZE):
                 cell_status = grid[x][y][z]   
                 if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and cell_status != GridStatus.SUPPLY_DEPOT): # is some inchworm path, but not its own
-                    neighbor_directions = set_neighbors()
-                    
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
                         n_status = grid[nx][ny][nz]
-                        if (is_valid_position_3d(grid, [nx, ny, nz])
-                            and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
-                            buffer_list.append((nx, ny, nz, cell_status))
+                        if (is_valid_position_3d(grid, [nx, ny, nz]) and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
+                            path_count.append((nx, ny, nz, cell_status))
+                if(len(path_count) >= 2):
+                    for new_info in path_count:
+                        buffer_list.append(new_info)
     
     for nx, ny, nz, new_status in buffer_list:
-        grid[nx][ny][nz] = new_status
+        grid = update_grid_status(grid, [nx, ny, nz], new_status)
+        
+    # # updating seedblock neighbors
+    # for dx, dy, dz in neighbor_directions:
+    #     nx, ny, nz = SEED_BK[0] + dx, SEED_BK[1] + dy, SEED_BK[2] + dz
+    #     n_status = grid[nx][ny][nz]
+    #     if (is_valid_position_3d(grid, [nx, ny, nz]) and n_status != GridStatus.INCOMING_BLOCK and n_status != iw_id * GridStatus.INCHWORM_PATH):
+    #         grid = update_grid_status(grid, [nx, ny, nz], GridStatus.WALKABLE)
+            
+    # # updating block depot neighbors
+    # for dx, dy, dz in neighbor_directions:
+    #     nx, ny, nz = BD_1_LOC[0] + dx, BD_1_LOC[1] + dy, BD_1_LOC[2] + dz
+    #     n_status = grid[nx][ny][nz]
+    #     if (is_valid_position_3d(grid, [nx, ny, nz]) and n_status != GridStatus.INCOMING_BLOCK and n_status != iw_id * GridStatus.INCHWORM_PATH):
+    #         grid = update_grid_status(grid, [nx, ny, nz], GridStatus.WALKABLE)
+    
+    grid = update_grid_status(grid, SEED_BK)
+    grid = update_grid_status(grid, BD_1_LOC, GridStatus.SUPPLY_DEPOT)
     
     return grid
