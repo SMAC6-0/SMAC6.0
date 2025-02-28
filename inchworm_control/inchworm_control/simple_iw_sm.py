@@ -690,10 +690,10 @@ class Inchworm:
                         current_map = Inchworm.process_received_map_snapshot(buffer)
                         print("Current map")
                         print(current_map)
+                        break
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
-                        break
 
                     collecting_data = False
             
