@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import IntEnum
 import numpy as np
 from config import *
 import bfs_path_planning
 from colorama import Fore, init
 init(autoreset=True)
 
-class GridStatus(Enum):
+class GridStatus(IntEnum):
     WALKABLE = 0
     NOT_WALKABLE = 1
     INCHWORM_PATH = -1
@@ -53,12 +53,12 @@ def initialize_grid():
         grid [list]: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """
     # Initialize an empty 3D grid with all cells represented as NOT_WALKABLE
-    grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] 
+    grid = [[[GridStatus.NOT_WALKABLE for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] 
 
     # Make the bottom layer (z = 0) WALKABLE
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
-            grid[x][y][0] = GridStatus.WALKABLE.value
+            grid[x][y][0] = GridStatus.WALKABLE
     
     grid = mark_depot_and_seed(grid)
     return grid
@@ -75,14 +75,14 @@ def mark_depot_and_seed(grid):
     for i in range(len(BD_LOCS)):
         x, y, z = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
-            grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value
-            grid[x][y][z] = GridStatus.WALKABLE.value
+            grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT
+            grid[x][y][z] = GridStatus.WALKABLE
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
         
     x, y, z = SEED_BK
-    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value
-    grid[x][y][z] = GridStatus.WALKABLE.value
+    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE
+    grid[x][y][z] = GridStatus.WALKABLE
     return grid
     
 def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
@@ -104,13 +104,13 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
 
     if is_valid_position_3d(grid, coord):
         if status != GridStatus.INCOMING_BLOCK:
-            grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
+            grid[x][y][z] = GridStatus.WALKABLE #curr cell
             if z - 1 >= 0:
-                grid[x][y][z-1] = status.value #cell below
+                grid[x][y][z-1] = status #cell below
         else:
-            grid[x][y][z] = GridStatus.INCOMING_BLOCK.value
+            grid[x][y][z] = GridStatus.INCOMING_BLOCK
             if z - 1 >= 0:
-                grid[x][y][z-1] = GridStatus.NOT_WALKABLE.value #cell below
+                grid[x][y][z - 1] = GridStatus.NOT_WALKABLE #cell below
 
     return grid
 
@@ -127,7 +127,7 @@ def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
     """ 
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step]
-        grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH.value
+        grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH
     return grid
 
 def rm_inchworm_path_from_grid(grid, inchworm_path):
@@ -146,12 +146,12 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step] 
         if [x, y, z + 1] == BD_1_LOC: 
-            grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
+            grid[x][y][z] = GridStatus.SUPPLY_DEPOT
         else:
-            if grid[x][y][z + 1] == GridStatus.WALKABLE.value:
-                grid[x][y][z] = GridStatus.NOT_WALKABLE.value
+            if grid[x][y][z + 1] == GridStatus.WALKABLE:
+                grid[x][y][z] = GridStatus.NOT_WALKABLE
             else:
-                grid[x][y][z] = GridStatus.WALKABLE.value
+                grid[x][y][z] = GridStatus.WALKABLE
     return grid
 
 
@@ -234,7 +234,7 @@ def create_cell(grid, coords):
     if is_valid_position_3d(grid, [x, y, z]):
         new_cell = Cell(x, y, z)
         
-        if grid[x][y][z] == GridStatus.WALKABLE.value:  
+        if grid[x][y][z] == GridStatus.WALKABLE:  
             new_cell.is_obs = False
         else:
             new_cell.is_obs = True
@@ -486,17 +486,24 @@ def buffer_iw_paths(grid, iw_id):
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
             for z in range(GRID_SIZE):
-                cell_status = grid[x][y][z]
-                
-                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0): # is some inchworm path, but not its own
-                    neighbor_directions = set_neighbors()
+                if [x, y, z] == SEED_BK:
+                    update_grid_status(grid, [x, y, z])
+                    break
+                elif [x, y, z] == BD_1_LOC:
+                    update_grid_status(grid, [x, y, z], GridStatus.SUPPLY_DEPOT)
+                    break
+                else:
+                    cell_status = grid[x][y][z]
                     
-                    for dx, dy, dz in neighbor_directions:
-                        nx, ny, nz = x + dx, y + dy, z + dz
-                        n_status = grid[nx][ny][nz]
-                        if (is_valid_position_3d(grid, [nx, ny, nz])
-                            and (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value)):
-                            buffer_list.append((nx, ny, nz, cell_status))
+                    if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and cell_status != GridStatus.SUPPLY_DEPOT): # is some inchworm path, but not its own
+                        neighbor_directions = set_neighbors()
+                        
+                        for dx, dy, dz in neighbor_directions:
+                            nx, ny, nz = x + dx, y + dy, z + dz
+                            n_status = grid[nx][ny][nz]
+                            if (is_valid_position_3d(grid, [nx, ny, nz])
+                                and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
+                                buffer_list.append((nx, ny, nz, cell_status))
     
     for nx, ny, nz, new_status in buffer_list:
         grid[nx][ny][nz] = new_status

@@ -477,7 +477,7 @@ class Inchworm:
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
                 x, y, z = self.leading_foot_loc
-                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
+                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE:
                     print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
                     return True
             return False

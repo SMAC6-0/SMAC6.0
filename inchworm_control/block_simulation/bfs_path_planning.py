@@ -43,7 +43,7 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
             if (map_data.is_valid_position_3d(grid, (neighbor_coord))  
-                and (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)  
+                and (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK)  
                 and not visited[nx][ny][nz]):
                 visited[nx][ny][nz] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)

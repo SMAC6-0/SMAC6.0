@@ -55,7 +55,7 @@ class SimData:
             # print(Fore.GREEN + f"IW{inchworm.id} is touvhing the struct, which has a value of {self.current_map[x][y][z]}")
             # a = np.array(self.current_map)
             # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
-            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
+            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE):
                 # Update current_map by clearing the iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
                 # Update current_map w new block 
