@@ -729,7 +729,8 @@ class Inchworm:
         # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
         # checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
         checksum =[]
-        checksum = buffer[-2:]
+        checksum += buffer[-1:]
+        checksum += buffer[-2:]
         print("checksum: ", checksum)
 
         # checksum.append(buffer.pop())
