@@ -342,6 +342,8 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
+    c_space_grid = update_grid_status(grid, SEED_BK)
+    c_space_grid = update_grid_status(grid, BD_1_LOC, GridStatus.SUPPLY_DEPOT)
     path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
@@ -486,24 +488,16 @@ def buffer_iw_paths(grid, iw_id):
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
             for z in range(GRID_SIZE):
-                if [x, y, z] == SEED_BK:
-                    update_grid_status(grid, [x, y, z])
-                    break
-                elif [x, y, z] == BD_1_LOC:
-                    update_grid_status(grid, [x, y, z], GridStatus.SUPPLY_DEPOT)
-                    break
-                else:
-                    cell_status = grid[x][y][z]
+                cell_status = grid[x][y][z]   
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and cell_status != GridStatus.SUPPLY_DEPOT): # is some inchworm path, but not its own
+                    neighbor_directions = set_neighbors()
                     
-                    if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and cell_status != GridStatus.SUPPLY_DEPOT): # is some inchworm path, but not its own
-                        neighbor_directions = set_neighbors()
-                        
-                        for dx, dy, dz in neighbor_directions:
-                            nx, ny, nz = x + dx, y + dy, z + dz
-                            n_status = grid[nx][ny][nz]
-                            if (is_valid_position_3d(grid, [nx, ny, nz])
-                                and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
-                                buffer_list.append((nx, ny, nz, cell_status))
+                    for dx, dy, dz in neighbor_directions:
+                        nx, ny, nz = x + dx, y + dy, z + dz
+                        n_status = grid[nx][ny][nz]
+                        if (is_valid_position_3d(grid, [nx, ny, nz])
+                            and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
+                            buffer_list.append((nx, ny, nz, cell_status))
     
     for nx, ny, nz, new_status in buffer_list:
         grid[nx][ny][nz] = new_status

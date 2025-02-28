@@ -17,7 +17,9 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
-    print(Fore.MAGENTA + f"BFS called with start: {start}, goal: {goal}")
+    start_status = map_data.GridStatus(grid[start[0]][start[1]][start[2]]).name
+    goal_status = map_data.GridStatus(grid[goal[0]][goal[1]][goal[2]]).name
+    print(Fore.MAGENTA + f"BFS called with start: {start_status} {start}, goal: {goal_status} {goal}")
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     
@@ -25,8 +27,8 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
         goal_cell, visited, queue = map_data.start_search_3d(grid, start, goal)
     else:
         raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
-                           f"Start Walkable? {grid[start[0]][start[1]][start[2]] == 0}\n",
-                           f"Goal Walkable? {grid[goal[0]][goal[1]][goal[2]] == 0}")
+                           f"Start Walkable? {start_status == 0}\n",
+                           f"Goal Walkable? {goal_status == 0}")
 
     if holding_block:
         queue[0].z -= 1
@@ -42,13 +44,13 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
         for dx, dy, dz in neighbor_directions:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
-            if (map_data.is_valid_position_3d(grid, (neighbor_coord))  
-                and (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK)  
+            if (map_data.is_valid_position_3d(grid, (neighbor_coord)) and 
+                (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK)  
                 and not visited[nx][ny][nz]):
                 visited[nx][ny][nz] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
     
-    print(Fore.MAGENTA + f"No path found with BFS from {start} to {goal}")
+    print(Fore.MAGENTA + f"No path found with BFS :(")#from {start_status} {start} to {goal_status} {goal}")
     return []
