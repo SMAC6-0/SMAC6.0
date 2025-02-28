@@ -679,7 +679,7 @@ class Inchworm:
                     buffer = b''.join(buffer) # convert to bytes object
                     checksum = Inchworm.get_checksum(buffer)
                     print("checksum: ", checksum)
-                    calculated_check_sum = Inchworm.crc16(buffer)
+                    calculated_check_sum = Inchworm.crc16(buffer[:-2])
                     print("calculated_check_sum: ", calculated_check_sum)
                     
                     if checksum == calculated_check_sum:
