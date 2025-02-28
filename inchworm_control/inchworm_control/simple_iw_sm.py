@@ -681,6 +681,7 @@ class Inchworm:
                     print("checksum: ", checksum)
                     calculated_check_sum = []
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
+                    calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
                     # Inchworm.crc16(buffer[:-2])
                     print("calculated_check_sum: ", calculated_check_sum)
                     
