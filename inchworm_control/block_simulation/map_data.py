@@ -111,6 +111,8 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
             grid[x][y][z] = GridStatus.WALKABLE
             if z - 1 >= 0:
                 grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT #cell below
+        elif status < 0: 
+            grid[x][y][z] = status
         else:
             grid[x][y][z] = GridStatus.WALKABLE #curr cell
             if z - 1 >= 0:
@@ -493,18 +495,24 @@ def buffer_iw_paths(grid, iw_id):
         for y in range(GRID_SIZE):
             for z in range(GRID_SIZE):
                 cell_status = grid[x][y][z]   
-                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and cell_status != GridStatus.SUPPLY_DEPOT): # is some inchworm path, but not its own
+                # not_supply = ([x, y, z] != BD_1_LOC) and (cell_status != GridStatus.SUPPLY_DEPOT)
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH) and cell_status < 0 and (cell_status != GridStatus.SUPPLY_DEPOT)): # is some inchworm path, but not its own
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
-                        n_status = grid[nx][ny][nz]
-                        if (is_valid_position_3d(grid, [nx, ny, nz]) and (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK)):
-                            path_count.append((nx, ny, nz, cell_status))
-                if(len(path_count) >= 2):
-                    for new_info in path_count:
-                        buffer_list.append(new_info)
+                        if is_valid_position_3d(grid, [nx, ny, nz]):
+                            n_status = grid[nx][ny][nz]
+                            if (n_status == GridStatus.WALKABLE or n_status == GridStatus.INCOMING_BLOCK) and [nx, ny, nz] != BD_1_LOC:
+                                path_count.append((nx, ny, nz, cell_status))
+                    if(len(path_count) > 2):
+                        print(Fore.MAGENTA + f"Path count: ", path_count)
+                        for new_info in path_count:
+                            buffer_list.append(new_info)
+                        path_count = []
     
-    for nx, ny, nz, new_status in buffer_list:
+    print(Fore.MAGENTA + f"buffer list vals: ", buffer_list)
+    for (nx, ny, nz, new_status) in buffer_list:
         grid = update_grid_status(grid, [nx, ny, nz], new_status)
+    print(Fore.MAGENTA + f"grid: ", grid)
         
     # # updating seedblock neighbors
     # for dx, dy, dz in neighbor_directions:
