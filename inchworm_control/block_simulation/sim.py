@@ -42,7 +42,7 @@ outline_step_texture_green = load_texture("Assets/Textures/smart_block_green_ste
 seed_block_texture_step = load_texture("Assets/Textures/seed_block_step.png") 
 
 # Incoming Blocks / Steps 
-incoming_path_texture = load_texture("Assets/Textures/incoming_path_blue.png")
+incoming_path_texture = load_texture("Assets/Textures/incoming_path_red.png")
 incoming_path_block_texture = load_texture("Assets/Textures/incoming_path_smart.png")
 incoming_path_seed_texture = load_texture("Assets/Textures/incoming_path_seed.png")
 incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
@@ -238,7 +238,6 @@ def vis_IW_paths(inchworm, clear_path=False):
                 smart_block_texture : smart_block_texture,
                 seed_block_texture : seed_block_texture,              
             }
-            block_color = None
         else: # show the inchworm path
             transition = {
                 white_block_texture : incoming_path_texture, 
@@ -253,10 +252,9 @@ def vis_IW_paths(inchworm, clear_path=False):
                 incoming_path_block_texture : incoming_path_block_texture,
                 incoming_path_seed_texture : incoming_path_seed_texture
             }
-            block_color = color.hsv(inchworm.id*90, 1, 1)
-        block_texture = transition[already_placed_block.texture]
+        block_color = transition[already_placed_block.texture]
         delete_cube(cell)
-        spawn_cube(cell, block_texture, block_color)
+        spawn_cube(cell, block_color)
 
 def generate_final_structure():
     """
@@ -290,16 +288,14 @@ def generate_final_structure():
 
 # Voxel (block) properties
 class Voxel(Button):
-    def __init__(self, position = (0, 0, 0), texture = white_block_texture, bk_color=None):
-        if bk_color is None: 
-            bk_color = color.color(0, 0, random.uniform(0.9, 1))
+    def __init__(self, position = (0, 0, 0), texture = white_block_texture):
         super().__init__(
             parent = scene,
             position = position,
             model = "Assets/Models/Block",
             origin_y = 0.5,
             texture = texture,
-            color = bk_color,
+            color = color.color(0, 0, random.uniform(0.9, 1)),
             highlight_color = color.light_gray,
             scale = 0.5
         )
@@ -391,7 +387,7 @@ def stop_simulation():
     application.quit()
 
 # spawns a cude in the simulation at the specified position and with the specified color
-def spawn_cube(coord: list[int], texture=smart_block_texture, bk_color=None):
+def spawn_cube(coord: list[int], texture=smart_block_texture):
     """
     Spawns a cube in the simulation at the specified xyz position and with the specified color. 
     Not always a smart block, but rather any sim update happening in a cube. 
@@ -403,7 +399,7 @@ def spawn_cube(coord: list[int], texture=smart_block_texture, bk_color=None):
         sim_data.blocks_placed.append(coord)  # Update the block information
 
     # Spawn the cube
-    new_cube = Voxel(position=target_position, texture=texture, bk_color=bk_color)
+    new_cube = Voxel(position=target_position, texture=texture)
 
 def delete_cube(coord: list[int]):
     """

@@ -55,9 +55,9 @@ class SimData:
             # print(Fore.GREEN + f"IW{inchworm.id} is touvhing the struct, which has a value of {self.current_map[x][y][z]}")
             # a = np.array(self.current_map)
             # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
-            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE):
+            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths, inchworm.id)
                 # Update current_map w new block 
 
                 # a = np.array(self.current_map)
@@ -82,7 +82,7 @@ class SimData:
         if self.cleared_path_flags[inchworm.id] and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
-            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
+            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
             print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
             self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
             return True

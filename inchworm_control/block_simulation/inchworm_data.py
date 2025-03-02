@@ -135,13 +135,13 @@ class Inchworm:
                 return
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                 # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
+                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
             is_traveling = True
             self.goal = next_goal
             if self.goal != SEED_BK: 
                 print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
-                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK) # updates map for next_goal to be incoming_block
+                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
         try: 
             step_instructions, steps, path = [], [], []
@@ -362,7 +362,7 @@ class Inchworm:
             if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + f"IW{self.id}: Touching the seed block")
                 self.initilization_flag = False 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
@@ -477,7 +477,7 @@ class Inchworm:
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
                 x, y, z = self.leading_foot_loc
-                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE:
+                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
                     print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
                     return True
             return False

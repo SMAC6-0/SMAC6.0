@@ -17,9 +17,9 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
-    start_status = map_data.GridStatus(grid[start[0]][start[1]][start[2]]).name
-    goal_status = map_data.GridStatus(grid[goal[0]][goal[1]][goal[2]]).name
-    print(Fore.MAGENTA + f"BFS called with start: {start_status} {start}, goal: {goal_status} {goal}")
+    start_status = map_data.GridStatus(grid[start[0]][start[1]][start[2]])
+    goal_status = map_data.GridStatus(grid[goal[0]][goal[1]][goal[2]])
+    print(Fore.MAGENTA + f"BFS called with start: {start_status.name} {start}, goal: {goal_status.name} {goal}")
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     
@@ -45,7 +45,7 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
             if (map_data.is_valid_position_3d(grid, (neighbor_coord)) and 
-                (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK)  
+                (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)  
                 and not visited[nx][ny][nz]):
                 visited[nx][ny][nz] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
