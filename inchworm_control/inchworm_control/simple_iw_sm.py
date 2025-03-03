@@ -165,7 +165,7 @@ class Inchworm:
         self.state = IW_STATE.INITIALIZATION
         self.initilization_flag = True
         self.print_flag = True
-        self.seed_block_flag = True
+        self.seed_block_flag = False
         self.retry_path_flag = True
         self.seed_block__path_flag = True
 
