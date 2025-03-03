@@ -26,10 +26,13 @@ class UART_CODES(Enum):
     NewBlock=0xFD
     Changes=0xFE
     Failed=0xFF
+    NewInchworm=0xEF
 
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
+    Block = 1
     Placing = 2
+    iw_path = 4 
 
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
@@ -46,7 +49,7 @@ class IW_STATE(Enum):
     ERROR = 7
     STRUCTURE_COMPLETE = 8
 
-PATH_PLANNING_TIMER = 3
+PATH_PLANNING_TIMER = 5
 
 lagging_transform = {
     InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
@@ -277,9 +280,183 @@ class Inchworm:
 
     def received_block_confirmation(self): 
         print(Fore.RED + "We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
-        pass
+        return True
+    
+    def send_IW_path_to_block(self, iw_path):
+        """
+        Sends the IW path to the structure one grid at a time 
 
+        Args: 
+            iw_path [list[list]]: the path of the inchworm 
+        """
+        # TODO: IW_path is in X, Y, Z format!!
+        # iterate through the iw_path
+        for grid_cell in iw_path:
+            print("grid", grid_cell)
+            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
+            # block_change is the data that needs to be sent
+            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+            for c in grid_cell:
+                block_change += struct.pack('B', c)
+
+            block_change += struct.pack('B', BLOCK_STATUS.iw_path.value) + struct.pack('B', IW_message_counter)
+
+            msg_len = len(block_change).to_bytes(2,'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
+
+            # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+            print(buffer)
+
+            self.IW_SERIAL.write(buffer)
+
+            # delay to make sure all the data is transmitted 
+            sleep(PATH_PLANNING_TIMER)
+
+        # TODO: handle transmission error
+
+        def inchworm_gets_map(self):
+            print("Getting the map RAHHHHHHHHHHH")
+
+            # Receiving Map Snapshot from Structure
+            buffer = []
+            msgLenBytes = []
+            msgLen = 0
+            msgLenCollected = True
+            msgLenReceivedCounter = 0
+            bytesRead = 0
+            collecting_data = False
+            while True:
+                # print(self.IW_SERIAL.read(1))
+                byte = self.IW_SERIAL.read(1)           #read serial port
+                # print(byte) # b'\xaa'
+                # byte = ord(byte) # turn it into a decimal value  # 170
+                # print(byte)
+                # byte = hex(byte) # 0xaa
+                # print(byte)
+
+                # byte = bytearray(struct.pack('B', byte))
+                # print(byte)
+                # print(sys.stdout.buffer.write(bytes(byte)))
+                # print(ord(byte))
+                print("Recieved byte", byte)
+
+                # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+                # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
+
+                if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
+                    print("start byte detected")
+                    buffer = []  
+                    bytesRead = 0
+                    msgLenCollected = False
+                    msgLenBytes = []
+                    msgLenReceivedCounter = 0
+                    collecting_data = True
+                    
+                elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
+                    print("Collecting Message Length")
+                    # byte_in_int = ord(byte)
+                    msgLenBytes.append(byte[0])
+                    print("msgLenBytes", msgLenBytes)
+                    msgLenReceivedCounter += 1
+                    if msgLenReceivedCounter == 2:
+                        # Convert collected bytes to integer (assuming big-endian format)
+                        msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
+                        print("msgLen", msgLen)
+                        msgLenCollected = True
+                        print(f"Message Length Determined: {msgLen} bytes")
+
+                elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                    print("Receiving Map Snapshot from Structure")
+                    if collecting_data:
+                        print("Map snapshot buffer: ", buffer)
+                        buffer = b''.join(buffer) # convert to bytes object
+                        checksum = Inchworm.get_checksum(buffer)
+                        print("checksum: ", checksum)
+                        calculated_check_sum = []
+                        calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
+                        calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
+                        # Inchworm.crc16(buffer[:-2])
+                        print("calculated_check_sum: ", calculated_check_sum)
+                        
+                        if checksum == calculated_check_sum:
+                            print("Checksum matched yippeeee")
+                            current_map = Inchworm.process_received_map_snapshot(buffer)
+                            print("Current map")
+                            print(current_map)
+                            return True
+                        else:
+                            print("CHECKSUM DID NOT MATCH")
+                            self.state = IW_STATE.ERROR
+                            break
+
+                        collecting_data = False
+                
+                elif collecting_data:
+                    buffer.append(byte) # Append bytes to buffer if between start and end delimiters
+                    bytesRead += 1
+                elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
+                    return True
+            
+            return False
+    
+    @staticmethod
+    def process_received_map_snapshot(map_data):
+        print("Processing map data")
+        layers, rows, cols = GRID_SIZE, GRID_SIZE, GRID_SIZE
+        array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+        index = 0
+        for l in range(layers):
+            for r in range(rows):
+                for c in range(cols):
+                    if index < len(map_data):
+                        array[l][r][c] = map_data[index]
+                        index += 1
+        return array  
+        print("Received 3D Array:", array)
+
+    def request_map_snapshot(self):
+        print("Gimme map plsss")
+        """
+        IW sends the Hex code to the block requesting the map
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        msg_len = len(block_change).to_bytes(2,'little')
+
+        buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
+        print(buffer)
+
+        self.IW_SERIAL.write(buffer)
+
+        print("Requesting map!!")
+        # TODO: handle transmission error
+    
+    # Checksum protocol for the IW and Block communication
+    @staticmethod
+    def get_checksum(buffer): # Get checksum from buffer
+        # print("buffer", buffer)
+        # checksum = buffer[-2:]
+        # print("Checksum: ", checksum)
+        # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
+        # checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
+        checksum =[]
+        checksum += buffer[-2:]
+        print("checksum: ", checksum)
+
+        # checksum.append(buffer.pop())
+        # checksum.append(buffer.pop())
+        # checksum = bytearray(checksum)
+        checksum = int.from_bytes(bytes(checksum), 'big')
+        # checksum = int.from_bytes(checksum,'big')
+        return checksum
+    
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def crc16(data: bytes, poly=0x8408):
@@ -367,10 +544,9 @@ class Inchworm:
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
                 print(Fore.BLUE + "Reset the path. Transferring the block data")
-                # transfer the block location data 
-                # TODO: MOOO help 
-                # send a 1D array ended with the Initialization enum OxFA 
-                # flash block that it's in unplaced location
+                
+                if not SIMULATION:
+                    self.request_map_snapshot()
 
         else: # this happens first 
             # Find & path plan to seed block 
@@ -388,14 +564,15 @@ class Inchworm:
         # MOOOO HELPPP 
         print(Fore.BLUE + "Path found. Sending the IW path to the structure")
         # IW sends it's path to the structure 
-        self.send_my_next_steps()
-        # TODO !!!!! 
-        print(Fore.BLUE + "Travelling to the supply")
+        if not SIMULATION:
+            self.send_IW_path_to_block(self.paths)
+            
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+        # TODO: instead of sleep retyr after IW_gets_Map_Snapshot
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
@@ -417,16 +594,11 @@ class Inchworm:
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-
-
-        print(Fore.BLUE + "Travelling to the block location")
-        # IW begins travelling to block location
         
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
     def handle_transported_block(self):
-
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
@@ -482,32 +654,7 @@ class Inchworm:
                     return True
             return False
         else:             
-            if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
-                got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
-                if got_map_snapshot.lower() == 'yes':
-                    self.seed_block_flag = False
-                    return True
-                elif got_map_snapshot.lower() == 'no':
-                    return False
-                else:
-                    print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
-            else:
-                # blah blah low level language 
-                # TODO: ask Mo for help when the IW gets the map SnapShot back 
-                # return true if the IW got the map snapshot
-                received_data = self.IW_SERIAL.read()              #read serial port
-                sleep(0.03)
-                data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-                received_data += self.IW_SERIAL.read(data_left)
-                print (received_data)                   #print received data
-
-                # verify if it's a map?? 
-                is_a_map = True
-                if is_a_map:
-                    # call the update map
-                    # self.current_map = map_data.update_grid_status(self.current_map, coord)
-                    pass
-                # return is_a_map
+            return self.inchworm_gets_map()
     
     def is_Path_Available(self):
         print(Fore.BLUE + "Checking path availability... ")
