@@ -1,5 +1,6 @@
 import map_data
-import config
+from colorama import Fore, init
+init(autoreset=True)
 
 def find_path(grid, start, goal, holding_block) -> list[int]:
     """
@@ -8,17 +9,17 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0) or not (1). 
-        start (tuple): A tuple containing the (x, z, y) coordinate of the starting cell in a path.
+        start (tuple): A tuple containing the (x, y, z) coordinate of the starting cell in a path.
                        The initial starting position can be configurable in config.py
-        goal (tuple): A tuple containing the (x, z, y) coordinate of the ending cell in a path.
+        goal (tuple): A tuple containing the (x, y, z) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
         holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
-    print(f"BFS called with start: {start}, goal: {goal}")
+    print(Fore.MAGENTA + f"BFS called with start: {start}, goal: {goal}")
     
-    neighbor_directions = map_data.set_neighbors()
+    neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     
     if map_data.is_valid_start_goal_3d(grid, start, goal):
         goal_cell, visited, queue = map_data.start_search_3d(grid, start, goal)
@@ -35,17 +36,19 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
 
         if map_data.is_goal_reached_3d(current_cell, goal_cell):
             path = map_data.reverse_path_3d(current_cell, holding_block)
-            print(f"Path found: {path}")
+            print(Fore.MAGENTA + f"Path found: {path}")
             return path
         
-        for dx, dz, dy in neighbor_directions:
-            nx, nz, ny = current_cell.x + dx, current_cell.z + dz, current_cell.y + dy
-            neighbor_coord = nx, nz, ny
-            if map_data.is_valid_position_3d(grid, (neighbor_coord)) and (grid[nx][nz][ny] == 0 or grid[nx][nz][ny] == 2) and not visited[nx][nz][ny]:
-                visited[nx][nz][ny] = True
+        for dx, dy, dz in neighbor_directions:
+            nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
+            neighbor_coord = nx, ny, nz
+            if (map_data.is_valid_position_3d(grid, (neighbor_coord))  
+                and (grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)  
+                and not visited[nx][ny][nz]):
+                visited[nx][ny][nz] = True
                 neighbor = map_data.create_cell(grid, neighbor_coord)
                 neighbor.parent = current_cell
                 queue.append(neighbor)
     
-    print(f"No path found with BFS from {start} to {goal}")
+    print(Fore.MAGENTA + f"No path found with BFS from {start} to {goal}")
     return []

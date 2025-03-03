@@ -147,6 +147,12 @@ current_map = [
 
 
 
+next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
+IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
+IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+
+IW_PATH = [[4, 0, 1], [5, 0, 1], [6, 0, 1], [7, 0, 1], [7, 0, 2], [7, 0, 3], [7, 0, 4], [7, 0, 5], [7, 0, 6], [7, 0, 7], [7, 1, 8]]
+
 # Inchworm states
 class IW_STATE(Enum):
     IDLE = 1 # added this incase we need to use it
@@ -490,7 +496,7 @@ class Inchworm:
         """
         # TODO: does this belong in checker, handler, or outside? @Mo 
 
-        # map updates so we need to manually update the x, z, y
+        # map updates so we need to manually update the x, y, z
         # self.current_map = map
         print("Current map updated")
         pass
