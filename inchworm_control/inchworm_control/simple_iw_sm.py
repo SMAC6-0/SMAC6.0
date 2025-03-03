@@ -21,6 +21,7 @@ class UART_CODES(Enum):
     NewBlock=0xFD
     Changes=0xFE
     Failed=0xFF
+    NewInchworm=0xEF
 
 class BLOCK_STATUS(Enum): # holds the status of the block 
     Unplaced = 0
@@ -722,6 +723,24 @@ class Inchworm:
 
     def request_map_snapshot(self):
         print("Gimme map plsss")
+        """
+        IW sends the Hex code to the block requesting the map
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+        msg_len = len(block_change).to_bytes(2,'little')
+
+        buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
+        print(buffer)
+
+        self.IW_SERIAL.write(buffer)
+
+        print("Requesting map!!")
+        # TODO: handle transmission error
+
 
     # Checksum protocol for the IW and Block communication
     @staticmethod
