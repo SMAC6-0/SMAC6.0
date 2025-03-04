@@ -20,6 +20,7 @@ class StepPublisher(Node):
         self.get_logger().info('Node starting')
 
         # FOR ROBOT_WS:
+        # TODO: change the file path!!!
         self.file_path = '/home/smac/robot_ws/src/SMAC6.0/inchworm_control/block_simulation/steps.txt'
         # FOR DEV_WS:
         # self.file_path = '~/MQP/dev_ws/src/inchworm_control/block_simulation/steps.txt'

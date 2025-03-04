@@ -735,9 +735,10 @@ def step_getter(step_instructions):
 
 
 if __name__ == "__main__":
-    file = open("Final_Structure.txt", "r")
-    final_structure = file.read()
-    print(final_structure)
+        
+    # file_path = '/home/smac/robot_ws/src/SMAC6.0/Final_Structure.txt'
+    with open("Final_Structure.txt", "r") as file:
+      final_structure = file.readlines()
 
     inchworm = Inchworm(orientation=CURRENT_ORIENTATION, final_structure=final_structure, location=IW_1_LOC, holding_block=False)
     try:
