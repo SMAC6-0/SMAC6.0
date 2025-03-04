@@ -106,6 +106,7 @@ class SimData:
         # print(Fore.GREEN + "inchworms spawned")
         print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
 
+
     def get_next_steps(self): 
         """
         Returns all of the next steps that all inchworms will be taking
