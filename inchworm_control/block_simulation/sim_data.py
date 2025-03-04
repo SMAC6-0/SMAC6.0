@@ -17,6 +17,7 @@ from search import search
 from inchworm_data import Inchworm
 from colorama import Fore, init
 import numpy as np
+import itertools
 init(autoreset=True)
 
 from inchworm_control.blueprint import blueprint 
@@ -79,6 +80,14 @@ class SimData:
             return False
         # get path & new incoming block from iw - DIFFERENT FUNC 
         # update current map with incoming block and paths 
+
+    def detect_IW_collision(self): 
+        """Raises an error if any of the inchworm feet are in the location of the other inchworms."""
+        # Compare 2 inchworms at a time from the list of all existing inchworms. 
+        for a, b in itertools.combinations(self.existing_inchworms, 2):
+            # Bitwise comparison of foot locations. If any foot loc is the same as any other foot loc, it is true.
+            if {tuple(a.leading_foot_loc), tuple(a.lagging_foot_loc)} & {tuple(b.leading_foot_loc), tuple(b.lagging_foot_loc)}:
+                raise RuntimeError(Fore.GREEN + f"COLLISION between IW{a.id} & IW{b.id} at {a.leading_foot_loc}, {a.lagging_foot_loc} and {b.leading_foot_loc}, {b.lagging_foot_loc}")
 
     def spawn_inchworms(self, num_inchworms: int): 
         """
