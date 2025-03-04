@@ -360,7 +360,7 @@ def determine_helper_blocks(grid, path_start, path_end):
     else:
         return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block, iw_id):
+def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -394,9 +394,9 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         steps.append(step_instructions)
         curr_orientation = orientation
 
-    return path_coords, steps
+    return path_coords, steps, curr_orientation
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: InchwormOrientation, holding_block: bool, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -487,6 +487,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
         #TODO: handle any block depot'
         if holding_block:
             step_instructions = f"{step_instructions}_BLOCK"
+        print(f"IW orientation {orientation.name} -> {new_orientation.name}, resulting in {step_instructions}")
         
         # for bd_loc in BD_LOCS:
         if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 

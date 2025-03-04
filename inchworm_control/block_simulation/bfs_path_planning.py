@@ -30,8 +30,8 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
                            f"Start Walkable? {start_status == 0}\n",
                            f"Goal Walkable? {goal_status == 0}")
 
-    if holding_block:
-        queue[0].z -= 1
+    # if holding_block:
+    #     queue[0].z -= 1
     
     while queue:
         current_cell = queue.pop(0)
