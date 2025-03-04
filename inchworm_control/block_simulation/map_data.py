@@ -509,7 +509,7 @@ def buffer_iw_paths(grid, iw_id):
                             buffer_list.append(new_info)
                         path_count = []
     
-    print(Fore.MAGENTA + f"buffer list vals: ", buffer_list)
+    # print(Fore.MAGENTA + f"buffer list vals: ", buffer_list)
     for (nx, ny, nz, new_status) in buffer_list:
         grid = update_grid_status(grid, [nx, ny, nz], new_status)
     # print(Fore.MAGENTA + f"grid: ", grid)

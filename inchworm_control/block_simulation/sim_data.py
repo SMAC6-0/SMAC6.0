@@ -86,7 +86,7 @@ class SimData:
             num_inchworms (int): number of inchworms building the structure
         """
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_LOCS[i]))
+            self.existing_inchworms.append(Inchworm(IW_ORIENTATIONS[i], self.final_structure, IW_LOCS[i]))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
 
             # For however many IWs exist, store flag in dictionary 
