@@ -195,7 +195,7 @@ def update():
                     inchworm.last_cell_2 = spawn_cube([x2, y2, z2], smart_block_texture_step)
                     inchworm.last_bk_og_texture_2 = smart_block_texture
 
-                key_n_pressed = False
+        key_n_pressed = False
 
 
     if held_keys["m"]:
