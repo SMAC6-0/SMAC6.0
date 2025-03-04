@@ -4,6 +4,7 @@ from config import *
 import bfs_path_planning
 from colorama import Fore, init
 init(autoreset=True)
+from inchworm_data import Inchworm
 
 class GridStatus(IntEnum):
     WALKABLE = 0
@@ -11,6 +12,34 @@ class GridStatus(IntEnum):
     INCHWORM_PATH = -1
     INCOMING_BLOCK = 2
     SUPPLY_DEPOT = 3
+    
+    @classmethod
+    def inchworm_path(cls, iw_id):
+        """Generate an inchworm path status dynamically using a negative ID."""
+        if iw_id in Inchworm.inchworm_list:
+            return -iw_id
+        raise ValueError(f"Inchworm ID {iw_id} is not valid.")
+
+    @classmethod
+    def is_inchworm_path(cls, value):
+        """Check if the given value represents an inchworm path."""
+        return isinstance(value, int) and value < 0 and abs(value) in Inchworm.inchworm_list
+
+    @classmethod
+    def which_inchworm(cls, value):
+        """Return the inchworm ID if the value is an inchworm path, otherwise None."""
+        if cls.is_inchworm_path(value):
+            return abs(value)
+        return None
+
+    @classmethod
+    def from_value(cls, value):
+        """Determine the GridStatus type, automatically recognizing inchworm paths."""
+        if value in cls._value2member_map_:
+            return cls(value)
+        elif cls.is_inchworm_path(value):
+            return value  # Return as valid inchworm path
+        raise ValueError(f"Invalid GridStatus value: {value}")
 
 class Cell:
     def __init__(self, x: int, y: int, z: int, is_obs: bool = False, g = 0, h = 0): 
@@ -504,7 +533,7 @@ def buffer_iw_paths(grid, iw_id):
                             if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
                                 path_count.append((nx, ny, nz, cell_status))
                     if (len(path_count) > 2):
-                        print(Fore.MAGENTA + f"Path count: ", path_count)
+                        # print(Fore.MAGENTA + f"Path count: ", path_count)
                         for new_info in path_count:
                             buffer_list.append(new_info)
                         path_count = []
@@ -533,5 +562,4 @@ def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
         neighbors.append([nx, ny, nz])
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True
-    # print(f"neighbors of : {neighbors}")
     return False

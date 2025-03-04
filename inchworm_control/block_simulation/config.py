@@ -9,7 +9,7 @@ GRID_SIZE = 50  # Define the size of your grid in one direction
 ### BLOCK DEPOTS & SEED BLOCK ###
 BD_1_LOC = [4, 4, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
 BD_LOCS = [BD_1_LOC] # The locations of all block depots (if there are multiple)
-SEED_BK = [6, 6, 1]
+SEED_BK = [6, 14, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
