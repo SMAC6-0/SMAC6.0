@@ -96,10 +96,6 @@ class SimData:
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
         print(Fore.GREEN + "inchworms spawned")
 
-        # Find seed block and consider it placed. 
-        self.seed_block = blueprint(self.current_map, self.final_structure)
-        # self.blocks_placed.append(self.seed_block) #TODO: confirm if necessary. 
-        self.current_map = map_data.update_grid_with_structure(self.current_map, self.seed_block)
 
     def get_next_steps(self): 
         """
