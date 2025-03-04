@@ -17,9 +17,9 @@ def find_path(grid, start, goal, holding_block) -> list[int]:
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
-    start_status = map_data.GridStatus(grid[start[0]][start[1]][start[2]])
-    goal_status = map_data.GridStatus(grid[goal[0]][goal[1]][goal[2]])
-    print(Fore.MAGENTA + f"BFS called with start: {start_status.name} {start}, goal: {goal_status.name} {goal}")
+    start_status = (grid[start[0]][start[1]][start[2]])
+    goal_status = (grid[goal[0]][goal[1]][goal[2]])
+    print(Fore.MAGENTA + f"BFS called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
     

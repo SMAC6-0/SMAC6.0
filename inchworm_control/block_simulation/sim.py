@@ -254,7 +254,10 @@ def vis_IW_paths(inchworm, clear_path=False):
                 incoming_path_seed_texture : incoming_path_seed_texture
             }
             block_color = color.hsv(inchworm.id*90, 1, 1)
-        block_texture = transition[already_placed_block.texture]
+        try: 
+            block_texture = transition[already_placed_block.texture]
+        except:
+            print(f"Unexpected texture in path visualization: {already_placed_block.texture}")  # Debugging line
         delete_cube(cell)
         spawn_cube(cell, block_texture, block_color)
 
@@ -374,6 +377,7 @@ def check_block_color(x, y, z):
             seed_block_texture_step : seed_block_texture,
             final_struct_outline: smart_block_texture, 
             incoming_block_texture: smart_block_texture, 
+            incoming_path_seed_texture : seed_block_texture_step,
             incoming_path_texture: outline_step_texture_red, # step over the incoming path 
             seed_block_texture: seed_block_texture_step,
             incoming_path_block_texture: smart_block_texture_step
@@ -381,7 +385,7 @@ def check_block_color(x, y, z):
         try: 
             block_color = transition[existing_cube_texture]
         except:
-            print(f"Unexpected texture: {existing_cube_texture}")  # Debugging line
+            print(f"Unexpected texture when simulating IW feet: {existing_cube_texture}")  # Debugging line
 
     return block_color
 
