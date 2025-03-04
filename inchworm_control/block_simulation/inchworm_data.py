@@ -92,7 +92,6 @@ class Inchworm:
         
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
-        self.initilization_flag = True
         self.print_flag = True
         self.seed_block_flag = True
 
@@ -489,8 +488,7 @@ class Inchworm:
             case IW_STATE.IDLE:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
-                if self.initilization_flag:
-                    self.handle_initilization()
+                self.handle_initilization()
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -538,7 +536,6 @@ class Inchworm:
             # move IW in sim
             if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + "Touching the seed block")
-                self.initilization_flag = False 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
