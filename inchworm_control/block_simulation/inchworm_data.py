@@ -550,6 +550,8 @@ class Inchworm:
 
         else: # this happens first 
             # Find & path plan to seed block 
+            if DEBUG:
+                print("IW has no paths so path planning")
             self.plan_path(SEED_BK)
 
         
