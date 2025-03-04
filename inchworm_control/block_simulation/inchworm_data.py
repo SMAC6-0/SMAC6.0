@@ -739,7 +739,7 @@ if __name__ == "__main__":
     final_structure = file.read()
     print(final_structure)
 
-    inchworm = Inchworm(CURRENT_ORIENTATION, final_structure=final_structure, IW_1_LOC, False)
+    inchworm = Inchworm(orientation=CURRENT_ORIENTATION, final_structure=final_structure, location=IW_1_LOC, holding_block=False)
     try:
         inchworm.run()
     except KeyboardInterrupt:
