@@ -735,7 +735,11 @@ def step_getter(step_instructions):
 
 
 if __name__ == "__main__":
-    inchworm = Inchworm(1, CURRENT_ORIENTATION, IW_1_LOC, False)
+    file = open("Final_Structure.txt", "r")
+    final_structure = file.read()
+    print(final_structure)
+
+    inchworm = Inchworm(CURRENT_ORIENTATION, final_structure=final_structure, IW_1_LOC, False)
     try:
         inchworm.run()
     except KeyboardInterrupt:
