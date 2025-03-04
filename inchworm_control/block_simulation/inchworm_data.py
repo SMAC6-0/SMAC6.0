@@ -17,6 +17,7 @@ UART_BAUD = 9600 # config
 # GPIO 14, pin 10 = TX yellow wire
 # ground = Pin 14
 # test 
+DEBUG = True # print statements to help DEBUG 
 
 class UART_CODES(Enum):
     StartByte=0xAA 
@@ -534,6 +535,8 @@ class Inchworm:
         print(Fore.BLUE + "MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
+            if DEBUG:
+                print("IW has paths")
             if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + "Touching the seed block")
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
