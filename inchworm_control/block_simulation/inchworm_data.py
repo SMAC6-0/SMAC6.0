@@ -319,6 +319,8 @@ class Inchworm:
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
+                elif self.no_blocks_left():
+                    self.handle_no_blocks_to_place()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
@@ -396,10 +398,15 @@ class Inchworm:
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-        sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+        if not SIMULATION:
+            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
         self.plan_path()
+
+    def handle_no_blocks_to_place(self): 
+        self.state = IW_STATE.STRUCTURE_COMPLETE
+        print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
     def handle_at_supply(self):
         print(Fore.BLUE + f"IW{self.id}: Touching the new block (move)")
@@ -516,6 +523,8 @@ class Inchworm:
         else: 
             return False
 
+    def no_blocks_left(self):
+        return self.goal == [-1, -1, -1]
 
     def is_IW_in_supply(self):
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""

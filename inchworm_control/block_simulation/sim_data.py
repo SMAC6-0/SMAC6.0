@@ -51,31 +51,19 @@ class SimData:
         # If yes, get newly placed block's coords from iw 
 
         # Structure verifies that block is in correct location 
-        if inchworm.leading_foot_loc == inchworm.goal and inchworm.paths: 
-            # print(Fore.GREEN + f"IW{inchworm.id} is touvhing the struct, which has a value of {self.current_map[x][y][z]}")
-            # a = np.array(self.current_map)
-            # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
+        if (inchworm.leading_foot_loc == inchworm.goal and inchworm.paths) or inchworm.state.value == 3: 
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths, inchworm.id)
                 # Update current_map w new block 
-
-                # a = np.array(self.current_map)
-                # print(Fore.GREEN + f"struct map: ", a[:9, :9, :4])
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
-                # a = np.array(self.current_map)
-                # print(Fore.GREEN + f"struct map after all updates: ", a[:9, :9, :4])
-                # print(Fore.GREEN + "final map: ", self.final_structure)
 
-                # Send current_map to IW 
-                # print("IW before copy", inchworm.current_map)
-                inchworm.current_map = copy.deepcopy(self.current_map)
-                # print("IW after copy", inchworm.current_map)
+            # Send current_map to IW 
+            inchworm.current_map = copy.deepcopy(self.current_map)
 
-                print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
-                self.cleared_path_flags[inchworm.id] = True # Path is cleared flag, meaning struct is set to receive updates with a new path 
-                return True
-        # return self.current_map # TODO: maybe unnecessary
+            print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
+            self.cleared_path_flags[inchworm.id] = True # Path is cleared flag, meaning struct is set to receive updates with a new path 
+            return True
 
     def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
@@ -105,7 +93,6 @@ class SimData:
             self.cleared_path_flags[i+1] = False # The key is i+1 to correspond to the IW ID
         # print(Fore.GREEN + "inchworms spawned")
         print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
-
 
     def get_next_steps(self): 
         """
