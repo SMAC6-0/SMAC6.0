@@ -735,7 +735,7 @@ def step_getter(step_instructions):
 
 
 if __name__ == "__main__":
-    inchworm = Inchworm(1, CURRENT_ORIENTATION, None, None, IW_1_LOC)
+    inchworm = Inchworm(1, CURRENT_ORIENTATION, IW_1_LOC, False)
     try:
         inchworm.run()
     except KeyboardInterrupt:
