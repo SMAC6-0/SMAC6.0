@@ -96,6 +96,7 @@ class SimData:
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
         print(Fore.GREEN + "inchworms spawned")
 
+
     def get_next_steps(self): 
         """
         Returns all of the next steps that all inchworms will be taking
