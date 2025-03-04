@@ -44,7 +44,7 @@ class SimData:
         # TODO: save self.final_structure to a file
         final_map_file = open('Final_Structure.txt', 'w')
         with open("Final_Structure.txt", "w") as final_map_file:
-            final_map_file.write(f"final_structure = {self.final_structure}\n")
+            final_map_file.write(f"{self.final_structure}\n")
     
     def send_map_to_IW(self, inchworm): 
         """
