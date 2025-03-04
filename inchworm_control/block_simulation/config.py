@@ -34,7 +34,7 @@ class InchwormOrientation(Enum):
 CURRENT_ORIENTATION = InchwormOrientation.NORTH
 
 # if the simulation is for the demo, set this to True
-SIMULATION = True
+SIMULATION = False
 LARGE_BUILD = False
 
 # have inchworm starting inline with BD 
