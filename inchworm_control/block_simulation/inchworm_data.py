@@ -18,6 +18,7 @@ UART_BAUD = 9600 # config
 # ground = Pin 14
 # test 
 DEBUG = True # print statements to help DEBUG 
+INCHWORM_CAN_MOVE = True # setting this to True so it can bypass all the movements for debugging 
 
 class UART_CODES(Enum):
     StartByte=0xAA 
@@ -546,7 +547,7 @@ class Inchworm:
             # move IW in sim
             if DEBUG:
                 print("IW has paths")
-            if self.goal_progress_index >= len(self.paths): 
+            if self.goal_progress_index >= len(self.paths) or INCHWORM_CAN_MOVE: 
                 print(Fore.BLUE + "Touching the seed block")
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 self.paths = [] # Reset current path 
