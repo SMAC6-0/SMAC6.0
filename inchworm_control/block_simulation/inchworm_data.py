@@ -180,6 +180,9 @@ class Inchworm:
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
             step_getter(step_instructions)
+            if DEBUG:
+                print("exiting out of pathplannn")
+
         except RuntimeError as e:
             print(Fore.MAGENTA + f"Error: {e}. No path found, try again later.")
             return
