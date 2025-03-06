@@ -341,6 +341,8 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
+            if byte == []:
+                return False
             # print(byte) # b'\xaa'
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
@@ -499,6 +501,8 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
                 # if self.intilization_path_flag:
+                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                    self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -554,8 +558,6 @@ class Inchworm:
                 
                 if not SIMULATION:
                     self.request_map_snapshot()
-                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                        self.handle_IW_gets_Map()
                 
                 self.intilization_path_flag = True
 
