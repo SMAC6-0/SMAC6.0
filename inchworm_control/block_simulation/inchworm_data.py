@@ -543,7 +543,7 @@ class Inchworm:
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
-                print(Fore.BLUE + "Reset the path. Transferring the block data")
+                print(Fore.BLUE + "Reset the path. Requesting the map")
                 
                 if not SIMULATION:
                     self.request_map_snapshot()
