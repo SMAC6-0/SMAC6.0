@@ -150,6 +150,8 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
+                if DEBUG:
+                    print("In plan path")
                 path, steps = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
@@ -170,6 +172,9 @@ class Inchworm:
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += steps
             self.paths += path
+
+            if DEBUG:
+                print("path gott yayyyy")
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
@@ -655,7 +660,8 @@ class Inchworm:
                     print(Fore.BLUE + "IW got map snapshot")
                     return True
             return False
-        else:             
+        else:
+
             return self.inchworm_gets_map()
     
     def is_Path_Available(self):
