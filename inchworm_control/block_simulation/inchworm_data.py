@@ -94,7 +94,7 @@ class Inchworm:
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
         self.print_flag = True
-        self.seed_block_flag = True
+        self.intilization_path_flag = False
 
         
         Inchworm.next_id += 1
@@ -498,8 +498,9 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
-                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                    self.handle_IW_gets_Map()
+                if self.intilization_path_flag:
+                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                        self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -555,6 +556,8 @@ class Inchworm:
                 
                 if not SIMULATION:
                     self.request_map_snapshot()
+                
+                self.intilization_path_flag = True
 
         else: # this happens first 
             # Find & path plan to seed block 
