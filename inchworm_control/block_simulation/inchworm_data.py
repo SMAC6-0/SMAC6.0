@@ -396,7 +396,6 @@ class Inchworm:
                         current_map = Inchworm.process_received_map_snapshot(buffer)
                         print("Current map")
                         print(current_map)
-                        return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
@@ -668,7 +667,6 @@ class Inchworm:
                     return True
             return False
         else:
-
             return self.inchworm_gets_map()
     
     def is_Path_Available(self):
