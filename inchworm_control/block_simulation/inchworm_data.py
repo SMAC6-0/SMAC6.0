@@ -18,7 +18,7 @@ UART_BAUD = 9600 # config
 # ground = Pin 14
 # test 
 DEBUG = True # print statements to help DEBUG 
-INCHWORM_CAN_MOVE = True # setting this to True so it can bypass all the movements for debugging 
+INCHWORM_MOVED = True # setting this to True so it can bypass all the movements for debugging 
 
 class UART_CODES(Enum):
     StartByte=0xAA 
@@ -499,9 +499,9 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
-                if self.intilization_path_flag:
-                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                        self.handle_IW_gets_Map()
+                # if self.intilization_path_flag:
+                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                    self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -547,7 +547,7 @@ class Inchworm:
             # move IW in sim
             if DEBUG:
                 print("IW has paths")
-            if self.goal_progress_index >= len(self.paths) or INCHWORM_CAN_MOVE: 
+            if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
                 print(Fore.BLUE + "Touching the seed block")
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 self.paths = [] # Reset current path 
