@@ -404,7 +404,8 @@ class Inchworm:
     @staticmethod
     def process_received_map_snapshot(map_data):
         print("Processing map data")
-        layers, rows, cols = GRID_SIZE, GRID_SIZE, GRID_SIZE
+        # TODO: CHANGE THISSS PLSSS make generic instead of using JUST NUMBERS
+        layers, rows, cols = 4, 8, 8
         array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
         index = 0
         for l in range(layers):
