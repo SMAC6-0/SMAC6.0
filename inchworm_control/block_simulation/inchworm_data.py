@@ -236,15 +236,15 @@ class Inchworm:
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
 
-        print(Fore.RED + "Block change", block_change)
+        # print(Fore.RED + "Block change", block_change)
 
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print(Fore.RED + "msg_len", msg_len)
-        print(Fore.RED + "checksum", checksum)
+        # print(Fore.RED + "msg_len", msg_len)
+        # print(Fore.RED + "checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
@@ -268,15 +268,15 @@ class Inchworm:
 
         block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
 
-        print(Fore.RED + "Block change", block_change)
+        # print(Fore.RED + "Block change", block_change)
 
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print(Fore.RED + "msg_len", msg_len)
-        print(Fore.RED + "checksum", checksum)
+        # print(Fore.RED + "msg_len", msg_len)
+        # print(Fore.RED + "checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
@@ -301,7 +301,6 @@ class Inchworm:
         # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
         for grid_cell in iw_path:
-            print("grid", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
@@ -318,7 +317,6 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print(buffer)
 
             self.IW_SERIAL.write(buffer)
 
@@ -353,13 +351,13 @@ class Inchworm:
             # print(byte)
             # print(sys.stdout.buffer.write(bytes(byte)))
             # print(ord(byte))
-            print("Recieved byte", byte)
+            # print("Recieved byte", byte)
 
             # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
-                print("start byte detected")
+                # print("start byte detected")
                 buffer = []  
                 bytesRead = 0
                 msgLenCollected = False
@@ -368,36 +366,26 @@ class Inchworm:
                 collecting_data = True
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
-                print("Collecting Message Length")
+                # print("Collecting Message Length")
                 # byte_in_int = ord(byte)
                 msgLenBytes.append(byte[0])
-                print("msgLenBytes", msgLenBytes)
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
                     # Convert collected bytes to integer (assuming big-endian format)
                     msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-                    print("msgLen", msgLen)
                     msgLenCollected = True
-                    print(f"Message Length Determined: {msgLen} bytes")
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
-                print("Receiving Map Snapshot from Structure")
                 if collecting_data:
-                    print("Map snapshot buffer: ", buffer)
                     buffer = b''.join(buffer) # convert to bytes object
                     checksum = Inchworm.get_checksum(buffer)
-                    print("checksum: ", checksum)
                     calculated_check_sum = []
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
                     calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
                     # Inchworm.crc16(buffer[:-2])
-                    print("calculated_check_sum: ", calculated_check_sum)
                     
                     if checksum == calculated_check_sum:
-                        print("Checksum matched yippeeee")
                         current_map = Inchworm.process_received_map_snapshot(buffer)
-                        print("Current map")
-                        print(current_map)
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
@@ -441,11 +429,8 @@ class Inchworm:
         msg_len = len(block_change).to_bytes(2,'little')
 
         buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
-        print(buffer)
 
         self.IW_SERIAL.write(buffer)
-
-        print("Requesting map!!")        
         return True 
     
     # Checksum protocol for the IW and Block communication
@@ -458,7 +443,6 @@ class Inchworm:
         # checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
         checksum =[]
         checksum += buffer[-2:]
-        print("checksum: ", checksum)
 
         # checksum.append(buffer.pop())
         # checksum.append(buffer.pop())
