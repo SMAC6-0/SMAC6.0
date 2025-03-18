@@ -386,21 +386,17 @@ class Inchworm:
                     
                     if checksum == calculated_check_sum:
                         self.current_map = Inchworm.process_received_map_snapshot(buffer)
+                        return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
                         return False
 
-                    collecting_data = False
+                collecting_data = False
             
             elif collecting_data:
                 buffer.append(byte) # Append bytes to buffer if between start and end delimiters
                 bytesRead += 1
-            elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
-                break
-        
-        print("Out of the looopppppyy")
-        return True
     
     @staticmethod
     def process_received_map_snapshot(map_data):
