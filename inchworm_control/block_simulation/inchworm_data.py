@@ -341,8 +341,8 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
-            if byte == []:
-                return False
+            # if byte == []:
+            #     return False
             # print(byte) # b'\xaa'
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
@@ -401,7 +401,7 @@ class Inchworm:
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
-                        break
+                        return False
 
                     collecting_data = False
             
@@ -409,9 +409,9 @@ class Inchworm:
                 buffer.append(byte) # Append bytes to buffer if between start and end delimiters
                 bytesRead += 1
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
-                return True
+                break
         
-        return False
+        return True
     
     @staticmethod
     def process_received_map_snapshot(map_data):
@@ -445,8 +445,8 @@ class Inchworm:
 
         self.IW_SERIAL.write(buffer)
 
-        print("Requesting map!!")
-        # TODO: handle transmission error
+        print("Requesting map!!")        
+        return True 
     
     # Checksum protocol for the IW and Block communication
     @staticmethod
@@ -554,12 +554,7 @@ class Inchworm:
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
 
-                print(Fore.BLUE + "Reset the path. Requesting the map")
-                
-                if not SIMULATION:
-                    self.request_map_snapshot()
-                
-                self.intilization_path_flag = True
+                print(Fore.BLUE + "Reset the path.")
 
         else: # this happens first 
             # Find & path plan to seed block 
@@ -668,8 +663,11 @@ class Inchworm:
                     print(Fore.BLUE + "IW got map snapshot")
                     return True
             return False
-        else:
-            return self.inchworm_gets_map()
+        else:                
+            if not SIMULATION:
+                # request the map
+                if self.request_map_snapshot():
+                    return self.inchworm_gets_map()
     
     def is_Path_Available(self):
         print(Fore.BLUE + "Checking path availability... ")
