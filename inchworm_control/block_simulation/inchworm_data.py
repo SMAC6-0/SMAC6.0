@@ -401,6 +401,7 @@ class Inchworm:
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
                 break
         
+        print("Out of the looopppppyy")
         return True
     
     @staticmethod
@@ -416,8 +417,9 @@ class Inchworm:
                     if index < len(map_data):
                         array[l][r][c] = map_data[index]
                         index += 1
-        return array  
         print("Received 3D Array:", array)
+        return array  
+        
 
     def request_map_snapshot(self):
         print("Gimme map plsss")
