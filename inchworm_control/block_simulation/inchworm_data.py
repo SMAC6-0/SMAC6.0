@@ -712,13 +712,13 @@ class Inchworm:
         if SIMULATION: 
             return not self.leading_foot_loc == self.goal 
         else: 
-            incorrect_block = input("IW got error 'Incorrectly Placed Block'? (yes/no) \n")
-            if incorrect_block.lower() == 'yes':
-                return True
-            elif incorrect_block.lower() == 'no':
-                return False
-            else:
-                print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
+            # incorrect_block = input("IW got error 'Incorrectly Placed Block'? (yes/no) \n")
+            # if incorrect_block.lower() == 'yes':
+            #     return True
+            # elif incorrect_block.lower() == 'no':
+            #     return False
+            # else:
+            #     print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
             pass
     
     def is_structure_complete(self):
