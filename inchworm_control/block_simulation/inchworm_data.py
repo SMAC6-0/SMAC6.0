@@ -391,6 +391,7 @@ class Inchworm:
                     
                     if checksum == calculated_check_sum:
                         self.current_map = Inchworm.process_received_map_snapshot(buffer)
+                        print(self.current_map)
                         return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
