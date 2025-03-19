@@ -315,6 +315,7 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+            print("buffer", buffer)
 
             self.IW_SERIAL.write(buffer)
 
@@ -562,7 +563,8 @@ class Inchworm:
         # IW sends it's path to the structure 
         if not SIMULATION:
             self.send_IW_path_to_block(self.paths)
-            
+        
+        print("")
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
