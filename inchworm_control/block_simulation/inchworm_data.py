@@ -744,7 +744,7 @@ if __name__ == "__main__":
 
       
 
-    inchworm = Inchworm(orientation=CURRENT_ORIENTATION, final_structure=final_structure, location=IW_1_LOC, holding_block=False)
+    inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
     try:
         inchworm.run()
     except KeyboardInterrupt:
