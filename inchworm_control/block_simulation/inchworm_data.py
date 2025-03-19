@@ -407,7 +407,7 @@ class Inchworm:
     def process_received_map_snapshot(map_data):
         print("Processing map data")
         # TODO: CHANGE THISSS PLSSS make generic instead of using JUST NUMBERS
-        layers, rows, cols = 4, 8, 8
+        layers, rows, cols = 8, 8, 4
         array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
         index = 0
         for l in range(layers):
