@@ -743,7 +743,7 @@ if __name__ == "__main__":
       final_structure = file.readlines()
 
       
-
+    print("I'm hereee")
     inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
     try:
         inchworm.run()
