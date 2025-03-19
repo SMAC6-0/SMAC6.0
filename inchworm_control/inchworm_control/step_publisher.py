@@ -20,19 +20,16 @@ class StepPublisher(Node):
         self.get_logger().info('Node starting')
 
         # FOR ROBOT_WS:
-        # TODO: change the file path!!!
-        self.file_path = '/home/smac/robot_ws/src/SMAC6.0/inchworm_control/block_simulation/steps.txt'
+        self.file_path = '/home/smac/robot_ws/src/SMAC6.0/steps.txt'
         # FOR DEV_WS:
-        # self.file_path = '~/MQP/dev_ws/src/inchworm_control/block_simulation/steps.txt'
+        # self.file_path = '/home/Documents/smac6/src/SMAC6.0/inchworm_control/block_simulation/steps.txt'
         self.file_path = os.path.expanduser(self.file_path)
         # Read and get steps from file
         self.steps = read_file_callback(self)    
         print('steps FROM STEP_PUBLISHER', self.steps)
         
         msg = String()
-        (step, holding_block) = self.steps.pop(0)
-        if holding_block:
-            step += "_BLOCK"
+        step = self.steps.pop(0)
         msg.data = step
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing in INIT: "%s"' % step)
@@ -49,9 +46,7 @@ class StepPublisher(Node):
                 # if holding block is true, it is holding a block for this step
                 msg = String()
                 if(len(self.steps) > 0):
-                    (step, holding_block) = self.steps.pop(0)
-                    if holding_block:
-                        step += "_BLOCK"
+                    step = self.steps.pop(0)
                     msg.data = step
                     self.publisher_.publish(msg)
                     self.get_logger().info('Publishing: "%s"' % step)
@@ -75,7 +70,7 @@ def read_file_callback(self):
                 step_tuple = eval(line.strip())  # Convert string to tuple
                 # Convert the boolean value from string to bool
                 # Ensure proper boolean conversion regardless of case
-                step_tuple = (step_tuple[0], str(step_tuple[1]).strip().lower() == 'true')
+                # step_tuple = (step_tuple[0], str(step_tuple[1]).strip().lower() == 'true')
                 steps.append(step_tuple)
             return steps
     except Exception as e:

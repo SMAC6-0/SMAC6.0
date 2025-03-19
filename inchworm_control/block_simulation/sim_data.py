@@ -16,6 +16,8 @@ import map_data
 from search import search
 from inchworm_data import Inchworm
 from colorama import Fore, init
+import numpy as np
+import itertools
 init(autoreset=True)
 
 from inchworm_control.blueprint import blueprint 
@@ -31,7 +33,7 @@ class SimData:
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
-        self.cleared_path_flag = False
+        self.cleared_path_flags = {}
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
@@ -55,35 +57,28 @@ class SimData:
         # If yes, get newly placed block's coords from iw 
 
         # Structure verifies that block is in correct location 
-        if inchworm.leading_foot_loc == inchworm.goal and inchworm.paths: 
+        if (inchworm.leading_foot_loc == inchworm.goal and inchworm.paths) or inchworm.state.value == 3: 
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths)
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths, inchworm.id)
                 # Update current_map w new block 
-
-                # print(Fore.GREEN + "Before update:", self.current_map)
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
-                # print(Fore.GREEN + "structure map: ", self.current_map)
-                # print(Fore.GREEN + "final map: ", self.final_structure)
 
-                # Send current_map to IW 
-                # print("IW before copy", inchworm.current_map)
-                inchworm.current_map = copy.deepcopy(self.current_map)
-                # print("IW after copy", inchworm.current_map)
+            # Send current_map to IW 
+            inchworm.current_map = copy.deepcopy(self.current_map)
 
-                print(Fore.GREEN + "Struct should have sent its map to the IW")
-                self.cleared_path_flag = True
-                return True
-        # return self.current_map # TODO: maybe unnecessary
+            print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
+            self.cleared_path_flags[inchworm.id] = True # Path is cleared flag, meaning struct is set to receive updates with a new path 
+            return True
 
     def new_IW_paths_received(self, inchworm): 
         # Make sure the previous path is cleared at least once before this
-        if self.cleared_path_flag and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
+        if self.cleared_path_flags[inchworm.id] and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
-            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK)
-            print(Fore.GREEN + "struct's map updated w new IW path")
-            self.cleared_path_flag = False
+            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
+            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
+            self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
             return True
         else: 
             # print("struct did not receive new IW path")
@@ -91,16 +86,27 @@ class SimData:
         # get path & new incoming block from iw - DIFFERENT FUNC 
         # update current map with incoming block and paths 
 
+    def detect_IW_collision(self): 
+        """Raises an error if any of the inchworm feet are in the location of the other inchworms."""
+        # Compare 2 inchworms at a time from the list of all existing inchworms. 
+        for a, b in itertools.combinations(self.existing_inchworms, 2):
+            # Bitwise comparison of foot locations. If any foot loc is the same as any other foot loc, it is true.
+            if {tuple(a.leading_foot_loc), tuple(a.lagging_foot_loc)} & {tuple(b.leading_foot_loc), tuple(b.lagging_foot_loc)}:
+                raise RuntimeError(Fore.GREEN + f"COLLISION between IW{a.id} & IW{b.id} at {a.leading_foot_loc}, {a.lagging_foot_loc} and {b.leading_foot_loc}, {b.lagging_foot_loc}")
+
     def spawn_inchworms(self, num_inchworms: int): 
         """
         Args: 
             num_inchworms (int): number of inchworms building the structure
         """
         for i in range(num_inchworms): 
-            self.existing_inchworms.append(Inchworm(CURRENT_ORIENTATION, self.final_structure, IW_1_LOC))
+            self.existing_inchworms.append(Inchworm(IW_ORIENTATIONS[i], self.final_structure, IW_LOCS[i]))
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
-        print(Fore.GREEN + "inchworms spawned")
 
+            # For however many IWs exist, store flag in dictionary 
+            self.cleared_path_flags[i+1] = False # The key is i+1 to correspond to the IW ID
+        # print(Fore.GREEN + "inchworms spawned")
+        print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
 
     def get_next_steps(self): 
         """
@@ -109,6 +115,14 @@ class SimData:
         for inchworm in self.existing_inchworms: 
             return inchworm.get_next_point() # x, z, y
         # TODO: return a list of all the next points of travel
+
+    def generate_demo(self):
+        coordinates = []
+        coordinates.append([SEED_BK[0]+1, SEED_BK[1], SEED_BK[2]])
+        for z in (2, 3): 
+            coordinates.append([SEED_BK[0], SEED_BK[1], z])
+            coordinates.append([SEED_BK[0]+1, SEED_BK[1], z])
+        return coordinates            
     
     def generate_pyramid(self, base_size):
         """
