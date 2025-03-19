@@ -10,13 +10,13 @@ GRID_HEIGHT = 4
 ### BLOCK DEPOTS & SEED BLOCK ###
 BD_1_LOC = [4, 4, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
 BD_LOCS = [BD_1_LOC] # The locations of all block depots (if there are multiple)
-SEED_BK = [6, 8, 1]
+SEED_BK = [6, 7, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
 NUM_INCHWORMS = 1
 IW_1_LOC = [4, 1, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-IW_2_LOC = [8, 8, 0]
+IW_2_LOC = [7, 7, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
