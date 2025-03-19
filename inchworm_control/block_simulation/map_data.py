@@ -82,11 +82,11 @@ def initialize_grid():
         grid [list]: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """
     # Initialize an empty 3D grid with all cells represented as NOT_WALKABLE
-    grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] 
+    grid = [[[GridStatus.NOT_WALKABLE.value for z in range(GRID_HEIGHT)] for y in range(GRID_SIZE)] for x in range(GRID_SIZE)] 
 
     # Make the bottom layer (z = 0) WALKABLE
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
+    for x in range(len(grid)):
+        for y in range(len(grid[0])):
             grid[x][y][0] = GridStatus.WALKABLE.value
     
     grid = mark_depot_and_seed(grid)
@@ -340,7 +340,7 @@ def start_search_3d(grid, start, goal):
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
-    visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(len(grid[0][0]))]
+    visited = [[[False for z in range(len(grid[0][0]))] for y in range(len(grid[0]))] for x in range(len(grid))]
     queue = [start_cell]
     visited[start_cell.x][start_cell.y][start_cell.z] = True
     return goal_cell, visited, queue
@@ -487,7 +487,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
         #TODO: handle any block depot'
         if holding_block:
             step_instructions = f"{step_instructions}_BLOCK"
-        print(f"IW orientation {orientation.name} -> {new_orientation.name}, resulting in {step_instructions}")
+        # print(Fore.MAGENTA + f"IW orientation {orientation.name} -> {new_orientation.name}, resulting in {step_instructions}")
         
         # for bd_loc in BD_LOCS:
         if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
@@ -520,9 +520,9 @@ def buffer_iw_paths(grid, iw_id):
     path_count = []
 
     # Make the bottom layer (z = 0) WALKABLE
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            for z in range(GRID_SIZE):
+    for x in range(len(grid)):
+        for y in range(len(grid[0])):
+            for z in range(len(grid[0][0])):
                 cell_status = grid[x][y][z]   
                 
                 if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0 and [x, y, z] != SEED_BK and [x, y, z] != BD_1_LOC): # is some inchworm path, but not its own
