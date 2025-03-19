@@ -80,6 +80,8 @@ class Inchworm:
         self.paths = [] # the list of coords
         self.goal = [] # goal coord
         self.goal_progress_index = 0
+        self.num_steps = 0
+        self.step_num = 1
         # self.found_structures = []
         # self.misc_blocks = []
 
@@ -167,6 +169,7 @@ class Inchworm:
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += steps
             self.paths += path
+            self.num_steps = len(step_instructions)
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
@@ -182,7 +185,9 @@ class Inchworm:
         """
         if self.goal_progress_index > 0:
             self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
+
+            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
         
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
@@ -195,6 +200,41 @@ class Inchworm:
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
         return x, y, z
+    
+    def get_next_step(self):
+        if self.step_num > self.num_steps: 
+            ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
+        else: 
+            if self.goal_progress_index > 0:
+                file = open('steps.txt') 
+                content = file.readlines() 
+                step_str = content[self.step_num-1]
+                print(Fore.BLUE + f"Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
+
+                # Update Inchworm Orientation with each step
+                self.orientation = map_data.get_orientation(step_str, self.orientation)
+
+                self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
+                if "UP" not in step_str:
+                    self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
+
+                # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+                self.step_num += 1
+
+        
+            
+            x, y, z = self.leading_foot_loc
+            self.goal_progress_index += 1
+            
+            if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+                self.holding_block = True
+            elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+                self.holding_block = False
+            
+            if self.holding_block and [x, y, z] != self.goal:
+                z = z + 1
+            print(f"foot locs: {x, y, z}, {self.lagging_foot_loc}")
+            return x, y, z
     
     def get_total_inchworms(cls):
         """
@@ -367,6 +407,7 @@ class Inchworm:
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+                self.step_num = 1
 
                 print(Fore.BLUE + f"IW{self.id}: Reset the path. Transferring the block data")
                 # transfer the block location data 
@@ -437,6 +478,7 @@ class Inchworm:
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+        self.step_num = 1
         self.holding_block = False
 
         print(Fore.BLUE + f"IW{self.id}: Reset the path")

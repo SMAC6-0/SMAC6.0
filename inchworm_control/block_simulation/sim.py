@@ -92,7 +92,7 @@ def update():
     # Search(Look) for structures
     if held_keys["l"] and not key_l_pressed:
         generate_final_structure()
-        sim_data.spawn_inchworms(2)
+        sim_data.spawn_inchworms(NUM_INCHWORMS)
         key_l_pressed = True
 
     if not held_keys["l"]:
@@ -118,7 +118,7 @@ def update():
         for inchworm in sim_data.existing_inchworms:  
 
             if inchworm.paths: 
-                x, y, z = inchworm.get_next_point() 
+                x, y, z = inchworm.get_next_step() 
                 # print("IW", inchworm.id, " leading foot loc: ", inchworm.leading_foot_loc, "lagging_foot_loc: ", inchworm.lagging_foot_loc)
             
                 # If the IW is holding a block (the bool spawned) despawn that block from old location before it can be moved/respawned to next step
@@ -217,8 +217,8 @@ def vis_IW_paths(inchworm, clear_path=False):
         spawn_cube(inchworm.goal, incoming_block_texture)
 
     # Then show the path the inchworm is going to take
-    for step in range(len(inchworm.paths)-1): 
-        cell = inchworm.paths[step]
+    for cell in inchworm.paths: #step in range(len(inchworm.paths)-1): 
+        # cell = inchworm.paths[step]
 
         already_placed_block = None
         for e in scene.entities:
@@ -258,6 +258,7 @@ def vis_IW_paths(inchworm, clear_path=False):
         try: 
             block_texture = transition[already_placed_block.texture]
         except:
+            print("trouble at cell ", cell)
             print(f"Unexpected texture in path visualization: {already_placed_block.texture}")  # Debugging line
         delete_cube(cell)
         spawn_cube(cell, block_texture, block_color)
