@@ -1,16 +1,45 @@
-from enum import Enum
+from enum import IntEnum
 import numpy as np
 from config import *
 import bfs_path_planning
 from colorama import Fore, init
 init(autoreset=True)
+from inchworm_data import Inchworm
 
-class GridStatus(Enum):
+class GridStatus(IntEnum):
     WALKABLE = 0
     NOT_WALKABLE = 1
     INCHWORM_PATH = -1
     INCOMING_BLOCK = 2
     SUPPLY_DEPOT = 3
+    
+    @classmethod
+    def inchworm_path(cls, iw_id):
+        """Generate an inchworm path status dynamically using a negative ID."""
+        if iw_id in Inchworm.inchworm_list:
+            return -iw_id
+        raise ValueError(f"Inchworm ID {iw_id} is not valid.")
+
+    @classmethod
+    def is_inchworm_path(cls, value):
+        """Check if the given value represents an inchworm path."""
+        return isinstance(value, int) and value < 0 and abs(value) in Inchworm.inchworm_list
+
+    @classmethod
+    def which_inchworm(cls, value):
+        """Return the inchworm ID if the value is an inchworm path, otherwise None."""
+        if cls.is_inchworm_path(value):
+            return abs(value)
+        return None
+
+    @classmethod
+    def from_value(cls, value):
+        """Determine the GridStatus type, automatically recognizing inchworm paths."""
+        if value in cls._value2member_map_:
+            return cls(value)
+        elif cls.is_inchworm_path(value):
+            return value  # Return as valid inchworm path
+        raise ValueError(f"Invalid GridStatus value: {value}")
 
 class Cell:
     def __init__(self, x: int, y: int, z: int, is_obs: bool = False, g = 0, h = 0): 
@@ -53,11 +82,11 @@ def initialize_grid():
         grid [list]: A 3D list representing the initialized workspace where only the floor is walkable. (All z coordinates = 0).
     """
     # Initialize an empty 3D grid with all cells represented as NOT_WALKABLE
-    grid = [[[GridStatus.NOT_WALKABLE.value for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)] 
+    grid = [[[GridStatus.NOT_WALKABLE.value for z in range(GRID_HEIGHT)] for y in range(GRID_SIZE)] for x in range(GRID_SIZE)] 
 
     # Make the bottom layer (z = 0) WALKABLE
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
+    for x in range(len(grid)):
+        for y in range(len(grid[0])):
             grid[x][y][0] = GridStatus.WALKABLE.value
     
     grid = mark_depot_and_seed(grid)
@@ -103,14 +132,20 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
     x, y, z = coord
 
     if is_valid_position_3d(grid, coord):
-        if status != GridStatus.INCOMING_BLOCK:
-            grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
-            if z - 1 >= 0:
-                grid[x][y][z-1] = status.value #cell below
-        else:
+        if status == GridStatus.INCOMING_BLOCK.value:
             grid[x][y][z] = GridStatus.INCOMING_BLOCK.value
             if z - 1 >= 0:
-                grid[x][y][z-1] = GridStatus.NOT_WALKABLE.value #cell below
+                grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
+        elif status == GridStatus.SUPPLY_DEPOT.value:
+            grid[x][y][z] = GridStatus.WALKABLE.value
+            if z - 1 >= 0:
+                grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
+        elif status < 0: 
+            grid[x][y][z] = status
+        else:
+            grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
+            if z - 1 >= 0:
+                grid[x][y][z-1] = status #cell below
 
     return grid
 
@@ -130,7 +165,7 @@ def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
         grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH.value
     return grid
 
-def rm_inchworm_path_from_grid(grid, inchworm_path):
+def rm_inchworm_path_from_grid(grid, inchworm_path, iw_id):
     """
     Remove the inchworm path from the grid.
 
@@ -141,17 +176,16 @@ def rm_inchworm_path_from_grid(grid, inchworm_path):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    #TODO: specify inchworm
-    # inchworm_path.pop(-1)
     for step in range(len(inchworm_path)-1): 
         x, y, z = inchworm_path[step] 
-        if [x, y, z + 1] == BD_1_LOC: 
-            grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
-        else:
-            if grid[x][y][z + 1] == GridStatus.WALKABLE.value:
-                grid[x][y][z] = GridStatus.NOT_WALKABLE.value
+        if grid[x][y][z] == iw_id * GridStatus.INCHWORM_PATH.value:
+            if [x, y, z + 1] == BD_1_LOC: 
+                grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
             else:
-                grid[x][y][z] = GridStatus.WALKABLE.value
+                if grid[x][y][z + 1] == GridStatus.WALKABLE.value:
+                    grid[x][y][z] = GridStatus.NOT_WALKABLE.value
+                else:
+                    grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
 
 
@@ -306,7 +340,7 @@ def start_search_3d(grid, start, goal):
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
-    visited = [[[False for _ in range(len(grid))] for _ in range(len(grid[0]))] for _ in range(len(grid[0][0]))]
+    visited = [[[False for z in range(len(grid[0][0]))] for y in range(len(grid[0]))] for x in range(len(grid))]
     queue = [start_cell]
     visited[start_cell.x][start_cell.y][start_cell.z] = True
     return goal_cell, visited, queue
@@ -326,7 +360,7 @@ def determine_helper_blocks(grid, path_start, path_end):
     else:
         return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_block, iw_id):
+def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -360,9 +394,9 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation, holding_blo
         steps.append(step_instructions)
         curr_orientation = orientation
 
-    return path_coords, steps
+    return path_coords, steps, curr_orientation
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, holding_block, end_flag):
+def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: InchwormOrientation, holding_block: bool, end_flag):
     """
     Determines the steps needed to get from current_coord to next_coord by taking into account the
     direction of movement and new orientation of the inchworm's position in the 3D grid.
@@ -453,6 +487,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation, ho
         #TODO: handle any block depot'
         if holding_block:
             step_instructions = f"{step_instructions}_BLOCK"
+        # print(Fore.MAGENTA + f"IW orientation {orientation.name} -> {new_orientation.name}, resulting in {step_instructions}")
         
         # for bd_loc in BD_LOCS:
         if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
@@ -481,24 +516,51 @@ def buffer_iw_paths(grid, iw_id):
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
+    neighbor_directions = set_neighbors()
+    path_count = []
 
     # Make the bottom layer (z = 0) WALKABLE
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            for z in range(GRID_SIZE):
-                cell_status = grid[x][y][z]
+    for x in range(len(grid)):
+        for y in range(len(grid[0])):
+            for z in range(len(grid[0][0])):
+                cell_status = grid[x][y][z]   
                 
-                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0): # is some inchworm path, but not its own
-                    neighbor_directions = set_neighbors()
-                    
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0 and [x, y, z] != SEED_BK and [x, y, z] != BD_1_LOC): # is some inchworm path, but not its own
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
-                        n_status = grid[nx][ny][nz]
-                        if (is_valid_position_3d(grid, [nx, ny, nz])
-                            and (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value)):
-                            buffer_list.append((nx, ny, nz, cell_status))
+                        if (is_valid_position_3d(grid, [nx, ny, nz]) 
+                            and not (is_neighbor_or_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_or_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
+                            n_status = grid[nx][ny][nz]
+                            if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
+                                path_count.append((nx, ny, nz, cell_status))
+                    if (len(path_count) > 2):
+                        # print(Fore.MAGENTA + f"Path count: ", path_count)
+                        for new_info in path_count:
+                            buffer_list.append(new_info)
+                        path_count = []
     
-    for nx, ny, nz, new_status in buffer_list:
-        grid[nx][ny][nz] = new_status
+    # print(Fore.MAGENTA + f"buffer list vals: ", buffer_list)
+    for (nx, ny, nz, new_status) in buffer_list:
+        grid = update_grid_status(grid, [nx, ny, nz], new_status)
+    # print(Fore.MAGENTA + f"grid: ", grid)
+    
+    grid = update_grid_status(grid, SEED_BK)
+    grid = update_grid_status(grid, BD_1_LOC, GridStatus.SUPPLY_DEPOT.value)
     
     return grid
+
+def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
+    neighbors = []
+    if not is_valid_position_3d(grid, coord_compare) and not is_valid_position_3d(grid, og_coord):
+        return False
+    
+    if (coord_compare == og_coord):
+        return True
+    
+    gx, gy, gz = og_coord
+    for dx, dy, dz in neighbor_directions:
+        nx, ny, nz = gx + dx, gy + dy, gz + dz
+        neighbors.append([nx, ny, nz])
+        if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
+            return True
+    return False
