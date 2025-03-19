@@ -107,7 +107,10 @@ class Inchworm:
         else: 
             # These are vars that the simulation uses to simulate each of the inchworm feet
             self.last_cell, self.last_bk_og_texture, self.last_cell_2, self.last_bk_og_texture_2, self.spawned, self.prev_held_block_loc = None, None, None, None, False, [0,0,0]
-    
+
+        if DEBUG:
+            print("Current Map from IW")
+            print(self.current_map)
     def __del__(self):
         """
         Deletion of inchworm in the list of inchworms.
@@ -553,6 +556,10 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
+        if DEBUG:
+            print("Current Map from Block")
+            print(self.current_map)
+
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
