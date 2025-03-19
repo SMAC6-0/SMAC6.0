@@ -318,6 +318,9 @@ class Inchworm:
 
             self.IW_SERIAL.write(buffer)
 
+            if DEBUG:
+                print("grid celllllll RAHHH")
+
             # delay to make sure all the data is transmitted 
             sleep(PATH_PLANNING_TIMER)
 
