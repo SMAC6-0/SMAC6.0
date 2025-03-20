@@ -34,11 +34,12 @@ def blueprint(curr_map, final_map) -> list:
     final_map = np.array(final_map)
 
     # Debugging output
-    print("Curr Map shape:", curr_map)
-    print("Final Map shape:", final_map)
+    print("Curr Map shape:", curr_map.shape)
+    print("Final Map shape:", final_map.shape)
 
-    print("Curr Map:", curr_map.shape)
-    print("Final Map:", final_map.shape)
+    print("Curr Map:", curr_map)
+    print("Final Map:", final_map)
+    
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
         return [-9,-9,-9] # error value
