@@ -29,31 +29,8 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
                         [[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]]]
 
 def blueprint(curr_map, final_map) -> list:
-    print("Curr map before numopy", curr_map)
-    print("Final map before numopy", final_map)
-
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
-
-    print("Curr map after numopy", curr_map)
-    print("Final map after numopy", final_map)
-
-    if isinstance(final_map, str):
-        print("Final map is a string, attempting conversion...")
-        try:
-            final_map = eval(final_map)  # Ensure input is trusted before using eval
-        except Exception as e:
-            print("Error parsing final_map:", e)
-            return [-9, -9, -9]  # Error case
-
-    final_map = np.array(final_map)
-
-    if final_map.shape == (1,):  
-        final_map = final_map[1]
-
-    # Debugging output
-    print("Curr Map shape:", curr_map.shape, "| Size:", curr_map.size)
-    print("Final Map shape:", final_map.shape, "| Size:", final_map.size)
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 

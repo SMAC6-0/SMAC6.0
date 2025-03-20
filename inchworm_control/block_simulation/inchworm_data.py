@@ -756,8 +756,6 @@ if __name__ == "__main__":
     with open("Final_Structure.json", "r") as final_map_file:
         final_structure = json.load(final_map_file)
 
-    print("Final Structure")
-    print(final_structure)
     inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
     try:
         inchworm.run()
