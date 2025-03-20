@@ -577,7 +577,6 @@ class Inchworm:
         if not SIMULATION:
             self.send_IW_path_to_block(self.paths)
         
-        print("")
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
@@ -688,12 +687,16 @@ class Inchworm:
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
         print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
-        for bd_loc in BD_LOCS:
-            if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
-                print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
-                return True 
-             
-        return False
+        # TODO: Replace with actual implementation
+        if INCHWORM_MOVED:
+            return True
+        else:
+            for bd_loc in BD_LOCS:
+                if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
+                    print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
+                    return True 
+                
+            return False
 
 
     def is_IW_in_block(self):
