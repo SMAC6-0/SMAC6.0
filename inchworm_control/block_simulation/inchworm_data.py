@@ -391,7 +391,7 @@ class Inchworm:
                     
                     if checksum == calculated_check_sum:
                         self.current_map = Inchworm.process_received_map_snapshot(buffer)
-                        print(self.current_map)
+                        # print(self.current_map)
                         return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
@@ -417,7 +417,7 @@ class Inchworm:
                     if index < len(map_data):
                         array[l][r][c] = map_data[index]
                         index += 1
-        print("Received 3D Array:", array)
+        # print("Received 3D Array:", array)
         return array  
         
 
