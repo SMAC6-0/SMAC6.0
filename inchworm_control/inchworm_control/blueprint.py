@@ -39,7 +39,7 @@ def blueprint(curr_map, final_map) -> list:
 
     print("Curr Map:", curr_map.shape)
     print("Final Map:", final_map.shape)
-    if curr_map.shape != final_map.size:
+    if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
         return [-9,-9,-9] # error value
 
