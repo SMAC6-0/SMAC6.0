@@ -191,18 +191,19 @@ def rm_inchworm_path_from_grid(grid, inchworm_path, iw_id):
 
 def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
-    Sets the neighbors in an algorithm.
+    Sets the neighbors for use in (search) algorithms.
 
     Args:
-        allow_vertical (boolean): . 
-        allow_vert_diagonal (boolean): . 
-        allow_horz_diagonal (boolean): . 
-        allow_alls_diagonal (boolean): . 
-        allow_large_build (boolean)
+        allow_vertical (boolean): True to allow cells directly above and below the current cell. 
+        allow_vert_diagonal (boolean): True to add neighbors adjacent in the xy plane, but within 1 block up/down. 
+        allow_horz_diagonal (boolean): True to add neighbors diagonal in the xy plane. 
+        allow_alls_diagonal (boolean): True to add neighbors diagonal in the xy plane, but within 1 block up/down. 
+        allow_large_build (boolean): True to allow neighbors within 1 block horizontally, but +-3 vertically. This being true allows the inchworm to path
+            plan to place blocks up to 3 blocks tall. 
     Returns:
-        neighbor_directions (list(tuple)): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+        neighbor_directions (list(tuple)): A list of directions to nearby cells. 
     """ 
-    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
+    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)] # Adjacent cells in xy plane, excluding diagonals. 
     vertical_neighbors = [(0, 0, 1), (0, 0, -1)]
     diagonal_vert_neighbors = [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1),
                                (0, 1, 1), (0, 1, -1), (0, -1, 1), (0, -1, -1)]
@@ -214,7 +215,7 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
                              (1, 0, 3), (1, 0, -3), (-1, 0, 3), (-1, 0, -3),
                              (0, -1, 3), (0, -1, -3), (0, 1, -3), (0, 1, 3)]
     
-    # combined neighbor_directions based on conditions
+    # Combine neighbor_directions based on conditions
     neighbor_directions = base_neighbors
     
     if allow_vertical:
@@ -511,7 +512,14 @@ def get_orientation(movement: str, orientation: InchwormOrientation):
     else:
         return orientation    
     
-def buffer_iw_paths(grid, iw_id):
+def buffer_iw_paths(grid, iw_id: int):
+    """
+    To avoid collisions, buffers the inchworm paths of *other* IWs. 
+    Args: 
+        iw_id (int): the ID of the IW that is trying to path plan around the other IWs
+    Returns: 
+        grid: the 3D list map, now with a bunch of extra cells marked as IW paths
+    """
     # if on the map there is another iw path, have its neighbors also turn into iw_path
     
     # check all of grid for inchworm paths
@@ -550,6 +558,14 @@ def buffer_iw_paths(grid, iw_id):
     return grid
 
 def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
+    """
+    Returns true if a potential buffer cell is within the "off limits zone" of another block. 
+    Args:
+        grid (list)
+        coord_compare (list(list)): coordinate of a potential path buffer cell. 
+        og_coord: coordinate of a cell that can't be trapped by the buffer 
+        neighbor_directions: 
+    """
     neighbors = []
     if not is_valid_position_3d(grid, coord_compare) and not is_valid_position_3d(grid, og_coord):
         return False
@@ -564,3 +580,9 @@ def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True
     return False
+
+def create_placement_pivot(): 
+    """
+    Modify the path to add a little step to left or right before placing a block, since the IW needs to be right next to the structure to reach higher locations. 
+    """
+    pass
