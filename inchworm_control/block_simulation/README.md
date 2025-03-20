@@ -1,10 +1,10 @@
-# Inchworm Simulation (Ursina Engine)
+# SMAC Simulation (Ursina Engine)
 An advanced simulation showcasing inchworm behavior in a Minecraft-like environment, utilizing Python and the Ursina Engine. This project goes beyond the basic game mechanics to allow for the automated construction of structures through the manipulation of blocks by simulated inchworm movements.
 
-# Requirments 
-This simulation was developed using Python 3. Python 3.12 is strongly recommened. Using lower version of Pyhton can cause signifcant bugs.  For more information visit: https://www.python.org/downloads/release/python-3120/ 
+# Software Requirements 
+This simulation was developed using Python 3. Python 3.12 is strongly recommended. Using lower version of Pyhton can cause signifcant bugs. For more information visit: https://www.python.org/downloads/release/python-3120/ 
 
-Tracy note: Instructions here!
+## Download Python & Installation Instructions
 1. Download Python 3.12 by following the commands below. Courtesy of https://medium.com/@KNuggies/install-python-3-12-on-ubuntu-c7674df5f623
 I reccommend installing this outside your workspace
 `sudo apt update && sudo apt upgrade -y`
@@ -23,17 +23,45 @@ It is only after this you can install your packages: pip, ursina, and numpy.
 For pip, install it using this command in the **virtual environment** `sudo apt-get install python3-pip`
 
 Another note: for any python command thus forward, you must specify the version by tagging 'python3.12 -m' 
-Required packages: 
+
+## Required packages: 
 1. ursina 
 2. numpy 
 
-# How to Download and Run ⬇
+## How to Download and Run ⬇
 1. Make sure you have Python installed and Ursina too. If you have Python, go to the Command Line and type `pip install ursina`.
 2. Download this Repository (or clone it).
 3. Extract the ZIP file (not required it's cloned) and run the `sim.py` file.
 
-### How to edit the simulation ?
-congif.py file includes the location of Block Depot, initial position and orientation of the inchworm's leading leg. There is an additional parameter called DEMO. If True, the simulation will simplfy the steps to build the desired structure. This should only be true when building a 3-block column.
+# Running the Simulation
+After the requirements are met, you can now start simulating the inchworms, dynamic pathing, and smart blocks. In this simulation, we assume that all communication protocols (block-to-block, inchworm-to-block, block-to-inchworm) is correct.
+
+## Simulation Initialization
+To start, 
+
+## How to edit the simulation ?
+config.py file controls the following:
+1. Grid size of the map
+2. Locations of block depots
+3. Location of the seed block
+4. Initial position and orientation of the inchworms' leading leg
+
+Through these variables, you can customize the simulation.
+
+### Non-Seed Block Initialization
+Initializing the map consists spawns the following onto the map:
+1. Block depot
+2. Inchworm's leading foot location in their respective orientation(s)
+4. Path for inchworm to go to seed block
+
+This process calculates the entire path and steps for inchworm to build given structure.
+
+### Seed Block Initialization
+Initializing the map consists spawns the following onto the map:
+1. Block depot
+2. Seed block
+3. Inchworm(s) foot locations in their respective orientation(s)
+4. Path(s) for inchworm(s) to go to seed block
 
 ## Controls ⌨
 | Key | Description |
@@ -45,17 +73,19 @@ congif.py file includes the location of Block Depot, initial position and orient
 | `Right Click` | Remove Block |
 | `L` | Identify known substructures |
 | `N` | Move the inchworm to next block |
-| `P` | Calculate entire path and steps for inchworm to build given structure. Spawn Block Depot and leading inchworm foot. Write steps to steps.txt |
+| `P` | Start non-seed block initialization. |
 | `G` | Generate pyramid structure |
+| `K` | Generate SMAC 6 demo structure |
+| `M` | Spawn inchworms |
 | `F` | Enable flying and different camera angles |
 | `QE` | Fly up/down |
 | `1234` | Switch cameras |
 | `ESC` | Exit simulation |
 
 ## Demo usage 
-1. Build any structure you want to display in the workspace. 
+1. Build any structure you want to display in the workspace or generate pre-existing ones. 
 2. Identify known substructures (`L`), if there is a known structure it will change the color of the substructure
-3. Calculate path a for inchworm (`P`) and spawn the Block Depot and inchworm foot. It will create or overwrite the steps.txt with the current list of steps.
+3. Calculate a path for inchworm (`P`) and spawn the Block Depot and inchworm foot. It will create or overwrite the steps.txt with the current list of steps.
 4. Press `N` and watch the inchworm move to the next block!
 
 Note: You must press `L` then `P` (only once) for the simulation to work as intended.

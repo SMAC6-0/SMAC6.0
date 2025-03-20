@@ -116,7 +116,7 @@ def mark_depot_and_seed(grid):
     grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
     
-def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
+def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE.value):
     """
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 
