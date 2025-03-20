@@ -29,7 +29,14 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
                         [[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]]]
 
 def blueprint(curr_map, final_map) -> list:
+    print("Curr map before numopy", curr_map)
+    print("Final map before numopy", final_map)
+
     curr_map = np.array(curr_map)
+    final_map = np.array(final_map)
+
+    print("Curr map after numopy", curr_map)
+    print("Final map after numopy", final_map)
 
     if isinstance(final_map, str):
         print("Final map is a string, attempting conversion...")
