@@ -32,17 +32,14 @@ def blueprint(curr_map, final_map) -> list:
     print("Curr map before", curr_map)
     print("Final map before", final_map)
 
-    if isinstance(final_map, str):
-        final_map = json.loads(final_map)  # Convert JSON string to a Python list
+    # if isinstance(final_map, str):
+    #     final_map = json.loads(final_map)  # Convert JSON string to a Python list
     
-    final_map = np.array(final_map)
+    # final_map = np.array(final_map)
 
     # Debugging output
-    print("Curr Map shape:", curr_map.shape)
-    print("Final Map shape:", final_map.shape)
-
-    print("Curr Map:", curr_map)
-    print("Final Map:", final_map)
+    print("Curr Map size:", curr_map.size)
+    print("Final Map size:", final_map.size)
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
