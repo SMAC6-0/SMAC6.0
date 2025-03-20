@@ -6,6 +6,7 @@ from inchworm_control.blueprint import blueprint as blueprint
 from time import sleep
 import serial
 import struct
+import json
 from colorama import Fore, init
 init(autoreset=True)
 
@@ -752,8 +753,8 @@ def step_getter(step_instructions):
 if __name__ == "__main__":
         
     # file_path = '/home/smac/robot_ws/src/SMAC6.0/Final_Structure.txt'
-    with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.txt", "r") as file:
-      final_structure = file.readlines()
+    with open("Final_Structure.json", "r") as final_map_file:
+        final_structure = json.load(final_map_file)
 
     print("Final Structure")
     print(final_structure)

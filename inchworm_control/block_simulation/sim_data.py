@@ -18,6 +18,7 @@ from inchworm_data import Inchworm
 from colorama import Fore, init
 import numpy as np
 import itertools
+import json
 init(autoreset=True)
 
 from inchworm_control.blueprint import blueprint 
@@ -45,8 +46,8 @@ class SimData:
 
         # TODO: save self.final_structure to a file
         final_map_file = open('Final_Structure.txt', 'w')
-        with open("Final_Structure.txt", "w") as final_map_file:
-            final_map_file.write(f"{self.final_structure}\n")
+        with open("Final_Structure.json", "w") as final_map_file:
+            json.dump(self.final_structure, final_map_file)
     
     def send_map_to_IW(self, inchworm): 
         """
