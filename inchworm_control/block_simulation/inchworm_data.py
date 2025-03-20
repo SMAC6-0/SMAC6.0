@@ -303,6 +303,8 @@ class Inchworm:
         # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
         for grid_cell in iw_path:
+            if DEBUG:
+                print("Grid Cell path", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
