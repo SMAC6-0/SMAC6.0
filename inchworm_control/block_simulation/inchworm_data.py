@@ -330,6 +330,8 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER)
 
         # TODO: handle transmission error
+        print("out of for loooopppyy")
+
 
     def inchworm_gets_map(self):
         print("Getting the map RAHHHHHHHHHHH")
