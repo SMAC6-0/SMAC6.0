@@ -31,6 +31,8 @@ def blueprint(curr_map, final_map) -> list:
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
     # arrays are not the same size
+    print("Curr Map size", curr_map.size)
+    print("final Map size", final_map.size)
     if curr_map.size != final_map.size:
         print("Arrays don't match sizes") 
         return [-9,-9,-9] # error value
