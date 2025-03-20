@@ -753,7 +753,7 @@ def step_getter(step_instructions):
 if __name__ == "__main__":
         
     # file_path = '/home/smac/robot_ws/src/SMAC6.0/Final_Structure.txt'
-    with open("Final_Structure.json", "r") as final_map_file:
+    with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
         final_structure = json.load(final_map_file)
 
     inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
