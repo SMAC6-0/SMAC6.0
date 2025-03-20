@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 # x: row in array (7 rows)
 # y: layer (6 layers)
@@ -28,6 +29,9 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
                         [[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]]]
 
 def blueprint(curr_map, final_map) -> list:
+    print("Curr map before", curr_map)
+    print("Final map before", final_map)
+
     if isinstance(final_map, str):
         final_map = json.loads(final_map)  # Convert JSON string to a Python list
     
@@ -39,7 +43,7 @@ def blueprint(curr_map, final_map) -> list:
 
     print("Curr Map:", curr_map)
     print("Final Map:", final_map)
-    
+
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
         return [-9,-9,-9] # error value
