@@ -29,7 +29,7 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
 
 def blueprint(curr_map, final_map) -> list:
     curr_map = np.array(curr_map)
-    final_map = np.array(final_map)
+    # final_map = np.array(final_map)
     # arrays are not the same size
     print("Curr Map size", curr_map.shape)
     print("final Map size", final_map.shape)
