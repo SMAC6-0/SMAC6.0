@@ -692,7 +692,13 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         # TODO: Replace with actual implementation
         if INCHWORM_MOVED:
-            return True
+            IW_in_supply = input("Is iW in supply location? (yes/no) \n")
+            if IW_in_supply.lower() == 'yes':
+                return True
+            elif IW_in_supply.lower() == 'no':
+                return False
+            else:
+                print("Invalid input. Please answer with 'yes' or 'no'.")
         else:
             for bd_loc in BD_LOCS:
                 if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
@@ -700,7 +706,6 @@ class Inchworm:
                     return True 
                 
             return False
-
 
     def is_IW_in_block(self):
         """return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)"""
