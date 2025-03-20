@@ -28,13 +28,17 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
                         [[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]]]
 
 def blueprint(curr_map, final_map) -> list:
-    curr_map = np.array(curr_map)
-    # final_map = np.array(final_map)
-    # arrays are not the same size
-    print("Curr Map size", curr_map.shape)
-    print("final Map size", final_map.size)
-    print("Final Map", final_map)
-    print("Curr Map", curr_map)
+    if isinstance(final_map, str):
+        final_map = json.loads(final_map)  # Convert JSON string to a Python list
+    
+    final_map = np.array(final_map)
+
+    # Debugging output
+    print("Curr Map shape:", curr_map)
+    print("Final Map shape:", final_map)
+
+    print("Curr Map:", curr_map.shape)
+    print("Final Map:", final_map.shape)
     if curr_map.shape != final_map.size:
         print("Arrays don't match shape") 
         return [-9,-9,-9] # error value
