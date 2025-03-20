@@ -42,7 +42,7 @@ def blueprint(curr_map, final_map) -> list:
     final_map = np.array(final_map)
 
     if final_map.shape == (1,):  
-        final_map = final_map[0]
+        final_map = final_map[1]
 
     # Debugging output
     print("Curr Map shape:", curr_map.shape, "| Size:", curr_map.size)
