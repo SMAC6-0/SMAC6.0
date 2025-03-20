@@ -6,17 +6,28 @@ This simulation was developed using Python 3 with Python 3.12 being strongly rec
 
 ## Download Python & Installation Instructions
 1. Download Python 3.12 by following the commands below. Courtesy of https://medium.com/@KNuggies/install-python-3-12-on-ubuntu-c7674df5f623
+
 It is recommended to install Python outside your workspace to avoid conflicts.
 `sudo apt update && sudo apt upgrade -y`
+
 `python3 --version` (Check your current Python version)
+
 `sudo apt-get install build-essential gdb lcov pkg-config \libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \…` (Ensure all required dependencies are installed before proceeding)
+
 `wget -c https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tar.xz`
+
 `tar -Jxf Python-3.12.4.tar.xz`
+
 `cd Python-3.12.4`
+
 `./configure --enable-optimization`
+
 To have 3.12 run alongside your current python version in Linux, make sure to run the following so your system doesn't die. -j divvies the processes to the number of threads you choose (16)
+
 `make -j16 all`
+
 `sudo make altinstall`
+
 2. Create the virtual environment in your preferred IDE. 
 In VSCode, press Ctrl + Shift + P, type 'Python: Select Interrpreter', and at the top, there should be an option to select '+ Create Virtual Environment...' and use .venv
 
@@ -98,9 +109,13 @@ This also is compatible for multiple inchworms.
 4. Press `N` and watch the inchworm move to the next block!
 
 Note: You must press `L` then `P` or `M` (only once) for the simulation to work as intended.
+
 Note: If you walk off the edge of the field you will fall and will need to either fly to get back up or restart the simulation
+
 Note: Each green surface represents each leg of the inchworm
+
 Note: For multiple inchworms, they will have different color paths
+
 Automation: Run press_n.py to automate pressing n. You must give permission to the environment that you are running on to allow keyboard press. 
 
 ![Simulation Demo](Demosimulation-ezgif.com-video-to-gif-converter.gif)
