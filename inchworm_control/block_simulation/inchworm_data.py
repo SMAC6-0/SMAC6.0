@@ -117,12 +117,6 @@ class Inchworm:
         Deletion of inchworm in the list of inchworms.
         """
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
-
-    def send_my_next_steps(self): 
-        """ Send IW path and the corresponding incoming block to the structure. """ 
-        if not SIMULATION: 
-            # TODO @ SAKSHI & MO: UART COMMUNICATION
-            pass
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
@@ -233,7 +227,8 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
-        for c in next_block_location:
+        print ("Incoming block location", map_data.GridStatus.INCOMING_BLOCK.value)
+        for c in map_data.GridStatus.INCOMING_BLOCK.value:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
@@ -265,8 +260,8 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
-        for c in next_block_location:
-            block_change += struct.pack('B', c)
+        # for c in map_data.GridStatus.INCOMING_BLOCK.value:
+        #     block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
 
