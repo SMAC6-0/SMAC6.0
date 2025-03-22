@@ -53,6 +53,7 @@ class IW_STATE(Enum):
     STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 5
+COMMUNICATION_TIMER = 1
 
 lagging_transform = {
     InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
@@ -248,6 +249,8 @@ class Inchworm:
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
         self.IW_SERIAL.write(buffer)
+
+        sleep(COMMUNICATION_TIMER)
         print(Fore.RED + "block data sent!!")
         # TODO: handle transmission error
 
@@ -280,6 +283,7 @@ class Inchworm:
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
 
         self.IW_SERIAL.write(buffer)
+        sleep(COMMUNICATION_TIMER)
 
         print(Fore.RED + "Indicated block is in placing status!!")
         # TODO: handle transmission error
@@ -320,14 +324,10 @@ class Inchworm:
 
             self.IW_SERIAL.write(buffer)
 
-            if DEBUG:
-                print("grid celllllll RAHHH")
-
             # delay to make sure all the data is transmitted 
-            sleep(PATH_PLANNING_TIMER)
+            sleep(COMMUNICATION_TIMER)
 
         # TODO: handle transmission error
-        print("out of for loooopppyy")
 
 
     def inchworm_gets_map(self):
@@ -597,7 +597,6 @@ class Inchworm:
             print(Fore.BLUE + f"IW{self.id}: IW flashes block with it's location")
             self.send_block_location()
             # pause so that the block has enough time to process the info
-            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
 
             if self.received_block_confirmation():
                 print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
