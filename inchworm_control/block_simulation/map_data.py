@@ -66,12 +66,12 @@ class Cell:
     def __lt__(self, other): 
         """
         Less than. Returns true is this Cell object's total cost is less than the total cost on the inputted Cell (other). 
-        This is used for cell comparison for the priority queue. 
+        This is used for cell comparison for the priority queue (the frontier). 
         
         Args:
             other (Cell): Another Cell object. 
         """
-        return self.f < other.f # cell comparing for priority queue
+        return self.f < other.f # cell comparing for priority queue (the frontier)
     
 def initialize_grid():
     """
@@ -189,7 +189,7 @@ def rm_inchworm_path_from_grid(grid, inchworm_path, iw_id):
     return grid
 
 
-def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
+def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
     Sets the neighbors for use in (search) algorithms.
 
@@ -216,8 +216,9 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
                              (0, -1, 3), (0, -1, -3), (0, 1, -3), (0, 1, 3)]
     
     # Combine neighbor_directions based on conditions
-    neighbor_directions = base_neighbors
-    
+    neighbor_directions = []
+    if allow_adjacent:
+        neighbor_directions += base_neighbors
     if allow_vertical:
         neighbor_directions += vertical_neighbors
     if allow_vert_diagonal:
@@ -231,7 +232,7 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
         
     return neighbor_directions
 
-def reverse_path_3d(curr_cell, holding_block) -> list[int]:
+def reverse_path_3d(curr_cell: Cell, holding_block: bool) -> list[int]:
     """
     Reverse calculated path to go from start to goal.
     
@@ -337,25 +338,25 @@ def start_search_3d(grid, start, goal):
     Returns:
         goal_cell (Cell): .
         visited (list(boolean)): .
-        queue (list(Cell)): .
+        frontier (list(Cell)): .
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
     visited = [[[False for z in range(len(grid[0][0]))] for y in range(len(grid[0]))] for x in range(len(grid))]
-    queue = [start_cell]
+    frontier = [start_cell]
     visited[start_cell.x][start_cell.y][start_cell.z] = True
-    return goal_cell, visited, queue
+    return goal_cell, visited, frontier
 
 def handle_multiple_block_depots():
     #TODO: how path planning is affected by the existence of multiple block depots 
     pass
 
-def determine_helper_blocks(grid, path_start, path_end):
+def determine_helper_blocks(grid, path_start, path_end, iw_id):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
     
-    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
+    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, iw_id, False)
     if path_coords == []:
         RuntimeError(f"Cannot find helper blocks for path.")
     else:
@@ -377,12 +378,12 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
+    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
         print(Fore.MAGENTA + f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end)
+        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end, iw_id)
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
@@ -451,7 +452,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
     # print(f"orientation: {orientation}")
     transformed_vector = transform(*normalized_vector)
     
-    # Orientation here is based on NORTH.
+    # Orientation here is based on NORTH, and mappings are relative to leading foot location.
     base_mappings = {
         # Horizontal movements
         ( 1,  0,  0): ("RIGHT"),
@@ -468,7 +469,11 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
         ( 1,  0, -1): ("DOWN_RIGHT"),
         (-1,  0, -1): ("DOWN_LEFT"),
         ( 0,  1, -1): ("DOWN_FORWARD"),
-        ( 0, -1, -1): ("DOWN_BACK")
+        ( 0, -1, -1): ("DOWN_BACK"), 
+        # Diagonal vertical placements 
+        # No need to have considerations for (1,1) or (-1,1) because these diagonal cases only happen when the pivot foot is right next to the goal
+        ( 1,  -1,  1): ("UP_RIGHT"),  
+        (-1,  -1,  1): ("UP_LEFT"),
     }
 
     if transformed_vector in base_mappings:
@@ -537,7 +542,7 @@ def buffer_iw_paths(grid, iw_id: int):
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
                         if (is_valid_position_3d(grid, [nx, ny, nz]) 
-                            and not (is_neighbor_or_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_or_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
+                            and not (is_neighbor_of_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_of_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
                             n_status = grid[nx][ny][nz]
                             if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
                                 path_count.append((nx, ny, nz, cell_status))
@@ -557,7 +562,7 @@ def buffer_iw_paths(grid, iw_id: int):
     
     return grid
 
-def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
+def is_neighbor_of_cell(grid: list, coord_compare: list, og_coord: list, neighbor_directions: list):
     """
     Returns true if a potential buffer cell is within the "off limits zone" of another block. 
     Args:
@@ -576,6 +581,7 @@ def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
     gx, gy, gz = og_coord
     for dx, dy, dz in neighbor_directions:
         nx, ny, nz = gx + dx, gy + dy, gz + dz
+        print(f"is_neighbor_of_cell: Trying to see if {coord_compare} is neighbor of {og_coord} at {nx, ny, nz} ")
         neighbors.append([nx, ny, nz])
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True

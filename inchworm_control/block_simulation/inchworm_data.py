@@ -202,6 +202,7 @@ class Inchworm:
         return x, y, z
     
     def get_next_step(self):
+        """Returns the leading foot location as is used for the simulation"""
         if self.step_num > self.num_steps: 
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
@@ -215,14 +216,10 @@ class Inchworm:
                 self.orientation = map_data.get_orientation(step_str, self.orientation)
 
                 self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
-                if "UP" not in step_str:
+                if "UP" not in step_str and "PLACE" not in step_str:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-
-                # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
                 self.step_num += 1
-
-        
-            
+       
             x, y, z = self.leading_foot_loc
             self.goal_progress_index += 1
             
