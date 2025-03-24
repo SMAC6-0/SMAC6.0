@@ -704,10 +704,10 @@ class Inchworm:
 
     def is_IW_in_block(self):
         """return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)"""
+        print(Fore.BLUE + f"IW{self.id}: Checking if at block location...")
 
         # TODO: Replace with actual implementation
         if INCHWORM_MOVED:
-            print(Fore.BLUE + f"IW{self.id}: Checking if at block location...")
             IW_in_supply = input("Is iW in block location? (yes/no) \n")
             if IW_in_supply.lower() == 'yes':
                 return True
