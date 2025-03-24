@@ -297,6 +297,7 @@ class Inchworm:
         """
         # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
+        print("length of IW path", len(iw_path))
         for grid_cell in iw_path:
             if DEBUG:
                 print("Grid Cell path", grid_cell)
