@@ -31,11 +31,6 @@ class UART_CODES(Enum):
     Failed=0xFF
     NewInchworm=0xEF
 
-class BLOCK_STATUS(Enum): # holds the status of the block 
-    Unplaced = 0
-    Block = 1
-    Placing = 2
-
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
@@ -52,7 +47,7 @@ class IW_STATE(Enum):
     STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 5
-COMMUNICATION_TIMER = 0.5
+COMMUNICATION_TIMER = 0.4
 
 lagging_transform = {
     InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
@@ -233,7 +228,7 @@ class Inchworm:
         for c in self.goal:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', IW_message_counter)
 
         # print(Fore.RED + "Block change", block_change)
 
@@ -267,7 +262,7 @@ class Inchworm:
         # for c in map_data.GridStatus.INCOMING_BLOCK.value:
         #     block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.INCOMING_BLOCK.value) + struct.pack('B', IW_message_counter)
 
         # print(Fore.RED + "Block change", block_change)
 
