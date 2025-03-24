@@ -14,7 +14,7 @@ class GridStatus(IntEnum):
     
     @classmethod
     def inchworm_path(cls, iw_id):
-        """Generate an inchworm path status dynamically using a negative ID."""
+        """Generate an inchworm path status dynamically."""
         return iw_id + 10 # inchworm path status starts at arbitrary number 10
     
     @classmethod

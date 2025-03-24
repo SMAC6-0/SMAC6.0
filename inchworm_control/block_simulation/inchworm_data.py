@@ -35,7 +35,7 @@ class BLOCK_STATUS(Enum): # holds the status of the block
     Unplaced = 0
     Block = 1
     Placing = 2
-    iw_path = 4 
+    iw_path = map_data.inchworm_path() 
 
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
@@ -308,7 +308,7 @@ class Inchworm:
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
-            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+            block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
             for c in grid_cell:
                 block_change += struct.pack('B', c)
@@ -430,7 +430,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
         msg_len = len(block_change).to_bytes(2,'little')
 
