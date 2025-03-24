@@ -47,7 +47,7 @@ class IW_STATE(Enum):
     STRUCTURE_COMPLETE = 8
 
 PATH_PLANNING_TIMER = 5
-COMMUNICATION_TIMER = 0.4
+COMMUNICATION_TIMER = 0.3
 
 lagging_transform = {
     InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
