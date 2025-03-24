@@ -226,10 +226,11 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        print ("Incoming block location", map_data.GridStatus.INCOMING_BLOCK.value)
-        for c in map_data.GridStatus.INCOMING_BLOCK.value:
+        print ("Incoming block location", map_data.GridStatus.INCOMING_BLOCK)
+
+        for c in map_data.GridStatus.INCOMING_BLOCK:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
