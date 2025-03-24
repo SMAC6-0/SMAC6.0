@@ -95,7 +95,7 @@ class Inchworm:
         self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
         
         # pertaining to the state machine 
-        self.state = IW_STATE.INITIALIZATION
+        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         self.print_flag = True
         self.intilization_path_flag = False
 
@@ -228,9 +228,9 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        print ("Incoming block location", map_data.GridStatus.INCOMING_BLOCK)
+        print ("Incoming block location", self.goal)
 
-        for c in map_data.GridStatus.INCOMING_BLOCK:
+        for c in self.goal:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
