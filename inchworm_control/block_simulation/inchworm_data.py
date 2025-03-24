@@ -95,7 +95,7 @@ class Inchworm:
         self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
         
         # pertaining to the state machine 
-        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+        self.state = IW_STATE.PATH_PLANNING
         self.print_flag = True
         self.intilization_path_flag = False
 
