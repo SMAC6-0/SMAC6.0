@@ -35,7 +35,6 @@ class BLOCK_STATUS(Enum): # holds the status of the block
     Unplaced = 0
     Block = 1
     Placing = 2
-    iw_path = map_data.inchworm_path() 
 
 next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
@@ -89,6 +88,7 @@ class Inchworm:
         self.goal_progress_index = 0
         # self.found_structures = []
         # self.misc_blocks = []
+        self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
@@ -313,7 +313,7 @@ class Inchworm:
             for c in grid_cell:
                 block_change += struct.pack('B', c)
 
-            block_change += struct.pack('B', BLOCK_STATUS.iw_path.value) + struct.pack('B', IW_message_counter)
+            block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
 
             msg_len = len(block_change).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
