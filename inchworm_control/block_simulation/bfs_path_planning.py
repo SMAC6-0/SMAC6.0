@@ -53,17 +53,20 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
                         pivot_coord = [px, py, pz]
 
                         # The step to the side should be diagonal from the goal 
+                        print(Fore.MAGENTA + f"Trying to find neighbors for {pivot_coord} and {ground_coord}")
                         if (pivot_coord != ground_coord and
                             map_data.is_neighbor_of_cell(grid, pivot_coord, ground_coord, diagonal_neighbor_dirs) and 
                             (grid[px][py][pz] == map_data.GridStatus.WALKABLE.value or grid[px][py][pz] == (iw_id*map_data.GridStatus.INCHWORM_PATH.value))): 
                             # If a suitable location, add this step to the path
-                            pivot_cell = map_data.Cell(px, py, pz)
+                            pivot_cell = map_data.create_cell(grid, pivot_coord)
                             pivot_cell.parent = goal_adjacent 
                             current_cell.parent = pivot_cell # Same as the changing the parent to reach the goal cell 
                             print(Fore.MAGENTA + f"Added a pivot cell at {pivot_coord}")
                             break
                         else: 
                             print(Fore.MAGENTA + f"Failed to add a pivot cell at {pivot_coord}")
+                            print(Fore.MAGENTA + f"No path found with BFS :(")#from {start_status} {start} to {goal_status} {goal}")
+                            return []
 
             path = map_data.reverse_path_3d(current_cell, holding_block)
             print(Fore.MAGENTA + f"Path found: {path}")

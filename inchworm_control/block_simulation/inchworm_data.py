@@ -154,6 +154,11 @@ class Inchworm:
                 # Find path to block depot 
                 bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
+
+                # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
+                print(f"bd_path: {bd_path}")
+                if bd_path == []: 
+                    return
                 
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)

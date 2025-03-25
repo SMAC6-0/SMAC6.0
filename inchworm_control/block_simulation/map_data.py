@@ -355,12 +355,14 @@ def determine_helper_blocks(grid, path_start, path_end, iw_id):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    
-    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, iw_id, False)
-    if path_coords == []:
-        RuntimeError(f"Cannot find helper blocks for path.")
-    else:
-        return path_coords
+    path_coords = []
+    return path_coords 
+
+    # path_coords = bfs_path_planning.find_path(grid, path_start, path_end, iw_id, False)
+    # if path_coords == []:
+    #     RuntimeError(f"Cannot find helper blocks for path.")
+    # else:
+    #     return path_coords
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
     """
@@ -387,14 +389,15 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    for i in range(len(path_coords) - 1):
-        current_coord = path_coords[i]
-        next_coord = path_coords[i + 1]
-            
-        end_flag = bool(next_coord == path_end) # if it is done basically
-        step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord, next_coord, curr_orientation, holding_block, end_flag)
-        steps.append(step_instructions)
-        curr_orientation = orientation
+    if path_coords:
+        for i in range(len(path_coords) - 1):
+            current_coord = path_coords[i]
+            next_coord = path_coords[i + 1]
+                
+            end_flag = bool(next_coord == path_end) # if it is done basically
+            step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord, next_coord, curr_orientation, holding_block, end_flag)
+            steps.append(step_instructions)
+            curr_orientation = orientation
 
     return path_coords, steps, curr_orientation
 
@@ -581,7 +584,7 @@ def is_neighbor_of_cell(grid: list, coord_compare: list, og_coord: list, neighbo
     gx, gy, gz = og_coord
     for dx, dy, dz in neighbor_directions:
         nx, ny, nz = gx + dx, gy + dy, gz + dz
-        print(f"is_neighbor_of_cell: Trying to see if {coord_compare} is neighbor of {og_coord} at {nx, ny, nz} ")
+        # print(f"is_neighbor_of_cell: Trying to see if {coord_compare} is neighbor of {og_coord} at {nx, ny, nz} ")
         neighbors.append([nx, ny, nz])
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True
