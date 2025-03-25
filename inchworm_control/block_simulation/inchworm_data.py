@@ -31,6 +31,7 @@ class UART_CODES(Enum):
     Failed=0xFF
     NewInchworm=0xEF
 
+IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
 # Inchworm states
@@ -219,7 +220,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
         print ("Incoming block location", self.goal)
 
@@ -255,7 +256,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
         # for c in map_data.GridStatus.INCOMING_BLOCK.value:
         #     block_change += struct.pack('B', c)
@@ -302,7 +303,7 @@ class Inchworm:
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
-            block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
             for c in grid_cell:
                 block_change += struct.pack('B', c)
@@ -424,7 +425,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
 
         msg_len = len(block_change).to_bytes(2,'little')
 
