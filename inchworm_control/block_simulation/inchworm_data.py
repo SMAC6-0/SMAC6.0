@@ -663,7 +663,9 @@ class Inchworm:
         else:                
             if not SIMULATION:
                 # request the map
-                if self.request_map_snapshot():
+                if self.state == IW_STATE.INITIALIZATION and self.request_map_snapshot():
+                    return self.inchworm_gets_map()
+                else:   
                     return self.inchworm_gets_map()
     
     def is_Path_Available(self):
