@@ -342,7 +342,7 @@ class Inchworm:
             byte = self.IW_SERIAL.read(1)           #read serial port
             # if byte == []:
             #     return False
-            # print(byte) # b'\xaa'
+            print(byte) # b'\xaa'
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
             # byte = hex(byte) # 0xaa
@@ -383,6 +383,10 @@ class Inchworm:
                     calculated_check_sum = []
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
                     calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
+
+                    print("checksum", checksum)
+                    print("calculated_check_sum", calculated_check_sum)
+
                     # Inchworm.crc16(buffer[:-2])
                     
                     if checksum == calculated_check_sum:
