@@ -156,7 +156,6 @@ class Inchworm:
                 self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
-                print(f"bd_path: {bd_path}")
                 if bd_path == []: 
                     return
                 
@@ -245,7 +244,7 @@ class Inchworm:
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print(f"IW{self.id}: foot locs: {x, y, z}, {self.lagging_foot_loc}")
+            print(f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):

@@ -454,6 +454,7 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
     transform = orientation_transforms[orientation]
     # print(f"orientation: {orientation}")
     transformed_vector = transform(*normalized_vector)
+    print(f"transformed vector: {transformed_vector}")
     
     # Orientation here is based on NORTH, and mappings are relative to leading foot location.
     base_mappings = {
