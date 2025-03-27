@@ -598,18 +598,18 @@ class Inchworm:
             self.send_block_location()
             # pause so that the block has enough time to process the info
 
-            if self.received_block_confirmation():
-                print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
-                # IW sends a messgae indicating block is being placed
-                # MOOOOO HELPPPP
-                self.send_block_being_placed()
-            else: 
-                self.handle_error()
         
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def handle_transported_block(self):
+        if self.received_block_confirmation():
+            print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
+            # IW sends a messgae indicating block is being placed
+            # MOOOOO HELPPPP
+            self.send_block_being_placed()
+        else: 
+            self.handle_error()
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
