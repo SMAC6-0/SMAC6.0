@@ -54,11 +54,11 @@ key_t_pressed = False
 key_n_pressed = False 
 key_p_pressed, key_l_pressed = False, False
 key_k_pressed = False
-
+key = None
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_l_pressed, key_t_pressed,key_p_pressed, key_n_pressed, key_k_pressed
+    global key_g_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed
 
 
     # Generate the pyramid coordinates
@@ -252,8 +252,7 @@ class Voxel(Button):
         )
 
     # What happens to blocks on mouse inputs
-    def input(self,key):
-
+    def input(self, key):
         if self.hovered:
             if key == "left mouse down":
                 voxel = Voxel(position = self.position + mouse.normal, texture = smart_block_texture) 
