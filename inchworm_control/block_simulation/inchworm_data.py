@@ -343,6 +343,7 @@ class Inchworm:
             # if byte == []:
             #     return False
             print(byte) # b'\xaa'
+            print(ord(byte))
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
             # byte = hex(byte) # 0xaa
