@@ -395,76 +395,13 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
             next_coord = path_coords[i + 1]
                 
             end_flag = bool(next_coord == path_end) # if it is done basically
-            step_instructions, orientation = get_direction_instruction(current_coord, next_coord, curr_orientation, holding_block, end_flag)
+            step_instructions, orientation = convert_coordinate_to_steps(current_coord, next_coord, curr_orientation, holding_block, end_flag)
             steps.extend(step_instructions)
             curr_orientation = orientation
 
     return path_coords, steps, curr_orientation
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: InchwormOrientation, holding_block: bool, end_flag):
-    """
-    Determines the steps needed to get from current_coord to next_coord by taking into account the
-    direction of movement and new orientation of the inchworm's position in the 3D grid.
-    
-    Note: To make it more intuitive, think of it on the XY plane.
-          Because the leading foot never changes, there's no way for the inchworm to ever step 
-          diagonally backwards. Additionally, regular stepping forward and backward is just the 
-          inchworm turning and doing a right or left step.
-
-    Args:
-        grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
-        current_coord (tuple): The current position (x, y, z).
-        next_coord (tuple): The next position (x, y, z).
-        orientation (InchwormOrientation): The current orientation.
-        holding_block (boolean): Whether the inchworm is holding a block.
-        end_flag (boolean): Indicates the end of path.
-
-    Returns:
-        step_instructions, new_orientation (tuple): A formatted step instruction and the new orientation.
-    """    
-    
-    movement_vector = np.array(next_coord) - np.array(current_coord)
-    magnitude = (np.linalg.norm(movement_vector))
-    
-    if magnitude == 0:
-        print(Fore.MAGENTA + "Warning: No movement required.")
-        return [], "null"
-    
-    normalized_vector = ((coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
-    is_multi_axis_combinable = np.count_nonzero(normalized_vector) == 2 or (np.count_nonzero(normalized_vector) == 3 and end_flag) # combine directions when at end or when only 2
-    
-    # If there is only one axis changing
-    if magnitude == 1 and np.count_nonzero(movement_vector) == 1:
-        return get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag)
-    
-    all_instructions = []
-    updated_orientation = orientation
-    if  is_multi_axis_combinable: # separate into single-axis steps
-        intermediate_coord = current_coord
-        for axis in range(3):
-            # for _ in range(abs(movement_vector[axis])): # TODO: double check if necessary
-            separated_vector = [0, 0, 0]
-            separated_vector[axis] = (np.sign(movement_vector[axis]))
-            next_step_coord = (np.add(intermediate_coord, separated_vector))
-            
-            sub_instructions, sub_orientation = convert_coordinate_to_steps(
-                grid, intermediate_coord, next_step_coord, updated_orientation, holding_block, end_flag
-            )
-                
-            intermediate_coord = next_step_coord
-            updated_orientation = sub_orientation
-            all_instructions.extend(sub_instructions) 
-        return all_instructions, sub_orientation
-    else:
-        return get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag)
-
-    # Handle undefined or unexpected movements
-    print(Fore.MAGENTA + f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
-    return ["UNKNOWN_STEP"], "null"
-
-def get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag):
+def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_block, end_flag):
     movement_vector = np.subtract(next_coord, current_coord)
     
     direction_mappings = {
@@ -593,9 +530,3 @@ def is_neighbor_of_cell(grid: list, coord_compare: list, og_coord: list, neighbo
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True
     return False
-
-def create_placement_pivot(): 
-    """
-    Modify the path to add a little step to left or right before placing a block, since the IW needs to be right next to the structure to reach higher locations. 
-    """
-    pass
