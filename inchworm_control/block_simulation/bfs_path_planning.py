@@ -9,9 +9,9 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
                      the corresponding cell is walkable (0) or not (1). 
-        start (tuple): A tuple containing the (x, y, z) coordinate of the starting cell in a path.
+        start (list): A list containing the (x, y, z) coordinate of the starting cell in a path.
                        The initial starting position can be configurable in config.py
-        goal (tuple): A tuple containing the (x, y, z) coordinate of the ending cell in a path.
+        goal (list): A list containing the (x, y, z) coordinate of the ending cell in a path.
                       This typically is either the block depot or a block coordinate in the blueprint.
         iw_id (int): This inchworm's ID
         holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).

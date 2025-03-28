@@ -395,7 +395,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
             next_coord = path_coords[i + 1]
                 
             end_flag = bool(next_coord == path_end) # if it is done basically
-            step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord, next_coord, curr_orientation, holding_block, end_flag)
+            step_instructions, orientation = get_direction_instruction(current_coord, next_coord, curr_orientation, holding_block, end_flag)
             steps.extend(step_instructions)
             curr_orientation = orientation
 
@@ -423,18 +423,49 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
 
     Returns:
         step_instructions, new_orientation (tuple): A formatted step instruction and the new orientation.
-    """
-    movement_vector = np.subtract(next_coord, current_coord)
-    magnitude = int(np.linalg.norm(movement_vector))
+    """    
+    
+    movement_vector = np.array(next_coord) - np.array(current_coord)
+    magnitude = (np.linalg.norm(movement_vector))
     
     if magnitude == 0:
         print(Fore.MAGENTA + "Warning: No movement required.")
         return [], "null"
     
-    normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
+    normalized_vector = ((coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
+    is_multi_axis_combinable = np.count_nonzero(normalized_vector) == 2 or (np.count_nonzero(normalized_vector) == 3 and end_flag) # combine directions when at end or when only 2
     
-    # combine directions when at end or when only 2
-    is_multi_axis_combinable = np.count_nonzero(normalized_vector) == 2 or (np.count_nonzero(normalized_vector) == 3 and end_flag)
+    # If there is only one axis changing
+    if magnitude == 1 and np.count_nonzero(movement_vector) == 1:
+        return get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag)
+    
+    all_instructions = []
+    updated_orientation = orientation
+    if  is_multi_axis_combinable: # separate into single-axis steps
+        intermediate_coord = current_coord
+        for axis in range(3):
+            # for _ in range(abs(movement_vector[axis])): # TODO: double check if necessary
+            separated_vector = [0, 0, 0]
+            separated_vector[axis] = (np.sign(movement_vector[axis]))
+            next_step_coord = (np.add(intermediate_coord, separated_vector))
+            
+            sub_instructions, sub_orientation = convert_coordinate_to_steps(
+                grid, intermediate_coord, next_step_coord, updated_orientation, holding_block, end_flag
+            )
+                
+            intermediate_coord = next_step_coord
+            updated_orientation = sub_orientation
+            all_instructions.extend(sub_instructions) 
+        return all_instructions, sub_orientation
+    else:
+        return get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag)
+
+    # Handle undefined or unexpected movements
+    print(Fore.MAGENTA + f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
+    return ["UNKNOWN_STEP"], "null"
+
+def get_direction_instruction(current_coord, next_coord, orientation, holding_block, end_flag):
+    movement_vector = np.subtract(next_coord, current_coord)
     
     direction_mappings = {
         0: {1: "RIGHT",     -1: "LEFT"},    #X
@@ -443,87 +474,45 @@ def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: In
     }
     
     orientation_transforms = {
-            InchwormOrientation.NORTH: lambda x, y, z: (x, y, z),  
-            InchwormOrientation.SOUTH: lambda x, y, z: (-x, -y, z),
-            InchwormOrientation.EAST: lambda x, y, z: (-y, x, z),  
-            InchwormOrientation.WEST: lambda x, y, z: (y, -x, z),  
-        }
+        InchwormOrientation.NORTH: lambda x, y, z: [ x,  y, z],  
+        InchwormOrientation.SOUTH: lambda x, y, z: [-x, -y, z],
+        InchwormOrientation.EAST:  lambda x, y, z: [-y,  x, z],  
+        InchwormOrientation.WEST:  lambda x, y, z: [ y, -x, z],  
+    }
     
-    instructions = []
-    updated_orientation = orientation
-    if is_multi_axis_combinable:
-        transformed_vector = orientation_transforms[updated_orientation](*normalized_vector)
-        
-        direction_steps = []
-        for axis in range(3):
-            delta = transformed_vector[axis]
-            if delta != 0:
-                direction_steps.append(direction_mappings[axis][delta])
-        
-        combined_direction = "_".join(sorted(direction_steps))
-        
-        for part in combined_direction.split("_"):
-            updated_orientation = get_orientation(part, updated_orientation)
-        
-        instructions = [combined_direction]
-    else: # separate into single-axis steps
-        intermediate_coord = current_coord
-        
-        for axis in range(3):
-            for _ in range(abs(movement_vector[axis])):
-                separated_vector = [0, 0, 0]
-                separated_vector[axis] = int(np.sign(movement_vector[axis]))
-                normalized_step_vector = tuple(separated_vector)
-                next_step_coord = tuple(np.add(intermediate_coord, separated_vector))
-                transformed_vector = orientation_transforms[updated_orientation](*normalized_step_vector)
-                
-                for transformed_axis in range(3):
-                    if transformed_vector[transformed_axis] != 0:
-                        direction_step = direction_mappings[transformed_axis][transformed_vector[transformed_axis]]
-                        updated_orientation = get_orientation(direction_step, updated_orientation)
-                        instructions.append(direction_step)
-                        break
-                    
-                intermediate_coord = next_step_coord
+    # create instruction
+    instructions = [] 
+    transform = orientation_transforms[orientation]
+    transformed_vector = transform(*movement_vector)
 
-    # if transformed_vector in base_mappings:
-    #     step_instructions = base_mappings[transformed_vector]
-
-    #     if magnitude > 1:
-    #         if "UP" in step_instructions or "DOWN" in step_instructions:
-    #             verticality = step_instructions.split("_")[0]
-    #             horizontality = step_instructions.split("_")[-1]
-    #             step_instructions = f"{verticality}_{magnitude}_{horizontality}"
-    #         else:
-    #             horizontality = step_instructions
-    #             step_instructions = f"{magnitude}_{horizontality}"
-                
-    #     new_orientation = get_orientation(step_instructions, orientation)
-    all_instructions = []
-    for i, step_instruction in enumerate(instructions):
-        
-        print(f"transformed vector: {transformed_vector}")
-        print(f"orientation: {updated_orientation}")
-        
-        #TODO: handle any block depot'
-        if holding_block:
-            step_instruction = f"{step_instruction}_BLOCK"
-        
-        # for bd_loc in BD_LOCS:
-        if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
-            step_instruction = f"GRAB_{step_instruction}"
-        elif holding_block and end_flag:
-            step_instruction = f"PLACE_{step_instruction}"
-        else:
-            step_instruction = f"STEP_{step_instruction}"
-            
-        all_instructions.append(step_instruction)
+    for axis in [2, 1, 0]: # prioritize Z, then Y, then X according to direction_mappings
+        # If there is change on this axis: 
+        if transformed_vector[axis] != 0:
+            coord_change = transformed_vector[axis]
+            direction_step = direction_mappings[axis][int(np.sign(coord_change))]
+            instructions.append(direction_step)
+            if coord_change > 1 or coord_change < -1:
+                instructions.append(str(coord_change))
+            # print(f"coord_change: {coord_change} for {axis} axis for Transition between {current_coord} & {next_coord} while {orientation.name}. resulting step: {direction_step}")
+    # Determine the orientation based on the recent axis change
+    new_orientation = get_orientation(direction_step, orientation)
+    all_instructions = "_".join(instructions)
+    # print(f"transformed vector: {transformed_vector}")
+    # print(f"orientation: {updated_orientation}")
     
-    return all_instructions, updated_orientation
-
-    # Handle undefined or unexpected movements
-    print(Fore.MAGENTA + f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
-    return ["UNKNOWN_STEP"], "null"
+    #TODO: handle any block depot'
+    if holding_block:
+        all_instructions = f"{all_instructions}_BLOCK"
+    
+    # for bd_loc in BD_LOCS:
+    if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+        all_instructions = f"GRAB_{all_instructions}"
+    elif holding_block and end_flag:
+        all_instructions = f"PLACE_{all_instructions}"
+    else:
+        all_instructions = f"STEP_{all_instructions}"
+    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {all_instructions} going {new_orientation.name}")
+    return [all_instructions], new_orientation
 
 def get_orientation(movement: str, orientation: InchwormOrientation):
     if "RIGHT" in movement: 
