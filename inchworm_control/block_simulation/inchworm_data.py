@@ -14,8 +14,8 @@ init(autoreset=True)
 UART_BAUD = 9600 # config
 
 # Pins 
-# GPIO 15, pin 8 = RX green wire 
-# GPIO 14, pin 10 = TX yellow wire
+# GPIO 15, pin 8 = RX yellow wire 
+# GPIO 14, pin 10 = TX green wire
 # ground = Pin 14
 # test 
 DEBUG = True # print statements to help DEBUG 
@@ -343,7 +343,7 @@ class Inchworm:
             # if byte == []:
             #     return False
             print(byte) # b'\xaa'
-            print(ord(byte))
+            # print(ord(byte))
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
             # byte = hex(byte) # 0xaa
@@ -361,6 +361,7 @@ class Inchworm:
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)) and collecting_data == False:  # Start byte detected
                 # print("start byte detected")
                 buffer = []  
+                print("Print bufferrrrr after clear", buffer)
                 bytesRead = 0
                 msgLenCollected = False
                 msgLenBytes = []
