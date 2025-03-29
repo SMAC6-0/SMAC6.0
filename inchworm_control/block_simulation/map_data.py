@@ -9,29 +9,24 @@ from inchworm_data import Inchworm
 class GridStatus(IntEnum):
     WALKABLE = 0
     NOT_WALKABLE = 1
-    INCHWORM_PATH = -1
     INCOMING_BLOCK = 2
     SUPPLY_DEPOT = 3
     
     @classmethod
     def inchworm_path(cls, iw_id):
-        """Generate an inchworm path status dynamically using a negative ID."""
-        if iw_id in Inchworm.inchworm_list:
-            return -iw_id
-        raise ValueError(f"Inchworm ID {iw_id} is not valid.")
-
+        """Generate an inchworm path status dynamically using a pos int ID. The status is the ID + 10."""
+        return iw_id + 10 # inchworm path status starts at arbitrary number 11
+    
     @classmethod
     def is_inchworm_path(cls, value):
         """Check if the given value represents an inchworm path."""
-        return isinstance(value, int) and value < 0 and abs(value) in Inchworm.inchworm_list
-
+        return value > 10 # inchworm path status starts at arbitrary number 11
+    
     @classmethod
     def which_inchworm(cls, value):
         """Return the inchworm ID if the value is an inchworm path, otherwise None."""
-        if cls.is_inchworm_path(value):
-            return abs(value)
-        return None
-
+        return value - 10 # inchworm path status starts at arbitrary number 1
+    
     @classmethod
     def from_value(cls, value):
         """Determine the GridStatus type, automatically recognizing inchworm paths."""
@@ -155,38 +150,61 @@ def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
 
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
+                     the corresponding cell is walkable (0), not (1), incoming_block (2), 
+                     supply_depot (3), & inchworm_path (10 + iw_id).
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    for step in range(len(inchworm_path)-1): 
+    for step in range(len(inchworm_path) - 1): 
         x, y, z = inchworm_path[step]
-        grid[x][y][z] = iw_id * GridStatus.INCHWORM_PATH.value
+        grid[x][y][z] = GridStatus.inchworm_path(iw_id)
     return grid
 
-def rm_inchworm_path_from_grid(grid, inchworm_path, iw_id):
+def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     """
-    Remove the inchworm path from the grid.
+    Removes the inchworm path from the grid. If iw_id is None, it will remove all inchworm paths.
 
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
+                     the corresponding cell is walkable (0), not (1), incoming_block (2), 
+                     supply_depot (3), & inchworm_path (10 + iw_id).
+        inchworm_path (list): A list of coordinates that an inchworm is taking
+        iw_id: A specific inchworm ID. This determines what value GridStatus.inchworm_path() will be
     Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot. 
-    """ 
-    for step in range(len(inchworm_path)-1): 
-        x, y, z = inchworm_path[step] 
-        if grid[x][y][z] == iw_id * GridStatus.INCHWORM_PATH.value:
-            if [x, y, z + 1] == BD_1_LOC: 
-                grid[x][y][z] = GridStatus.SUPPLY_DEPOT.value
-            else:
-                if grid[x][y][z + 1] == GridStatus.WALKABLE.value:
-                    grid[x][y][z] = GridStatus.NOT_WALKABLE.value
-                else:
-                    grid[x][y][z] = GridStatus.WALKABLE.value
+        grid (list): An updated 3D list (grid) of the current map snapshot.
+    """       
+    # If there is an inchworm path, remove the path status for every cell along the path except the goal cell
+    if inchworm_path is not None:
+        targets = inchworm_path[:-1]  
+    # If no inchworm path is specified, clear the inchworm path from the whole grid 
+    else:
+        targets = [
+            (x, y, z)
+            for x in range(GRID_SIZE)
+            for y in range(GRID_SIZE)
+            for z in range(GRID_HEIGHT)
+        ]
+        
+    for x, y, z in targets:
+        value = grid[x][y][z]
+        if GridStatus.is_inchworm_path(value):
+            # Revert status of inchworm path cells if it matches the IW ID whose path is being cleared. 
+            if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
+                grid[x][y][z] = revert_status(grid, x, y, z)
+
     return grid
+
+def revert_status(grid, x, y, z):
+    """Revert the status of the grid cell at the specified location. """
+    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
+    if [x, y, z + 1] == BD_1_LOC: 
+        return GridStatus.SUPPLY_DEPOT.value
+    # If the cell used to be on a path, assume its walkable 
+    elif GridStatus.is_inchworm_path(grid[x][y][z])
+        return GridStatus.WALKABLE.value
+    else 
+        return GridStatus.NOT_WALKABLE.value
+    
 
 
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
@@ -482,8 +500,7 @@ def buffer_iw_paths(grid, iw_id: int):
             for z in range(len(grid[0][0])):
                 cell_status = grid[x][y][z]   
                 
-                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0 and # is some inchworm path, but not its own
-                    [x, y, z] != SEED_BK and [x, y, z] != BD_1_LOC):                                # do not buffer over seed bk or supply depot
+                if GridStatus.is_inchworm_path(cell_status) and iw_id != GridStatus.which_inchworm(cell_status): # is some inchworm path, but not its own
                     
                     # Iterate through neighbors of this cell 
                     for dx, dy, dz in neighbor_directions:
