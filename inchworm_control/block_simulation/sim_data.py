@@ -134,7 +134,7 @@ class SimData:
             for x in range(base_size - z):
                 # Each column
                 for y in range(base_size - z):
-                    pyramid.append([x+10, y+10, z+1])
+                    pyramid.append([x+SEED_BK[0], y+SEED_BK[1], z+1])
         return pyramid
     
     def generate_building(self): 

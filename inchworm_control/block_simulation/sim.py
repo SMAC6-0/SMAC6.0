@@ -128,6 +128,9 @@ def update():
                 vis_IW_paths(inchworm, clear_path=True)
 
             inchworm.update_state()
+            # Cheap hack to make inchworm not communicate with the structure twice
+            # if inchworm.state.value == 3: 
+            #     inchworm.update_state()
 
             if sim_data.new_IW_paths_received(inchworm):
                 vis_IW_paths(inchworm)
@@ -153,12 +156,6 @@ def show_structure_map():
 
 def vis_IW_paths(inchworm, clear_path=False):
     """Visualize the IW's path, or clear it"""
-    # First extract the next block the IW is going to place
-    if inchworm.goal != SEED_BK: 
-        delete_cube(inchworm.goal)
-        spawn_cube(inchworm.goal, incoming_block_texture)
-
-    # Then show the path the inchworm is going to take
     for cell in inchworm.paths: #step in range(len(inchworm.paths)-1): 
         # cell = inchworm.paths[step]
 
@@ -190,6 +187,7 @@ def vis_IW_paths(inchworm, clear_path=False):
                 seed_block_texture_step : incoming_path_seed_texture,
                 outline_step_texture_red : incoming_path_texture,
                 smart_block_texture_step : incoming_path_block_texture,
+                final_struct_outline : incoming_block_texture,
                 # Maintain textures if repeating the visualization: 
                 incoming_block_texture : incoming_block_texture,
                 incoming_path_texture : incoming_path_texture, 

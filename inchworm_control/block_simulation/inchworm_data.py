@@ -162,6 +162,8 @@ class Inchworm:
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
                 self.holding_block = False
+                if goal_path == []: 
+                    return
                 goal_path.pop(0) # Remove repeat coord
                 
                 # combines start to block depot and block depot to goal
@@ -230,8 +232,10 @@ class Inchworm:
                 self.orientation = map_data.get_orientation(step_str, self.orientation)
 
                 self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
-                if "UP" not in step_str and "PLACE" not in step_str:
+                if "PLACE" not in step_str:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
+                    if "UP" in step_str: 
+                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
@@ -537,9 +541,9 @@ class Inchworm:
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
                 x, y, z = self.leading_foot_loc
-                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
-                    print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
-                    return True
+                # if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
+                print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
+                return True
             return False
         else:             
             if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication

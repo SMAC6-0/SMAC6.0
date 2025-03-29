@@ -48,6 +48,7 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
                     diagonal_neighbor_dirs = map_data.set_neighbors(allow_adjacent=False, allow_vertical=False, allow_vert_diagonal=False, allow_horz_diagonal=True)
 
                     ground_coord = [goal[0], goal[1], goal[2] - (goal_cell.z - goal_adjacent.z)] # Look for pivot steps on the same level as the inchworm would be before placement 
+                    pivot_cell = None
                     for dx, dy, dz in adjacent_neighbor_dirs: 
                         px, py, pz = goal_adjacent.x + dx, goal_adjacent.y + dy, goal_adjacent.z + dz # Examine potential side steps (adjacent to goal_adjacent)
                         pivot_coord = [px, py, pz]
@@ -66,7 +67,7 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
                             # break
                         else: 
                             print(Fore.MAGENTA + f"Failed to add a pivot cell at {pivot_coord}")
-                    if not pivot_cell: # If no pivot cell was found
+                    if pivot_cell is None: # If no pivot cell was found
                         print(Fore.MAGENTA + f"No path found with BFS :(")#from {start_status} {start} to {goal_status} {goal}")
                         return []
 

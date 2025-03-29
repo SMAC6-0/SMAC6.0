@@ -476,13 +476,16 @@ def buffer_iw_paths(grid, iw_id: int):
     neighbor_directions = set_neighbors()
     path_count = []
 
-    # Make the bottom layer (z = 0) WALKABLE
+    # Iterate through the grid
     for x in range(len(grid)):
         for y in range(len(grid[0])):
             for z in range(len(grid[0][0])):
                 cell_status = grid[x][y][z]   
                 
-                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0 and [x, y, z] != SEED_BK and [x, y, z] != BD_1_LOC): # is some inchworm path, but not its own
+                if ((cell_status != iw_id * GridStatus.INCHWORM_PATH.value) and cell_status < 0 and # is some inchworm path, but not its own
+                    [x, y, z] != SEED_BK and [x, y, z] != BD_1_LOC):                                # do not buffer over seed bk or supply depot
+                    
+                    # Iterate through neighbors of this cell 
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
                         if (is_valid_position_3d(grid, [nx, ny, nz]) 
