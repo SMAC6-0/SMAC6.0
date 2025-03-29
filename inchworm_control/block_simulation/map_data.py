@@ -14,18 +14,18 @@ class GridStatus(IntEnum):
     
     @classmethod
     def inchworm_path(cls, iw_id):
-        """Generate an inchworm path status dynamically using a negative ID."""
-        return iw_id + 10 # inchworm path status starts at arbitrary number 10
+        """Generate an inchworm path status dynamically using a pos int ID. The status is the ID + 10."""
+        return iw_id + 10 # inchworm path status starts at arbitrary number 11
     
     @classmethod
     def is_inchworm_path(cls, value):
         """Check if the given value represents an inchworm path."""
-        return value >= 10 # inchworm path status starts at arbitrary number 10
+        return value > 10 # inchworm path status starts at arbitrary number 11
     
     @classmethod
     def which_inchworm(cls, value):
         """Return the inchworm ID if the value is an inchworm path, otherwise None."""
-        return value - 10 # inchworm path status starts at arbitrary number 10
+        return value - 10 # inchworm path status starts at arbitrary number 1
     
     @classmethod
     def from_value(cls, value):
@@ -173,36 +173,39 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot.
     """       
+    # If there is an inchworm path, remove the path status for every cell along the path except the goal cell
     if inchworm_path is not None:
-        targets = inchworm_path[:-1]  # Avoid last point as before
+        targets = inchworm_path[:-1]  
+    # If no inchworm path is specified, clear the inchworm path from the whole grid 
     else:
         targets = [
             (x, y, z)
             for x in range(GRID_SIZE)
             for y in range(GRID_SIZE)
-            for z in range(GRID_SIZE)
+            for z in range(GRID_HEIGHT)
         ]
         
     for x, y, z in targets:
         value = grid[x][y][z]
         if GridStatus.is_inchworm_path(value):
+            # Revert status of inchworm path cells if it matches the IW ID whose path is being cleared. 
             if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
                 grid[x][y][z] = revert_status(grid, x, y, z)
 
     return grid
 
 def revert_status(grid, x, y, z):
+    """Revert the status of the grid cell at the specified location. """
+    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
-    try:
-        above = grid[x][y][z + 1]
-    except IndexError:
-        above = GridStatus.WALKABLE.value
-    return (
-        GridStatus.NOT_WALKABLE.value
-        if above == GridStatus.WALKABLE.value
-        else GridStatus.WALKABLE.value
-    )
+    # If the cell used to be on a path, assume its walkable 
+    elif GridStatus.is_inchworm_path(grid[x][y][z])
+        return GridStatus.WALKABLE.value
+    else 
+        return GridStatus.NOT_WALKABLE.value
+    
+
 
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
@@ -498,7 +501,6 @@ def buffer_iw_paths(grid, iw_id: int):
                 cell_status = grid[x][y][z]   
                 
                 if GridStatus.is_inchworm_path(cell_status) and iw_id != GridStatus.which_inchworm(cell_status): # is some inchworm path, but not its own
-                    neighbor_directions = set_neighbors()
                     
                     # Iterate through neighbors of this cell 
                     for dx, dy, dz in neighbor_directions:
