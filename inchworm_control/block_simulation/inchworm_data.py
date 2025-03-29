@@ -80,6 +80,8 @@ class Inchworm:
         self.paths = [] # the list of coords
         self.goal = [] # goal coord
         self.goal_progress_index = 0
+        self.num_steps = 0
+        self.step_num = 1
         # self.found_structures = []
         # self.misc_blocks = []
 
@@ -152,10 +154,16 @@ class Inchworm:
                 # Find path to block depot 
                 bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
+
+                # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
+                if bd_path == []: 
+                    return
                 
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
                 self.holding_block = False
+                if goal_path == []: 
+                    return
                 goal_path.pop(0) # Remove repeat coord
                 
                 # combines start to block depot and block depot to goal
@@ -167,11 +175,19 @@ class Inchworm:
             # Update inchworm path & corresponding steps to travel that path
             step_instructions += steps
             self.paths += path
+            self.num_steps = len(step_instructions)
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
+            # Save the step instructions 
             step_getter(step_instructions)
+            if SIMULATION: # Avoid unnecessary data usage by only saving step instructions twice in simulation. 
+                # Saving the step instructions like this enables the step instructions to be stored for *each* simulated inchworm, rather than just one at a time 
+                # (Storing the step instructions to a separate file is a limited to just one IW if running simulation.) 
+                # TODO: determine if storing to steps.txt is really necessary? 
+                self.step_instructions = step_instructions
+                print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
@@ -182,7 +198,9 @@ class Inchworm:
         """
         if self.goal_progress_index > 0:
             self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
+            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
+
+            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
         
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
@@ -195,6 +213,43 @@ class Inchworm:
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
         return x, y, z
+    
+    def get_next_step(self):
+        """Returns the leading foot location as is used for the simulation"""
+        if self.step_num > self.num_steps: 
+            ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
+        else: 
+            if self.goal_progress_index > 0:
+                if SIMULATION: 
+                    step_str = self.step_instructions[self.step_num-1]
+                else: 
+                    file = open('steps.txt') 
+                    content = file.readlines() 
+                    step_str = content[self.step_num-1]
+                print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
+
+                # Update Inchworm Orientation with each step
+                self.orientation = map_data.get_orientation(step_str, self.orientation)
+
+                self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
+                if "PLACE" not in step_str:
+                    self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
+                    if "UP" in step_str: 
+                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
+                self.step_num += 1
+       
+            x, y, z = self.leading_foot_loc
+            self.goal_progress_index += 1
+            
+            if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+                self.holding_block = True
+            elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+                self.holding_block = False
+            
+            if self.holding_block and [x, y, z] != self.goal:
+                z = z + 1
+            print(f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            return x, y, z
     
     def get_total_inchworms(cls):
         """
@@ -367,6 +422,7 @@ class Inchworm:
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+                self.step_num = 1
 
                 print(Fore.BLUE + f"IW{self.id}: Reset the path. Transferring the block data")
                 # transfer the block location data 
@@ -437,6 +493,7 @@ class Inchworm:
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+        self.step_num = 1
         self.holding_block = False
 
         print(Fore.BLUE + f"IW{self.id}: Reset the path")
@@ -484,9 +541,9 @@ class Inchworm:
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
                 x, y, z = self.leading_foot_loc
-                if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
-                    print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
-                    return True
+                # if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
+                print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
+                return True
             return False
         else:             
             if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
