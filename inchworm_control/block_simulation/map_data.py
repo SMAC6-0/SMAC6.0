@@ -25,7 +25,10 @@ class GridStatus(IntEnum):
     @classmethod
     def which_inchworm(cls, value):
         """Return the inchworm ID if the value is an inchworm path, otherwise None."""
-        return value - 10 # inchworm path status starts at arbitrary number 1
+        if (value - 10) > 0:
+            return value - 10 # inchworm path status starts at arbitrary number 11
+        else: 
+            return None
     
     @classmethod
     def from_value(cls, value):
@@ -135,7 +138,7 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
             grid[x][y][z] = GridStatus.WALKABLE.value
             if z - 1 >= 0:
                 grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
-        elif status < 0: 
+        elif GridStatus.is_inchworm_path(status): # status < 0: 
             grid[x][y][z] = status
         else:
             grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
@@ -200,9 +203,9 @@ def revert_status(grid, x, y, z):
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
     # If the cell used to be on a path, assume its walkable 
-    elif GridStatus.is_inchworm_path(grid[x][y][z])
+    elif GridStatus.is_inchworm_path(grid[x][y][z]):
         return GridStatus.WALKABLE.value
-    else 
+    else: 
         return GridStatus.NOT_WALKABLE.value
     
 
@@ -505,9 +508,13 @@ def buffer_iw_paths(grid, iw_id: int):
                     # Iterate through neighbors of this cell 
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
+                        
+                        # If this neighboring cell is a valid position and not a neighbor of the BD or Seed block
                         if (is_valid_position_3d(grid, [nx, ny, nz]) 
                             and not (is_neighbor_of_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_of_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
                             n_status = grid[nx][ny][nz]
+
+                            # If this neighboring cell is walkable or incoming, it should be buffered 
                             if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
                                 path_count.append((nx, ny, nz, cell_status))
                     if (len(path_count) > 2):

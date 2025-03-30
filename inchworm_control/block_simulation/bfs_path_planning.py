@@ -58,7 +58,7 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
                         # print(f"IW{iw_id}: value at {pivot_coord} is {grid[px][py][pz]}")
                         if (pivot_coord != ground_coord and
                             map_data.is_neighbor_of_cell(grid, pivot_coord, ground_coord, diagonal_neighbor_dirs) and 
-                            (grid[px][py][pz] == map_data.GridStatus.WALKABLE.value or grid[px][py][pz] == (iw_id*map_data.GridStatus.INCHWORM_PATH.value))): 
+                            (grid[px][py][pz] == map_data.GridStatus.WALKABLE.value or iw_id == map_data.GridStatus.which_inchworm(grid[px][py][pz]))): 
                             # If a suitable location, add this step to the path
                             pivot_cell = map_data.create_cell(grid, pivot_coord)
                             pivot_cell.parent = goal_adjacent 
