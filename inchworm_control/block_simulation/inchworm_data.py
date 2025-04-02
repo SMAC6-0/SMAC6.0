@@ -366,7 +366,6 @@ class Inchworm:
                 msgLenCollected = False
                 msgLenBytes = []
                 msgLenReceivedCounter = 0
-                collecting_data = True
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
                 # print("Collecting Message Length")
@@ -378,6 +377,7 @@ class Inchworm:
                     msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
                     print("msg Len when collecting msg len: ", msgLen)
                     msgLenCollected = True
+                    collecting_data = True
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
                 print("BytesRead: ", bytesRead)
