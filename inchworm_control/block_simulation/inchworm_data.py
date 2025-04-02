@@ -381,6 +381,7 @@ class Inchworm:
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
                 if collecting_data:
                     buffer = b''.join(buffer) # convert to bytes object
+                    print("BUFFFEERR after join: ", buffer)
                     checksum = Inchworm.get_checksum(buffer)
                     calculated_check_sum = []
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
