@@ -358,7 +358,7 @@ class Inchworm:
             # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
             # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
-            if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)):  # Start byte detected
+            if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)): # and not collecting_data:  # Start byte detected
                 # print("start byte detected")
                 buffer = []  
                 print("Print bufferrrrr after clear", buffer)
@@ -376,9 +376,12 @@ class Inchworm:
                 if msgLenReceivedCounter == 2:
                     # Convert collected bytes to integer (assuming big-endian format)
                     msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
+                    print("msg Len when collecting msg len: ", msgLen)
                     msgLenCollected = True
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                print("BytesRead: ", bytesRead)
+                print("msgLen: ", msgLen)
                 if collecting_data:
                     buffer = b''.join(buffer) # convert to bytes object
                     print("BUFFFEERR after join: ", buffer)
