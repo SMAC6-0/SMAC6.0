@@ -84,13 +84,21 @@ class MotorController(Node):
             # Add more mappings as needed
         }
 
-        activate_servo(self.servo1)
-        activate_servo(self.servo2)
+        self.servo1.ChangeDutyCycle(5)
+        sleep(0.5)
+        self.servo1.ChangeDutyCycle(7.5)
+        sleep(0.5)
+        self.servo1.ChangeDutyCycle(10)
+        sleep(0.5)
+        self.servo1.stop(0)
 
-        sleep(1)
+        # activate_servo(self.servo1)
+        # activate_servo(self.servo2)
 
-        release_servo(self.servo1)
-        release_servo(self.servo2)
+        # sleep(1)
+
+        # release_servo(self.servo1)
+        # release_servo(self.servo2)
 
     def listener_callback(self, msg):
         """
