@@ -50,7 +50,7 @@ class MotorController(Node):
         GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
 
         # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
-        self.servo1 = GPIO.PWM(11,30) # pin 11 for servo1, pulse 50Hz
+        self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
         self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
 
         # Start PWM with an initial duty cycle of 0 (no movement)
@@ -776,7 +776,7 @@ def activate_servo(servo_id):
     Args:
         servo_id: The servo motor object to be activated. 
     """
-    # Set duty cycle to move servo to 10° position (2 corresponds to 0° for most servos)
+    # Set duty cycle to move servo to 0° position (2 corresponds to 0° for most servos)
     servo_id.ChangeDutyCycle(2+(90/18))
     # Pause to allow servo to reach position
     time.sleep(1)
