@@ -753,12 +753,12 @@ class Inchworm:
         # compare the current map and the blueprint
         # return true if structure is complete and false otherwise
         print("Cuuurent map", self.current_map)
-        print("Cuuurent map", self.final_structure)
+        print("Final map", self.final_structure)
 
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.id)
 
         print("Cuuurent map after", self.current_map)
-        print("Cuuurent map after", self.final_structure)
+        print("FInal map after", self.final_structure)
         return self.current_map == self.final_structure
         # structure_complete = input("Is structure complete? (yes/no) \n")
         # if structure_complete.lower() == 'yes':
