@@ -755,7 +755,7 @@ class Inchworm:
         print("Cuuurent map", self.current_map)
         print("Final map", self.final_structure)
 
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths,self.id)
 
         print("Cuuurent map after", self.current_map)
         print("FInal map after", self.final_structure)
