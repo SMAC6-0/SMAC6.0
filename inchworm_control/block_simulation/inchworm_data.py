@@ -229,15 +229,15 @@ class Inchworm:
 
         block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', IW_message_counter)
 
-        # print(Fore.RED + "Block change", block_change)
+        print(Fore.RED + "Block change", block_change)
 
         # calculate message length and checksum
 
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        # print(Fore.RED + "msg_len", msg_len)
-        # print(Fore.RED + "checksum", checksum)
+        print(Fore.RED + "msg_len", msg_len)
+        print(Fore.RED + "checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
@@ -543,8 +543,6 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            if DEBUG:
-                print("IW has paths")
             if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
                 print(Fore.BLUE + "Touching the seed block")
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
@@ -555,8 +553,6 @@ class Inchworm:
 
         else: # this happens first 
             # Find & path plan to seed block 
-            if DEBUG:
-                print("IW has no paths so path planning")
             self.plan_path(SEED_BK)
 
         
