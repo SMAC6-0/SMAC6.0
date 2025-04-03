@@ -47,19 +47,20 @@ def blueprint(curr_map, final_map) -> list:
             for z in range((curr_map.shape[2])): #iterate 0-7
                 for x in range(curr_map.shape[0]): #iterate 0-7
                     for y in range(curr_map.shape[1]): #iterate 0-7
-                        is_different = curr_map[x, y, z] != final_map[x, y, z]
-                        final_is_walkable = final_map[x, y, z] == 0
-                        lowest_z = z
+                        if curr_map[x, y, z] != 2: 
+                            is_different = curr_map[x, y, z] != final_map[x, y, z]
+                            final_is_walkable = final_map[x, y, z] == 0
+                            lowest_z = z
 
-                        
-                        for zz in range((curr_map.shape[2])):
-                            curr_is_walkable = curr_map[x, y, zz] == 0
-                            if curr_is_walkable:
-                                lowest_z = zz
-                        
-                        if is_different and final_is_walkable:
-                            for zz in range(lowest_z + 1, z + 1):
-                                priority_queue.append((x, y, zz))
+                            
+                            for zz in range((curr_map.shape[2])):
+                                curr_is_walkable = curr_map[x, y, zz] == 0
+                                if curr_is_walkable:
+                                    lowest_z = zz
+                            
+                            if is_different and final_is_walkable:
+                                for zz in range(lowest_z + 1, z + 1):
+                                    priority_queue.append((x, y, zz))
             
             priority_queue.sort(key=lambda coord:(coord[2], coord[0], coord[1]))
             
