@@ -46,7 +46,6 @@ install(PROGRAMS
   inchworm_control/motor_controller.py
   inchworm_control/step_publisher.py 
   inchworm_control/ik_test.py
-  inchworm_control/state_machine.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
