@@ -89,7 +89,7 @@ class MotorController(Node):
         activate_servo(self.servo1)
         activate_servo(self.servo2)
         release_servo(self.servo1)
-        # release_servo_newEE(self.servo2)
+        release_servo_newEE(self.servo2)
 
     def listener_callback(self, msg):
         """
@@ -804,7 +804,7 @@ def release_servo_newEE(servo_id):
         servo_id: The servo motor object to be released. 
     """
     # Set duty cycle to move servo to 90° position (6 corresponds to 6° for most servos)
-    servo_id.ChangeDutyCycle(2+(90/18))
+    servo_id.ChangeDutyCycle(2+(120/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
