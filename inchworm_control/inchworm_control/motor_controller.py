@@ -55,7 +55,20 @@ class MotorController(Node):
 
         # Start PWM with an initial duty cycle of 0 (no movement)
         self.servo1.start(0)
-        self.servo2.start(0)
+        # self.servo2.start(0)
+
+        self.servo1.ChangeDutyCycle(5)
+        sleep(0.5)
+        self.servo1.ChangeDutyCycle(7.5)
+        sleep(0.5)
+        self.servo1.ChangeDutyCycle(10)
+        sleep(0.5)
+        self.servo1.stop(0)
+
+        # activate_servo(self.servo1)
+        # activate_servo(self.servo2)
+        # release_servo(self.servo1)
+        # release_servo(self.servo2)
 
         # Note: Motors are not allowed to have negative positions
         
@@ -83,22 +96,6 @@ class MotorController(Node):
             'SIMPLIFIED_POS_1_DOWN_2': self.step_down_2
             # Add more mappings as needed
         }
-
-        self.servo1.ChangeDutyCycle(5)
-        sleep(0.5)
-        self.servo1.ChangeDutyCycle(7.5)
-        sleep(0.5)
-        self.servo1.ChangeDutyCycle(10)
-        sleep(0.5)
-        self.servo1.stop(0)
-
-        # activate_servo(self.servo1)
-        # activate_servo(self.servo2)
-
-        # sleep(1)
-
-        # release_servo(self.servo1)
-        # release_servo(self.servo2)
 
     def listener_callback(self, msg):
         """
