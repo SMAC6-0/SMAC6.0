@@ -84,6 +84,14 @@ class MotorController(Node):
             # Add more mappings as needed
         }
 
+        activate_servo(self.servo1)
+        activate_servo(self.servo2)
+
+        sleep(1)
+
+        release_servo(self.servo1)
+        release_servo(self.servo2)
+
     def listener_callback(self, msg):
         """
         Callback function for the motor_command subscriber.
