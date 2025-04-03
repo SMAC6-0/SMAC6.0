@@ -774,7 +774,7 @@ def activate_servo(servo_id):
         servo_id: The servo motor object to be activated. 
     """
     # Set duty cycle to move servo to 0° position (2 corresponds to 0° for most servos)
-    servo_id.ChangeDutyCycle(2+(20/18))
+    servo_id.ChangeDutyCycle(2+(30/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
