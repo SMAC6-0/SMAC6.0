@@ -51,7 +51,7 @@ class MotorController(Node):
 
         # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
         self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
-        self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
+        # self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
 
         # Start PWM with an initial duty cycle of 0 (no movement)
         self.servo1.start(0)
