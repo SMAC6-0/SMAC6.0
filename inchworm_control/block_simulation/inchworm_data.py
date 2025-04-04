@@ -441,6 +441,7 @@ class Inchworm:
 
         buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
 
+        print("Init Buffer: ", buffer)
         self.IW_SERIAL.write(buffer)
         return True 
     
