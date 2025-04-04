@@ -236,13 +236,12 @@ class Inchworm:
         msg_len = len(block_change).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print(Fore.RED + "msg_len", msg_len)
-        print(Fore.RED + "checksum", checksum)
 
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
+        print("Block location buffer", buffer)
         self.IW_SERIAL.write(buffer)
 
         sleep(COMMUNICATION_TIMER)
