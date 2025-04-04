@@ -34,7 +34,7 @@ class UART_CODES(Enum):
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
 IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
 
-dummy_block_location = [1, 0, 1] # testing value #TODO: change this later
+# dummy_block_location = [1, 0, 1] # testing value #TODO: change this later
 
 # Inchworm states
 class IW_STATE(Enum):
@@ -91,7 +91,7 @@ class Inchworm:
         self.lagging_foot_loc = list(lagging_transform[orientation](*self.leading_foot_loc))
         
         # pertaining to the state machine 
-        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+        self.state = IW_STATE.INITIALIZATION
         self.print_flag = True
         self.intilization_path_flag = False
 
@@ -227,7 +227,7 @@ class Inchworm:
         print ("Incoming block location", self.goal)
 
         # TODO replace this with self.goal
-        for c in dummy_block_location:
+        for c in self.goal:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', IW_message_counter)
