@@ -2,9 +2,11 @@ from enum import IntEnum
 import numpy as np
 from config import *
 import bfs_path_planning
+import d_star_lite_path_planning
 from colorama import Fore, init
 init(autoreset=True)
 from inchworm_data import Inchworm
+import heapq
 
 class GridStatus(IntEnum):
     WALKABLE = 0
@@ -40,7 +42,7 @@ class GridStatus(IntEnum):
         raise ValueError(f"Invalid GridStatus value: {value}")
 
 class Cell:
-    def __init__(self, x: int, y: int, z: int, is_obs: bool = False, g = 0, h = 0): 
+    def __init__(self, x: int, y: int, z: int, is_obs: bool = False): 
         """
         Initialize the Cell class. It represents a single cell (location) within the map or grid, and is used for path planning purposes. 
         
@@ -51,14 +53,14 @@ class Cell:
             is_obs (bool): True if this cell is occupied, not walkable. False if walkable. 
             g (int): The cost to reach this cell. 
             h (int): Evaluated additional heuristic cost to reach this cell. 
+            f (int): The sum of the cost to reach a cell and the heuristic cost to reach a cell.
         """
         self.x = x
         self.y = y
         self.z = z
         self.is_obs = is_obs
-        self.g = g
-        self.h = h 
-        self.f = g + h # total cost
+        self.g = float('inf') # estimated cost from start to current cell
+        self.rhs = float('inf') # one step ahead cost to goal
         self.parent = None # The parent may later be set as another Cell object. 
 
     def __lt__(self, other): 
@@ -69,7 +71,11 @@ class Cell:
         Args:
             other (Cell): Another Cell object. 
         """
-        return self.f < other.f # cell comparing for priority queue (the frontier)
+        return (self.g, self.rhs) < (other.g, other.rhs) # cell comparing for priority queue (the frontier)
+    
+    def to_tuple(self):
+        """turns a cell into a tuple"""
+        return (self.x, self.y, self.z)
     
 def initialize_grid():
     """
@@ -346,9 +352,9 @@ def is_valid_start_goal_3d(grid, start, goal):
     goal_cell = create_cell(grid, goal)
     return not (start_cell.is_obs and goal_cell.is_obs)
     
-def start_search_3d(grid, start, goal):
+def start_bfs_3d(grid, start, goal):
     """
-    Takes given grid, start position, and goal position of pathfinding and initializes a search.
+    Takes given grid, start position, and goal position of pathfinding and initializes bfs.
 
     Args:
         grid (list): A 3D list representing the workspace, where each element indicates whether
@@ -368,6 +374,42 @@ def start_search_3d(grid, start, goal):
     visited[start_cell.x][start_cell.y][start_cell.z] = True
     return goal_cell, visited, frontier
 
+def heuristic(a, b):
+    h = abs(a.x - b.x) + abs(a.y - b.y) + 1.2 * abs(a.z - b.z) # manhattan distance w/ more weight on z
+    return h
+
+def handle_side_step(grid, current_cell, goal_cell, iw_id, holding_block):
+    # If goal is reached and a block is going to be placed, make an extra step to the side
+    if holding_block: 
+        goal_adjacent = current_cell.parent # This is the cell right next to the goal cell, the step right before the goal itself 
+        if (goal_cell.z - goal_adjacent.z) > 1: # Only bother adding the step if this block is higher up
+            print(Fore.MAGENTA + f"Trying to add a pivot")
+            adjacent_neighbor_dirs = set_neighbors(allow_vertical=False, allow_vert_diagonal=False)
+            diagonal_neighbor_dirs = set_neighbors(allow_adjacent=False, allow_vertical=False, allow_vert_diagonal=False, allow_horz_diagonal=True)
+            
+            ground_coord = [goal_cell.x, goal_cell.y, goal_cell.z - (goal_cell.z - goal_adjacent.z)] # Look for pivot steps on the same level as the inchworm would be before placement 
+            pivot_cell = None
+            for dx, dy, dz in adjacent_neighbor_dirs: 
+                px, py, pz = goal_adjacent.x + dx, goal_adjacent.y + dy, goal_adjacent.z + dz # Examine potential side steps (adjacent to goal_adjacent)
+                pivot_coord = [px, py, pz]
+
+                # The step to the side should be diagonal from the goal 
+                # print(Fore.MAGENTA + f"Trying to find neighbors for {pivot_coord} and {ground_coord}")
+                # print(f"IW{iw_id}: value at {pivot_coord} is {grid[px][py][pz]}")
+                if (pivot_coord != ground_coord and
+                    is_neighbor_of_cell(grid, pivot_coord, ground_coord, diagonal_neighbor_dirs) and 
+                    (grid[px][py][pz] == GridStatus.WALKABLE.value or iw_id == GridStatus.which_inchworm(grid[px][py][pz]))): 
+                    # If a suitable location, add this step to the path
+                    pivot_cell = create_cell(grid, pivot_coord)
+                    pivot_cell.parent = goal_adjacent 
+                    current_cell.parent = pivot_cell # Same as the changing the parent to reach the goal cell 
+                    print(Fore.MAGENTA + f"Added a pivot cell at {pivot_coord}")
+                    # break
+                else: 
+                    print(Fore.MAGENTA + f"Failed to add a pivot cell at {pivot_coord}")
+            if pivot_cell is None: # If no pivot cell was found
+                print(Fore.MAGENTA + "No pivot cell found — continuing with original path.")#from {start_status} {start} to {goal_status} {goal}")
+    
 def handle_multiple_block_depots():
     #TODO: how path planning is affected by the existence of multiple block depots 
     pass
@@ -401,7 +443,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
+    path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
