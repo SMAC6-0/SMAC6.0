@@ -1,5 +1,4 @@
 import heapq
-import math
 import map_data
 from colorama import Fore, init
 init(autoreset=True)
@@ -109,14 +108,8 @@ def find_path(grid, start, goal, iw_id, holding_block):
     d_star = DStarLite(grid, start, goal) # snapshot of what we have searched and found
     d_star.compute_shortest_path()
     current_cell = d_star.start
-    visited = set()
     
-    print(f"Start at: {current_cell.to_tuple()}, Goal is: {d_star.goal.to_tuple()}")
     while current_cell.to_tuple() != d_star.goal.to_tuple(): # Explore frontier 
-        if current_cell.to_tuple() in visited:
-            print(Fore.RED + f"Stuck! Already visited: {current_cell.to_tuple()}")
-            return []
-        visited.add(current_cell.to_tuple())
         min_cost = float('inf')
         next_cell = None
         
@@ -133,15 +126,13 @@ def find_path(grid, start, goal, iw_id, holding_block):
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
             return []
         
-        print(Fore.MAGENTA + f"Moving from {current_cell.to_tuple()} to {next_cell.to_tuple()}")
-        
+        map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
+        # if next_cell.to_tuple() == d_star.goal.to_tuple():
+        #     current_cell = next_cell  # goal_cell parent already updated in handle_side_step
+        #     break
+
         next_cell.parent = current_cell
-        map_data.handle_side_step(grid, next_cell, current_cell, iw_id, holding_block)
         current_cell = next_cell
-        
-        if next_cell.to_tuple() == d_star.goal.to_tuple():
-            print(Fore.GREEN + f"oooooo~ we're at the goal~~~~")
-            break
         
     path = map_data.reverse_path_3d(current_cell, holding_block)
     print(Fore.MAGENTA + f"Path found: {path}")

@@ -378,13 +378,17 @@ def heuristic(a, b):
     h = abs(a.x - b.x) + abs(a.y - b.y) + 1.2 * abs(a.z - b.z) # manhattan distance w/ more weight on z
     return h
 
-def handle_side_step(grid, current_cell, goal_cell, iw_id, holding_block):
+def handle_side_step(grid, current_cell: Cell, goal_cell: Cell, iw_id: int, holding_block: bool):
     # If goal is reached and a block is going to be placed, make an extra step to the side
     if holding_block: 
         goal_adjacent = current_cell.parent # This is the cell right next to the goal cell, the step right before the goal itself 
+        
+        if goal_adjacent is None: # guard for if current_cell is root of path
+            return
+        
         if (goal_cell.z - goal_adjacent.z) > 1: # Only bother adding the step if this block is higher up
-            print(Fore.MAGENTA + f"Trying to add a pivot")
-            adjacent_neighbor_dirs = set_neighbors(allow_vertical=False, allow_vert_diagonal=False)
+            print(Fore.MAGENTA + f"Trying to add a pivot w/ height difference {goal_cell.z - goal_adjacent.z}")
+            adjacent_neighbor_dirs = set_neighbors(allow_vertical=False, allow_vert_diagonal=False, allow_horz_diagonal=True)
             diagonal_neighbor_dirs = set_neighbors(allow_adjacent=False, allow_vertical=False, allow_vert_diagonal=False, allow_horz_diagonal=True)
             
             ground_coord = [goal_cell.x, goal_cell.y, goal_cell.z - (goal_cell.z - goal_adjacent.z)] # Look for pivot steps on the same level as the inchworm would be before placement 
@@ -402,11 +406,19 @@ def handle_side_step(grid, current_cell, goal_cell, iw_id, holding_block):
                     # If a suitable location, add this step to the path
                     pivot_cell = create_cell(grid, pivot_coord)
                     pivot_cell.parent = goal_adjacent 
+                    # goal_cell.parent = pivot_cell
                     current_cell.parent = pivot_cell # Same as the changing the parent to reach the goal cell 
                     print(Fore.MAGENTA + f"Added a pivot cell at {pivot_coord}")
                     # break
                 else: 
-                    print(Fore.MAGENTA + f"Failed to add a pivot cell at {pivot_coord}")
+                    if pivot_coord == ground_coord:
+                        print(Fore.MAGENTA + f"Failed:" + Fore.WHITE + f"\tPivot coord {pivot_coord} == ground_coord {ground_coord}")
+                    if not is_neighbor_of_cell(grid, pivot_coord, ground_coord, diagonal_neighbor_dirs):
+                        print(Fore.MAGENTA + f"Failed:" + Fore.WHITE + f"\tPivot coord {pivot_coord} ≠ diagonal neighbor of ground_coord {ground_coord}")
+                    if not (grid[px][py][pz] == GridStatus.WALKABLE.value or iw_id == GridStatus.which_inchworm(grid[px][py][pz])):
+                        cell_val = grid[px][py][pz]
+                        print(Fore.MAGENTA + f"Failed:" + Fore.WHITE + f"\tPivot coord {pivot_coord} ≠ walkable  or {iw_id} (value: {cell_val})")
+                
             if pivot_cell is None: # If no pivot cell was found
                 print(Fore.MAGENTA + "No pivot cell found — continuing with original path.")#from {start_status} {start} to {goal_status} {goal}")
     
