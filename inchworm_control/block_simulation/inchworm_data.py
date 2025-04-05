@@ -313,7 +313,7 @@ class Inchworm:
             block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
 
             msg_len = len(block_change).to_bytes(2,'little')
-            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'big')
 
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
