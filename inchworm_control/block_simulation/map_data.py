@@ -179,8 +179,10 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     print("grid: ", grid)
     print("Iw path: ", inchworm_path)
     print("iw_id: ", iw_id)
+
     if inchworm_path is not None:
         targets = inchworm_path[:-1]  # Avoid last point as before
+        print("targets: ", targets)
     else:
         targets = [
             (x, y, z)
@@ -188,11 +190,16 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
             for y in range(GRID_SIZE)
             for z in range(GRID_HEIGHT)
         ]
+        print("targets: ", targets)
         
     for x, y, z in targets:
+        print("FOR LOOP")
         value = grid[x][y][z]
+        print("value, ", value)
         if GridStatus.is_inchworm_path(value):
+            print("IM HERE")
             if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
+                print("IM HEREWWWW")
                 print("before grid: ", grid[x][y][z])
                 grid[x][y][z] = revert_status(grid, x, y, z)
                 print("after grid: ", grid[x][y][z])
