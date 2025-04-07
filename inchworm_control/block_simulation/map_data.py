@@ -193,7 +193,10 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
         value = grid[x][y][z]
         if GridStatus.is_inchworm_path(value):
             if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
+                print("before grid: ", grid[x][y][z])
                 grid[x][y][z] = revert_status(grid, x, y, z)
+                print("after grid: ", grid[x][y][z])
+
     return grid
 
 def revert_status(grid, x, y, z):
