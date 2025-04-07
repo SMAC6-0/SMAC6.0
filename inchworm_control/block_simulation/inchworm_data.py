@@ -618,7 +618,15 @@ class Inchworm:
             self.send_block_being_placed()
         else: 
             self.handle_error()
-        # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+
+        print("Cuuurent map", self.current_map)
+        print("Final map", self.final_structure)
+
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, iw_id=self.id)
+
+        print("Cuuurent map after", self.current_map)
+        print("FInal map after", self.final_structure)
+
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.holding_block = False
@@ -758,13 +766,13 @@ class Inchworm:
 
         # compare the current map and the blueprint
         # return true if structure is complete and false otherwise
-        print("Cuuurent map", self.current_map)
-        print("Final map", self.final_structure)
+        # print("Cuuurent map", self.current_map)
+        # print("Final map", self.final_structure)
 
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
+        # # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
 
-        print("Cuuurent map after", self.current_map)
-        print("FInal map after", self.final_structure)
+        # print("Cuuurent map after", self.current_map)
+        # print("FInal map after", self.final_structure)
         return self.current_map == self.final_structure
         # structure_complete = input("Is structure complete? (yes/no) \n")
         # if structure_complete.lower() == 'yes':
