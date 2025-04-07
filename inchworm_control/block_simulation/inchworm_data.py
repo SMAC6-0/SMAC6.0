@@ -26,7 +26,7 @@ class UART_CODES(Enum):
     Initialization=0xFA
     BeingPlaced=0xFB 
     MapSnapshot=0xFC
-    NewBlock=0xFD
+
     Changes=0xFE
     Failed=0xFF
     NewInchworm=0xEF
@@ -236,7 +236,7 @@ class Inchworm:
 
         # calculate message length and checksum
 
-        msg_len = len(block_change).to_bytes(2,'little')
+        msg_len = len(block_change+2).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
 
