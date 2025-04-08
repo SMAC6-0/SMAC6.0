@@ -456,9 +456,10 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, priority_queue) # get the path
-    # path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
+    c_space_grid = grid
+    # c_space_grid = buffer_iw_paths(grid, iw_id)
+    # path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, priority_queue) # get the path
+    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
 
 
     # if no path was found, check to see if you'll need a helper block

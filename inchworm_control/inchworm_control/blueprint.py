@@ -1,5 +1,6 @@
 import numpy as np
 from collections import defaultdict
+from block_simulation.config import SEED_BK
 
 # x: row in array (7 rows)
 # y: layer (6 layers)
@@ -79,18 +80,15 @@ class BlueprintAlgorithm:
                 for x, y, z in self._priority_queue:
                     z_groups[z].append((x, y))
 
-                min_x, max_x = min([x for (x, y, z) in self._priority_queue]), max([x for (x, y, z) in self._priority_queue])
-                min_y, max_y = min([y for (x, y, z) in self._priority_queue]), max([y for (x, y, z) in self._priority_queue])
-                
-                # prioritize center of structure
-                center_x, center_y = (max_x + min_x) // 2, (max_y + min_y) // 2
+                # prioritize from seed block outwards
+                seed_x, seed_y, seed_z = SEED_BK
 
-                def center_distance(x, y):
-                    return abs(x - center_x) ** 2 + (y - center_y) ** 2
+                def seed_distance(x, y):
+                    return abs(x - seed_x) ** 2 + (y - seed_y) ** 2
 
                 sorted_coords = []
                 for z in sorted(z_groups.keys()):
-                    sorted_xy = sorted(z_groups[z], key=lambda xy: center_distance(xy[0], xy[1]))
+                    sorted_xy = sorted(z_groups[z], key=lambda xy: seed_distance(xy[0], xy[1]))
                     for x, y in sorted_xy:
                         sorted_coords.append((x, y, z))
                         
