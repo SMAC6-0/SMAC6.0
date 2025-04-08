@@ -107,9 +107,6 @@ class Inchworm:
             # These are vars that the simulation uses to simulate each of the inchworm feet
             self.last_cell, self.last_bk_og_texture, self.last_cell_2, self.last_bk_og_texture_2, self.spawned, self.prev_held_block_loc = None, None, None, None, False, [0,0,0]
 
-        if DEBUG:
-            print("Current Map from IW")
-            print(self.current_map)
     def __del__(self):
         """
         Deletion of inchworm in the list of inchworms.
@@ -168,15 +165,10 @@ class Inchworm:
             step_instructions += steps
             self.paths += path
 
-            if DEBUG:
-                print("path gott yayyyy")
-
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
             step_getter(step_instructions)
-            if DEBUG:
-                print("exiting out of pathplannn")
 
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
@@ -223,7 +215,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
         print ("Incoming block location", self.goal)
 
@@ -261,7 +253,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
         # for c in map_data.GridStatus.INCOMING_BLOCK.value:
         #     block_change += struct.pack('B', c)
@@ -331,7 +323,7 @@ class Inchworm:
             sleep(COMMUNICATION_TIMER)
 
         sleep(COMMUNICATION_TIMER)
-        print("actually send the path")
+        print("actually send the path --------------------")
 
         for grid_cell in iw_path:
             if DEBUG:
@@ -613,9 +605,6 @@ class Inchworm:
         if not SIMULATION:
             self.send_IW_path_to_block(self.clear_path_com, self.paths)
         
-        if DEBUG:
-            print("IW map after sending it to supply")
-            print(self.current_map)
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
@@ -670,6 +659,7 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def IW_clear_path(self):
+        print("I cleared my pathhhhhh yippeeee")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths) 
 
     def handle_error(self):
