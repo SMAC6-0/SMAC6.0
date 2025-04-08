@@ -26,6 +26,7 @@ Another note: for any python command thus forward, you must specify the version 
 Required packages: 
 1. ursina 
 2. numpy 
+3. colorama
 
 # How to Download and Run ⬇
 1. Make sure you have Python installed and Ursina too. If you have Python, go to the Command Line and type `pip install ursina`.

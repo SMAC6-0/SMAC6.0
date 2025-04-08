@@ -3,7 +3,7 @@ from enum import Enum
 import copy
 from config import *
 import map_data as map_data
-from inchworm_control.blueprint import blueprint 
+import blueprint 
 from time import sleep
 import serial
 import struct
@@ -103,7 +103,7 @@ class Inchworm(Node):
         
         Inchworm.next_id += 1
         Inchworm.inchworm_list.append(self)
-        self.create_timer(0.2, self.timer_callback)
+        self.create_timer(1, self.update_state())
 
         # UART stuff
         if not SIMULATION: 
@@ -369,6 +369,7 @@ class Inchworm(Node):
             self.update_state()
 
     def update_state(self):
+        self.get_logger().info("Running update_state")
         match self.state:
             case IW_STATE.IDLE:
                 self.handle_idle()
@@ -648,8 +649,6 @@ class Inchworm(Node):
         #     print("Invalid input. Please answer with 'yes' or 'no'.")
         # pass
 
-    def timer_callback(self):
-        self.get_logger().info("Hello ROS2")
 
 def step_getter(step_instructions):
     """
@@ -666,7 +665,7 @@ def step_getter(step_instructions):
 def main(args=None):
     print("inchworm data running")
     rclpy.init(args=args)
-    inchworm_node = Inchworm()
+    inchworm_node = Inchworm(IW_1_ORIENTATION, None, IW_1_LOC)
     rclpy.spin(inchworm_node)
     inchworm_node.destroy_node()
     rclpy.shutdown()
