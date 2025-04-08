@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 print("were trying to run the file :,)")
 from enum import Enum
 import copy
