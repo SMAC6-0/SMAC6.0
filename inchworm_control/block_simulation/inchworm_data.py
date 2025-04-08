@@ -85,6 +85,7 @@ class Inchworm:
         # self.found_structures = []
         # self.misc_blocks = []
         self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
+        self.clear_path_com = [] # stores the list of path to send to the blocks to clear from the map 
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
@@ -292,7 +293,7 @@ class Inchworm:
         print(Fore.RED + "We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
         return True
     
-    def send_IW_path_to_block(self, iw_path):
+    def send_IW_path_to_block(self, clear_path_com, iw_path):
         """
         Sends the IW path to the structure one grid at a time 
 
@@ -301,7 +302,37 @@ class Inchworm:
         """
         # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
-        print("length of IW path", len(iw_path))
+        print("length of clear IW path", len(clear_path_com))
+        for grid_cell in clear_path_com:
+            if DEBUG:
+                print("Grid Cell path", grid_cell)
+            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+            # block_change is the data that needs to be sent
+            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+            
+            for c in grid_cell:
+                block_change += struct.pack('B', c)
+
+            reverted_id = map_data.revert_status(self.current_map,grid_cell[0], grid_cell[1], grid_cell[2])
+            block_change += struct.pack('B', reverted_id) + struct.pack('B', IW_message_counter)
+
+            msg_len = len(block_change).to_bytes(2,'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
+
+            # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+            print("buffer", buffer)
+
+            self.IW_SERIAL.write(buffer)
+
+            # delay to make sure all the data is transmitted 
+            sleep(COMMUNICATION_TIMER)
+
+        sleep(COMMUNICATION_TIMER)
+        print("actually send the path")
+
         for grid_cell in iw_path:
             if DEBUG:
                 print("Grid Cell path", grid_cell)
@@ -569,6 +600,7 @@ class Inchworm:
             print("Current Map from Block")
             print(self.current_map)
 
+        self.clear_path_com = self.paths
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
@@ -578,7 +610,7 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Path found. Sending the IW path to the structure")
         # IW sends it's path to the structure 
         if not SIMULATION:
-            self.send_IW_path_to_block(self.paths)
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
         
         if DEBUG:
             print("IW map after sending it to supply")
