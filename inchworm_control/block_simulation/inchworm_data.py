@@ -2,13 +2,15 @@
 from enum import Enum
 import copy
 from config import *
-import map_data
-from inchworm_control.blueprint import blueprint as blueprint
+import map_data as map_data
+from inchworm_control.blueprint import blueprint 
 from time import sleep
 import serial
 import struct
 from colorama import Fore, init
 init(autoreset=True)
+import rclpy
+from rclpy.node import Node
 
 ###### UART stuff
 UART_BAUD = 9600 # config
@@ -56,7 +58,7 @@ lagging_transform = {
     InchwormOrientation.WEST: lambda x, y, z: (x + 1, y, z) 
 }
 
-class Inchworm:
+class Inchworm(Node):
     next_id = 1
     inchworm_list = []
     
@@ -69,6 +71,8 @@ class Inchworm:
             location (tuple[int]): the xzy location of the inchworm's leading foot. 
             holding_block (bool): True if the inchworm's leading foot is holding a block. 
         """
+        super().__init__('inchworm_node')
+        print("Yahoo")
         # Essential information for IW to keep track of
         self.id = Inchworm.next_id
         self.orientation = orientation
@@ -99,6 +103,7 @@ class Inchworm:
         
         Inchworm.next_id += 1
         Inchworm.inchworm_list.append(self)
+        self.create_timer(0.2, self.timer_callback)
 
         # UART stuff
         if not SIMULATION: 
@@ -643,6 +648,9 @@ class Inchworm:
         #     print("Invalid input. Please answer with 'yes' or 'no'.")
         # pass
 
+    def timer_callback(self):
+        self.get_logger().info("Hello ROS2")
+
 def step_getter(step_instructions):
     """
     Write the steps to steps.txt
@@ -653,10 +661,20 @@ def step_getter(step_instructions):
         for step in complete_steps:
             file.write(f"{step}\n")
 
+## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
+
+def main(args=None):
+    print("inchworm data running")
+    rclpy.init(args=args)
+    inchworm_node = Inchworm()
+    rclpy.spin(inchworm_node)
+    inchworm_node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
-    inchworm = Inchworm(1, IW_1_ORIENTATION, None, None, IW_1_LOC)
-    try:
-        inchworm.run()
-    except KeyboardInterrupt:
-        print(Fore.GREEN + "Stopping the inchworm system.") 
+    main()
+    # inchworm = Inchworm(1, IW_1_ORIENTATION, None, None, IW_1_LOC)
+    # try:
+    #     inchworm.run()
+    # except KeyboardInterrupt:
+    #     print(Fore.GREEN + "Stopping the inchworm system.") 
