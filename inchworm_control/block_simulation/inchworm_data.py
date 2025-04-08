@@ -553,6 +553,7 @@ class Inchworm:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
+                    self.IW_clear_path()
                     if self.is_structure_complete(): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
@@ -667,6 +668,9 @@ class Inchworm:
 
         self.state = IW_STATE.PLACING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
+
+    def IW_clear_path(self):
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths) 
 
     def handle_error(self):
         print(Fore.BLUE + f"IW{self.id}: OHHH NOOO, ERROR ERROR")
@@ -798,8 +802,8 @@ class Inchworm:
 
         # compare the current map and the blueprint
         # return true if structure is complete and false otherwise
-        # print("Cuuurent map", self.current_map)
-        # print("Final map", self.final_structure)
+        print("Cuuurent map", self.current_map)
+        print("Final map", self.final_structure)
 
         # # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
 
