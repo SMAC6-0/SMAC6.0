@@ -4,11 +4,12 @@ from colorama import Fore, init
 init(autoreset=True)
 
 class DStarLite:
-    def __init__(self, grid, start, goal):
+    def __init__(self, grid, start, goal, structure_queue=None):
         self.grid = grid
+        self.structure_queue = structure_queue
         self.cell_map = {}
         self.start = self.get_cell(start)
-        self.goal = self.get_cell(goal)
+        self.goal = self.get_cell(goal, True)
         self.priority_queue = []
         self.km = 0 # changes in environment
         self.neighbors = map_data.set_neighbors(allow_large_build=True)
@@ -30,11 +31,24 @@ class DStarLite:
         """using the key (k) and its corresponding cell (c), remove it from the priority queue"""
         self.priority_queue = [(k, c) for (k, c) in self.priority_queue if c.to_tuple() != cell.to_tuple()]
         
-    def get_cell(self, coords):
+    def get_cell(self, coords, is_goal=False):
         coords = tuple(coords)
+        x, y, z = coords
         if coords not in self.cell_map:
-            self.cell_map[coords] = map_data.create_cell(self.grid, coords)
-        return self.cell_map[coords]
+            cell = map_data.create_cell(self.grid, coords)
+            self.cell_map[coords] = cell
+        else:
+            cell = self.cell_map[coords]
+            
+        if is_goal:
+            pass
+        elif self.structure_queue and self.grid[x][y][z] == map_data.GridStatus.WALKABLE.value:
+            for block in self.structure_queue:
+                if coords == tuple(block):
+                    cell.cost += 100 + 10 * z
+                    break
+            
+        return cell
         
     def update_rhs(self, cell):
         """updates rhs and re-inserts it if needed"""
@@ -46,7 +60,7 @@ class DStarLite:
                 if map_data.is_valid_position_3d(self.grid, (neighbor_coord)):
                     if ((self.grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)):
                         neighbor = self.get_cell(neighbor_coord)
-                        min_rhs = min(min_rhs, neighbor.g + 1)
+                        min_rhs = min(min_rhs, neighbor.g + neighbor.cost)
             cell.rhs = min_rhs
         self.remove_from_queue(cell)
         if cell.g != cell.rhs:
@@ -81,7 +95,7 @@ class DStarLite:
                 
                 
 
-def find_path(grid, start, goal, iw_id, holding_block):
+def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
     """
     Perform D* Lite search in a 3D grid. 
 
@@ -94,6 +108,7 @@ def find_path(grid, start, goal, iw_id, holding_block):
                       This typically is either the block depot or a block coordinate in the blueprint.
         iw_id (int): This inchworm's ID
         holding_block (bool): A flag that indicates if the inchworm is holding a block or not (which then changes the z).
+        structure_queue (list): A list of the next blocks in the structure
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
@@ -105,7 +120,7 @@ def find_path(grid, start, goal, iw_id, holding_block):
         raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
                            f"Start Walkable? {start_status == 0}\n",
                            f"Goal Walkable? {goal_status == 0}")    
-    d_star = DStarLite(grid, start, goal) # snapshot of what we have searched and found
+    d_star = DStarLite(grid, start, goal, structure_queue) # snapshot of what we have searched and found
     d_star.compute_shortest_path()
     current_cell = d_star.start
     
@@ -126,13 +141,13 @@ def find_path(grid, start, goal, iw_id, holding_block):
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
             return []
         
-        map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
         # if next_cell.to_tuple() == d_star.goal.to_tuple():
         #     current_cell = next_cell  # goal_cell parent already updated in handle_side_step
         #     break
 
         next_cell.parent = current_cell
         current_cell = next_cell
+    map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
         
     path = map_data.reverse_path_3d(current_cell, holding_block)
     print(Fore.MAGENTA + f"Path found: {path}")

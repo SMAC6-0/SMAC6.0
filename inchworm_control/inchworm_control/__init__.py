@@ -1,1 +1,1 @@
-from .blueprint import blueprint
+from .blueprint import BlueprintAlgorithm

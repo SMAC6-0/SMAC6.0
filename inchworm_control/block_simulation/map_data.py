@@ -62,6 +62,7 @@ class Cell:
         self.g = float('inf') # estimated cost from start to current cell
         self.rhs = float('inf') # one step ahead cost to goal
         self.parent = None # The parent may later be set as another Cell object. 
+        self.cost = 1 # cost it takes for inchworm to step through instance of cell
 
     def __lt__(self, other): 
         """
@@ -118,7 +119,7 @@ def mark_depot_and_seed(grid):
     grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
     
-def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE):
+def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE.value):
     """
     Update the 3D workspace being passed in such that the passed in structure becomes walkable and the space beneath it is not.
 
@@ -375,7 +376,7 @@ def start_bfs_3d(grid, start, goal):
     return goal_cell, visited, frontier
 
 def heuristic(a, b):
-    h = abs(a.x - b.x) + abs(a.y - b.y) + 1.2 * abs(a.z - b.z) # manhattan distance w/ more weight on z
+    h = abs(a.x - b.x) + abs(a.y - b.y) + 10 * abs(a.z - b.z) # manhattan distance w/ more weight on z
     return h
 
 def handle_side_step(grid, current_cell: Cell, goal_cell: Cell, iw_id: int, holding_block: bool):
@@ -439,7 +440,7 @@ def determine_helper_blocks(grid, path_start, path_end, iw_id):
     # else:
     #     return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
+def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int, priority_queue):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -450,17 +451,20 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
         path_start (tuple): The starting position of the path.
         path_end (tuple): The ending position of the path.
         curr_orientation (enum): N, E, S, or W 
-        holding_block(bool): True if the inchworm is holding a block.
+        holding_block (bool): True if the inchworm is holding a block.
+        iw_id (int): The corresponding inchworm ID of the inchworm that called path planning
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
+    path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, priority_queue) # get the path
+    # path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
+
 
     # if no path was found, check to see if you'll need a helper block
-    if path_coords == []:
-        print(Fore.MAGENTA + f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end, iw_id)
+    # if path_coords == []:
+    #     print(Fore.MAGENTA + f"Checking for helper block now for start: {path_start}, goal: {path_end}")
+    #     path_coords = determine_helper_blocks(c_space_grid, path_start, path_end, iw_id)
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
