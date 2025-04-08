@@ -4,7 +4,7 @@ from config import *
 import bfs_path_planning
 from colorama import Fore, init
 init(autoreset=True)
-from inchworm_data import Inchworm
+from inchworm_control.inchworm_control.inchworm_data import Inchworm
 
 class GridStatus(IntEnum):
     WALKABLE = 0
