@@ -310,7 +310,7 @@ class Inchworm:
 
             block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
 
-            msg_len = len(block_change).to_bytes(2,'little')
+            msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
@@ -341,7 +341,7 @@ class Inchworm:
             reverted_id = map_data.revert_status(self.current_map,grid_cell[0], grid_cell[1], grid_cell[2])
             block_change += struct.pack('B', reverted_id) + struct.pack('B', IW_message_counter)
 
-            msg_len = len(block_change).to_bytes(2,'little')
+            msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
@@ -370,7 +370,7 @@ class Inchworm:
 
             block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
 
-            msg_len = len(block_change).to_bytes(2,'little')
+            msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
