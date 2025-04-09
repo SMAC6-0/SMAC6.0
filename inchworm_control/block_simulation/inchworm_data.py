@@ -297,38 +297,9 @@ class Inchworm:
         # TODO: IW_path is in X, Y, Z format!!
         # iterate through the iw_path
 
-        for grid_cell in test_path_delete:
-            if DEBUG:
-                print("Grid Cell path", grid_cell)
-            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
-
-            # block_change is the data that needs to be sent
-            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
-
-            for c in grid_cell:
-                block_change += struct.pack('B', c)
-
-            block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
-
-            print("length: ", len(block_change))
-            msg_len = (len(block_change)+2).to_bytes(2,'little')
-            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
-
-            # append msg_len, block_change, checksum, ending_code(enum) to buffer
-
-            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print("buffer", buffer)
-
-            self.IW_SERIAL.write(buffer)
-
-            # delay to make sure all the data is transmitted 
-            sleep(COMMUNICATION_TIMER)
-
-        print("Testing delete ")
-
         # TODO: replace this
-        print("length of clear IW path", len(test_path_delete))
-        for grid_cell in test_path_delete:
+        print("length of clear IW path", len(clear_path_com))
+        for grid_cell in clear_path_com:
             if DEBUG:
                 print("Grid Cell path", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
