@@ -328,6 +328,7 @@ class Inchworm:
 
         sleep(COMMUNICATION_TIMER)
         print("actually send the path --------------------")
+        print("length of path: ", len(iw_path))
 
         for grid_cell in iw_path:
             if DEBUG:
