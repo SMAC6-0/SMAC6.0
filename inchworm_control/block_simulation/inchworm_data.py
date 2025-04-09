@@ -310,6 +310,7 @@ class Inchworm:
 
             block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
 
+            print("length: ", len(block_change))
             msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
 
