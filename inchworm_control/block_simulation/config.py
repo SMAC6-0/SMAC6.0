@@ -40,7 +40,7 @@ IW_2_ORIENTATION = InchwormOrientation.SOUTH
 IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
 
 # if the simulation is for the demo, set this to True
-SIMULATION = False
+SIMULATION = True
 LARGE_BUILD = False
 
 # have inchworm starting inline with BD 

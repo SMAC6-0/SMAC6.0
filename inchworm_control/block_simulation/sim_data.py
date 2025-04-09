@@ -45,6 +45,7 @@ class SimData:
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
 
         # TODO: save self.final_structure to a file
+        print("Saving map in the json file")
         with open("Final_Structure.json", "w") as final_map_file:
             json.dump(self.final_structure, final_map_file)
     
