@@ -612,7 +612,7 @@ class Inchworm:
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
                     self.IW_clear_path()
-                    if self.is_structure_complete(): # structure is complete
+                    if self.is_structure_complete(self.current_map, self.final_structure): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
                         self.handle_structure_incomplete()
