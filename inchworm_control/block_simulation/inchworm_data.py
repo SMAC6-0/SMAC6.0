@@ -865,8 +865,10 @@ class Inchworm:
 
 
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
-
+        print("current map: ", self.current_map)
+        print("current map: ", self.final_structure)
         self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
+        print("SELF GOAL: ", self.goal)
         return self.goal == [-1, -1, -1] # structure is complete!!
     
         # structure_complete = input("Is structure complete? (yes/no) \n")
