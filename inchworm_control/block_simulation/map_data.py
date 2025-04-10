@@ -103,7 +103,7 @@ def mark_depot_and_seed(grid):
         x, y, z = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
             if z - 1 >= 0:
-                grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
+                grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
             grid[x][y][z] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
