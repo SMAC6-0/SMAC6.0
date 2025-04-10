@@ -31,6 +31,7 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
 def blueprint(curr_map, final_map) -> list:
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
+    map_complete = True
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
@@ -38,7 +39,14 @@ def blueprint(curr_map, final_map) -> list:
 
     elif curr_map.size == final_map.size:
         # The structure is complete
-        if np.array_equal(curr_map, final_map):
+        for z in range(curr_map.shape[2]):
+            for x in range(curr_map.shape[0]):
+                for x in range(curr_map.shape[1]):
+                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
+                        map_complete = False
+
+
+        if map_complete: 
             return [-1,-1,-1]
         else: 
             # TODO: implement prioritization of found structures
