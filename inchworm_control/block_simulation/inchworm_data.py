@@ -868,13 +868,14 @@ class Inchworm:
         final_map = np.array(final_map)
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
         print("current map: ", curr_map)
-        print("current map: ", final_map)
+        print("Final map: ", final_map)
         map_complete = True
 
         for z in range(curr_map.shape[2]):
             for x in range(curr_map.shape[0]):
                 for y in range(curr_map.shape[1]):
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
+                        print(f"WRONFG THING STUPOIDA ", {x, y, z})
                         map_complete = False
 
         print("IS MAP COMPLETE: ", map_complete)
