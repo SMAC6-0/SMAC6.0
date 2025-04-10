@@ -722,7 +722,9 @@ class Inchworm:
 
     def IW_clear_path(self):
         print("I cleared my pathhhhhh yippeeee")
+        print("current Map before clear", self.current_map)
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths) 
+        print("current Map after clear", self.current_map)
 
     def handle_error(self):
         print(Fore.BLUE + f"IW{self.id}: OHHH NOOO, ERROR ERROR")
