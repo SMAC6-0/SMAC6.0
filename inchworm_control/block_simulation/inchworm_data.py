@@ -128,8 +128,8 @@ class Inchworm:
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            if self.goal == [-1, -1, -1]:
-                print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
+            if self.goal == [-1, -1, -1]: # structure is complete!!
+                print(Fore.MAGENTA + f"IW{self.id}: Structure is complete")
                 return
             elif self.goal == [-9, -9, -9]:
                 print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")

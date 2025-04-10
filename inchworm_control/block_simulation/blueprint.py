@@ -48,6 +48,7 @@ def blueprint(curr_map, final_map) -> list:
 
         if map_complete: 
             return [-1,-1,-1]
+        
         else: 
             # TODO: implement prioritization of found structures
             # print("map dims: ", curr_map.shape[0], curr_map.shape[1],curr_map.shape[2])
