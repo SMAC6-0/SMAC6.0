@@ -147,7 +147,7 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
 
         next_cell.parent = current_cell
         current_cell = next_cell
-    map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
+    # map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
         
     path = map_data.reverse_path_3d(current_cell, holding_block)
     print(Fore.MAGENTA + f"Path found: {path}")
