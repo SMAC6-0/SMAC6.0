@@ -2,7 +2,7 @@ from enum import Enum
 import copy
 from config import *
 import map_data
-from blueprint import blueprint
+from blueprint import BlueprintAlgorithm
 from time import sleep
 import serial
 import struct
