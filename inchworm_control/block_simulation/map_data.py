@@ -197,17 +197,17 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     return grid
 
 def revert_status(grid, x, y, z):
-    """Revert the status of the grid cell at the specified location. """
-    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
-    # If the cell used to be on a path, assume its walkable 
-    elif GridStatus.is_inchworm_path(grid[x][y][z]):
-        return GridStatus.WALKABLE.value
-    else: 
-        return GridStatus.NOT_WALKABLE.value
-    
-
+    try:
+        above = grid[x][y][z + 1]
+    except IndexError:
+        above = GridStatus.WALKABLE.value
+    return (
+        GridStatus.NOT_WALKABLE.value
+        if above == GridStatus.WALKABLE.value
+        else GridStatus.WALKABLE.value
+    )
 
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
