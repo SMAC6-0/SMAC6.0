@@ -281,7 +281,7 @@ class Inchworm:
         for c in self.goal:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', self.IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.NOT_WALKABLE.value) + struct.pack('B', self.IW_message_counter)
         self.IW_message_counter += 1
 
         print(Fore.RED + "Block change", block_change)
