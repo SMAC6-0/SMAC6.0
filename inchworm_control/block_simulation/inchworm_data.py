@@ -8,6 +8,7 @@ import serial
 import struct
 import json
 from colorama import Fore, init
+import numpy as np
 init(autoreset=True)
 
 ###### UART stuff
@@ -851,7 +852,7 @@ class Inchworm:
             #     print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
             pass
     
-    def is_structure_complete(self):
+    def is_structure_complete(self, curr_map, final_map):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
 
         # compare the current map and the blueprint
@@ -863,16 +864,17 @@ class Inchworm:
         #             if(self.current_map[x][y][z] != self.final_structure[x][y][z]) and self.current_map[x][y][z]:
         #                 return
 
-
+        curr_map = np.array(curr_map)
+        final_map = np.array(final_map)
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
-        print("current map: ", self.current_map)
-        print("current map: ", self.final_structure)
+        print("current map: ", curr_map)
+        print("current map: ", final_map)
         map_complete = True
 
-        for z in range(self.current_map.shape[2]):
-            for x in range(self.current_map.shape[0]):
-                for y in range(self.current_map.shape[1]):
-                    if self.current_map[x, y, z] < 10 and self.current_map[x, y, z] != self.final_structure[x, y, z]:
+        for z in range(curr_map.shape[2]):
+            for x in range(curr_map.shape[0]):
+                for y in range(curr_map.shape[1]):
+                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != self.final_map[x, y, z]:
                         map_complete = False
 
         print("IS MAP COMPLETE: ", map_complete)
