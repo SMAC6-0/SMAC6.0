@@ -90,7 +90,7 @@ class Inchworm:
         # self.misc_blocks = []
         self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
         self.clear_path_com = [] # stores the list of path to send to the blocks to clear from the map 
-        self.IW_message_counter = 0 # this is the messgae counter for sending data, IW's message counter increases
+        self.IW_message_counter = 1 # this is the messgae counter for sending data, IW's message counter increases
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
