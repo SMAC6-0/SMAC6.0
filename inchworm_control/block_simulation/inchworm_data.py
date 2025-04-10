@@ -707,24 +707,22 @@ class Inchworm:
         else: 
             self.handle_error()
 
-        print(f"current map {self.current_map}")
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
-        print(f"after clearing {self.current_map}")
-        self.paths = [] # Reset current path 
-        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
-        self.step_num = 1
-        self.holding_block = False
-
-        print(Fore.BLUE + f"IW{self.id}: Reset the path")
 
         self.state = IW_STATE.PLACING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def IW_clear_path(self):
         print("I cleared my pathhhhhh yippeeee")
-        print("current Map before clear", self.current_map)
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.id)
-        print("current Map after clear", self.current_map)
+        print(f"current map {self.current_map}")
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
+        print(f"after clearing {self.current_map}")
+        self.clear_path_com = self.paths
+        self.paths = [] # Reset current path 
+        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
+        self.step_num = 1
+        self.holding_block = False
+
+        print(Fore.BLUE + f"IW{self.id}: Reset the path")
 
     def handle_error(self):
         print(Fore.BLUE + f"IW{self.id}: OHHH NOOO, ERROR ERROR")
