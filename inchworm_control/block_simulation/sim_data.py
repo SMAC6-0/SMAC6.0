@@ -21,8 +21,6 @@ import itertools
 import json
 init(autoreset=True)
 
-from inchworm_control.blueprint import blueprint 
-
 class SimData: 
     def __init__(self): 
         self.seed_block = [] # TODO: algo to deduce seed block based on what is in the sim (based on goal struct)
@@ -140,7 +138,7 @@ class SimData:
             for x in range(base_size - z):
                 # Each column
                 for y in range(base_size - z):
-                    pyramid.append([x+10, y+10, z+1])
+                    pyramid.append([x+SEED_BK[0], y+SEED_BK[1], z+1])
         return pyramid
     
     def generate_building(self): 

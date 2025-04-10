@@ -14,18 +14,21 @@ class GridStatus(IntEnum):
     
     @classmethod
     def inchworm_path(cls, iw_id):
-        """Generate an inchworm path status dynamically."""
-        return iw_id + 10 # inchworm path status starts at arbitrary number 10
+        """Generate an inchworm path status dynamically using a pos int ID. The status is the ID + 10."""
+        return iw_id + 10 # inchworm path status starts at arbitrary number 11
     
     @classmethod
     def is_inchworm_path(cls, value):
         """Check if the given value represents an inchworm path."""
-        return value >= 10 # inchworm path status starts at arbitrary number 10
+        return value > 10 # inchworm path status starts at arbitrary number 11
     
     @classmethod
     def which_inchworm(cls, value):
         """Return the inchworm ID if the value is an inchworm path, otherwise None."""
-        return value - 10 # inchworm path status starts at arbitrary number 10
+        if (value - 10) > 0:
+            return value - 10 # inchworm path status starts at arbitrary number 11
+        else: 
+            return None
     
     @classmethod
     def from_value(cls, value):
@@ -61,12 +64,12 @@ class Cell:
     def __lt__(self, other): 
         """
         Less than. Returns true is this Cell object's total cost is less than the total cost on the inputted Cell (other). 
-        This is used for cell comparison for the priority queue. 
+        This is used for cell comparison for the priority queue (the frontier). 
         
         Args:
             other (Cell): Another Cell object. 
         """
-        return self.f < other.f # cell comparing for priority queue
+        return self.f < other.f # cell comparing for priority queue (the frontier)
     
 def initialize_grid():
     """
@@ -137,7 +140,7 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE.v
             grid[x][y][z] = GridStatus.WALKABLE.value
             if z - 1 >= 0:
                 grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
-        elif status < 0: 
+        elif GridStatus.is_inchworm_path(status): # status < 0: 
             grid[x][y][z] = status
         else:
             grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
@@ -194,32 +197,33 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     return grid
 
 def revert_status(grid, x, y, z):
+    """Revert the status of the grid cell at the specified location. """
+    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
-    try:
-        above = grid[x][y][z + 1]
-    except IndexError:
-        above = GridStatus.WALKABLE.value
-    return (
-        GridStatus.NOT_WALKABLE.value
-        if above == GridStatus.WALKABLE.value
-        else GridStatus.WALKABLE.value
-    )
+    # If the cell used to be on a path, assume its walkable 
+    elif GridStatus.is_inchworm_path(grid[x][y][z]):
+        return GridStatus.WALKABLE.value
+    else: 
+        return GridStatus.NOT_WALKABLE.value
+    
 
-def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
+
+def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
-    Sets the neighbors in an algorithm.
+    Sets the neighbors for use in (search) algorithms.
 
     Args:
-        allow_vertical (boolean): . 
-        allow_vert_diagonal (boolean): . 
-        allow_horz_diagonal (boolean): . 
-        allow_alls_diagonal (boolean): . 
-        allow_large_build (boolean)
+        allow_vertical (boolean): True to allow cells directly above and below the current cell. 
+        allow_vert_diagonal (boolean): True to add neighbors adjacent in the xy plane, but within 1 block up/down. 
+        allow_horz_diagonal (boolean): True to add neighbors diagonal in the xy plane. 
+        allow_alls_diagonal (boolean): True to add neighbors diagonal in the xy plane, but within 1 block up/down. 
+        allow_large_build (boolean): True to allow neighbors within 1 block horizontally, but +-3 vertically. This being true allows the inchworm to path
+            plan to place blocks up to 3 blocks tall. 
     Returns:
-        neighbor_directions (list(tuple)): An updated 3D list (grid) where the floor & structure is walkable and the cell beneath the structure is not. 
+        neighbor_directions (list(tuple)): A list of directions to nearby cells. 
     """ 
-    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)]
+    base_neighbors = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)] # Adjacent cells in xy plane, excluding diagonals. 
     vertical_neighbors = [(0, 0, 1), (0, 0, -1)]
     diagonal_vert_neighbors = [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1),
                                (0, 1, 1), (0, 1, -1), (0, -1, 1), (0, -1, -1)]
@@ -231,9 +235,10 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
                              (1, 0, 3), (1, 0, -3), (-1, 0, 3), (-1, 0, -3),
                              (0, -1, 3), (0, -1, -3), (0, 1, -3), (0, 1, 3)]
     
-    # combined neighbor_directions based on conditions
-    neighbor_directions = base_neighbors
-    
+    # Combine neighbor_directions based on conditions
+    neighbor_directions = []
+    if allow_adjacent:
+        neighbor_directions += base_neighbors
     if allow_vertical:
         neighbor_directions += vertical_neighbors
     if allow_vert_diagonal:
@@ -247,7 +252,7 @@ def set_neighbors(allow_vertical=True, allow_vert_diagonal=True, allow_horz_diag
         
     return neighbor_directions
 
-def reverse_path_3d(curr_cell, holding_block) -> list[int]:
+def reverse_path_3d(curr_cell: Cell, holding_block: bool) -> list[int]:
     """
     Reverse calculated path to go from start to goal.
     
@@ -353,29 +358,31 @@ def start_search_3d(grid, start, goal):
     Returns:
         goal_cell (Cell): .
         visited (list(boolean)): .
-        queue (list(Cell)): .
+        frontier (list(Cell)): .
     """
     start_cell = create_cell(grid, start)
     goal_cell = create_cell(grid, goal)
     visited = [[[False for z in range(len(grid[0][0]))] for y in range(len(grid[0]))] for x in range(len(grid))]
-    queue = [start_cell]
+    frontier = [start_cell]
     visited[start_cell.x][start_cell.y][start_cell.z] = True
-    return goal_cell, visited, queue
+    return goal_cell, visited, frontier
 
 def handle_multiple_block_depots():
     #TODO: how path planning is affected by the existence of multiple block depots 
     pass
 
-def determine_helper_blocks(grid, path_start, path_end):
+def determine_helper_blocks(grid, path_start, path_end, iw_id):
     #TODO
     # right now, this function only recalculates bfs by searching for vertical paths, for the case when the structure is something like a column
     # in the future, this function should be able to determine if a helper block is needed, and if so, where to place it
-    
-    path_coords = bfs_path_planning.find_path(grid, path_start, path_end, False)
-    if path_coords == []:
-        RuntimeError(f"Cannot find helper blocks for path.")
-    else:
-        return path_coords
+    path_coords = []
+    return path_coords 
+
+    # path_coords = bfs_path_planning.find_path(grid, path_start, path_end, iw_id, False)
+    # if path_coords == []:
+    #     RuntimeError(f"Cannot find helper blocks for path.")
+    # else:
+    #     return path_coords
 
 def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
     """
@@ -393,130 +400,76 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
     c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, holding_block) # get the path
+    path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
 
     # if no path was found, check to see if you'll need a helper block
     if path_coords == []:
         print(Fore.MAGENTA + f"Checking for helper block now for start: {path_start}, goal: {path_end}")
-        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end)
+        path_coords = determine_helper_blocks(c_space_grid, path_start, path_end, iw_id)
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    for i in range(len(path_coords) - 1):
-        current_coord = path_coords[i]
-        next_coord = path_coords[i + 1]
-            
-        end_flag = bool(next_coord == path_end) # if it is done basically
-        step_instructions, orientation = convert_coordinate_to_steps(grid, current_coord, next_coord, curr_orientation, holding_block, end_flag)
-        steps.append(step_instructions)
-        curr_orientation = orientation
+    if path_coords:
+        for i in range(len(path_coords) - 1):
+            current_coord = path_coords[i]
+            next_coord = path_coords[i + 1]
+                
+            end_flag = bool(next_coord == path_end) # if it is done basically
+            step_instructions, orientation = convert_coordinate_to_steps(current_coord, next_coord, curr_orientation, holding_block, end_flag)
+            steps.extend(step_instructions)
+            curr_orientation = orientation
 
     return path_coords, steps, curr_orientation
 
-def convert_coordinate_to_steps(grid, current_coord, next_coord, orientation: InchwormOrientation, holding_block: bool, end_flag):
-    """
-    Determines the steps needed to get from current_coord to next_coord by taking into account the
-    direction of movement and new orientation of the inchworm's position in the 3D grid.
-    
-    Note: To make it more intuitive, think of it on the XY plane.
-          Because the leading foot never changes, there's no way for the inchworm to ever step 
-          diagonally backwards. Additionally, regular stepping forward and backward is just the 
-          inchworm turning and doing a right or left step.
-
-    Args:
-        grid (list): A 3D list representing the workspace, where each element indicates whether
-                     the corresponding cell is walkable (0), not (1), inchworm_path (-inchworm_id), 
-                     incoming_block (2), & supply_depot (3). 
-        current_coord (tuple): The current position (x, y, z).
-        next_coord (tuple): The next position (x, y, z).
-        orientation (InchwormOrientation): The current orientation.
-        holding_block (boolean): Whether the inchworm is holding a block.
-        end_flag (boolean): Indicates the end of path.
-
-    Returns:
-        step_instructions, new_orientation (tuple): A formatted step instruction and the new orientation.
-    """
+def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_block, end_flag):
     movement_vector = np.subtract(next_coord, current_coord)
-    magnitude = int(np.linalg.norm(movement_vector))
     
-    if magnitude == 0:
-        print(Fore.MAGENTA + "Warning: No movement required.")
-        return [], "null"
-    
-    # If horizontally diagonal, needs to split into 2 sequential steps.
-    if abs(movement_vector[0]) > 0 and abs(movement_vector[2]) > 0:  # Diagonal in x-y plane
-        intermediate_coord = ((int(current_coord[0] + np.sign(movement_vector[0])), current_coord[1], current_coord[2]))
-        
-        # Process the two components
-        step1, orientation1 = convert_coordinate_to_steps(grid, current_coord, intermediate_coord, orientation, holding_block, end_flag)
-        step2, orientation2 = convert_coordinate_to_steps(grid, intermediate_coord, next_coord, orientation1, holding_block, end_flag)
-        
-        combined_steps = f"{step1}\n{step2}"
-        return combined_steps, orientation2
-    
-    normalized_vector = tuple(int(coord // magnitude) if magnitude != 0 else 0 for coord in movement_vector)
+    direction_mappings = {
+        0: {1: "RIGHT",     -1: "LEFT"},    #X
+        1: {1: "FORWARD",   -1: "BACK"},    #Y
+        2: {1: "UP",        -1: "DOWN" }    #Z
+    }
     
     orientation_transforms = {
-        InchwormOrientation.NORTH: lambda x, y, z: (x, y, z),  
-        InchwormOrientation.SOUTH: lambda x, y, z: (-x, -y, z),
-        InchwormOrientation.EAST: lambda x, y, z: (-y, x, z),  
-        InchwormOrientation.WEST: lambda x, y, z: (y, -x, z),  
+        InchwormOrientation.NORTH: lambda x, y, z: [ x,  y, z],  
+        InchwormOrientation.SOUTH: lambda x, y, z: [-x, -y, z],
+        InchwormOrientation.EAST:  lambda x, y, z: [-y,  x, z],  
+        InchwormOrientation.WEST:  lambda x, y, z: [ y, -x, z],  
     }
     
+    # create instruction
+    instructions = [] 
     transform = orientation_transforms[orientation]
-    # print(f"orientation: {orientation}")
-    transformed_vector = transform(*normalized_vector)
+    transformed_vector = transform(*movement_vector)
+
+    for axis in [2, 1, 0]: # prioritize Z, then Y, then X according to direction_mappings
+        # If there is change on this axis: 
+        if transformed_vector[axis] != 0:
+            coord_change = transformed_vector[axis]
+            direction_step = direction_mappings[axis][int(np.sign(coord_change))]
+            instructions.append(direction_step)
+            if coord_change > 1 or coord_change < -1:
+                instructions.append(str(coord_change))
+            # print(f"coord_change: {coord_change} for {axis} axis for Transition between {current_coord} & {next_coord} while {orientation.name}. resulting step: {direction_step}")
+    # Determine the orientation based on the recent axis change
+    new_orientation = get_orientation(direction_step, orientation)
+    all_instructions = "_".join(instructions)
+    # print(f"transformed vector: {transformed_vector}")
+    # print(f"orientation: {updated_orientation}")
     
-    # Orientation here is based on NORTH.
-    base_mappings = {
-        # Horizontal movements
-        ( 1,  0,  0): ("RIGHT"),
-        (-1,  0,  0): ("LEFT"),
-        ( 0,  1,  0): ("FORWARD"),
-        ( 0, -1,  0): ("BACK"),
-        ( 0,  0,  1): ("UP"),
-        ( 0,  0, -1): ("DOWN"),
-        # Vertically diagonal movements
-        ( 1,  0,  1): ("UP_RIGHT"),
-        (-1,  0,  1): ("UP_LEFT"),
-        ( 0,  1,  1): ("UP_FORWARD"),
-        ( 0, -1,  1): ("UP_BACK"),
-        ( 1,  0, -1): ("DOWN_RIGHT"),
-        (-1,  0, -1): ("DOWN_LEFT"),
-        ( 0,  1, -1): ("DOWN_FORWARD"),
-        ( 0, -1, -1): ("DOWN_BACK")
-    }
-
-    if transformed_vector in base_mappings:
-        step_instructions = base_mappings[transformed_vector]
-
-        if magnitude > 1:
-            if "UP" in step_instructions or "DOWN" in step_instructions:
-                verticality = step_instructions.split("_")[0]
-                horizontality = step_instructions.split("_")[-1]
-                step_instructions = f"{verticality}_{magnitude}_{horizontality}"
-            else:
-                horizontality = step_instructions
-                step_instructions = f"{magnitude}_{horizontality}"
-                
-        new_orientation = get_orientation(step_instructions, orientation)
-        
-        #TODO: handle any block depot'
-        if holding_block:
-            step_instructions = f"{step_instructions}_BLOCK"
-        # print(Fore.MAGENTA + f"IW orientation {orientation.name} -> {new_orientation.name}, resulting in {step_instructions}")
-        
-        # for bd_loc in BD_LOCS:
-        if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):# if all([bd_loc[0], bd_loc[1], bd_loc[2]-1] == next_coord): 
-            return f"GRAB_{step_instructions}", new_orientation
-        elif holding_block & end_flag:
-            return f"PLACE_{step_instructions}", new_orientation
-        else:
-            return f"STEP_{step_instructions}", new_orientation
-
-    # Handle undefined or unexpected movements
-    print(Fore.MAGENTA + f"Warning: Undefined movement vector {movement_vector} between {current_coord} and {next_coord}")
-    return ["UNKNOWN_STEP"], "null"
+    #TODO: handle any block depot'
+    if holding_block:
+        all_instructions = f"{all_instructions}_BLOCK"
+    
+    # for bd_loc in BD_LOCS:
+    if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+        all_instructions = f"GRAB_{all_instructions}"
+    elif holding_block and end_flag:
+        all_instructions = f"PLACE_{all_instructions}"
+    else:
+        all_instructions = f"STEP_{all_instructions}"
+    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {all_instructions} going {new_orientation.name}")
+    return [all_instructions], new_orientation
 
 def get_orientation(movement: str, orientation: InchwormOrientation):
     if "RIGHT" in movement: 
@@ -526,9 +479,16 @@ def get_orientation(movement: str, orientation: InchwormOrientation):
     elif "BACK" in movement: 
         return orientation.rotate(2)
     else:
-        return orientation    
+        return orientation
     
-def buffer_iw_paths(grid, iw_id):
+def buffer_iw_paths(grid, iw_id: int):
+    """
+    To avoid collisions, buffers the inchworm paths of *other* IWs. 
+    Args: 
+        iw_id (int): the ID of the IW that is trying to path plan around the other IWs
+    Returns: 
+        grid: the 3D list map, now with a bunch of extra cells marked as IW paths
+    """
     # if on the map there is another iw path, have its neighbors also turn into iw_path
     
     # check all of grid for inchworm paths
@@ -536,20 +496,24 @@ def buffer_iw_paths(grid, iw_id):
     neighbor_directions = set_neighbors()
     path_count = []
 
-    # Make the bottom layer (z = 0) WALKABLE
+    # Iterate through the grid
     for x in range(len(grid)):
         for y in range(len(grid[0])):
             for z in range(len(grid[0][0])):
                 cell_status = grid[x][y][z]   
                 
                 if GridStatus.is_inchworm_path(cell_status) and iw_id != GridStatus.which_inchworm(cell_status): # is some inchworm path, but not its own
-                    neighbor_directions = set_neighbors()
                     
+                    # Iterate through neighbors of this cell 
                     for dx, dy, dz in neighbor_directions:
                         nx, ny, nz = x + dx, y + dy, z + dz
+                        
+                        # If this neighboring cell is a valid position and not a neighbor of the BD or Seed block
                         if (is_valid_position_3d(grid, [nx, ny, nz]) 
-                            and not (is_neighbor_or_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_or_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
+                            and not (is_neighbor_of_cell(grid, [nx, ny, nz], SEED_BK, neighbor_directions) or is_neighbor_of_cell(grid, [nx, ny, nz], BD_1_LOC, neighbor_directions))):
                             n_status = grid[nx][ny][nz]
+
+                            # If this neighboring cell is walkable or incoming, it should be buffered 
                             if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
                                 path_count.append((nx, ny, nz, cell_status))
                     if (len(path_count) > 2):
@@ -568,7 +532,15 @@ def buffer_iw_paths(grid, iw_id):
     
     return grid
 
-def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
+def is_neighbor_of_cell(grid: list, coord_compare: list, og_coord: list, neighbor_directions: list):
+    """
+    Returns true if a potential buffer cell is within the "off limits zone" of another block. 
+    Args:
+        grid (list)
+        coord_compare (list(list)): coordinate of a potential path buffer cell. 
+        og_coord: coordinate of a cell that can't be trapped by the buffer 
+        neighbor_directions: 
+    """
     neighbors = []
     if not is_valid_position_3d(grid, coord_compare) and not is_valid_position_3d(grid, og_coord):
         return False
@@ -579,6 +551,7 @@ def is_neighbor_or_cell(grid, coord_compare, og_coord, neighbor_directions):
     gx, gy, gz = og_coord
     for dx, dy, dz in neighbor_directions:
         nx, ny, nz = gx + dx, gy + dy, gz + dz
+        # print(f"is_neighbor_of_cell: Trying to see if {coord_compare} is neighbor of {og_coord} at {nx, ny, nz} ")
         neighbors.append([nx, ny, nz])
         if is_valid_position_3d(grid, [nx, ny, nz]) and coord_compare == [nx, ny, nz]:
             return True
