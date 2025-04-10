@@ -866,9 +866,17 @@ class Inchworm:
 
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
 
+        map_complete = True 
+
         print("Cuuurent map after", self.current_map)
         print("FInal map after", self.final_structure)
-        return self.current_map == self.final_structure
+        for z in range(curr_map.shape[2]):
+            for x in range(curr_map.shape[0]):
+                for y in range(curr_map.shape[1]):
+                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
+                        map_complete = False
+
+        return map_complete
         # structure_complete = input("Is structure complete? (yes/no) \n")
         # if structure_complete.lower() == 'yes':
         #     return True
