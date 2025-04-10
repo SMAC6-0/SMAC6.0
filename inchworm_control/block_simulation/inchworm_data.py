@@ -707,14 +707,6 @@ class Inchworm:
         else: 
             self.handle_error()
 
-
-        print(Fore.BLUE + "Travelling to the block location")
-        # IW begins travelling to block location
-        
-        self.state = IW_STATE.TRANSPORTING_BLOCK
-        print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
-
-    def handle_transported_block(self):
         # print(f"current map {self.current_map}")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
         # print(f"after clearing {self.current_map}")
