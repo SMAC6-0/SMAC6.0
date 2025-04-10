@@ -435,7 +435,7 @@ class Inchworm:
             byte = self.IW_SERIAL.read(1)           #read serial port
             # if byte == []:
             #     return False
-            print(byte) # b'\xaa'
+            # print(byte) # b'\xaa'
             # print(ord(byte))
             # byte = ord(byte) # turn it into a decimal value  # 170
             # print(byte)
@@ -454,7 +454,7 @@ class Inchworm:
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)): # and not collecting_data:  # Start byte detected
                 # print("start byte detected")
                 buffer = []  
-                print("Print bufferrrrr after clear", buffer)
+                # print("Print bufferrrrr after clear", buffer)
                 bytesRead = 0
                 msgLenCollected = False
                 msgLenBytes = []
@@ -468,13 +468,13 @@ class Inchworm:
                 if msgLenReceivedCounter == 2:
                     # Convert collected bytes to integer (assuming big-endian format)
                     msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-                    print("msg Len when collecting msg len: ", msgLen)
+                    # print("msg Len when collecting msg len: ", msgLen)
                     msgLenCollected = True
                     collecting_data = True
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
-                print("BytesRead: ", bytesRead)
-                print("msgLen: ", msgLen)
+                # print("BytesRead: ", bytesRead)
+                # print("msgLen: ", msgLen)
                 if collecting_data:
                     buffer = b''.join(buffer) # convert to bytes object
                     print("BUFFFEERR after join: ", buffer)
@@ -483,8 +483,8 @@ class Inchworm:
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
                     calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
 
-                    print("checksum", checksum)
-                    print("calculated_check_sum", calculated_check_sum)
+                    # print("checksum", checksum)
+                    # print("calculated_check_sum", calculated_check_sum)
 
                     # Inchworm.crc16(buffer[:-2])
                     
