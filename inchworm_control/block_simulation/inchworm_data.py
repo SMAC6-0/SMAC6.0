@@ -34,7 +34,7 @@ class UART_CODES(Enum):
     NewInchworm=0xEF
 
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
-IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+
 
 dummy_block_location = [1, 0, 1] # testing value #TODO: change this later
 
@@ -90,6 +90,7 @@ class Inchworm:
         # self.misc_blocks = []
         self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
         self.clear_path_com = [] # stores the list of path to send to the blocks to clear from the map 
+        self.IW_message_counter = 0 # this is the messgae counter for sending data, IW's message counter increases
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
@@ -279,7 +280,8 @@ class Inchworm:
         for c in self.goal:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.WALKABLE.value) + struct.pack('B', self.IW_message_counter)
+        self.IW_message_counter += 1
 
         print(Fore.RED + "Block change", block_change)
 
@@ -314,7 +316,8 @@ class Inchworm:
         # for c in map_data.GridStatus.INCOMING_BLOCK.value:
         #     block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', map_data.GridStatus.INCOMING_BLOCK.value) + struct.pack('B', IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.INCOMING_BLOCK.value) + struct.pack('B', self.IW_message_counter)
+        self.IW_message_counter += 1
 
         # print(Fore.RED + "Block change", block_change)
 
@@ -365,7 +368,9 @@ class Inchworm:
                 block_change += struct.pack('B', c)
 
             reverted_id = map_data.revert_status(self.current_map,grid_cell[0], grid_cell[1], grid_cell[2])
-            block_change += struct.pack('B', reverted_id) + struct.pack('B', IW_message_counter)
+            block_change += struct.pack('B', reverted_id) + struct.pack('B', self.IW_message_counter)
+            self.IW_message_counter += 1
+
 
             msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
@@ -395,7 +400,8 @@ class Inchworm:
             for c in grid_cell:
                 block_change += struct.pack('B', c)
 
-            block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', IW_message_counter)
+            block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', self.IW_message_counter)
+            self.IW_message_counter += 1
 
             msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
