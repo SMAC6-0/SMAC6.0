@@ -10,7 +10,9 @@ import struct
 from colorama import Fore, init
 init(autoreset=True)
 import rclpy
+from rclpy.action import ActionClient
 from rclpy.node import Node
+from action_interfaces.action import Inchwormpath
 
 ###### UART stuff
 UART_BAUD = 9600 # config
@@ -663,10 +665,25 @@ class InchwormNode(Node):
         super().__init__('inchworm_node')
         self.inchworm = Inchworm(IW_1_ORIENTATION, None, IW_1_LOC)
         self.create_timer(1, self.update_state)
+
+        # Set up the the inchworm node (state machine) as the client for the action of stepping
+        self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
         self.get_logger().info("Inchworm Node Initialized")
     
     def update_state(self): 
         self.inchworm.update_state()
+
+        if self.inchworm.paths != []: 
+            future = self.send_goal(self.inchworm.step_instructions)
+            rclpy.spin_until_future_complete(self, future)
+
+    def send_goal(self, path):
+        goal_msg = Inchwormpath.Goal()
+        goal_msg.path = path
+
+        self._action_client.wait_for_server()
+
+        return self._action_client.send_goal_async(goal_msg)
 
 
 

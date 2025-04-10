@@ -45,7 +45,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   inchworm_control/motor_controller.py
   inchworm_control/step_publisher.py 
-  inchworm_control/ik_test.py
+  inchworm_control/execute_path.py
   block_simulation/inchworm_data.py
   DESTINATION lib/${PROJECT_NAME}
 )

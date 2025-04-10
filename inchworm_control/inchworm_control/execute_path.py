@@ -2,11 +2,13 @@
 from inchworm_control.ik import inverseKinematics
 from inchworm_control.trajectory_planning import quintic_trajectory 
 import rclpy
+from rclpy.action import ActionServer
 from rclpy.node import Node
 from std_msgs.msg import Float32, String
+from action_interfaces.action import Inchwormpath
 # for servo
-import RPi.GPIO as GPIO
-GPIO.setwarnings(False)
+# import RPi.GPIO as GPIO
+# GPIO.setwarnings(False)
 import time
 from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
@@ -35,7 +37,7 @@ PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value]
 BLOCK_INTERFACING_TIME = 1 # sec 
 TRAVEL_TIME = 2
     
-class IkTest(Node):
+class PathProgression(Node):
     def __init__(self):
         """
         Initialization method for the motor controller node.
@@ -43,7 +45,12 @@ class IkTest(Node):
         Initializes ROS2 publisher, subscriber, GPIO pins, motor angles, and step actions for the inchworm robot.
         """
         # Initialize the ROS2 node with the name 'ik_test'
-        super().__init__('ik_test')
+        super().__init__('execute_path')
+        self._action_server = ActionServer(
+            self,
+            Inchwormpath,
+            'inchworm_moving',
+            self.execute_callback)
 
         # Create a publisher for the 'step_status' topic, which sends Float32 messages
         self.publisher_ = self.create_publisher(Float32, 'step_status', 10)
@@ -61,35 +68,35 @@ class IkTest(Node):
         # Note: The RPi should be connected to the bottom-left USB port and no other USB devices should be connected
         # If the connection fails, try disconnecting and reconnecting the USB port
     
-        self.servo_bus = ServoBus('/dev/ttyUSB0')  
+        # self.servo_bus = ServoBus('/dev/ttyUSB0')  
         self.get_logger().info('Node starting')
 
         # init motors
-        self.init_motors()
+        # self.init_motors()
 
         # init servos
-        GPIO.setmode(GPIO.BOARD)
+        # GPIO.setmode(GPIO.BOARD)
 
-        # Initialize GPIO pins 11 and 13 for controlling the gripper servos
-        GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
-        GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
+        # # Initialize GPIO pins 11 and 13 for controlling the gripper servos
+        # GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
+        # GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
 
-        # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
-        self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
-        self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
+        # # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
+        # self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
+        # self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
 
-        # Start PWM with an initial duty cycle of 0 (no movement)
-        self.servo1.start(0)
-        self.servo2.start(0)
+        # # Start PWM with an initial duty cycle of 0 (no movement)
+        # self.servo1.start(0)
+        # self.servo2.start(0)
 
         # Note: Motors are not allowed to have negative positions
         
         print("----------------Initial Motor Angles-----------------------")
-        print(self.motor_1.pos_read(), 
-            self.motor_2.pos_read(), 
-            self.motor_3.pos_read(), 
-            self.motor_4.pos_read(), 
-            self.motor_5.pos_read())
+        # print(self.motor_1.pos_read(), 
+        #     self.motor_2.pos_read(), 
+        #     self.motor_3.pos_read(), 
+        #     self.motor_4.pos_read(), 
+        #     self.motor_5.pos_read())
         
         # Initialize a dictionary mapping possible step actions to corresponding methods
         self.step_actions = {
@@ -115,7 +122,45 @@ class IkTest(Node):
             # place block
         }      
 
+    def execute_callback(self, goal_handle):
+        """Callback function as an action server"""
+        self.get_logger().info('Executing goal...')
 
+        # Extract info from request 
+        # .path corresponds to the name of the request as defined in the action file 
+        path = goal_handle.request.path
+
+        # Establish feedback message (sends updates before path is complete)
+        feedback_msg = Inchwormpath.Feedback()
+        feedback_msg.step_num = 0
+        feedback_msg.total_steps = len(path)
+
+        # Iterate through each step in the path - begin the moving process ! 
+        for step in path: 
+            feedback_msg.step_num += 1
+            self.get_logger().info(f'Feedback: Step {feedback_msg.step_num} / {feedback_msg.total_steps}')
+            goal_handle.publish_feedback(feedback_msg)
+
+            # Perform the step
+            try:
+                # Get the step action from the step_actions dictionary based on the received message
+                action = self.step_actions.get(step)
+
+                if action:
+                    # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
+                    action()
+                else:
+                    # Log a warning if the action is not recognized
+                    self.get_logger().warn('Unknown command: %s' % step)
+                sleep(1)
+                
+            except Exception as e:
+                self.get_logger().error('Failed to move servo: "%s"' % str(e))
+
+        goal_handle.succeed()
+        result = Inchwormpath.Result()
+        result.completion_status = True
+        return result
 
     def listener_callback(self, msg):
         """
@@ -716,10 +761,10 @@ def release_servo(servo_id):
 
 def main(args=None):
     rclpy.init(args=args)
-    ik_test = IkTest()
-    rclpy.spin(ik_test)
-    ik_test.destroy_node()
-    rclpy.shutdown()
+    path_progression_server = PathProgression()
+    rclpy.spin(path_progression_server)
+    # path_progression_server.destroy_node()
+    # rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
