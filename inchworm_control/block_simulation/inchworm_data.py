@@ -707,9 +707,9 @@ class Inchworm:
         else: 
             self.handle_error()
 
-        # print(f"current map {self.current_map}")
+        print(f"current map {self.current_map}")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
-        # print(f"after clearing {self.current_map}")
+        print(f"after clearing {self.current_map}")
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
@@ -856,10 +856,15 @@ class Inchworm:
 
         # compare the current map and the blueprint
         # return true if structure is complete and false otherwise
-        print("Cuuurent map", self.current_map)
-        print("Final map", self.final_structure)
+        
+        # for z in range(len(self.current_map[2])):
+        #     for x in range(len(self.current_map[1])):
+        #         for y in range(len(self.current_map[0])):
+        #             if(self.current_map[x][y][z] != self.final_structure[x][y][z]) and self.current_map[x][y][z]:
+        #                 return
 
-        # # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
+
+        # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
 
         # print("Cuuurent map after", self.current_map)
         # print("FInal map after", self.final_structure)
