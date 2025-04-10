@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict
-from block_simulation.config import SEED_BK
+from config import SEED_BK
 
 # x: row in array (7 rows)
 # y: layer (6 layers)

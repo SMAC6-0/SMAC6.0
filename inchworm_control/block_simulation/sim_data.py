@@ -53,7 +53,7 @@ class SimData:
         if (inchworm.leading_foot_loc == inchworm.goal and inchworm.paths) or inchworm.state.value == 3: 
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths, inchworm.id)
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=inchworm.id)
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
 

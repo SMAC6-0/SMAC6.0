@@ -2,7 +2,7 @@ from enum import Enum
 import copy
 from config import *
 import map_data
-from inchworm_control.blueprint import BlueprintAlgorithm
+from blueprint import blueprint
 from time import sleep
 import serial
 import struct
@@ -491,8 +491,9 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def handle_transported_block(self):
-
-        # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+        # print(f"current map {self.current_map}")
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
+        # print(f"after clearing {self.current_map}")
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
