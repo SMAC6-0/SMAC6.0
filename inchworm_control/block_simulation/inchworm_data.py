@@ -641,6 +641,7 @@ class Inchworm:
             if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
                 print(Fore.BLUE + "Touching the seed block")
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+                self.clear_path_com = self.paths
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
                 self.step_num = 1
@@ -658,7 +659,6 @@ class Inchworm:
         if DEBUG:
             print("Current Map from Block")
             print(self.current_map)
-
         self.clear_path_com = self.paths
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
@@ -680,6 +680,7 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
+        self.clear_path_com = self.paths
         self.plan_path()
 
     def handle_no_blocks_to_place(self): 
@@ -750,6 +751,7 @@ class Inchworm:
 
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
+        self.clear_path_com = self.paths
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
 
