@@ -41,7 +41,7 @@ def blueprint(curr_map, final_map) -> list:
         # The structure is complete
         for z in range(curr_map.shape[2]):
             for x in range(curr_map.shape[0]):
-                for x in range(curr_map.shape[1]):
+                for y in range(curr_map.shape[1]):
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
                         map_complete = False
 
