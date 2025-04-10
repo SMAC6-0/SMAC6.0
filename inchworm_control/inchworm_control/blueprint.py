@@ -92,7 +92,7 @@ class BlueprintAlgorithm:
                     for x, y in sorted_xy:
                         sorted_coords.append((x, y, z))
                         
-                print(sorted_coords)                
+                # print(sorted_coords)                
                 next_block = sorted_coords[0]
 
                 if self._last_block == next_block:
@@ -106,8 +106,7 @@ class BlueprintAlgorithm:
                     next_block = sorted_coords[1]
                     self._last_block = next_block
                     self._count = 0
-
-                print(f"block: {self._last_block} count: {self._count}")
+                    print(f"block: {self._last_block} count: {self._count}")
                 return list(next_block)
         return [-9, -9, -9]
 

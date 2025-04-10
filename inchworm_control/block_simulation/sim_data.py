@@ -117,7 +117,7 @@ class SimData:
             coordinates.append([SEED_BK[0]+1, SEED_BK[1], z])
         return coordinates            
     
-    def generate_pyramid(self, base_size):
+    def generate_pyramid(self, base_size=5):
         """
         Generates a quarter section of a 10-by-10 pyramid of blocks (if base_size = 5).
         Args:
@@ -134,6 +134,32 @@ class SimData:
                 for y in range(base_size - z):
                     pyramid.append([x+SEED_BK[0], y+SEED_BK[1], z+1])
         return pyramid
+    
+    def generate_diag_pyramid(self, base_size=5):
+        """
+        Generates a diagonal pyramid of blocks depending on the base_size.
+        Args:
+            base_size (int): Base size of the quarter of the pyramid. 
+        Returns:
+            diag_pyramid: list of list [x, y, z]. List block locations. 
+        """
+        diag_pyramid = []
+        seed_x, seed_y, seed_z = SEED_BK
+
+        if base_size % 2 == 0:
+            raise ValueError("base_size must be an odd number for a symmetric pyramid.")
+
+        radius = base_size // 2
+
+        for z in range(radius + 1):  # Number of layers = radius + 1
+            layer_radius = radius - z
+            for dx in range(-layer_radius, layer_radius + 1):
+                for dy in range(-layer_radius, layer_radius + 1):
+                    if abs(dx) + abs(dy) <= layer_radius:
+                        x = seed_x + dx
+                        y = seed_y + dy
+                        diag_pyramid.append([x, y, seed_z + z + 1])  # z+1 to build above seed
+        return diag_pyramid
     
     def generate_building(self): 
         simplify_and_ensure_connectivity("inchworm_control/block_simulation/Assets/Structures/empire.xyz", "inchworm_control/block_simulation/Assets/Structures/empire2.xyz", grid_size=10)

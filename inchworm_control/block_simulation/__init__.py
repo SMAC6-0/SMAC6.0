@@ -1,3 +1,3 @@
 from inchworm_control import blueprint as BP
 
-BP.blueprint()
+from config import SEED_BK

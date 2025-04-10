@@ -456,8 +456,7 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    c_space_grid = grid
-    # c_space_grid = buffer_iw_paths(grid, iw_id)
+    c_space_grid = buffer_iw_paths(grid, iw_id)
     # path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, priority_queue) # get the path
     path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block) # get the path
 
@@ -541,11 +540,12 @@ def get_orientation(movement: str, orientation: InchwormOrientation):
     else:
         return orientation
     
-def buffer_iw_paths(grid, iw_id: int):
+def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
     """
     To avoid collisions, buffers the inchworm paths of *other* IWs. 
     Args: 
         iw_id (int): the ID of the IW that is trying to path plan around the other IWs
+        buffer_flag (bool): a flag to turn buffer on or off
     Returns: 
         grid: the 3D list map, now with a bunch of extra cells marked as IW paths
     """
@@ -553,7 +553,7 @@ def buffer_iw_paths(grid, iw_id: int):
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
-    neighbor_directions = set_neighbors()
+    neighbor_directions = set_neighbors(allow_vert_diagonal=False)
     path_count = []
 
     # Iterate through the grid
@@ -574,7 +574,7 @@ def buffer_iw_paths(grid, iw_id: int):
                             n_status = grid[nx][ny][nz]
 
                             # If this neighboring cell is walkable or incoming, it should be buffered 
-                            if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value):
+                            if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value) and buffer_flag:
                                 path_count.append((nx, ny, nz, cell_status))
                     if (len(path_count) > 2):
                         # print(Fore.MAGENTA + f"Path count: ", path_count)
