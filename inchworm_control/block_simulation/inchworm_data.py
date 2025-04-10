@@ -864,8 +864,8 @@ class Inchworm:
 
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
 
-        # print("Cuuurent map after", self.current_map)
-        # print("FInal map after", self.final_structure)
+        print("Cuuurent map after", self.current_map)
+        print("FInal map after", self.final_structure)
         return self.current_map == self.final_structure
         # structure_complete = input("Is structure complete? (yes/no) \n")
         # if structure_complete.lower() == 'yes':
