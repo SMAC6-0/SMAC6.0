@@ -68,5 +68,5 @@ def blueprint(curr_map, final_map) -> list:
                 return list(priority_queue[0])
     return [-9, -9, -9]
 
-print(blueprint(sample_map, sample_stacked_final))
+# print(blueprint(sample_map, sample_stacked_final))
 

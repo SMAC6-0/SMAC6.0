@@ -58,7 +58,7 @@ lagging_transform = {
     InchwormOrientation.WEST: lambda x, y, z: (x + 1, y, z) 
 }
 
-class Inchworm(Node):
+class Inchworm():
     next_id = 1
     inchworm_list = []
     
@@ -71,8 +71,6 @@ class Inchworm(Node):
             location (tuple[int]): the xzy location of the inchworm's leading foot. 
             holding_block (bool): True if the inchworm's leading foot is holding a block. 
         """
-        super().__init__('inchworm_node')
-        print("Yahoo")
         # Essential information for IW to keep track of
         self.id = Inchworm.next_id
         self.orientation = orientation
@@ -103,7 +101,6 @@ class Inchworm(Node):
         
         Inchworm.next_id += 1
         Inchworm.inchworm_list.append(self)
-        self.create_timer(1, self.update_state())
 
         # UART stuff
         if not SIMULATION: 
@@ -369,7 +366,6 @@ class Inchworm(Node):
             self.update_state()
 
     def update_state(self):
-        self.get_logger().info("Running update_state")
         match self.state:
             case IW_STATE.IDLE:
                 self.handle_idle()
@@ -662,10 +658,21 @@ def step_getter(step_instructions):
 
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
 
+class InchwormNode(Node): 
+    def __init__(self): 
+        super().__init__('inchworm_node')
+        self.inchworm = Inchworm(IW_1_ORIENTATION, None, IW_1_LOC)
+        self.create_timer(1, self.update_state)
+        self.get_logger().info("Inchworm Node Initialized")
+    
+    def update_state(self): 
+        self.inchworm.update_state()
+
+
+
 def main(args=None):
-    print("inchworm data running")
     rclpy.init(args=args)
-    inchworm_node = Inchworm(IW_1_ORIENTATION, None, IW_1_LOC)
+    inchworm_node = InchwormNode()
     rclpy.spin(inchworm_node)
     inchworm_node.destroy_node()
     rclpy.shutdown()
