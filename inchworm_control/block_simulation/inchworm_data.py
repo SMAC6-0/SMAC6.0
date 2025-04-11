@@ -649,9 +649,10 @@ class Inchworm:
     # and transfer the block location to the seed block
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
-        self.get_next_point()
         if self.paths: # this happens second 
             # move IW in sim
+
+            self.get_next_point()
             if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + "Touching the seed block")    
                 self.clear_path_com = self.paths
