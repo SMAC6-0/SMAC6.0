@@ -122,6 +122,7 @@ class Inchworm:
     def dummy_IW_move(self):
         make_IW_move = input("Make IW move? (yes/no) \n")
         if make_IW_move.lower() == 'yes':
+            self.goal_progress_index += 1
             return True
         elif make_IW_move.lower() == 'no':
             return False
@@ -647,7 +648,7 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            if self.goal_progress_index >= len(self.paths) or self.dummy_IW_move(): 
+            if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + "Touching the seed block")    
                 self.clear_path_com = self.paths
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
