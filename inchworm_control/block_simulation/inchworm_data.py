@@ -666,6 +666,7 @@ class Inchworm:
             # Find & path plan to seed block 
             print("Clear Path before path plan to seed blcok: ", self.clear_path_com)
             self.plan_path(SEED_BK)
+            print("Ran path plan")
 
         
         
