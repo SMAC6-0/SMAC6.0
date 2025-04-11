@@ -122,9 +122,9 @@ class Inchworm:
     def dummy_IW_move(self):
         make_IW_move = input("Make IW move? (yes/no) \n")
         if make_IW_move.lower() == 'yes':
-            INCHWORM_MOVED = True
+            return True
         elif make_IW_move.lower() == 'no':
-            INCHWORM_MOVED = False
+            return False
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
@@ -600,7 +600,6 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
                 # if self.intilization_path_flag:
-                
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -645,16 +644,15 @@ class Inchworm:
     # and transfer the block location to the seed block
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
-        print("This is my path: ", self.paths)
-        print("True?? Paths : ", self.paths == True)
         if self.paths: # this happens second 
             print("I'm hereee")
             # move IW in sim
-            if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
+            if self.goal_progress_index >= len(self.paths) or self.dummy_IW_move(): 
                 print(Fore.BLUE + "Touching the seed block")    
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 print("Clear Path: ", self.clear_path_com)
                 self.clear_path_com = self.paths
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
+                print("Current map after removing path in init: ", self.current_map)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
                 self.step_num = 1
