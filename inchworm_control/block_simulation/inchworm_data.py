@@ -670,9 +670,11 @@ class Inchworm:
         if DEBUG:
             print("Current Map from Block")
             print(self.current_map)
-        print("Path before path plan: ", self.paths)
+        self.clear_path_com = self.paths # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
-        print("Path after path plan: ", self.paths)
+
+        print("Clear Path: ", self.clear_path_com)
+        print("Actual Path: ", self.paths)
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
