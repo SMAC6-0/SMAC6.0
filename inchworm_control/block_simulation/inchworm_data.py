@@ -646,6 +646,7 @@ class Inchworm:
     # and transfer the block location to the seed block
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
+        print("This is my path: ", self.paths)
         if self.paths: # this happens second 
             print("I'm hereee")
             # move IW in sim
