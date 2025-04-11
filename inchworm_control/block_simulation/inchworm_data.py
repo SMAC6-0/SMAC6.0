@@ -599,9 +599,9 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
-                # if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
-                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                    self.handle_IW_gets_Map()
+                if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
+                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                        self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -659,7 +659,7 @@ class Inchworm:
 
                 print(Fore.BLUE + "Reset the path.") 
 
-                # self.iw_reached_seed_block_flag = True
+                self.iw_reached_seed_block_flag = True
 
         else: # this happens first 
             # Find & path plan to seed block 
