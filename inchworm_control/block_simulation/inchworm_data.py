@@ -119,6 +119,15 @@ class Inchworm:
         """
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
     
+    def dummy_IW_move(self):
+        make_IW_move = input("Make IW move? (yes/no) \n")
+        if make_IW_move.lower() == 'yes':
+            return True
+        elif make_IW_move.lower() == 'no':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
@@ -640,7 +649,7 @@ class Inchworm:
         if self.paths: # this happens second 
             print("I'm hereee")
             # move IW in sim
-            if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
+            if self.goal_progress_index >= len(self.paths) or self.dummy_IW_move(): 
                 print(Fore.BLUE + "Touching the seed block")    
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 print("Clear Path: ", self.clear_path_com)
