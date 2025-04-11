@@ -637,11 +637,11 @@ class Inchworm:
     # and transfer the block location to the seed block
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
-        print("PATHS in INIT", self.paths)
         if self.paths: # this happens second 
+            print("I'm hereee")
             # move IW in sim
             if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
-                print(Fore.BLUE + "Touching the seed block")
+                print(Fore.BLUE + "Touching the seed block")    
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 print("Clear Path: ", self.clear_path_com)
                 self.clear_path_com = self.paths
