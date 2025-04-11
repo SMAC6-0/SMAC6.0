@@ -670,7 +670,7 @@ class Inchworm:
         if DEBUG:
             print("Current Map from Block")
             print(self.current_map)
-        self.clear_path_com = self.paths # Save the previous path before path planning so IW can remove this path in the structure
+        self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
 
         print("Clear Path: ", self.clear_path_com)
