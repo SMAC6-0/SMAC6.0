@@ -538,7 +538,7 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
         msg_len = len(block_change).to_bytes(2,'little')
 
@@ -546,7 +546,6 @@ class Inchworm:
 
         print("Init Buffer: ", buffer)
         self.IW_SERIAL.write(buffer)
-        return True 
     
     # Checksum protocol for the IW and Block communication
     @staticmethod
@@ -599,7 +598,7 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
-                if self.iw_reached_seed_block_flag:
+                if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
                     if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                         self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
@@ -647,14 +646,11 @@ class Inchworm:
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
-            print("I'm hereee")
             # move IW in sim
             if self.goal_progress_index >= len(self.paths) or self.dummy_IW_move(): 
                 print(Fore.BLUE + "Touching the seed block")    
-                print("Clear Path: ", self.clear_path_com)
                 self.clear_path_com = self.paths
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
-                print("Current map after removing path in init: ", self.current_map)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
                 self.step_num = 1
@@ -674,8 +670,9 @@ class Inchworm:
         if DEBUG:
             print("Current Map from Block")
             print(self.current_map)
-        self.clear_path_com = self.paths
+        print("Path before path plan: ", self.paths)
         self.plan_path()
+        print("Path after path plan: ", self.paths)
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
@@ -788,10 +785,9 @@ class Inchworm:
         else:                
             if not SIMULATION:
                 # request the map
-                if self.state == IW_STATE.INITIALIZATION and self.request_map_snapshot():
-                    return self.inchworm_gets_map()
-                else:   
-                    return self.inchworm_gets_map()
+                if self.state == IW_STATE.INITIALIZATION:
+                    self.request_map_snapshot()
+                return self.inchworm_gets_map()
     
     def is_Path_Available(self):
         print(Fore.BLUE + f"IW{self.id}: Checking path availability... ")
