@@ -120,11 +120,11 @@ class Inchworm:
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
     
     def dummy_IW_move(self):
-        make_IW_move = input("Make IW move? (yes/no) \n")
-        if make_IW_move.lower() == 'yes':
+        make_IW_move = input("Make IW move? (y/n) \n")
+        if make_IW_move.lower() == 'y':
             self.goal_progress_index += 1
             return True
-        elif make_IW_move.lower() == 'no':
+        elif make_IW_move.lower() == 'n':
             return False
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
@@ -646,6 +646,7 @@ class Inchworm:
     # and transfer the block location to the seed block
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
+        self.dummy_IW_move()
         if self.paths: # this happens second 
             # move IW in sim
             if self.goal_progress_index >= len(self.paths): 
