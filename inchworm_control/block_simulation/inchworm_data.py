@@ -20,7 +20,7 @@ UART_BAUD = 9600 # config
 # ground = Pin 14
 # test 
 DEBUG = True # print statements to help DEBUG 
-INCHWORM_MOVED = True # setting this to True so it can bypass all the movements for debugging 
+INCHWORM_MOVED = False # setting this to True so it can bypass all the movements for debugging 
 
 test_path_delete = [[5, 1, 0], [4, 1, 0], [3, 1, 0], [2, 1, 0], [1, 1, 0],]
 
@@ -122,9 +122,9 @@ class Inchworm:
     def dummy_IW_move(self):
         make_IW_move = input("Make IW move? (yes/no) \n")
         if make_IW_move.lower() == 'yes':
-            return True
+            INCHWORM_MOVED = True
         elif make_IW_move.lower() == 'no':
-            return False
+            INCHWORM_MOVED = False
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
@@ -649,7 +649,7 @@ class Inchworm:
         if self.paths: # this happens second 
             print("I'm hereee")
             # move IW in sim
-            if self.goal_progress_index >= len(self.paths) or self.dummy_IW_move(): 
+            if self.goal_progress_index >= len(self.paths) or INCHWORM_MOVED: 
                 print(Fore.BLUE + "Touching the seed block")    
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 print("Clear Path: ", self.clear_path_com)
