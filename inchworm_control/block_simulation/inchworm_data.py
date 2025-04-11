@@ -647,6 +647,7 @@ class Inchworm:
     def handle_initilization(self):
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         print("This is my path: ", self.paths)
+        print("True?? Paths : ", self.paths == True)
         if self.paths: # this happens second 
             print("I'm hereee")
             # move IW in sim
