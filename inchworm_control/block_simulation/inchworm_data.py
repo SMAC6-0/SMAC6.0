@@ -600,8 +600,7 @@ class Inchworm:
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
                 # if self.intilization_path_flag:
-                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                    self.handle_IW_gets_Map()
+                
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -660,6 +659,9 @@ class Inchworm:
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
                 self.step_num = 1
 
+                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                    self.handle_IW_gets_Map()
+                    
                 print(Fore.BLUE + "Reset the path.")
 
         else: # this happens first 
