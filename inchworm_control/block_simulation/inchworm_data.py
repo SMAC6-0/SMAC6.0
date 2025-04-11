@@ -214,6 +214,8 @@ class Inchworm:
             # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
         
         x, y, z = self.leading_foot_loc
+        #TODO: delete this later
+        self.dummy_IW_move()
         self.goal_progress_index += 1
         
         if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
