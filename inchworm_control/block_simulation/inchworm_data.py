@@ -20,7 +20,7 @@ UART_BAUD = 9600 # config
 # ground = Pin 14
 # test 
 DEBUG = True # print statements to help DEBUG 
-INCHWORM_MOVED = False # setting this to True so it can bypass all the movements for debugging 
+INCHWORM_MOVED = True # setting this to True so it can bypass all the movements for debugging 
 
 test_path_delete = [[5, 1, 0], [4, 1, 0], [3, 1, 0], [2, 1, 0], [1, 1, 0],]
 
@@ -661,7 +661,7 @@ class Inchworm:
 
                 if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
                     self.handle_IW_gets_Map()
-                    
+
                 print(Fore.BLUE + "Reset the path.")
 
         else: # this happens first 
