@@ -100,7 +100,7 @@ class Inchworm:
         # pertaining to the state machine 
         self.state = IW_STATE.INITIALIZATION
         self.print_flag = True
-        self.intilization_path_flag = False
+        self.iw_reached_seed_block_flag = False # flag to make sure IW reached the seed block and can now request map
 
         
         Inchworm.next_id += 1
@@ -599,7 +599,9 @@ class Inchworm:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
                 self.handle_initilization()
-                # if self.intilization_path_flag:
+                if self.iw_reached_seed_block_flag:
+                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                        self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -657,16 +659,13 @@ class Inchworm:
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
                 self.step_num = 1
 
-                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                    self.handle_IW_gets_Map()
+                print(Fore.BLUE + "Reset the path.") 
 
-                print(Fore.BLUE + "Reset the path.")
+                self.iw_reached_seed_block_flag = True
 
         else: # this happens first 
             # Find & path plan to seed block 
-            print("Clear Path before path plan to seed blcok: ", self.clear_path_com)
             self.plan_path(SEED_BK)
-            print("Ran path plan")
 
         
         
