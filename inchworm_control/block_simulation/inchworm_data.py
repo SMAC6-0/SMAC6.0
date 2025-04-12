@@ -811,16 +811,17 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Checking if at block location...")
         # print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         # TODO: Replace with actual implementation
-        if INCHWORM_MOVED:
-            IW_in_supply = input("Is iW in block location? (yes/no) \n")
-            if IW_in_supply.lower() == 'yes':
-                self.get_next_step()
+        if not SIMULATION:
+            if INCHWORM_MOVED:
+                IW_in_supply = input("Is iW in block location? (yes/no) \n")
+                if IW_in_supply.lower() == 'yes':
+                    self.get_next_step() 
+
+        if self.leading_foot_loc == self.goal: 
+            print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
+            return True 
         else: 
-            if self.leading_foot_loc == self.goal: 
-                print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
-                return True 
-            else: 
-                return False
+            return False
         # IW_in_block = input("Is iW in block location? (yes/no) \n")
         # if IW_in_block.lower() == 'yes':
         #     return True
