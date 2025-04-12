@@ -5,5 +5,5 @@ servo_bus = ServoBus('/dev/ttyUSB0')
 
 motor_id = input("What motor's position would you like to read?")
 
-print(servo_bus.pos_read(motor_id))
+print(servo_bus.pos_read(int(motor_id)))
 # print(servo_bus.id_read())
