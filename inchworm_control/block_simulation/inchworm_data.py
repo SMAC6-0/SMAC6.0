@@ -297,15 +297,10 @@ class Inchworm:
         print(Fore.RED + "Block change", block_change)
 
         # calculate message length and checksum
-
-        
-
         msg_len = (len(block_change) + 2).to_bytes(2,'little') # account for the checksum and end byte
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
-
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
         print("Block location buffer", buffer)
@@ -313,7 +308,6 @@ class Inchworm:
 
         sleep(COMMUNICATION_TIMER)
         print(Fore.RED + "block data sent!!")
-        # TODO: handle transmission error
 
     def send_block_being_placed(self):
         """
@@ -324,10 +318,7 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        # for c in map_data.GridStatus.INCOMING_BLOCK.value:
-        #     block_change += struct.pack('B', c)
-
-        block_change += struct.pack('B', map_data.GridStatus.INCOMING_BLOCK.value) + struct.pack('B', self.IW_message_counter)
+        block_change += struct.pack('B', map_data.GridStatus.NOT_WALKABLE.value) + struct.pack('B', self.IW_message_counter)
         self.IW_message_counter += 1
 
         # print(Fore.RED + "Block change", block_change)
@@ -360,6 +351,7 @@ class Inchworm:
         Sends the IW path to the structure one grid at a time 
 
         Args: 
+            clear_path_com [list[list]]: the path of the inchworm to be removed from the structure
             iw_path [list[list]]: the path of the inchworm 
         """
         # TODO: IW_path is in X, Y, Z format!!
@@ -373,7 +365,7 @@ class Inchworm:
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
-            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+            block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
             
             for c in grid_cell:
                 block_change += struct.pack('B', c)
@@ -381,7 +373,6 @@ class Inchworm:
             reverted_id = map_data.revert_status(self.current_map,grid_cell[0], grid_cell[1], grid_cell[2])
             block_change += struct.pack('B', reverted_id) + struct.pack('B', self.IW_message_counter)
             self.IW_message_counter += 1
-
 
             msg_len = (len(block_change)+2).to_bytes(2,'little')
             checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
@@ -426,9 +417,6 @@ class Inchworm:
 
             # delay to make sure all the data is transmitted 
             sleep(COMMUNICATION_TIMER)
-
-        # TODO: handle transmission error
-
 
     def inchworm_gets_map(self):
         print("Getting the map RAHHHHHHHHHHH")
@@ -488,7 +476,6 @@ class Inchworm:
                 # print("msgLen: ", msgLen)
                 if collecting_data:
                     buffer = b''.join(buffer) # convert to bytes object
-                    print("BUFFFEERR after join: ", buffer)
                     checksum = Inchworm.get_checksum(buffer)
                     calculated_check_sum = []
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
@@ -651,7 +638,7 @@ class Inchworm:
             self.get_next_point()
             if self.goal_progress_index >= len(self.paths): 
                 print(Fore.BLUE + "Touching the seed block")    
-                self.clear_path_com = self.paths
+                self.clear_path_com = copy.deepcopy(self.paths)
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
                 self.paths = [] # Reset current path 
                 self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
@@ -696,7 +683,7 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
-        self.clear_path_com = self.paths
+        self.clear_path_com = copy.deepcopy(self.paths)
         self.plan_path()
 
     def handle_no_blocks_to_place(self): 
@@ -710,8 +697,6 @@ class Inchworm:
             print(Fore.BLUE + f"IW{self.id}: IW flashes block with it's location")
             self.send_block_location()
             # pause so that the block has enough time to process the info
-
-        
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
@@ -733,7 +718,7 @@ class Inchworm:
         print(f"current map {self.current_map}")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
         print(f"after clearing {self.current_map}")
-        self.clear_path_com = self.paths
+        self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
@@ -767,7 +752,7 @@ class Inchworm:
 
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
-        self.clear_path_com = self.paths
+        self.clear_path_com = copy.deepcopy(self.paths)
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
 
