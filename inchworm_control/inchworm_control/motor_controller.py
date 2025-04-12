@@ -60,11 +60,12 @@ class MotorController(Node):
         # Note: Motors are not allowed to have negative positions
         
         print("----------------Initial Motor Angles-----------------------")
-        print(self.motor_1.pos_read(), 
-            self.motor_2.pos_read(), 
-            self.motor_3.pos_read(), 
-            self.motor_4.pos_read(), 
-            self.motor_5.pos_read())
+        print(self.motor_1.pos_read())
+        # print(self.motor_1.pos_read(), 
+        #     self.motor_2.pos_read(), 
+        #     self.motor_3.pos_read(), 
+        #     self.motor_4.pos_read(), 
+        #     self.motor_5.pos_read())
 
         # Initialize a dictionary mapping possible step actions to corresponding methods
         self.step_actions = {
