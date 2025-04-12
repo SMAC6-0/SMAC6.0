@@ -3,5 +3,5 @@ from lewansoul_servo_bus import ServoBus
 
 servo_bus = ServoBus('/dev/ttyUSB0')
 
-print(servo_bus.pos_read(1))
-# print(servo_bus.id_read())
+# print(servo_bus.pos_read(1))
+print(servo_bus.id_read())
