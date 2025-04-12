@@ -318,7 +318,7 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        block_change += struct.pack('B', map_data.GridStatus.NOT_WALKABLE.value) + struct.pack('B', self.IW_message_counter)
+        block_change += struct.pack('B', self.IW_message_counter)
         self.IW_message_counter += 1
 
         # print(Fore.RED + "Block change", block_change)
