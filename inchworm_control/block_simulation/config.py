@@ -31,6 +31,7 @@ class InchwormOrientation(Enum):
         """
         Rotate the orientation by a number of steps.
         Positive steps rotate clockwise, negative steps rotate counterclockwise.
+        Ex: +1 -> RIGHT. Ex: 2 -> Turns around
         """
         new_value = (self.value + steps) % len(InchwormOrientation)
         return InchwormOrientation(new_value)

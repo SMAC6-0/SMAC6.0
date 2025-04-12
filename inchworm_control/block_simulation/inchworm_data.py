@@ -3,16 +3,16 @@ from enum import Enum
 import copy
 from config import *
 import map_data as map_data
-import blueprint 
+from blueprint import blueprint 
 from time import sleep
 import serial
 import struct
 from colorama import Fore, init
 init(autoreset=True)
-import rclpy
-from rclpy.action import ActionClient
-from rclpy.node import Node
-from action_interfaces.action import Inchwormpath
+# import rclpy
+# from rclpy.action import ActionClient
+# from rclpy.node import Node
+# from action_interfaces.action import Inchwormpath
 
 ###### UART stuff
 UART_BAUD = 9600 # config
@@ -196,28 +196,6 @@ class Inchworm():
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
-
-    def get_next_point(self): 
-        """ 
-        Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
-        """
-        if self.goal_progress_index > 0:
-            self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-
-            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
-        
-        x, y, z = self.leading_foot_loc
-        self.goal_progress_index += 1
-        
-        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-            self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            self.holding_block = False
-        
-        if self.holding_block and [x, y, z] != self.goal:
-            z = z + 1
-        return x, y, z
     
     def get_next_step(self):
         """Returns the leading foot location as is used for the simulation"""
@@ -226,20 +204,23 @@ class Inchworm():
         else: 
             if self.goal_progress_index > 0:
                 if SIMULATION: 
-                    step_str = self.step_instructions[self.step_num-1]
+                    step = self.step_instructions[self.step_num-1]
                 else: 
                     file = open('steps.txt') 
                     content = file.readlines() 
-                    step_str = content[self.step_num-1]
-                print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
-
+                    step = content[self.step_num-1]
+                print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
+                step_type = step[0]
+                step_change = step[1]
                 # Update Inchworm Orientation with each step
-                self.orientation = map_data.get_orientation(step_str, self.orientation)
+                self.orientation = map_data.get_orientation(step_change, self.orientation)
 
                 self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
-                if "PLACE" not in step_str:
+                # If the IW is NOT placing a block right now
+                if "PLACE" not in step_type:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-                    if "UP" in step_str: 
+                    # If the inchworm is stepping up 
+                    if step_change[2] > 0: 
                         self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
                 self.step_num += 1
        
@@ -659,7 +640,7 @@ def step_getter(step_instructions):
             file.write(f"{step}\n")
 
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
-
+"""
 class InchwormNode(Node): 
     def __init__(self): 
         super().__init__('inchworm_node')
@@ -701,3 +682,5 @@ if __name__ == "__main__":
     #     inchworm.run()
     # except KeyboardInterrupt:
     #     print(Fore.GREEN + "Stopping the inchworm system.") 
+
+"""

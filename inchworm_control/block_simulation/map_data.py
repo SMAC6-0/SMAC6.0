@@ -438,49 +438,48 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_
         InchwormOrientation.WEST:  lambda x, y, z: [ y, -x, z],  
     }
     
-    # create instruction
-    instructions = [] 
+    # create a vector representing a change in leading foot position, relative to the inchworm's leading foot
     transform = orientation_transforms[orientation]
     transformed_vector = transform(*movement_vector)
+    transformed_vector = list(map(int, transformed_vector))
 
-    for axis in [2, 1, 0]: # prioritize Z, then Y, then X according to direction_mappings
-        # If there is change on this axis: 
-        if transformed_vector[axis] != 0:
-            coord_change = transformed_vector[axis]
-            direction_step = direction_mappings[axis][int(np.sign(coord_change))]
-            instructions.append(direction_step)
-            if coord_change > 1 or coord_change < -1:
-                instructions.append(str(coord_change))
-            # print(f"coord_change: {coord_change} for {axis} axis for Transition between {current_coord} & {next_coord} while {orientation.name}. resulting step: {direction_step}")
     # Determine the orientation based on the recent axis change
-    new_orientation = get_orientation(direction_step, orientation)
-    all_instructions = "_".join(instructions)
-    # print(f"transformed vector: {transformed_vector}")
-    # print(f"orientation: {updated_orientation}")
-    
+    new_orientation = get_orientation(transformed_vector, orientation)
+
+    step_type = ""
     #TODO: handle any block depot'
     if holding_block:
-        all_instructions = f"{all_instructions}_BLOCK"
+        step_type = f"{step_type}_W_BLOCK"
     
     # for bd_loc in BD_LOCS:
     if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-        all_instructions = f"GRAB_{all_instructions}"
+        step_type = f"GRAB" #{all_instructions}"
     elif holding_block and end_flag:
-        all_instructions = f"PLACE_{all_instructions}"
+        step_type = f"PLACE" #{all_instructions}"
     else:
-        all_instructions = f"STEP_{all_instructions}"
-    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {all_instructions} going {new_orientation.name}")
-    return [all_instructions], new_orientation
+        step_type = f"STEP{step_type}"
+    
+    # Debug print
+    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {step_type} {transformed_vector} going {new_orientation.name}")
+    
+    return [(step_type, transformed_vector)], new_orientation
 
-def get_orientation(movement: str, orientation: InchwormOrientation):
-    if "RIGHT" in movement: 
-        return orientation.rotate(1)
-    elif "LEFT" in movement: 
-        return orientation.rotate(-1)
-    elif "BACK" in movement: 
+def get_orientation(transformed_vector, orientation: InchwormOrientation):
+    delta_x, delta_y = transformed_vector[0], transformed_vector[1]
+    if delta_x != 0: 
+        return orientation.rotate(delta_x)
+    elif delta_y < 0: 
         return orientation.rotate(2)
-    else:
+    else: 
         return orientation
+    # if "RIGHT" in movement: 
+    #     return orientation.rotate(1)
+    # elif "LEFT" in movement: 
+    #     return orientation.rotate(-1)
+    # elif "BACK" in movement: 
+    #     return orientation.rotate(2)
+    # else:
+    #     return orientation
     
 def buffer_iw_paths(grid, iw_id: int):
     """
