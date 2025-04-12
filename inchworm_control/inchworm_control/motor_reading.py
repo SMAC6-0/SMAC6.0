@@ -3,9 +3,9 @@ from lewansoul_servo_bus import ServoBus
 
 servo_bus = ServoBus('/dev/ttyUSB0')
 
-servo_bus.id_write(1, 3)
+# servo_bus.id_write(1, 3)
 
 # motor_id = input("What motor's position would you like to read?")
 
 # print(servo_bus.pos_read(int(motor_id)))
-# print(servo_bus.id_read())
+print(servo_bus.id_read())
