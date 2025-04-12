@@ -674,6 +674,7 @@ class Inchworm:
         if not SIMULATION:
             self.send_IW_path_to_block(self.clear_path_com, self.paths)
         
+        self.get_next_step()
         self.state = IW_STATE.TRAVELLING_TO_SUPPLY
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
