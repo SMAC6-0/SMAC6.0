@@ -20,12 +20,12 @@ IW_2_LOC = [12, 12, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
-# Define the possible orientations of the inchworm
+# Define the possible orientations of the inchworm relative to the world
 class InchwormOrientation(Enum):
-    NORTH = 0
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
+    NORTH = 0       # +y direction
+    EAST = 1        # +x
+    SOUTH = 2       # -y 
+    WEST = 3        # -x
 
     def rotate(self, steps):
         """

@@ -385,7 +385,7 @@ def determine_helper_blocks(grid, path_start, path_end, iw_id):
     # else:
     #     return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
+def initiate_find_path(grid, leading_foot_loc, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -410,9 +410,12 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    if path_coords:
+    if path_coords: 
         for i in range(len(path_coords) - 1):
             current_coord = path_coords[i]
+            if i == 0:
+                # The start of the path will be from the leading foot, but based on the possibilities from the lagging foot
+                current_coord = leading_foot_loc
             next_coord = path_coords[i + 1]
                 
             end_flag = bool(next_coord == path_end) # if it is done basically
@@ -431,11 +434,16 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_
         2: {1: "UP",        -1: "DOWN" }    #Z
     }
     
+    # dx -> left/right 
+    # dy -> forward/back 
+    # dz -> up/down
+    # These directions are based on the inchworm frame, which has the x axis pointing forwards 
+    # Transform world frame -> inchworm frame
     orientation_transforms = {
-        InchwormOrientation.NORTH: lambda x, y, z: [ x,  y, z],  
-        InchwormOrientation.SOUTH: lambda x, y, z: [-x, -y, z],
-        InchwormOrientation.EAST:  lambda x, y, z: [-y,  x, z],  
-        InchwormOrientation.WEST:  lambda x, y, z: [ y, -x, z],  
+        InchwormOrientation.NORTH: lambda x, y, z: [ y, -x, z],  
+        InchwormOrientation.SOUTH: lambda x, y, z: [-y,  x, z],
+        InchwormOrientation.EAST:  lambda x, y, z: [ x,  y, z],  
+        InchwormOrientation.WEST:  lambda x, y, z: [-x, -y, z],  
     }
     
     # create a vector representing a change in leading foot position, relative to the inchworm's leading foot
@@ -466,9 +474,9 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_
 
 def get_orientation(transformed_vector, orientation: InchwormOrientation):
     delta_x, delta_y = transformed_vector[0], transformed_vector[1]
-    if delta_x != 0: 
-        return orientation.rotate(delta_x)
-    elif delta_y < 0: 
+    if delta_y != 0: 
+        return orientation.rotate(-delta_y)
+    elif delta_x < 0: 
         return orientation.rotate(2)
     else: 
         return orientation

@@ -124,7 +124,8 @@ class Inchworm():
             pass
     
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
-        """ Plan path from current location to specified goal. """
+        """ Plan path from current location to specified goal. 
+            Path planning typically starts from the pivot foot to avoid unnecessary walking on the structure"""
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
 
         is_traveling = False # assumes that if not specified, objective is to travel, not place
@@ -154,10 +155,10 @@ class Inchworm():
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
+                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
+                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
@@ -165,7 +166,7 @@ class Inchworm():
                     return
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
                 self.holding_block = False
                 if goal_path == []: 
                     return
@@ -202,20 +203,26 @@ class Inchworm():
         if self.step_num > self.num_steps: 
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
+            step_type = ""
             if self.goal_progress_index > 0:
-                if SIMULATION: 
-                    step = self.step_instructions[self.step_num-1]
-                else: 
-                    file = open('steps.txt') 
-                    content = file.readlines() 
-                    step = content[self.step_num-1]
+                step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
                 step_change = step[1]
+                orientation_transforms = {
+                    InchwormOrientation.NORTH: lambda x, y, z: [-y,  x, z],  
+                    InchwormOrientation.SOUTH: lambda x, y, z: [ y, -x, z],
+                    InchwormOrientation.EAST:  lambda x, y, z: [ x,  y, z],  
+                    InchwormOrientation.WEST:  lambda x, y, z: [-x, -y, z],  
+                }
+                transform = orientation_transforms[self.orientation]
+                transformed_vector = transform(*step_change)
+                transformed_vector = list(map(int, transformed_vector))
+                print(f"change in world frame: {transformed_vector}")
+                self.leading_foot_loc = [self.leading_foot_loc[i] + transformed_vector[i] for i in range(len(transformed_vector))]  
                 # Update Inchworm Orientation with each step
                 self.orientation = map_data.get_orientation(step_change, self.orientation)
 
-                self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
                 # If the IW is NOT placing a block right now
                 if "PLACE" not in step_type:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
@@ -227,9 +234,11 @@ class Inchworm():
             x, y, z = self.leading_foot_loc
             self.goal_progress_index += 1
             
-            if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+            # If the IW is grabbing a block, holding_block becomes true
+            if "GRAB" in step_type:
                 self.holding_block = True
-            elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+            # Then, if placing a block, IW is no longer holding the block
+            elif "PLACE" in step_type: #self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
                 self.holding_block = False
             
             if self.holding_block and [x, y, z] != self.goal:
