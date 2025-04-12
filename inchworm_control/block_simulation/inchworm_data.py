@@ -697,6 +697,7 @@ class Inchworm:
             print(Fore.BLUE + f"IW{self.id}: IW flashes block with it's location")
             self.send_block_location()
             # pause so that the block has enough time to process the info
+        
         self.state = IW_STATE.TRANSPORTING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
@@ -792,38 +793,28 @@ class Inchworm:
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
         print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
-        self.get_next_step()
+        if not SIMULATION:
+            if INCHWORM_MOVED:
+                IW_in_supply = input("Is iW in supply location? (yes/no) \n")
+                if IW_in_supply.lower() == 'yes':
+                    self.get_next_step()
         # TODO: Replace with actual implementation
-        # 
-        # else:
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
-                if INCHWORM_MOVED:
-                    IW_in_supply = input("Is iW in supply location? (yes/no) \n")
-                    if IW_in_supply.lower() == 'yes':
-                        return True
-                    elif IW_in_supply.lower() == 'no':
-                        return False
-                    else:
-                        print("Invalid input. Please answer with 'yes' or 'no'.")
-        #         return True 
+                return True 
             
         return False
 
     def is_IW_in_block(self):
         """return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)"""
         print(Fore.BLUE + f"IW{self.id}: Checking if at block location...")
-
+        # print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         # TODO: Replace with actual implementation
         if INCHWORM_MOVED:
             IW_in_supply = input("Is iW in block location? (yes/no) \n")
             if IW_in_supply.lower() == 'yes':
-                return True
-            elif IW_in_supply.lower() == 'no':
-                return False
-            else:
-                print("Invalid input. Please answer with 'yes' or 'no'.")
+                self.get_next_step()
         else: 
             if self.leading_foot_loc == self.goal: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
