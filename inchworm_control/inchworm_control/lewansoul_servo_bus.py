@@ -109,6 +109,9 @@ class Servo:
         self.bus.id_write(self.id, new_id)
         self.id = new_id
 
+    def id_read(self) -> int:
+        return self.bus.id_read(self)
+
     def angle_offset_adjust(self, *args, **kwargs) -> None:
         self.bus.angle_offset_adjust(self.id, *args, **kwargs)
 
@@ -542,6 +545,16 @@ class ServoBus:
 
         if new_id != old_id:
             self._send_packet(old_id, _SERVO_ID_WRITE, bytes((new_id,)))
+
+    def id_read(self) -> int:
+        """
+        Reads the ID of the connected servo 
+         *Can only connect 1 servo when running this*
+        """
+ 
+        response = self._send_and_receive_packet(BROADCAST_ID, _SERVO_ID_READ)
+        servo_id = response.parameters[0]
+        return servo_id
 
     def angle_offset_adjust(self, servo_id: int, offset_degrees: Real,
                             write: bool = True) -> None:
