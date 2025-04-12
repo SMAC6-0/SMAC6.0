@@ -794,19 +794,20 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         self.get_next_step()
         # TODO: Replace with actual implementation
-        # if INCHWORM_MOVED:
-        #     IW_in_supply = input("Is iW in supply location? (yes/no) \n")
-        #     if IW_in_supply.lower() == 'yes':
-        #         return True
-        #     elif IW_in_supply.lower() == 'no':
-        #         return False
-        #     else:
-        #         print("Invalid input. Please answer with 'yes' or 'no'.")
+        # 
         # else:
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
-                return True 
+                if INCHWORM_MOVED:
+                    IW_in_supply = input("Is iW in supply location? (yes/no) \n")
+                    if IW_in_supply.lower() == 'yes':
+                        return True
+                    elif IW_in_supply.lower() == 'no':
+                        return False
+                    else:
+                        print("Invalid input. Please answer with 'yes' or 'no'.")
+        #         return True 
             
         return False
 
