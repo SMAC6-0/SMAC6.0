@@ -6,6 +6,7 @@ from rclpy.action import ActionServer
 from rclpy.node import Node
 from std_msgs.msg import Float32, String
 from action_interfaces.action import Inchwormpath
+from action_interfaces.msg import Step
 # for servo
 # import RPi.GPIO as GPIO
 # GPIO.setwarnings(False)
@@ -128,31 +129,32 @@ class PathProgression(Node):
 
         # Extract info from request 
         # .path corresponds to the name of the request as defined in the action file 
-        path = goal_handle.request.path
+        all_steps = goal_handle.request.all_steps
 
         # Establish feedback message (sends updates before path is complete)
         feedback_msg = Inchwormpath.Feedback()
         feedback_msg.step_num = 0
-        feedback_msg.total_steps = len(path)
+        feedback_msg.total_steps = len(all_steps)
 
         # Iterate through each step in the path - begin the moving process ! 
-        for step in path: 
+        for step in all_steps: 
             feedback_msg.step_num += 1
             self.get_logger().info(f'Feedback: Step {feedback_msg.step_num} / {feedback_msg.total_steps}')
             goal_handle.publish_feedback(feedback_msg)
-
+            time.sleep(1)
             # Perform the step
             try:
-                # Get the step action from the step_actions dictionary based on the received message
-                action = self.step_actions.get(step)
+                print(f"Imagine me doing a step olay")
+                # # Get the step action from the step_actions dictionary based on the received message
+                # action = self.step_actions.get(step)
 
-                if action:
-                    # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
-                    action()
-                else:
-                    # Log a warning if the action is not recognized
-                    self.get_logger().warn('Unknown command: %s' % step)
-                sleep(1)
+                # if action:
+                #     # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
+                #     action()
+                # else:
+                #     # Log a warning if the action is not recognized
+                #     self.get_logger().warn('Unknown command: %s' % step)
+                # sleep(1)
                 
             except Exception as e:
                 self.get_logger().error('Failed to move servo: "%s"' % str(e))
