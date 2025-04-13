@@ -87,6 +87,7 @@ class Inchworm:
         self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
+        self.next_block_loc = [] # stores the location of next block
         # self.found_structures = []
         # self.misc_blocks = []
         self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
@@ -139,6 +140,7 @@ class Inchworm:
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
+
             if self.goal == [-1, -1, -1]: # structure is complete!!
                 print(Fore.MAGENTA + f"IW{self.id}: Structure is complete")
                 return
@@ -147,6 +149,7 @@ class Inchworm:
                 path = []
                 return
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
+                self.next_block_loc = self.goal
                 # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
@@ -321,17 +324,8 @@ class Inchworm:
         block_change += struct.pack('B', self.IW_message_counter)
         self.IW_message_counter += 1
 
-        # print(Fore.RED + "Block change", block_change)
-
-        # calculate message length and checksum
-
         msg_len = (len(block_change)+2).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
-
-        # print(Fore.RED + "msg_len", msg_len)
-        # print(Fore.RED + "checksum", checksum)
-
-        # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
         print("Being placed buffer: ", buffer)
@@ -719,6 +713,8 @@ class Inchworm:
         print(f"current map {self.current_map}")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
         print(f"after clearing {self.current_map}")
+        print(f"final map {self.final_structure}")
+
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
@@ -773,11 +769,10 @@ class Inchworm:
                 return True
             return False
         else:                
-            if not SIMULATION:
-                # request the map
-                if self.state == IW_STATE.INITIALIZATION:
-                    self.request_map_snapshot()
-                return self.inchworm_gets_map()
+            # request the map
+            if self.state == IW_STATE.INITIALIZATION:
+                self.request_map_snapshot()
+            return self.inchworm_gets_map()
     
     def is_Path_Available(self):
         print(Fore.BLUE + f"IW{self.id}: Checking path availability... ")
