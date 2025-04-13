@@ -50,6 +50,7 @@ incoming_block_texture = load_texture("Assets/Textures/incoming_block.png")
 # More Variables
 window.exit_button.visible = False
 key_g_pressed = False  
+key_h_pressed = False  
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed, key_l_pressed = False, False
@@ -58,17 +59,26 @@ key = None
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed
+    global key_g_pressed, key_h_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed
 
 
     # Generate the pyramid coordinates
     if held_keys["g"] and not key_g_pressed:
-        pyramid_coordinates = sim_data.generate_pyramid(5)
+        pyramid_coordinates = sim_data.generate_pyramid()
         for coord in pyramid_coordinates:
             spawn_cube(coord)  
         key_g_pressed = True  # Set the flag to True after printing
     
     if not held_keys["g"]:
+        key_g_pressed = False
+        
+    if held_keys["h"] and not key_g_pressed:
+        diag_pyramid_coordinates = sim_data.generate_diag_pyramid()
+        for coord in diag_pyramid_coordinates:
+            spawn_cube(coord)  
+        key_g_pressed = True  # Set the flag to True after printing
+    
+    if not held_keys["h"]:
         key_g_pressed = False
 
     if held_keys["t"] and not key_t_pressed:
@@ -269,8 +279,8 @@ class Voxel(Button):
                     print("Block not found")
                 destroy(self)
                 
-        if key == "escape":
-            stop_simulation()
+            if key == "escape":
+                stop_simulation()
 
 # Skybox
 class Sky(Entity):
