@@ -149,7 +149,7 @@ class Inchworm:
                 path = []
                 return
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
-                self.next_block_loc = self.goal
+                self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                 # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
