@@ -2,7 +2,7 @@ from enum import Enum
 import copy
 from config import *
 import map_data
-from blueprint import BlueprintAlgorithm
+from blueprint import blueprint
 from time import sleep
 import serial
 import struct
@@ -82,7 +82,6 @@ class Inchworm:
         self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
-        self.blueprint_planner = BlueprintAlgorithm()
         # self.found_structures = []
         # self.misc_blocks = []
 
@@ -122,14 +121,13 @@ class Inchworm:
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
         """ Plan path from current location to specified goal. """
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
-        priority_snapshot = None
+
         is_traveling = False # assumes that if not specified, objective is to travel, not place
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
-            self.goal = self.blueprint_planner.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            priority_snapshot = self.blueprint_planner._priority_queue
+            self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
                 return
@@ -151,10 +149,10 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id, priority_snapshot)
+                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id, priority_snapshot)
+                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
@@ -162,7 +160,7 @@ class Inchworm:
                     return
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
                 self.holding_block = False
                 if goal_path == []: 
                     return
