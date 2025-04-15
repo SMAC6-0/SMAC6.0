@@ -102,13 +102,15 @@ def mark_depot_and_seed(grid):
     for i in range(len(BD_LOCS)):
         x, y, z = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
-            grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value
+            if z - 1 >= 0:
+                grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
             grid[x][y][z] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
         
     x, y, z = SEED_BK
-    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value
+    if z - 1 >= 0:
+        grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
     grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
     
@@ -174,12 +176,10 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
         inchworm_path (list): A list of coordinates that an inchworm is taking
         iw_id: A specific inchworm ID. This determines what value GridStatus.inchworm_path() will be
     Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot.
-    """       
-    # If there is an inchworm path, remove the path status for every cell along the path except the goal cell
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """      
     if inchworm_path is not None:
-        targets = inchworm_path[:-1]  
-    # If no inchworm path is specified, clear the inchworm path from the whole grid 
+        targets = inchworm_path[:-1]  # Avoid last point as before
     else:
         targets = [
             (x, y, z)
@@ -191,7 +191,6 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     for x, y, z in targets:
         value = grid[x][y][z]
         if GridStatus.is_inchworm_path(value):
-            # Revert status of inchworm path cells if it matches the IW ID whose path is being cleared. 
             if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
                 grid[x][y][z] = revert_status(grid, x, y, z)
 
@@ -199,16 +198,14 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
 
 def revert_status(grid, x, y, z):
     """Revert the status of the grid cell at the specified location. """
-    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
+    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot  
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
-    # If the cell used to be on a path, assume its walkable 
+    # If the cell used to be on a path, assume its walkable
     elif GridStatus.is_inchworm_path(grid[x][y][z]):
         return GridStatus.WALKABLE.value
     else: 
         return GridStatus.NOT_WALKABLE.value
-    
-
 
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """

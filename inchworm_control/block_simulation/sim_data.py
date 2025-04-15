@@ -18,6 +18,7 @@ from inchworm_data import Inchworm
 from colorama import Fore, init
 import numpy as np
 import itertools
+import json
 init(autoreset=True)
 
 class SimData: 
@@ -40,6 +41,11 @@ class SimData:
         blocks_placed.sort(key=lambda lowest: lowest[2]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
+
+        # TODO: save self.final_structure to a file
+        print("Saving map in the json file")
+        with open("Final_Structure.json", "w") as final_map_file:
+            json.dump(self.final_structure, final_map_file)
     
     def send_map_to_IW(self, inchworm): 
         """
