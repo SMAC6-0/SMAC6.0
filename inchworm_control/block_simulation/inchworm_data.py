@@ -14,12 +14,6 @@ init(autoreset=True)
 ###### UART stuff
 UART_BAUD = 9600 # config
 
-# Pins 
-# GPIO 15, pin 8 = RX yellow wire 
-# GPIO 14, pin 10 = TX green wire
-# ground = Pin 14
-# test 
-DEBUG = True # print statements to help DEBUG 
 INCHWORM_MOVED = True # setting this to True so it can bypass all the movements for debugging 
 
 test_path_delete = [[5, 1, 0], [4, 1, 0], [3, 1, 0], [2, 1, 0], [1, 1, 0],]
@@ -288,16 +282,12 @@ class Inchworm:
         # block_change is the data that needs to be sent
         block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        print ("Incoming block location", self.next_block_loc)
-
         # TODO replace this with self.goal
         for c in self.next_block_loc:
             block_change += struct.pack('B', c)
 
         block_change += struct.pack('B', map_data.GridStatus.NOT_WALKABLE.value) + struct.pack('B', self.IW_message_counter)
         self.IW_message_counter += 1
-
-        print(Fore.RED + "Block change", block_change)
 
         # calculate message length and checksum
         msg_len = (len(block_change) + 2).to_bytes(2,'little') # account for the checksum and end byte
@@ -352,10 +342,8 @@ class Inchworm:
         # iterate through the iw_path
 
         # TODO: replace this
-        print("length of clear IW path", len(clear_path_com))
+        # print("length of clear IW path", len(clear_path_com))
         for grid_cell in clear_path_com:
-            if DEBUG:
-                print("Grid Cell path", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
@@ -374,7 +362,7 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print("buffer", buffer)
+            print("Clear Path Buffer", buffer)
 
             self.IW_SERIAL.write(buffer)
 
@@ -382,12 +370,10 @@ class Inchworm:
             sleep(COMMUNICATION_TIMER)
 
         sleep(COMMUNICATION_TIMER)
-        print("actually send the path --------------------")
-        print("length of path: ", len(iw_path))
+        print("-------------------- actually send the path --------------------")
+        # print("length of path: ", len(iw_path))
 
         for grid_cell in iw_path:
-            if DEBUG:
-                print("Grid Cell path", grid_cell)
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
             # block_change is the data that needs to be sent
@@ -405,7 +391,7 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print("buffer", buffer)
+            print("IW Path Buffer: ", buffer)
 
             self.IW_SERIAL.write(buffer)
 
@@ -426,48 +412,24 @@ class Inchworm:
         while True:
             # print(self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
-            # if byte == []:
-            #     return False
-            # print(byte) # b'\xaa'
-            # print(ord(byte))
-            # byte = ord(byte) # turn it into a decimal value  # 170
-            # print(byte)
-            # byte = hex(byte) # 0xaa
-            # print(byte)
-
-            # byte = bytearray(struct.pack('B', byte))
-            # print(byte)
-            # print(sys.stdout.buffer.write(bytes(byte)))
-            # print(ord(byte))
-            # print("Recieved byte", byte)
-
-            # print(bytearray(struct.pack('B', UART_CODES.StartByte.value)))
-            # print(byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)))
 
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)): # and not collecting_data:  # Start byte detected
-                # print("start byte detected")
                 buffer = []  
-                # print("Print bufferrrrr after clear", buffer)
                 bytesRead = 0
                 msgLenCollected = False
                 msgLenBytes = []
                 msgLenReceivedCounter = 0
                 
             elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
-                # print("Collecting Message Length")
-                # byte_in_int = ord(byte)
                 msgLenBytes.append(byte[0])
                 msgLenReceivedCounter += 1
                 if msgLenReceivedCounter == 2:
                     # Convert collected bytes to integer (assuming big-endian format)
                     msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-                    # print("msg Len when collecting msg len: ", msgLen)
                     msgLenCollected = True
                     collecting_data = True
 
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
-                # print("BytesRead: ", bytesRead)
-                # print("msgLen: ", msgLen)
                 if collecting_data:
                     buffer = b''.join(buffer) # convert to bytes object
                     checksum = Inchworm.get_checksum(buffer)
@@ -475,14 +437,8 @@ class Inchworm:
                     calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
                     calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
 
-                    # print("checksum", checksum)
-                    # print("calculated_check_sum", calculated_check_sum)
-
-                    # Inchworm.crc16(buffer[:-2])
-                    
                     if checksum == calculated_check_sum:
                         self.current_map = Inchworm.process_received_map_snapshot(buffer)
-                        # print(self.current_map)
                         return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
@@ -526,25 +482,16 @@ class Inchworm:
 
         buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
 
-        print("Init Buffer: ", buffer)
+        print("Request Map Buffer: ", buffer)
         self.IW_SERIAL.write(buffer)
     
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def get_checksum(buffer): # Get checksum from buffer
-        # print("buffer", buffer)
-        # checksum = buffer[-2:]
-        # print("Checksum: ", checksum)
-        # msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
-        # checksum =  int.from_bytes(checksum, 'big')  # Convert to integer
         checksum =[]
         checksum += buffer[-2:]
 
-        # checksum.append(buffer.pop())
-        # checksum.append(buffer.pop())
-        # checksum = bytearray(checksum)
         checksum = int.from_bytes(bytes(checksum), 'big')
-        # checksum = int.from_bytes(checksum,'big')
         return checksum
     
     # Checksum protocol for the IW and Block communication
@@ -650,14 +597,8 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
-        if DEBUG:
-            print("Current Map from Block")
-            print(self.current_map)
         self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
-
-        print("Clear Path: ", self.clear_path_com)
-        print("Actual Path: ", self.paths)
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
@@ -709,11 +650,8 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def IW_clear_path(self):
-        print("I cleared my pathhhhhh yippeeee")
-        print(f"current map {self.current_map}")
+        print("I cleared my pathhhhhh yippee")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
-        print(f"after clearing {self.current_map}")
-        print(f"final map {self.final_structure}")
 
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
@@ -817,13 +755,6 @@ class Inchworm:
             return True 
         else: 
             return False
-        # IW_in_block = input("Is iW in block location? (yes/no) \n")
-        # if IW_in_block.lower() == 'yes':
-        #     return True
-        # elif IW_in_block.lower() == 'no':
-        #     return False
-        # else:
-        #     print("Invalid input. Please answer with 'yes' or 'no'.")
 
     def incorrect_block_location(self):
         """ return true if the IW gets "incorrectly placed block" from the structure """
@@ -831,26 +762,10 @@ class Inchworm:
         if SIMULATION: 
             return not self.leading_foot_loc == self.goal 
         else: 
-            # incorrect_block = input("IW got error 'Incorrectly Placed Block'? (yes/no) \n")
-            # if incorrect_block.lower() == 'yes':
-            #     return True
-            # elif incorrect_block.lower() == 'no':
-            #     return False
-            # else:
-            #     print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
             pass
     
     def is_structure_complete(self, curr_map, final_map):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-
-        # compare the current map and the blueprint
-        # return true if structure is complete and false otherwise
-        
-        # for z in range(len(self.current_map[2])):
-        #     for x in range(len(self.current_map[1])):
-        #         for y in range(len(self.current_map[0])):
-        #             if(self.current_map[x][y][z] != self.final_structure[x][y][z]) and self.current_map[x][y][z]:
-        #                 return
 
         curr_map = np.array(curr_map)
         final_map = np.array(final_map)
@@ -868,27 +783,7 @@ class Inchworm:
 
         print("IS MAP COMPLETE: ", map_complete)
         return map_complete
-    
-        # structure_complete = input("Is structure complete? (yes/no) \n")
-        # if structure_complete.lower() == 'yes':
-        #     return True
-        # elif structure_complete.lower() == 'no':
-        #     return False
-        # else:
-        #     print("Invalid input. Please answer with 'yes' or 'no'.")
-        # pass
-
-def step_getter(step_instructions):
-    """
-    Write the steps to steps.txt
-    """
-    complete_steps = copy.deepcopy(step_instructions)
-    file_path = "steps.txt"
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
-
-
+  
 if __name__ == "__main__":
         
     with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
