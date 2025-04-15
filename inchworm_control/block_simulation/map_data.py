@@ -203,7 +203,7 @@ def revert_status(grid, x, y, z):
         return GridStatus.SUPPLY_DEPOT.value
     # If the cell used to be on a path, assume its walkable
     elif GridStatus.is_inchworm_path(grid[x][y][z]):
-        return GridStatus.SUPPLY_DEPOT.value
+        return GridStatus.WALKABLE.value
     else: 
         return GridStatus.NOT_WALKABLE.value
 
