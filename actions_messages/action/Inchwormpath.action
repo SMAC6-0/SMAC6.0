@@ -1,0 +1,6 @@
+Step[] all_steps
+---
+bool completion_status
+---
+int32 step_num
+int32 total_steps

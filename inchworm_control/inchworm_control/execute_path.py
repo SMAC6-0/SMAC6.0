@@ -5,8 +5,8 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 from std_msgs.msg import Float32, String
-from action_interfaces.action import Inchwormpath
-from action_interfaces.msg import Step
+from actions_messages.action import Inchwormpath
+from actions_messages.msg import Step
 # for servo
 import RPi.GPIO as GPIO
 GPIO.setwarnings(False)

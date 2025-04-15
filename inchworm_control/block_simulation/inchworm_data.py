@@ -12,8 +12,8 @@ init(autoreset=True)
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
-from action_interfaces.action import Inchwormpath
-from action_interfaces.msg import Step
+from actions_messages.action import Inchwormpath
+from actions_messages.msg import Step
 
 ###### UART stuff
 UART_BAUD = 9600 # config
