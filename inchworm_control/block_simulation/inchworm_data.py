@@ -656,8 +656,13 @@ def step_getter(step_instructions):
 
 class InchwormNode(Node): 
     def __init__(self): 
+        # Initialize the ROS node the inchworm uses 
         super().__init__('inchworm_node')
+        # Initialize the inchworm (state machine)
+        # TODO: insert path to final structure file here 
         self.inchworm = Inchworm(IW_1_ORIENTATION, None, IW_1_LOC)
+
+        # Every second, update the state
         self.create_timer(1, self.update_state)
 
         # Set up the the inchworm node (state machine) as the client for the action of stepping
@@ -665,28 +670,39 @@ class InchwormNode(Node):
         self.get_logger().info("Inchworm Node Initialized")
     
     def update_state(self): 
+        """Update the inchworm state machine & send an existing set of step instructions to the motors """
         self.inchworm.update_state()
 
         if self.inchworm.step_instructions != []: 
             self.send_goal(self.inchworm.step_instructions)
+            # Clear the step instructions so that the state continues updating, 
+            # but the instructions are not resent 
             self.inchworm.step_instructions = []
 
     def send_goal(self, all_steps):
+        """Send an action request for the 'inchworm_moving' action"""
+        # Initialize action goal message 
         goal_msg = Inchwormpath.Goal()
         goal_msg.all_steps = []
 
+        # Since steps contain complex data, split the step instructions 
         for step_type, step_change in all_steps: 
+            # Create a Step msg to be put in a list
             step_msg = Step(step_type=step_type, step_change=step_change)
             goal_msg.all_steps.append(step_msg)
 
+        # Return error if the action server times out 
         if not self._action_client.wait_for_server(timeout_sec=5.0):
             self.get_logger().error("Action server (execute_path.py) not available")
             return
 
+        # Asynchronously send goal msg. While it's running, receive feedback in this node through feedback_callback
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        # Upon successful receival of the action command, run the goal_response_callback
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
+        """Runs upon successful receival of the goal command"""
         goal_handle = future.result()
         if not goal_handle.accepted:
             self.get_logger().info('Goal rejected :(')
@@ -694,15 +710,19 @@ class InchwormNode(Node):
 
         self.get_logger().info('Goal accepted :)')
 
+        # Asynchronously receive the result of the action
         self._get_result_future = goal_handle.get_result_async()
+        # Upon successful completion of the action command, run the goal_result_callback
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
+        """Runs upon successful completion of the action"""
         result = future.result().result
         self.get_logger().info(f'Result: Completed? {result.completion_status}')
         # rclpy.shutdown()
 
     def feedback_callback(self, feedback_msg):
+        """Runs repeeatedly as the action runs, providing feedback"""
         feedback = feedback_msg.feedback
         self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
 

@@ -8,8 +8,8 @@ from std_msgs.msg import Float32, String
 from action_interfaces.action import Inchwormpath
 from action_interfaces.msg import Step
 # for servo
-# import RPi.GPIO as GPIO
-# GPIO.setwarnings(False)
+import RPi.GPIO as GPIO
+GPIO.setwarnings(False)
 import time
 from inchworm_control.lewansoul_servo_bus import ServoBus
 from time import sleep 
@@ -69,35 +69,35 @@ class PathProgression(Node):
         # Note: The RPi should be connected to the bottom-left USB port and no other USB devices should be connected
         # If the connection fails, try disconnecting and reconnecting the USB port
     
-        # self.servo_bus = ServoBus('/dev/ttyUSB0')  
+        self.servo_bus = ServoBus('/dev/ttyUSB0')  
         self.get_logger().info('Node starting')
 
         # init motors
-        # self.init_motors()
+        self.init_motors()
 
         # init servos
-        # GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BOARD)
 
-        # # Initialize GPIO pins 11 and 13 for controlling the gripper servos
-        # GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
-        # GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
+        # Initialize GPIO pins 11 and 13 for controlling the gripper servos
+        GPIO.setup(11, GPIO.OUT)  # Pin 11 as output for servo1
+        GPIO.setup(13, GPIO.OUT)  # Pin 13 as output for servo2
 
-        # # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
-        # self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
-        # self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
+        # Set up PWM (Pulse Width Modulation) for the two gripper servos, with a frequency of 50Hz
+        self.servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
+        self.servo2 = GPIO.PWM(13,50) # pin 13 for servo2, pulse 50Hz
 
-        # # Start PWM with an initial duty cycle of 0 (no movement)
-        # self.servo1.start(0)
-        # self.servo2.start(0)
+        # Start PWM with an initial duty cycle of 0 (no movement)
+        self.servo1.start(0)
+        self.servo2.start(0)
 
         # Note: Motors are not allowed to have negative positions
         
         print("----------------Initial Motor Angles-----------------------")
-        # print(self.motor_1.pos_read(), 
-        #     self.motor_2.pos_read(), 
-        #     self.motor_3.pos_read(), 
-        #     self.motor_4.pos_read(), 
-        #     self.motor_5.pos_read())
+        print(self.motor_1.pos_read(), 
+            self.motor_2.pos_read(), 
+            self.motor_3.pos_read(), 
+            self.motor_4.pos_read(), 
+            self.motor_5.pos_read())
         
         # Initialize a dictionary mapping possible step actions to corresponding methods
         self.step_actions = {
@@ -159,6 +159,7 @@ class PathProgression(Node):
             except Exception as e:
                 self.get_logger().error('Failed to move servo: "%s"' % str(e))
 
+        # Indicate successful completion of the goal, of the path
         goal_handle.succeed()
         result = Inchwormpath.Result()
         result.completion_status = True
