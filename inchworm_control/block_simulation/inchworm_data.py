@@ -117,7 +117,7 @@ class Inchworm:
     def dummy_IW_move(self):
         make_IW_move = input("Make IW move? (y/n) \n")
         if make_IW_move.lower() == 'y':
-            self.goal_progress_index += 1
+            self.get_next_step()
             return True
         elif make_IW_move.lower() == 'n':
             return False
@@ -193,28 +193,6 @@ class Inchworm:
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
-
-    def get_next_point(self): 
-        """ 
-        Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
-        """
-        if self.goal_progress_index > 0:
-            self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-
-            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
-        
-        x, y, z = self.leading_foot_loc
-        self.goal_progress_index += 1
-        
-        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-            self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            self.holding_block = False
-        
-        if self.holding_block and [x, y, z] != self.goal:
-            z = z + 1
-        return x, y, z
     
     def get_next_step(self):
         """Returns the leading foot location as is used for the simulation"""
@@ -537,7 +515,6 @@ class Inchworm:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    self.IW_clear_path()
                     if self.is_structure_complete(self.current_map, self.final_structure): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
@@ -565,15 +542,12 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            self.get_next_point()
-            if self.goal_progress_index >= len(self.paths): 
+            if MANUAL_TESTING:
+                self.dummy_IW_move()
+            if self.leading_foot_loc == self.goal: 
                 print(Fore.BLUE + "Touching the seed block")    
-                self.clear_path_com = copy.deepcopy(self.paths)
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths)
-                self.paths = [] # Reset current path 
-                self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
-                self.step_num = 1
-
+                
+                self.IW_clear_path()
                 print(Fore.BLUE + "Reset the path.") 
 
                 self.iw_reached_seed_block_flag = True
@@ -586,7 +560,6 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
-        self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
@@ -607,7 +580,6 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
-        self.clear_path_com = copy.deepcopy(self.paths)
         self.plan_path()
 
     def handle_no_blocks_to_place(self): 
@@ -626,13 +598,15 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def handle_transported_block(self):
-        if self.received_block_confirmation():
-            print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
-            # IW sends a messgae indicating block is being placed
-            # MOOOOO HELPPPP
-            self.send_block_being_placed()
-        else: 
-            self.handle_error()
+        if not SIMULATION:
+            if self.received_block_confirmation():
+                print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
+                # IW sends a messgae indicating block is being placed
+                # MOOOOO HELPPPP
+                self.send_block_being_placed()
+            else: 
+                self.handle_error()
+        self.IW_clear_path()
 
 
         self.state = IW_STATE.PLACING_BLOCK
@@ -676,7 +650,6 @@ class Inchworm:
 
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
-        self.clear_path_com = copy.deepcopy(self.paths)
         self.plan_path()
         # TODO: SEND PATH TO STRUCTURE
 

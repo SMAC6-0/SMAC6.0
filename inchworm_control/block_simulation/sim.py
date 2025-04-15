@@ -310,9 +310,7 @@ def simulate_leading_foot(inchworm, x, y, z):
         # Checks for visuals at goal location
         if [already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z] == inchworm.goal:
             # IW reaches goal coords & places block 
-            pass
-            # last_block_original_texture = smart_block_texture
-            # new_texture = smart_block_texture 
+            new_texture = smart_block_texture 
         else:
             # The inchworm is not yet at the goal
             new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
@@ -427,8 +425,8 @@ if not SIMULATION:
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))
 else:
-    for z in range(21): # 5
-        for x in range(21): # 6 
+    for z in range(GRID_SIZE): # 5
+        for x in range(GRID_SIZE): # 6 
             voxel = Voxel(position = (x, 0, z))
     # spawn seed block & supply depot
     spawn_cube(SEED_BK, seed_block_texture)
