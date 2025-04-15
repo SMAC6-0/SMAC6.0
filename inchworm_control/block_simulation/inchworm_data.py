@@ -188,8 +188,6 @@ class Inchworm:
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
-            # Save the step instructions 
-            step_getter(step_instructions)
             if SIMULATION: # Avoid unnecessary data usage by only saving step instructions twice in simulation. 
                 # Saving the step instructions like this enables the step instructions to be stored for *each* simulated inchworm, rather than just one at a time 
                 # (Storing the step instructions to a separate file is a limited to just one IW if running simulation.) 
