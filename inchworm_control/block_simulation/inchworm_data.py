@@ -521,6 +521,9 @@ class Inchworm():
         self.state = IW_STATE.STRUCTURE_COMPLETE
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
+        self.get_logger().info("Operation complete. Shutting down ROS.")
+        rclpy.shutdown()
+
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
@@ -664,9 +667,9 @@ class InchwormNode(Node):
     def update_state(self): 
         self.inchworm.update_state()
 
-        if self.inchworm.paths != []: 
-            future = self.send_goal(self.inchworm.step_instructions)
-            rclpy.spin_until_future_complete(self, future)
+        if self.inchworm.step_instructions != []: 
+            self.send_goal(self.inchworm.step_instructions)
+            self.inchworm.step_instructions = []
 
     def send_goal(self, all_steps):
         goal_msg = Inchwormpath.Goal()
@@ -676,7 +679,9 @@ class InchwormNode(Node):
             step_msg = Step(step_type=step_type, step_change=step_change)
             goal_msg.all_steps.append(step_msg)
 
-        self._action_client.wait_for_server()
+        if not self._action_client.wait_for_server(timeout_sec=5.0):
+            self.get_logger().error("Action server (execute_path.py) not available")
+            return
 
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
@@ -695,7 +700,7 @@ class InchwormNode(Node):
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info(f'Result: Completed? {result.completion_status}')
-        rclpy.shutdown()
+        # rclpy.shutdown()
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
@@ -707,8 +712,8 @@ def main(args=None):
     rclpy.init(args=args)
     inchworm_node = InchwormNode()
     rclpy.spin(inchworm_node)
-    inchworm_node.destroy_node()
-    rclpy.shutdown()
+    # inchworm_node.destroy_node()
+    # rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
