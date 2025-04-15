@@ -188,12 +188,8 @@ class Inchworm:
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
-            if SIMULATION: # Avoid unnecessary data usage by only saving step instructions twice in simulation. 
-                # Saving the step instructions like this enables the step instructions to be stored for *each* simulated inchworm, rather than just one at a time 
-                # (Storing the step instructions to a separate file is a limited to just one IW if running simulation.) 
-                # TODO: determine if storing to steps.txt is really necessary? 
-                self.step_instructions = step_instructions
-                print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            self.step_instructions = step_instructions
+            print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
@@ -226,12 +222,7 @@ class Inchworm:
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             if self.goal_progress_index > 0:
-                if SIMULATION: 
-                    step_str = self.step_instructions[self.step_num-1]
-                else: 
-                    file = open('steps.txt') 
-                    content = file.readlines() 
-                    step_str = content[self.step_num-1]
+                step_str = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
 
                 # Update Inchworm Orientation with each step
