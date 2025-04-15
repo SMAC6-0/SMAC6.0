@@ -307,6 +307,8 @@ class Inchworm:
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
         sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+        # TODO: instead of sleep retyr after IW_gets_Map_Snapshot
+        
         # or stay here until the IW gets a new map!!
         # TODO: call map snapshot? 
         # if self.IW_gets_Map_Snapshot():
@@ -389,33 +391,7 @@ class Inchworm:
             # return true if the IW got the map snapshot
             print("getting map snapshot")
 
-            self.inchworm_gets_map()
-            return True 
-
-            # received_data = self.IW_SERIAL.read()              #read serial port
-            # sleep(0.03)
-            # data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-            # received_data += self.IW_SERIAL.read(data_left)
-            # print (received_data)                   #print received data
-
-            # # verify if it's a map?? 
-            # is_a_map = True
-            # if is_a_map:
-            #     # call the update map
-            #     self.update_my_current_map()
-            # # return is_a_map
-
-            # # layers, rows, cols = 3, 5, 6
-            # # array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
-            # # index = 0
-            # # for l in range(layers):
-            # #     for r in range(rows):
-            # #         for c in range(cols):
-            # #             if index < len(map_data):
-            # #                 array[l][r][c] = map_data[index]
-            # #                 index += 1
-            # # return array  
-            # # print("Received 3D Array:", array)
+            return self.inchworm_gets_map()  
     
     def is_Path_Available(self):
         # # question how do we know if this path is the most upto date path
@@ -487,19 +463,6 @@ class Inchworm:
         pass
     
     # other functionsss
-
-    def update_my_current_map(self, map): 
-        """
-        Updates the inchworm's map based on received updates from the structure. 
-        Args: 
-            map: xzy (3D) list storing the current status of the map, as the structure knows it.  
-        """
-        # TODO: does this belong in checker, handler, or outside? @Mo 
-
-        # map updates so we need to manually update the x, y, z
-        # self.current_map = map
-        print("Current map updated")
-        pass
     
     # ---------------------------- IW block communication functions ----------------------------- 
 
@@ -697,10 +660,11 @@ class Inchworm:
                         current_map = Inchworm.process_received_map_snapshot(buffer)
                         print("Current map")
                         print(current_map)
-                        break
+                        return True
                     else:
                         print("CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
+                        break
 
                     collecting_data = False
             
@@ -708,9 +672,9 @@ class Inchworm:
                 buffer.append(byte) # Append bytes to buffer if between start and end delimiters
                 bytesRead += 1
             elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)):
-                break
+                return True
         
-        print("Out da while looopppp")
+        return False
 
     @staticmethod
     def process_received_map_snapshot(map_data):

@@ -18,6 +18,7 @@ from inchworm_data import Inchworm
 from colorama import Fore, init
 import numpy as np
 import itertools
+import json
 init(autoreset=True)
 
 class SimData: 
@@ -40,6 +41,11 @@ class SimData:
         blocks_placed.sort(key=lambda lowest: lowest[2]) # sort the blocks placed so that the ones with the lowest z coords are update in the map first 
         for block in blocks_placed: 
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
+
+        # TODO: save self.final_structure to a file
+        print("Saving map in the json file")
+        with open("Final_Structure.json", "w") as final_map_file:
+            json.dump(self.final_structure, final_map_file)
     
     def send_map_to_IW(self, inchworm): 
         """
@@ -53,7 +59,7 @@ class SimData:
         if (inchworm.leading_foot_loc == inchworm.goal and inchworm.paths) or inchworm.state.value == 3: 
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map by clearing the iw path 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.paths, inchworm.id)
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=inchworm.id)
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
 
