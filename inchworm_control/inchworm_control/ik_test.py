@@ -669,7 +669,7 @@ class IkTest(Node):
                 print("Servo2 attached") 
             else:
                 # detach the leading leg
-                release_servo(self.servo2)
+                release_servo_newEE(self.servo2)
                 print("Servo2 detached")          
         elif (pivot_foot == 1): # 1 is the pivot foot
              # activate the servo of the following leg
@@ -686,33 +686,47 @@ class IkTest(Node):
                 print("Servo1 detached")     
 
 ## Due to indentation things, these two functions (activate/release servo) are not part of the MotorController class
-# servo angle of 0 is activated, 180 released
+# servo angle of 30 is activated, 150 released
 def activate_servo(servo_id):
     """
     Activate the servo motor so that the gripper latches onto the surface. 
     Args:
         servo_id: The servo motor object to be activated. 
     """
-    # Set duty cycle to move servo to 0° position (2 corresponds to 0° for most servos)
-    servo_id.ChangeDutyCycle(2+(0/18))
+    # Set duty cycle to move servo to 30° position
+    servo_id.ChangeDutyCycle(2+(30/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
 
-# Releases the servo by moving it to 180 degrees (or a fully released position)
+# Releases the servo by moving it to 150 degrees (or a fully released position)
 def release_servo(servo_id):
     """
     Release the servo motor so that the gripper detached from the surface. 
     Args:
         servo_id: The servo motor object to be released. 
     """
-    # Set duty cycle to move servo to 180° position (12 corresponds to 180° for most servos)
-    servo_id.ChangeDutyCycle(2+(180/18))
+    # Set duty cycle to move servo to 150° position
+    servo_id.ChangeDutyCycle(2+(150/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
-    servo_id.ChangeDutyCycle(0) 
+    servo_id.ChangeDutyCycle(0)
+
+# Releases the servo of new EE by moving it to 80 degrees (or a fully released position)
+def release_servo_newEE(servo_id):
+    """
+    Release the servo motor so that the gripper detached from the surface for the new End Effector. 
+    Args:
+        servo_id: The servo motor object to be released. 
+    """
+    # Set duty cycle to move servo to 80° position
+    servo_id.ChangeDutyCycle(2+(80/18))
+    # Pause to allow servo to reach position
+    time.sleep(1)
+    # Stop sending signal to servo
+    servo_id.ChangeDutyCycle(0)
 
 def main(args=None):
     rclpy.init(args=args)
