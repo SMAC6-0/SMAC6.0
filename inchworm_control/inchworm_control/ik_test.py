@@ -115,10 +115,6 @@ class IkTest(Node):
             # place block
         }      
 
-        start_step = input("ready?")
-        if start_step == "y":
-            self.step_forward
-
 
 
     def listener_callback(self, msg):
