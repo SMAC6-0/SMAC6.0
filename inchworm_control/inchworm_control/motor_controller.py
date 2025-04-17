@@ -86,8 +86,8 @@ class MotorController(Node):
         }
 
         release_servo(self.servo1)
-        release_servo(self.servo2)
-        # release_servo_newEE(self.servo2)
+        # release_servo(self.servo2)
+        release_servo_newEE(self.servo2)
         activate_servo(self.servo1)
         activate_servo(self.servo2)
         # release_servo(self.servo1)
