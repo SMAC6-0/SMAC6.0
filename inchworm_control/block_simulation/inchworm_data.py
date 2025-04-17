@@ -124,12 +124,15 @@ class Inchworm:
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
+        
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = self.blueprint_planner.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             priority_snapshot = self.blueprint_planner._priority_queue
+            print(f"PRIORITY QUEUE IS: {priority_snapshot} & TRAVELLING? {is_traveling} & IS HOLDING BLOCK? {self.holding_block}")
+            
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
                 return
@@ -207,13 +210,13 @@ class Inchworm:
         x, y, z = self.leading_foot_loc
         self.goal_progress_index += 1
         
-        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-            self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            self.holding_block = False
+        # if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+        #     self.holding_block = True
+        # elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+        #     self.holding_block = False
         
-        if self.holding_block and [x, y, z] != self.goal:
-            z = z + 1
+        # if self.holding_block and [x, y, z] != self.goal:
+        #     z = z + 1
         return x, y, z
     
     def get_next_step(self):
