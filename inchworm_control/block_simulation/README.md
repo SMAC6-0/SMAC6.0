@@ -38,7 +38,7 @@ Important: To ensure you're using Python 3.12, run all Python commands as:
 `python3.12 -m` 
 
 Once Python and the virtual environment are set up, install the required packages:
-`pip install ursina numpy`
+`pip install ursina numpy colorama`
 
 ## How to Download and Run ⬇
 1. Make sure you have Python installed and Ursina too. If you have Python, go to the Command Line and type `pip install ursina`.

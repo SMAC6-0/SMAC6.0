@@ -20,17 +20,18 @@ IW_2_LOC = [7, 7, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
-# Define the possible orientations of the inchworm
+# Define the possible orientations of the inchworm relative to the world
 class InchwormOrientation(Enum):
-    NORTH = 0
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
+    NORTH = 0       # +y direction
+    EAST = 1        # +x
+    SOUTH = 2       # -y 
+    WEST = 3        # -x
 
     def rotate(self, steps):
         """
         Rotate the orientation by a number of steps.
         Positive steps rotate clockwise, negative steps rotate counterclockwise.
+        Ex: +1 -> RIGHT. Ex: 2 -> Turns around
         """
         new_value = (self.value + steps) % len(InchwormOrientation)
         return InchwormOrientation(new_value)
@@ -42,6 +43,7 @@ IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
 # if the simulation is for the demo, set this to True
 SIMULATION = False
 LARGE_BUILD = False
+DIRECT_CONTROL = False
 
 # have inchworm starting inline with BD 
 # column should not be in line with BD

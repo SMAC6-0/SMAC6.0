@@ -9,6 +9,8 @@ setup(
         'console_scripts': [
             'motor_controller = inchworm_control.motor_controller:main',
             'step_publisher = inchworm_control.step_publisher:main',
+            'execute_path = inchworm_control.execute_path:main',
+            'inchworm_data = block_simulation.inchworm_data:main',
         ],
     },
 )

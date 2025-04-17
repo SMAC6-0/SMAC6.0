@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from enum import Enum
 import copy
 from config import *
@@ -10,6 +11,12 @@ import json
 from colorama import Fore, init
 import numpy as np
 init(autoreset=True)
+if not SIMULATION:
+    import rclpy
+    from rclpy.action import ActionClient
+    from rclpy.node import Node
+    from actions_messages.action import Inchwormpath
+    from actions_messages.msg import Step
 
 ###### UART stuff
 UART_BAUD = 9600 # config
@@ -54,7 +61,7 @@ lagging_transform = {
     InchwormOrientation.WEST: lambda x, y, z: (x + 1, y, z) 
 }
 
-class Inchworm:
+class Inchworm():
     next_id = 1
     inchworm_list = []
     
@@ -125,7 +132,8 @@ class Inchworm:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
-        """ Plan path from current location to specified goal. """
+        """ Plan path from current location to specified goal. 
+            Path planning typically starts from the pivot foot to avoid unnecessary walking on the structure"""
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
 
         is_traveling = False # assumes that if not specified, objective is to travel, not place
@@ -157,10 +165,10 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
+                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
+                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id)
                 self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
@@ -168,7 +176,7 @@ class Inchworm:
                     return
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id)
                 self.holding_block = False
                 if goal_path == []: 
                     return
@@ -188,59 +196,54 @@ class Inchworm:
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
+            # Save the step instructions 
             self.step_instructions = step_instructions
             print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
-
-    def get_next_point(self): 
-        """ 
-        Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
-        """
-        if self.goal_progress_index > 0:
-            self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-
-            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
-        
-        x, y, z = self.leading_foot_loc
-        self.goal_progress_index += 1
-        
-        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-            self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            self.holding_block = False
-        
-        if self.holding_block and [x, y, z] != self.goal:
-            z = z + 1
-        return x, y, z
     
     def get_next_step(self):
         """Returns the leading foot location as is used for the simulation"""
         if self.step_num > self.num_steps: 
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
+            step_type = ""
             if self.goal_progress_index > 0:
-                step_str = self.step_instructions[self.step_num-1]
-                print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
-
+                step = self.step_instructions[self.step_num-1]
+                print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
+                step_type = step[0]
+                step_change = step[1]
+                orientation_transforms = {
+                    InchwormOrientation.NORTH: lambda x, y, z: [-y,  x, z],  
+                    InchwormOrientation.SOUTH: lambda x, y, z: [ y, -x, z],
+                    InchwormOrientation.EAST:  lambda x, y, z: [ x,  y, z],  
+                    InchwormOrientation.WEST:  lambda x, y, z: [-x, -y, z],  
+                }
+                transform = orientation_transforms[self.orientation]
+                transformed_vector = transform(*step_change)
+                transformed_vector = list(map(int, transformed_vector))
+                print(f"change in world frame: {transformed_vector}")
+                self.leading_foot_loc = [self.leading_foot_loc[i] + transformed_vector[i] for i in range(len(transformed_vector))]  
                 # Update Inchworm Orientation with each step
-                self.orientation = map_data.get_orientation(step_str, self.orientation)
+                self.orientation = map_data.get_orientation(step_change, self.orientation)
 
-                self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
-                if "PLACE" not in step_str:
+                # If the IW is NOT placing a block right now
+                if "PLACE" not in step_type:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-                    if "UP" in step_str: 
+                    # If the inchworm is stepping up 
+                    if step_change[2] > 0: 
                         self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
             self.goal_progress_index += 1
             
-            if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+            # If the IW is grabbing a block, holding_block becomes true
+            if "GRAB" in step_type:
                 self.holding_block = True
-            elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+            # Then, if placing a block, IW is no longer holding the block
+            elif "PLACE" in step_type: #self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
                 self.holding_block = False
             
             if self.holding_block and [x, y, z] != self.goal:
@@ -674,6 +677,10 @@ class Inchworm:
         self.state = IW_STATE.STRUCTURE_COMPLETE
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
 
+        if not SIMULATION:
+            self.get_logger().info("Operation complete. Shutting down ROS.")
+            rclpy.shutdown()
+
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.clear_path_com = copy.deepcopy(self.paths)
@@ -769,17 +776,104 @@ class Inchworm:
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
                         print(f"WRONFG THING STUPOIDA ", {x, y, z})
                         map_complete = False
-
         print("IS MAP COMPLETE: ", map_complete)
         return map_complete
-  
-if __name__ == "__main__":
-        
-    with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
-        final_structure = json.load(final_map_file)
+    
+## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
 
-    inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
-    try:
-        inchworm.run()
-    except KeyboardInterrupt:
-        print(Fore.GREEN + "Stopping the inchworm system.") 
+if not SIMULATION:
+    class InchwormNode(Node): 
+        def __init__(self): 
+            # Initialize the ROS node the inchworm uses 
+            super().__init__('inchworm_node')
+            # Initialize the inchworm (state machine)
+            with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
+                final_structure = json.load(final_map_file)
+            self.inchworm = Inchworm(IW_1_ORIENTATION, final_structure, IW_1_LOC)
+
+            # Every second, update the state
+            self.create_timer(1, self.update_state)
+
+            # Set up the the inchworm node (state machine) as the client for the action of stepping
+            self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
+            self.get_logger().info("Inchworm Node Initialized")
+        
+        def update_state(self): 
+            """Update the inchworm state machine & send an existing set of step instructions to the motors """
+            self.inchworm.update_state()
+
+            if self.inchworm.step_instructions != []: 
+                self.send_goal(self.inchworm.step_instructions)
+                # Clear the step instructions so that the state continues updating, 
+                # but the instructions are not resent 
+                self.inchworm.step_instructions = []
+
+        def send_goal(self, all_steps):
+            """Send an action request for the 'inchworm_moving' action"""
+            # Initialize action goal message 
+            goal_msg = Inchwormpath.Goal()
+            goal_msg.all_steps = []
+
+            # Since steps contain complex data, split the step instructions 
+            for step_type, step_change in all_steps: 
+                # Create a Step msg to be put in a list
+                step_msg = Step(step_type=step_type, step_change=step_change)
+                goal_msg.all_steps.append(step_msg)
+
+            # Return error if the action server times out 
+            if not self._action_client.wait_for_server(timeout_sec=5.0):
+                self.get_logger().error("Action server (execute_path.py) not available")
+                return
+
+            # Asynchronously send goal msg. While it's running, receive feedback in this node through feedback_callback
+            self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+            # Upon successful receival of the action command, run the goal_response_callback
+            self._send_goal_future.add_done_callback(self.goal_response_callback)
+
+        def goal_response_callback(self, future):
+            """Runs upon successful receival of the goal command"""
+            goal_handle = future.result()
+            if not goal_handle.accepted:
+                self.get_logger().info('Goal rejected :(')
+                return
+
+            self.get_logger().info('Goal accepted :)')
+
+            # Asynchronously receive the result of the action
+            self._get_result_future = goal_handle.get_result_async()
+            # Upon successful completion of the action command, run the goal_result_callback
+            self._get_result_future.add_done_callback(self.get_result_callback)
+
+        def get_result_callback(self, future):
+            """Runs upon successful completion of the action"""
+            result = future.result().result
+            self.get_logger().info(f'Result: Completed? {result.completion_status}')
+            # rclpy.shutdown()
+
+        def feedback_callback(self, feedback_msg):
+            """Runs repeeatedly as the action runs, providing feedback"""
+            feedback = feedback_msg.feedback
+            self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
+
+
+
+def main(args=None):
+    if not SIMULATION:
+        rclpy.init(args=args)
+        inchworm_node = InchwormNode()
+        rclpy.spin(inchworm_node)
+    elif DIRECT_CONTROL:
+        with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
+            final_structure = json.load(final_map_file)
+        inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
+        try:
+            inchworm.run()
+        except KeyboardInterrupt:
+            print(Fore.GREEN + "Stopping the inchworm system.") 
+        inchworm_node.destroy_node()
+    # rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()
+   
+
