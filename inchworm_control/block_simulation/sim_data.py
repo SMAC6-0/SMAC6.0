@@ -57,6 +57,7 @@ class SimData:
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
 
+            print(Fore.GREEN + f"sim_data's current_map: {self.current_map}")
             # Send current_map to IW 
             inchworm.current_map = copy.deepcopy(self.current_map)
 
