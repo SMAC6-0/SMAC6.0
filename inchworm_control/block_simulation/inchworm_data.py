@@ -147,7 +147,7 @@ class Inchworm:
                 print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
-        print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
+        # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
         
         try: 
@@ -212,8 +212,8 @@ class Inchworm:
         
         if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
             self.holding_block = True
-        # elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-        #     self.holding_block = False
+        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+            self.holding_block = False
         
         if self.holding_block and [x, y, z] != self.goal:
             z = z + 1
@@ -235,12 +235,14 @@ class Inchworm:
 
                 # Update Inchworm Orientation with each step
                 self.orientation = map_data.get_orientation(step_str, self.orientation)
+                prev_leading = self.leading_foot_loc
+                # print(f"prev_leading: {prev_leading}")
 
                 self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
                 if "PLACE" not in step_str:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-                    if "UP" in step_str: 
-                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
+                    if "UP" in step_str:
+                        self.lagging_foot_loc[2] = (prev_leading[2] - 1) if (prev_leading[2] - 1) >= 0 else 0
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc

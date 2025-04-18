@@ -74,7 +74,7 @@ class SimData:
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
             self.current_map[bx][by][bz] == map_data.update_grid_status(self.current_map, [bx, by, bz], map_data.GridStatus.SUPPLY_DEPOT.value) # revert BD location GridStatus
             # self.current_map[sx][sy][sz] == map_data.update_grid_status(self.current_map, [x, y, z]) # revert SEED_BK location GridStatus
-            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path\n{self.current_map}")
+            # print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path\n{self.current_map}")
             self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
             return True
         else: 
@@ -162,7 +162,7 @@ class SimData:
                     if abs(dx) + abs(dy) <= layer_radius:
                         x = seed_x + dx
                         y = seed_y + dy
-                        diag_pyramid.append([x, y, seed_z + z + 1])  # z+1 to build above seed
+                        diag_pyramid.append([x, y, seed_z + z])  # z+1 to build above seed
         return diag_pyramid
     
     def generate_building(self): 
