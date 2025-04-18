@@ -669,8 +669,8 @@ class IkTest(Node):
                 print("Servo2 attached") 
             else:
                 # detach the leading leg
-                release_servo(self.servo2)
-                # release_servo_newEE(self.servo2)
+                # release_servo(self.servo2)
+                release_servo_newEE(self.servo2)
                 print("Servo2 detached")          
         elif (pivot_foot == 1): # 1 is the pivot foot
              # activate the servo of the following leg
