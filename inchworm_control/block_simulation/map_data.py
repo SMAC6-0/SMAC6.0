@@ -150,7 +150,7 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE.v
         else:
             grid[x][y][z] = GridStatus.WALKABLE.value #curr cell
             if z - 1 >= 0:
-                grid[x][y][z-1] = status #cell below
+                grid[x][y][z - 1] = status #cell below
 
     return grid
 
@@ -209,14 +209,14 @@ def revert_status(grid, x, y, z):
     # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
+    elif grid[x][y][z + 1] == GridStatus.INCOMING_BLOCK.value:
+        return GridStatus.NOT_WALKABLE.value
     # If the cell used to be on a path, assume its walkable 
     elif GridStatus.is_inchworm_path(grid[x][y][z]):
         return GridStatus.WALKABLE.value
     else: 
         return GridStatus.NOT_WALKABLE.value
     
-
-
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
     Sets the neighbors for use in (search) algorithms.
@@ -336,7 +336,7 @@ def is_goal_reached_3d(curr_cell, goal_cell):
             curr_cell.y == goal_cell.y and 
             curr_cell.z == goal_cell.z)
 
-def is_valid_start_goal_3d(grid, start, goal):
+def is_valid_start_goal_3d(grid, start, goal, iw_id):
     """
     Validates a coordinate to see if it is in bounds.
 
@@ -346,12 +346,24 @@ def is_valid_start_goal_3d(grid, start, goal):
                      incoming_block (2), & supply_depot (3). 
         start (tuple): A tuple of the starting position in an inchworm's path.
         goal (tuple): A tuple of the goal position in an inchworm's path. 
+        iw_id (int): An inchworm's ID
     Returns:
         (boolean): A boolean confirming or denying a coordinate. 
     """
-    start_cell = create_cell(grid, start)
-    goal_cell = create_cell(grid, goal)
-    return not (start_cell.is_obs and goal_cell.is_obs)
+    sx, sy, sz = start
+    is_valid_start = ((grid[sx][sy][sz] == GridStatus.WALKABLE.value or 
+                       grid[sx][sy][sz] == GridStatus.INCOMING_BLOCK.value or
+                       grid[sx][sy][sz] == GridStatus.SUPPLY_DEPOT.value or
+                       iw_id == GridStatus.which_inchworm(grid[sx][sy][sz])) and
+                      is_valid_position_3d(grid, start))
+    gx, gy, gz = goal
+    is_valid_goal = ((grid[gx][gy][gz] == GridStatus.WALKABLE.value or 
+                      grid[gx][gy][gz] == GridStatus.INCOMING_BLOCK.value or
+                      grid[gx][gy][gz] == GridStatus.SUPPLY_DEPOT.value or
+                      iw_id == GridStatus.which_inchworm(grid[gx][gy][gz])) and
+                     is_valid_position_3d(grid, goal))
+    return is_valid_start and is_valid_goal
+            
     
 def start_bfs_3d(grid, start, goal):
     """
@@ -553,7 +565,7 @@ def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
-    neighbor_directions = set_neighbors(allow_vert_diagonal=False)
+    neighbor_directions = set_neighbors()
     path_count = []
 
     # Iterate through the grid

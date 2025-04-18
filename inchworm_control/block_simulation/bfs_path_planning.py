@@ -24,12 +24,10 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
         
-    if map_data.is_valid_start_goal_3d(grid, start, goal):
+    if map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
         goal_cell, visited, frontier = map_data.start_bfs_3d(grid, start, goal)
     else:
-        raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
-                           f"Start Walkable? {start_status == 0}\n",
-                           f"Goal Walkable? {goal_status == 0}")
+        raise RuntimeError(f"Invalid start {start} or goal {goal} position")
 
     # if holding_block:
     #     frontier[0].z -= 1

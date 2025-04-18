@@ -57,7 +57,6 @@ class SimData:
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
 
-            print(Fore.GREEN + f"sim_data's current_map: {self.current_map}")
             # Send current_map to IW 
             inchworm.current_map = copy.deepcopy(self.current_map)
 
@@ -70,8 +69,12 @@ class SimData:
         if self.cleared_path_flags[inchworm.id] and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
             x, y, z = inchworm.goal
+            bx, by, bz = BD_1_LOC
+            # sx, sy, sz = SEED_BK
             self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
-            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
+            self.current_map[bx][by][bz] == map_data.update_grid_status(self.current_map, [bx, by, bz], map_data.GridStatus.SUPPLY_DEPOT.value) # revert BD location GridStatus
+            # self.current_map[sx][sy][sz] == map_data.update_grid_status(self.current_map, [x, y, z]) # revert SEED_BK location GridStatus
+            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path\n{self.current_map}")
             self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
             return True
         else: 

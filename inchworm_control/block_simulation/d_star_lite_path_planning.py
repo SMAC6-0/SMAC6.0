@@ -116,10 +116,8 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
     goal_status = (grid[goal[0]][goal[1]][goal[2]])
     print(Fore.MAGENTA + f"D* Lite called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
     
-    if not map_data.is_valid_start_goal_3d(grid, start, goal):
-        raise RuntimeError(f"Invalid start {start} or goal {goal} position\n",
-                           f"Start Walkable? {start_status == 0}\n",
-                           f"Goal Walkable? {goal_status == 0}")    
+    if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
+        raise RuntimeError(f"Invalid start {start} or goal {goal} position")    
     d_star = DStarLite(grid, start, goal, structure_queue) # snapshot of what we have searched and found
     d_star.compute_shortest_path()
     current_cell = d_star.start
