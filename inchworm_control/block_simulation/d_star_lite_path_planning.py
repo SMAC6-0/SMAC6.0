@@ -22,7 +22,7 @@ class DStarLite:
         """calculates the priority key for a cell"""
         g_rhs = min(cell.g, cell.rhs) #takes the minimum of the estimated cost and the one look ahead cost
         h = map_data.heuristic(self.start, cell)
-        return(g_rhs + h + self.km, g_rhs)
+        return(g_rhs + h + self.km + cell.cost, g_rhs)
     
     def insert(self, cell, key):
         heapq.heappush(self.priority_queue, (key, cell))
@@ -92,8 +92,6 @@ class DStarLite:
                         if ((self.grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)):
                             neighbor = self.get_cell(neighbor_coord)
                             self.update_rhs(neighbor)
-                
-                
 
 def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
     """
@@ -134,20 +132,16 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    if neighbor.g < min_cost:
+                    total_cost = neighbor.g + neighbor.cost
+                    if total_cost < min_cost:
                         min_cost = neighbor.g
                         next_cell = neighbor
         if next_cell is None:
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
             return []
-        
-        # if next_cell.to_tuple() == d_star.goal.to_tuple():
-        #     current_cell = next_cell  # goal_cell parent already updated in handle_side_step
-        #     break
 
         next_cell.parent = current_cell
         current_cell = next_cell
-    # map_data.handle_side_step(grid, current_cell, next_cell, iw_id, holding_block)
         
     path = map_data.reverse_path_3d(current_cell, holding_block)
     print(Fore.MAGENTA + f"Path found: {path}")
