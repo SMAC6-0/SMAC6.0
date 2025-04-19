@@ -34,15 +34,15 @@ class DStarLite:
     def get_cell(self, coords, is_goal=False):
         coords = tuple(coords)
         x, y, z = coords
+        
         if coords not in self.cell_map:
             cell = map_data.create_cell(self.grid, coords)
             self.cell_map[coords] = cell
         else:
             cell = self.cell_map[coords]
             
-        if is_goal:
-            pass
-        elif self.structure_queue and self.grid[x][y][z] == map_data.GridStatus.WALKABLE.value:
+        if not is_goal and self.structure_queue:
+            cell.cost = 1
             for block in self.structure_queue:
                 if coords == tuple(block):
                     cell.cost += 100 + 10 * z
@@ -78,20 +78,37 @@ class DStarLite:
                 for dx, dy, dz in self.neighbors:
                     nx, ny, nz = cell.x + dx, cell.y + dy, cell.z + dz
                     neighbor_coord = nx, ny, nz
-                    if map_data.is_valid_position_3d(self.grid, (neighbor_coord)):
-                        if ((self.grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)):
-                            neighbor = self.get_cell(neighbor_coord)
-                            self.update_rhs(neighbor)
+
+                    if map_data.is_valid_position_3d(self.grid, neighbor_coord):
+                        neighbor = self.get_cell(neighbor_coord)
+
+                        if self.structure_queue:
+                            neighbor.cost = 1
+                            for block in self.structure_queue:
+                                if neighbor.to_tuple() == tuple(block):
+                                    neighbor.cost += 100 + 10 * neighbor.z
+                                    break
+
+                        self.update_rhs(neighbor)
             else:
                 cell.g = float('inf')
                 self.update_rhs(cell)
+                
                 for dx, dy, dz in self.neighbors:
                     nx, ny, nz = cell.x + dx, cell.y + dy, cell.z + dz
                     neighbor_coord = nx, ny, nz
-                    if map_data.is_valid_position_3d(self.grid, (neighbor_coord)):
-                        if ((self.grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)):
-                            neighbor = self.get_cell(neighbor_coord)
-                            self.update_rhs(neighbor)
+
+                    if map_data.is_valid_position_3d(self.grid, neighbor_coord):
+                        neighbor = self.get_cell(neighbor_coord)
+
+                        if self.structure_queue:
+                            neighbor.cost = 1
+                            for block in self.structure_queue:
+                                if neighbor.to_tuple() == tuple(block):
+                                    neighbor.cost += 100 + 10 * neighbor.z
+                                    break
+
+                        self.update_rhs(neighbor)
 
 def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
     """
@@ -132,9 +149,9 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    total_cost = neighbor.g + neighbor.cost
-                    if total_cost < min_cost:
-                        min_cost = neighbor.g
+                    print(Fore.CYAN + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
+                    if neighbor.g + neighbor.cost < min_cost:
+                        min_cost = neighbor.g + neighbor.cost
                         next_cell = neighbor
         if next_cell is None:
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
