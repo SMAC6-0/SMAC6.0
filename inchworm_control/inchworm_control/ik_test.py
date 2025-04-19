@@ -246,10 +246,13 @@ class IkTest(Node):
     The territory of movesets begins now...
 
     Basic Procedure: 
-    1. Movement is called through subscription to ROS topic. 
-    2. Use trajectory planning to move leading foot in straight lines: up, to above goal, down to goal. 
-    3. Move the following foot towards other foot. 
+    1. a basic generqal move function
+    2. takes in step_types -> STEP, GRAB, PLACE, STEP W/ BLOCK
+    3. deltaX, deltaY, deltaZ
     """
+
+    
+    
 
     def step_forward(self): 
         """
