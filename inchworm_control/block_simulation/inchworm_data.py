@@ -515,7 +515,12 @@ class Inchworm:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    if self.is_structure_complete(self.current_map, self.final_structure): # structure is complete
+                    # if SIMULATION and self.paths == []: 
+                    #     print(Fore.BLUE + f"Simulation, breaking")
+                    #     return
+                    # else: 
+                    self.IW_clear_path()
+                    if self.is_structure_complete(): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
                         self.handle_structure_incomplete()
@@ -547,8 +552,7 @@ class Inchworm:
             if self.leading_foot_loc == self.goal: 
                 print(Fore.BLUE + "Touching the seed block")    
                 
-                self.IW_clear_path()
-                print(Fore.BLUE + "Reset the path.") 
+                # self.IW_clear_path()
 
                 self.iw_reached_seed_block_flag = True
 
@@ -560,6 +564,14 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
+        # self.IW_clear_path()
+        # If simulation, break to allow simulated communication
+        # if SIMULATION and self.clear_path_com == []: 
+        #     print(Fore.BLUE + f"Simulation, breaking")
+        #     return
+        # else: 
+        self.IW_clear_path()
+        # self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
@@ -580,6 +592,7 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
+        self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
 
     def handle_no_blocks_to_place(self): 
@@ -606,14 +619,13 @@ class Inchworm:
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-        self.IW_clear_path()
+        
 
 
         self.state = IW_STATE.PLACING_BLOCK
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
     def IW_clear_path(self):
-        print("I cleared my pathhhhhh yippee")
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
 
         self.clear_path_com = copy.deepcopy(self.paths)
@@ -663,7 +675,7 @@ class Inchworm:
         # return true if the IW got the map snapshot
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
-                x, y, z = self.leading_foot_loc
+                # x, y, z = self.leading_foot_loc
                 # if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
                 print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
                 return True
@@ -689,10 +701,12 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         if not SIMULATION:
-            if INCHWORM_MOVED:
-                IW_in_supply = input("Is iW in supply location? (yes/no) \n")
-                if IW_in_supply.lower() == 'yes':
-                    self.get_next_step()
+            if MANUAL_TESTING: 
+                self.dummy_IW_move()
+            # if INCHWORM_MOVED and MANUAL_TESTING:
+            #     IW_in_supply = input("Is iW in supply location? (yes/no) \n")
+            #     if IW_in_supply.lower() == 'yes':
+            #         self.get_next_step()
         # TODO: Replace with actual implementation
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
@@ -707,10 +721,12 @@ class Inchworm:
         # print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         # TODO: Replace with actual implementation
         if not SIMULATION:
-            if INCHWORM_MOVED:
-                IW_in_supply = input("Is iW in block location? (yes/no) \n")
-                if IW_in_supply.lower() == 'yes':
-                    self.get_next_step() 
+            if MANUAL_TESTING: 
+                self.dummy_IW_move()
+            # if INCHWORM_MOVED and MANUAL_TESTING:
+            #     IW_in_supply = input("Is iW in block location? (yes/no) \n")
+            #     if IW_in_supply.lower() == 'yes':
+            #         self.get_next_step() 
 
         if self.leading_foot_loc == self.goal: 
             print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
@@ -726,22 +742,23 @@ class Inchworm:
         else: 
             pass
     
-    def is_structure_complete(self, curr_map, final_map):
+    def is_structure_complete(self):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-
-        curr_map = np.array(curr_map)
-        final_map = np.array(final_map)
+        # print("current map: ", curr_map)
+        # print("Final map: ", final_map)
+        curr_map = np.array(self.current_map)
+        final_map = np.array(self.final_structure)
         # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
-        print("current map: ", curr_map)
-        print("Final map: ", final_map)
+        
         map_complete = True
 
         for z in range(curr_map.shape[2]):
             for x in range(curr_map.shape[0]):
                 for y in range(curr_map.shape[1]):
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
-                        print(f"WRONFG THING STUPOIDA ", {x, y, z})
-                        map_complete = False
+                        if curr_map[x, y, z] != 2: 
+                            print(f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
+                            map_complete = False
 
         print("IS MAP COMPLETE: ", map_complete)
         return map_complete

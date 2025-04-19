@@ -2,7 +2,7 @@ from enum import Enum
 
 # this file holds variables that the user can change just in this file before running
 
-GRID_SIZE = 8  # Define the size of your grid in one direction 
+GRID_SIZE = 20  # Define the size of your grid in one direction 
                 # Then, use this dimension to create a 3D list representing the cubical workspace 
                 # where every cell is 0, representing that all those cells are walkable 
 GRID_HEIGHT = 4
@@ -10,13 +10,13 @@ GRID_HEIGHT = 4
 ### BLOCK DEPOTS & SEED BLOCK ###
 BD_1_LOC = [4, 4, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
 BD_LOCS = [BD_1_LOC] # The locations of all block depots (if there are multiple)
-SEED_BK = [1, 2, 1]
+SEED_BK = [6, 6, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
-NUM_INCHWORMS = 1
+NUM_INCHWORMS = 2
 IW_1_LOC = [6, 7, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-IW_2_LOC = [6, 7, 0]
+IW_2_LOC = [12, 12, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #

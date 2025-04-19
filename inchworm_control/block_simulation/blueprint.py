@@ -39,16 +39,8 @@ def blueprint(curr_map, final_map) -> list:
 
     elif curr_map.size == final_map.size:
         # The structure is complete
-        for z in range(curr_map.shape[2]):
-            for x in range(curr_map.shape[0]):
-                for y in range(curr_map.shape[1]):
-                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
-                        map_complete = False
-
-
-        if map_complete: 
+        if np.array_equal(curr_map, final_map):
             return [-1,-1,-1]
-        
         else: 
             # TODO: implement prioritization of found structures
             # print("map dims: ", curr_map.shape[0], curr_map.shape[1],curr_map.shape[2])
