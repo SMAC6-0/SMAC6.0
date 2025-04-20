@@ -93,6 +93,9 @@ class IkTest(Node):
         
         # Initialize a dictionary mapping possible step actions to corresponding methods
         self.step_actions = {
+            # Temp Testing IK
+            'TEST': self.test_step,
+
             # Inchworm movements
             'STEP_FORWARD': self.step_forward,
             'STEP_LEFT': self.step_left,
@@ -252,7 +255,31 @@ class IkTest(Node):
     """
 
     
-    
+    def test_step(self): 
+        """
+        Testing variety of basic positions to tune IK
+        """
+        # positions
+        goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
+        above_goal = copy.deepcopy(goal)
+        above_goal[2] += 0.5
+
+        # Start moving leading foot 
+        pivot_foot = 1 
+        self.latch_detach(pivot_foot) 
+        
+        # EE moves straight up from board to just above the home
+        self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        # # Move forward and hover over the goal position 
+        # self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
+        
+        # # Move from above goal to the goal position
+        # self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, pivot_foot)
+
+        print("Movement complete: TEST_STEP")
+
+
 
     def step_forward(self): 
         """
