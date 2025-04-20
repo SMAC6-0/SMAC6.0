@@ -87,6 +87,8 @@ class SimData:
                 inchworm.current_map = copy.deepcopy(self.current_map)
 
                 self.map_sent_flag[inchworm.id] = True
+                x, y, z = inchworm.goal
+                print(f"IW{inchworm.id}'s real grid status at [6, 6, 2] is {self.current_map[6][6][2]}")
                 print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
                 return True
 
@@ -105,6 +107,9 @@ class SimData:
                 if inchworm.goal != SEED_BK:
                     self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, inchworm.goal, map_data.GridStatus.INCOMING_BLOCK.value)
                 self.map_sent_flag[inchworm.id] = False
+                x, y, z = inchworm.goal
+                print(f"IW{inchworm.id}'s real grid status at goal {inchworm.goal} is {self.current_map[x][y][z]}")
+                print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
                 return True
 
 

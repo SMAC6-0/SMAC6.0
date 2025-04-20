@@ -134,6 +134,8 @@ class Inchworm:
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
+            x, y, z = self.goal
+            print(f"IW{self.id}: own grid status at goal {self.goal} is {self.current_map[x][y][z]}")
 
             if self.goal == [-1, -1, -1]: # structure is complete!!
                 print(Fore.MAGENTA + f"IW{self.id}: Structure is complete")

@@ -128,9 +128,8 @@ def update():
             sim_data.send_map_to_IW(inchworm)
 
             inchworm.update_state()
-            # Cheap hack to make inchworm not communicate with the structure twice
+            # Important: Update the state again after a path is found, so that it is communicated before the next IW comes along
             if inchworm.state.value == 3: 
-                print("UPDATING STATE AGAIN")
                 inchworm.update_state()
 
 
