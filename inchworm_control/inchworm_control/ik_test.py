@@ -661,7 +661,7 @@ class IkTest(Node):
             pivot_foot (int): The inchworm's pivot foot. 
             block (bool): True if the inchworm is holding onto a block. Makes sure the block stays latched. 
         """
-        if (pivot_foot == 5): # 5 is the pivot foot
+        if (pivot_foot == 1): # 1 is the pivot foot
             # activate the servo of the following leg
             activate_servo(self.servo1)
             print("servo1 attached")
@@ -675,7 +675,7 @@ class IkTest(Node):
                 # release_servo(self.servo2)
                 release_servo_newEE(self.servo2)
                 print("Servo2 detached")          
-        elif (pivot_foot == 1): # 1 is the pivot foot
+        elif (pivot_foot == 5): # 5 is the pivot foot
              # activate the servo of the following leg
             activate_servo(self.servo2)
             print("servo2 attached")
