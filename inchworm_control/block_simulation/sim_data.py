@@ -32,7 +32,7 @@ class SimData:
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
-        self.cleared_path_flags = {}
+        self.map_sent_flag = {} # Extra security to ensure paths are sent once, if map was sent first 
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
@@ -77,20 +77,23 @@ class SimData:
         """
         If the IW is at its goal, structure sends the IW a map snapshot
         """
+        print(Fore.GREEN + f"foot loc {inchworm.leading_foot_loc}, goal {inchworm.goal}, clear_path_com {inchworm.clear_path_com}, state {inchworm.state.value}")
         x, y, z = inchworm.leading_foot_loc
-        if (inchworm.leading_foot_loc == inchworm.goal):
+        if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 6):
+            print(f"we here. grid status:{self.current_map[x][y][z]}")
             if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
                 # Send current_map to IW 
                 inchworm.current_map = copy.deepcopy(self.current_map)
 
+                self.map_sent_flag[inchworm.id] = True
                 print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
                 return True
 
     def paths_rm_add(self, inchworm): 
-        if inchworm.clear_path_com:
-            if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1]:
+        if inchworm.clear_path_com: # and self.map_sent_flag[inchworm.id]:
+            if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and inchworm.state.value == 4:
                 x, y, z = inchworm.leading_foot_loc
                 # Update current_map by clearing the previous iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.clear_path_com, iw_id=inchworm.id)
@@ -100,6 +103,8 @@ class SimData:
                 self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
                 x, y, z = inchworm.goal
                 self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
+
+                self.map_sent_flag[inchworm.id] = False
                 print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
                 return True
 
@@ -138,9 +143,9 @@ class SimData:
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
 
             # For however many IWs exist, store flag in dictionary 
-            self.cleared_path_flags[i+1] = False # The key is i+1 to correspond to the IW ID
+            self.map_sent_flag[i+1] = False # The key is i+1 to correspond to the IW ID
         # print(Fore.GREEN + "inchworms spawned")
-        print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
+        print(Fore.GREEN + f"{num_inchworms} inchworms successfully spawned")
 
     def get_next_steps(self): 
         """

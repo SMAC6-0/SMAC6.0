@@ -129,9 +129,9 @@ def update():
 
             inchworm.update_state()
             # Cheap hack to make inchworm not communicate with the structure twice
-            # if inchworm.state.value == 3: 
-            #     print("UPDATING STATE AGAIN")
-            #     inchworm.update_state()
+            if inchworm.state.value == 3: 
+                print("UPDATING STATE AGAIN")
+                inchworm.update_state()
 
 
             if sim_data.paths_rm_add(inchworm):
