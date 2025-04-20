@@ -7,6 +7,7 @@ from time import sleep
 import serial
 import struct
 from colorama import Fore, init
+
 init(autoreset=True)
 
 ###### UART stuff
