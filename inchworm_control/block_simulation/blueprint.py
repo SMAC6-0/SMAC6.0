@@ -50,8 +50,8 @@ def blueprint(curr_map, final_map) -> list:
                 for x in range(curr_map.shape[0]): #iterate 0-7
                     for y in range(curr_map.shape[1]): #iterate 0-7
                         if curr_map[x, y, z] != 2: 
-                            # if [x, y, z] == [6, 6, 2]:
-                            #     print(f"BAD BAD: curr map at 6,6,2 is {curr_map[x, y, z]}")
+                            if [x, y, z] == [6, 6, 2]:
+                                print(f"BLUEPRINT: curr map at 6,6,2 is {curr_map[x, y, z]}")
                             is_different = curr_map[x, y, z] != final_map[x, y, z]
                             final_is_walkable = final_map[x, y, z] == 0
                             lowest_z = z
