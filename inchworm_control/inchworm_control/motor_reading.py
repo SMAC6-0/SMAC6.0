@@ -4,7 +4,7 @@ from time import sleep
 
 servo_bus = ServoBus('/dev/ttyUSB0')
 
-# servo_bus.id_write(1, 3)
+# servo_bus.id_write(4, 2)
 
 motor_id = input("What motor's position would you like to read?")
 
