@@ -77,11 +77,10 @@ class SimData:
         """
         If the IW is at its goal, structure sends the IW a map snapshot
         """
-        print(Fore.GREEN + f"foot loc {inchworm.leading_foot_loc}, goal {inchworm.goal}, clear_path_com {inchworm.clear_path_com}, state {inchworm.state.value}")
         x, y, z = inchworm.leading_foot_loc
         if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 6):
-            print(f"we here. grid status:{self.current_map[x][y][z]}")
-            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
+            if ((self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value) or 
+                (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
                 # Send current_map to IW 
@@ -92,7 +91,8 @@ class SimData:
                 return True
 
     def paths_rm_add(self, inchworm): 
-        if inchworm.clear_path_com: # and self.map_sent_flag[inchworm.id]:
+        """Removes the IW's previous path and sends the new one. """
+        if inchworm.clear_path_com and self.map_sent_flag[inchworm.id]:
             if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and inchworm.state.value == 4:
                 x, y, z = inchworm.leading_foot_loc
                 # Update current_map by clearing the previous iw path 
@@ -102,10 +102,9 @@ class SimData:
                 # Add the new path to the struct's map
                 self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
                 x, y, z = inchworm.goal
-                self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
-
+                if inchworm.goal != SEED_BK:
+                    self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, inchworm.goal, map_data.GridStatus.INCOMING_BLOCK.value)
                 self.map_sent_flag[inchworm.id] = False
-                print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
                 return True
 
 

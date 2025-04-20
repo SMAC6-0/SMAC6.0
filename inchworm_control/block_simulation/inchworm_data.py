@@ -589,11 +589,17 @@ class Inchworm:
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
         if not SIMULATION:
+            # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
+            self.paths = [self.leading_foot_loc, self.lagging_foot_loc]
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
         self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
+        # For simulation. If no path is available, save the path as its own location 
+        if self.paths == []:
+            self.paths = [self.leading_foot_loc, self.lagging_foot_loc]
 
     def handle_no_blocks_to_place(self): 
         self.state = IW_STATE.STRUCTURE_COMPLETE
