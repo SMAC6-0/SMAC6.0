@@ -121,7 +121,7 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
 
     
     # Convert alpha angle from degrees to radians 
-    alpha = math.radians(alpha - 20)
+    alpha = math.radians(alpha - 10)
 
     # error catching: Robot cannot reach the point
     maxDistArmZ = L_BASE + L1 + L2 + L3 + L4 + L_ENDEFFECTOR # max Distance the arm can reach in z axis
