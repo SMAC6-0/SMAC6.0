@@ -108,12 +108,12 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
     """
 
     # These calculations are in inches 
-    L_BASE = 3.125  # base to joint 1
-    L1 = 1.4        # Joint 1 to Joint 2
-    L2 = 6.625      # Joint 2 to Joint 3
-    L3 = 6.625      # Joint 3 to Joint 4
-    L4 = 1.4        # Joint 4 to Joint 5
-    L_ENDEFFECTOR = 3.125  # Joint 5 to EE
+    L_BASE = 3.16  # base to joint 1
+    L1 = 1.15        # Joint 1 to Joint 2
+    L2 = 6.43      # Joint 2 to Joint 3
+    L3 = 6.67      # Joint 3 to Joint 4
+    L4 = 1.17        # Joint 4 to Joint 5
+    L_ENDEFFECTOR = 3.18  # Joint 5 to EE
 
     # extract the motor offsets from the yaml file
     inchworm_motor_offsets, inchworm_motor_bounds = load_inchworm_motor_offsets_bounds('/home/smac/robot_ws/src/SMAC6.0/inchworm_control/inchworm_control/inchworm_motor_config.yaml')
