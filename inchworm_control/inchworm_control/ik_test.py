@@ -268,12 +268,16 @@ class IkTest(Node):
 
         z_test = [1, 0, 1, EE_direction.DOWN.value]
 
+        x_test = [2, 0, 1, EE_direction.DOWN.value]
+
         # Start moving leading foot 
         pivot_foot = 1 
         self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
         self.move_to(current_pos, z_test, BLOCK_INTERFACING_TIME, pivot_foot) 
+
+        self.move_to(z_test, x_test, BLOCK_INTERFACING_TIME, pivot_foot) 
 
         # # Move forward and hover over the goal position 
         # self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
