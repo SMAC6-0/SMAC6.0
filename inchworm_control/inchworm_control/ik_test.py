@@ -109,7 +109,7 @@ class IkTest(Node):
             'TEST': self.test_step,
 
             # General Function
-            'GENERAL' : self.move_iw_general(),
+            # 'GENERAL' : self.move_iw_general(),
 
             # Inchworm movements
             'STEP_FORWARD': self.step_forward,
