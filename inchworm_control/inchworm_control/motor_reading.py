@@ -20,6 +20,6 @@ currTime = time()
 servo_bus.move_time_write(5, int(motor_pos), 1)
 while(time() - currTime < 1.0):
     print(servo_bus.pos_read(5))
-    sleep(0.25)
+    sleep(0.1)
 
 # print(servo_bus.id_read())
