@@ -109,7 +109,7 @@ class IkTest(Node):
             'TEST': self.test_step,
 
             # General Function
-            # 'GENERAL' : self.move_iw_general(),
+            'GENERAL' : self.move_iw_general(),
 
             # Inchworm movements
             'STEP_FORWARD': self.step_forward,
@@ -144,17 +144,32 @@ class IkTest(Node):
         """
         self.get_logger().info('Received command to "%s' % msg.data)
         try:
-            # Get the step action from the step_actions dictionary based on the received message
-            action = self.step_actions.get(msg.data)
+            tokens = [t.strip() for t in msg.data.split(',')]
 
-            if action:
-                # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
-                action()
-                # TODO: Determine when pivot_foot == 5 is passed into the step functions 
+            if tokens[0] == 'GENERAL' and len(tokens) == 5:
+                # Parse GENERAL movement command
+                step_type_str = tokens[1]
+                deltaX = int(tokens[2])
+                deltaY = int(tokens[3])
+                deltaZ = int(tokens[4])
+
+                # Convert string to STEP_TYPE enum (expects format like "STEP_TYPE.STEP_W_BLOCK")
+                step_type = eval(step_type_str)  # Caution: eval assumes trusted input
+
+                self.move_iw_general(step_type, deltaX, deltaY, deltaZ)
+
             else:
-                # Log a warning if the action is not recognized
-                self.get_logger().warn('Unknown command: %s' % msg.data)
-            sleep(1)
+                # Get the step action from the step_actions dictionary based on the received message
+                action = self.step_actions.get(msg.data)
+
+                if action:
+                    # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
+                    action()
+                    # TODO: Determine when pivot_foot == 5 is passed into the step functions 
+                else:
+                    # Log a warning if the action is not recognized
+                    self.get_logger().warn('Unknown command: %s' % msg.data)
+                sleep(1)
             
         except Exception as e:
             self.get_logger().error('Failed to move servo: "%s"' % str(e))
