@@ -264,9 +264,9 @@ class IkTest(Node):
         # above_goal = copy.deepcopy(goal)
         # above_goal[2] += 0.5
 
-        current_pos = [2, 0, 0, EE_direction.DOWN.value]
+        current_pos = [1, 0, 0, EE_direction.DOWN.value]
 
-        z_test = [2, 0, 1, EE_direction.DOWN.value]
+        z_test = [1, 0, 1, EE_direction.DOWN.value]
 
         # Start moving leading foot 
         pivot_foot = 1 
