@@ -79,9 +79,9 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
         #     inputY = CUBE_WIDTH * 1.0101 * goal_Y - 0.0204
         #     inputZ = (-0.0233 * (CUBE_WIDTH * goal_Z)**2) + (CUBE_WIDTH * 1.2747 * goal_Z) + 0.4137
         if (pivot_foot == 1):
-            inputX = CUBE_WIDTH * goal_X
+            inputX = CUBE_WIDTH * goal_X + 0.5
             inputY = CUBE_WIDTH * goal_Y
-            inputZ = CUBE_WIDTH * goal_Z
+            inputZ = CUBE_WIDTH * goal_Z + 1
         elif (pivot_foot == 5):
             inputX = CUBE_WIDTH * goal_X
             inputY = CUBE_WIDTH * goal_Y
@@ -109,10 +109,10 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
 
     # These calculations are in inches 
     L_BASE = 3.125  # base to joint 1
-    L1 = 1          # Joint 1 to Joint 2
+    L1 = 1.4        # Joint 1 to Joint 2
     L2 = 6.625      # Joint 2 to Joint 3
     L3 = 6.625      # Joint 3 to Joint 4
-    L4 = 1          # Joint 4 to Joint 5
+    L4 = 1.4        # Joint 4 to Joint 5
     L_ENDEFFECTOR = 3.125  # Joint 5 to EE
 
     # extract the motor offsets from the yaml file
