@@ -455,11 +455,11 @@ class IkTest(Node):
 
         current_pos = [1, 0, 0, EE_direction.DOWN.value]
 
-        z_test = [1, 0, 0.5, EE_direction.DOWN.value]
+        z_test = [1, 0, 1.5, EE_direction.DOWN.value]
 
-        x_test = [2, 0, 0.5, EE_direction.DOWN.value]
+        x_test = [2, 0, 1.5, EE_direction.DOWN.value]
 
-        z_test2 = [2, 0, 1, EE_direction.DOWN.value]
+        z_test2 = [2, 0, 0.9, EE_direction.DOWN.value]
 
         y_test = [2, 1, 1, EE_direction.DOWN.value]
 
