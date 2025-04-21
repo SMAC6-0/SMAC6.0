@@ -266,7 +266,7 @@ class IkTest(Node):
 
         current_pos = [2, 0, 0, EE_direction.DOWN.value]
 
-        z_test = [2, 0, 1, EE_direction.DOWN.value]
+        z_test = [2, 0, 1.5, EE_direction.DOWN.value]
 
         # Start moving leading foot 
         pivot_foot = 1 
