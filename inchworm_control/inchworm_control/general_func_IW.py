@@ -18,7 +18,6 @@ class EE_direction(Enum):
 class IW_MOVEMENTS(Enum):
     ATTACH_DETACH_SERVO = 1 # activate/release servos 
     MOVE_LEADING_FOOT = 2
-
     MOVE_FOLLOWING_FOOT = 3
 
 # Common positions the inchworm must travel to, with the format of [x, y, z, EE_direction] relative to the frame of the inchworm pivot foot. (units: num blocks, deg) 
@@ -33,243 +32,165 @@ PIVOT_OFF_BLOCK_ABOVE_HOME = [1, 0, 1.5, EE_direction.DOWN.value]
 PIVOT_ON_BLOCK_HOME_POSITION = [1, 0, -1, EE_direction.DOWN.value]  # From perspective of the pivot foot, which is on the block
 PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value]
 
+class IkTest:
+    # this is based of off the leading foot
+    def move_iw_general(self, step_type, deltaX, deltaY, deltaZ):
+        print(Fore.CYAN+f"Step type: {step_type} w/ deltaX, deltaY and deltaZ = {deltaX, deltaY, deltaZ} ")
 
-# this is based of off the leading foot
-def move_iw_general(step_type, deltaX, deltaY, deltaZ):
-    print(Fore.CYAN+f"Step type: {STEP_TYPE.STEP} w/ deltaX, deltaY and deltaZ = {deltaX, deltaY, deltaZ} ")
+        if abs(deltaX) > 1 or abs(deltaY) > 1 or abs(deltaZ) > 2:
+            raise Exception(f"Out of bounds. IW cannnot go to the position: {deltaX, deltaY, deltaZ}")
+        
+        pivot_foot = 1 # stores the pivot foot
+        holding_block = step_type in [STEP_TYPE.PLACE, STEP_TYPE.STEP_W_BLOCK] # True if these are the step_types, False otherwise
+        movements = [] # store the movements the IW is going to perform 
+        positions = [] # stores the list of positions the IW needs to go to
 
-    if abs(deltaX) > 1 or abs(deltaY) > 1 or abs(deltaZ) > 2:
-        raise Exception(f"Out of bounds. IW cannnot go to the position: {deltaX, deltaY, deltaZ}")
-    
-    # decide the movement
-    if deltaX == 1 and deltaY == 0 and deltaZ == 0: # move forward
-        leading_foot_goal = [deltaX + 1, deltaY, deltaZ, EE_direction.DOWN.value]
-        following_foot_home = [1, 0, deltaZ, EE_direction.DOWN.value]
-        following_foot_goal = [deltaX + 1, deltaY, deltaZ, EE_direction.DOWN.value]
-    elif deltaX == 0 and deltaY != 0 and deltaZ == 0: # turns
-        if deltaY < 0: # turn right
-            leading_foot_goal = [deltaX+1, deltaY, deltaZ, EE_direction.DOWN.value]
-            following_foot_home = [1, 0, 0, EE_direction.DOWN.value]
-            following_foot_goal = [deltaX + 1, - deltaY, deltaZ, EE_direction.DOWN.value]
-        else: # turn left
-            leading_foot_goal = [deltaX+1, deltaY, deltaZ, EE_direction.DOWN.value]
-            following_foot_home = [1, 0, 0, EE_direction.DOWN.value]
-            following_foot_goal = [deltaX + 1, - deltaY, deltaZ, EE_direction.DOWN.value]
-    elif deltaX == -1 and deltaY == 0: # turn around
-        leading_foot_goal = [deltaX - 1, deltaY, deltaZ, EE_direction.DOWN.value]
-        following_foot_home = []
-        following_foot_goal = []
-    else:
-        leading_foot_goal = [deltaX+1, deltaY, deltaZ, EE_direction.DOWN.value]
-        following_foot_home = [deltaX+1, deltaY, deltaZ, EE_direction.DOWN.value]
-        following_foot_goal = [deltaX + 1, deltaY, deltaZ, EE_direction.DOWN.value]
+        goals = self.get_foot_goals(deltaX, deltaY, deltaZ)
 
-    leading_foot_home = [1, 0, deltaZ, EE_direction.DOWN.value]
-    leading_foot_home_above = copy.deepcopy(leading_foot_home)
-    leading_foot_home_above[2] += 0.5
+        leading_foot_home = goals["leading_foot_home"]
+        leading_foot_home_above = goals["leading_foot_home_above"]
+        leading_foot_goal = goals["leading_foot_goal"]
+        leading_foot_goal_above = goals["leading_foot_goal_above"]
 
-    leading_foot_goal_above = copy.deepcopy(leading_foot_goal)
-    leading_foot_goal_above[2] += 0.5
+        following_foot_home = goals["following_foot_home"]
+        following_foot_home_above = goals["following_foot_home_above"]
+        following_foot_goal = goals["following_foot_goal"]
+        following_foot_goal_above = goals["following_foot_goal_above"]
+        # attach detach the feeties based on holding block and pivot foot 
+        print(Fore.RED + f"[Attach/Detach] pivot foot = {pivot_foot},holding block = {holding_block}, step = {step_type}")
 
-    if following_foot_home and following_foot_goal: # only copy if this is not empty
-        following_foot_home_above = copy.deepcopy(following_foot_home)
-        following_foot_home_above[2] += 0.5
-
-        following_foot_goal_above = copy.deepcopy(following_foot_goal)
-        following_foot_goal_above[2] += 0.5
-    else:
-        following_foot_goal_above = []
-        following_foot_home_above = []
-
-
-    # print(Fore.BLUE + "leading foot location", leading_foot_goal)
-    # print(Fore.BLUE + "leading foot above location", leading_foot_goal_above)
-    movements = [] # store the movements the IW is going to perform 
-    holding_block = False # is IW holding a block
-    prev_position = [] # stores the previous position of the IW
-    next_position = [] # stores the next position of the IW
-    positions = [] # stores the list of positions the IW needs to go to
-    pivot_foot = 1 # stores the pivot foot
-
-    if step_type == STEP_TYPE.PLACE or step_type == STEP_TYPE.STEP_W_BLOCK:
-        holding_block = True
-
-    # attach detach the feeties based on holding block and pivot foot 
-    print(Fore.RED + f"Attach and detach, pivot foot = {pivot_foot} and IW holding block is {holding_block} and step is {step_type}")
-
-    match step_type:
-        case STEP_TYPE.STEP: # handles the forward, backward, lefts and rights steps
-            positions.append(leading_foot_home)
-            positions.append(leading_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            # leading food is in place, activate necessary servos
-            movements.append(IW_MOVEMENTS.ATTACH_DETACH_SERVO)
-
-            positions.append(following_foot_goal)
-            positions.append(following_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            positions.append(following_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            positions.append(following_foot_home)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-
-        case STEP_TYPE.PLACE: # IW is holding a block!! 
+        if step_type in [STEP_TYPE.PLACE, STEP_TYPE.STEP_W_BLOCK]: # IW is holding a block! 
             leading_foot_home[2] = 1
             leading_foot_home_above[2] = 1.5
 
-            leading_foot_goal[2] += 1
-            leading_foot_goal_above[2] += 1
-
-            positions.append(leading_foot_home)
-            positions.append(leading_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            # leading food is in place, activate necessary servos
-            movements.append(IW_MOVEMENTS.ATTACH_DETACH_SERVO)
-
-            # TODO: change this code if you want the following foot to do something after it places a block 
-            # following_foot_goal = []
-            # following_foot_goal_above = []
-            # positions.append(following_foot_goal)
-            # positions.append(following_foot_goal_above)
-            # movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            # positions.append(following_foot_home_above)
-            # movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            # positions.append(following_foot_home)
-            # movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-        case STEP_TYPE.GRAB:
-            leading_foot_goal[2] += 1
-            leading_foot_goal_above[2] += 1
-
-            positions.append(leading_foot_home)
-            positions.append(leading_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
+        if step_type in [STEP_TYPE.GRAB, STEP_TYPE.STEP_W_BLOCK]: # IW is stepping with a block! 
             holding_block = True
-            # leading food is in place, activate necessary servos
-            movements.append(IW_MOVEMENTS.ATTACH_DETACH_SERVO)
-
-            following_foot_home[2] = -1
-            following_foot_home_above[2] = 0.5
-
-            following_foot_goal[2] -= 1
-            following_foot_goal_above[2] = 0.5
-
-            positions.append(following_foot_goal)
-            positions.append(following_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            positions.append(following_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-            positions.append(following_foot_home)
-            movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-            
-
-        case STEP_TYPE.STEP_W_BLOCK: # IW is holding a block!!
-            leading_foot_home[2] = 1
-            leading_foot_home_above[2] = 1.5
-
-            leading_foot_goal[2] += 1
-            leading_foot_goal_above[2] += 1
-
-            positions.append(leading_foot_home)
-            positions.append(leading_foot_home_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal_above)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            positions.append(leading_foot_goal)
-            movements.append(IW_MOVEMENTS.MOVE_LEADING_FOOT)
-
-            # leading food is in place, activate necessary servos
-            movements.append(IW_MOVEMENTS.ATTACH_DETACH_SERVO)
-
-            if following_foot_goal:
+            if following_foot_home or following_foot_goal:
                 following_foot_home[2] = -1
                 following_foot_home_above[2] = 0.5
 
                 following_foot_goal[2] -= 1
                 following_foot_goal_above[2] = 0.5
 
-                print(f"following foot goal {following_foot_goal}, above {following_foot_goal_above}")
+        if step_type not in [STEP_TYPE.STEP]: # IW leading foot ends on top of a block!
+            leading_foot_goal[2] += 1
+            leading_foot_goal_above[2] += 1
 
-                positions.append(following_foot_goal)
-                positions.append(following_foot_goal_above)
-                movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
+        # Store the positions and movements
+        positions += [leading_foot_home, leading_foot_home_above, leading_foot_goal_above, leading_foot_goal]
+        movements += [IW_MOVEMENTS.MOVE_LEADING_FOOT] * 3
+        # leading food is in place, activate necessary servos
+        movements.append(IW_MOVEMENTS.ATTACH_DETACH_SERVO)
 
-                positions.append(following_foot_home_above)
-                movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-                positions.append(following_foot_home)
-                movements.append(IW_MOVEMENTS.MOVE_FOLLOWING_FOOT)
-
-    # takes care of actual movements
+        if step_type not in [STEP_TYPE.PLACE]:
+            movements += [IW_MOVEMENTS.MOVE_FOLLOWING_FOOT] * 3
+            positions += [following_foot_goal, following_foot_goal_above, following_foot_home_above, following_foot_home]        
+        
+        self.move_motors(movements, positions, pivot_foot, holding_block, step_type)   
     
+    # -------------------------- ********************** --------------------------
+    # -------------------------- ***HELPER FUNCTIONS*** --------------------------
+    # -------------------------- ********************** --------------------------
 
-    for i in range(len(movements)):
-        if movements[i] == IW_MOVEMENTS.ATTACH_DETACH_SERVO: #now it's time to change the pivot foot
-            print(Fore.YELLOW + "Leading Foot is in place!")
-            pivot_foot = 5
-            print(Fore.RED + f"Attach and detach, pivot foot = {pivot_foot} and IW holding block is {holding_block} and step is {step_type}")
+    def get_foot_goals(self, deltaX, deltaY, deltaZ):
+        down = EE_direction.DOWN.value
 
+        # Default positions
+        leading_foot_home = [1, 0, deltaZ, down]
+        leading_foot_goal = [deltaX + 1, deltaY, deltaZ, down]
+        following_foot_home = [deltaX, deltaY, deltaZ, down]
+        following_foot_goal = [deltaX + 1, deltaY, deltaZ, down]
+
+        # decide the movement
+        if deltaX == 1 and deltaY == 0 and deltaZ == 0: # move forward
+            print("Move Forward")
+            following_foot_home = [deltaX, 0, deltaZ, down]
+        elif deltaX == 0 and deltaY != 0 and deltaZ == 0: # turns
+            following_foot_home = [deltaX + 1, 0, deltaZ, down]
+            if deltaY < 0: # turn right
+                print("Turn Right")
+                following_foot_goal = [deltaX + 1, - deltaY, deltaZ, down]
+            else: # turn left
+                print("Turn Left")
+                following_foot_goal = [deltaX + 1, - deltaY, deltaZ, EE_direction.DOWN.value]
+        elif deltaX == -1 and deltaY == 0: # turn around
+            print("Turn Around")
+            leading_foot_goal = [deltaX - 1, deltaY, deltaZ, down]
+            following_foot_home = []
+            following_foot_goal = []
+        # else:
+        #     print("Moveee")
+        #     following_foot_home = [deltaX + 1, deltaY, deltaZ, EE_direction.DOWN.value]
+        #     following_foot_goal = [deltaX + 1, deltaY, deltaZ, EE_direction.DOWN.value]
+
+        leading_foot_home_above = self.get_above_position(leading_foot_home)
+        leading_foot_goal_above = self.get_above_position(leading_foot_goal)
+
+        if following_foot_home and following_foot_goal: # only copy if this is not empty
+            following_foot_home_above = self.get_above_position(following_foot_home)
+            following_foot_goal_above = self.get_above_position(following_foot_goal)
         else:
-            prev_position = positions[i]
-            next_position = positions[i+1]
+            following_foot_goal_above = []
+            following_foot_home_above = []
 
-            if next_position == []: # empty 
-                break
+        # print(f"leading_foot_goal {leading_foot_goal} leading_foot_home: {leading_foot_home}, leading_foot_goal_above: {leading_foot_goal_above}, leading_foot_home_above: {leading_foot_home_above}," 
+        #     f"following_foot_goal: {following_foot_goal}, following_foot_home: {following_foot_home}, following_foot_goal_above: {following_foot_goal_above}, following_foot_home_above: {following_foot_home_above}")
+        return {
+            "leading_foot_goal": leading_foot_goal,
+            "leading_foot_home": leading_foot_home,
+            "leading_foot_goal_above": leading_foot_goal_above,
+            "leading_foot_home_above": leading_foot_home_above,
+            "following_foot_goal": following_foot_goal,
+            "following_foot_home": following_foot_home,
+            "following_foot_goal_above": following_foot_goal_above,
+            "following_foot_home_above": following_foot_home_above
+        }
+
+    def get_above_position(self, positon):
+        above_positon = copy.deepcopy(positon)
+        above_positon[2] += 0.5
+        return above_positon
+
+    def move_motors(self, movements, positions, pivot_foot, holding_block, step_type):
+        # takes care of actual movements
+        for i in range(len(movements)):
+            if movements[i] == IW_MOVEMENTS.ATTACH_DETACH_SERVO: #now it's time to change the pivot foot
+                print(Fore.YELLOW + "Leading Foot is in place!")
+                pivot_foot = 5
+                print(Fore.RED + f"[Attach/Detach] pivot foot = {pivot_foot},holding block = {holding_block}, step = {step_type}")
+
             else:
+                prev_position = positions[i]
+                next_position = positions[i+1]
+
+                if not next_position: # empty 
+                    break
+
                 print(f"do {movements[i]} from {prev_position} to {next_position}")
 
 if __name__ == "__main__":
-    # ik_test = IkTest()
-    # print(Fore.CYAN+"--------------------- STEP ---------------------")
-    # move_iw_general(STEP_TYPE.STEP, 1, 0, 0) # forward
-    # move_iw_general(STEP_TYPE.STEP, -1, 0, 0) # backwards
-    # move_iw_general(STEP_TYPE.STEP, 0, 1, 0) # left
-    # move_iw_general(STEP_TYPE.STEP, 0, -1, 0) # right 
+    ik_test = IkTest()
+    print(Fore.CYAN+"--------------------- STEP ---------------------")
+    ik_test.move_iw_general(STEP_TYPE.STEP, 1, 0, 0) # forward
+    ik_test.move_iw_general(STEP_TYPE.STEP, -1, 0, 0) # backwards
+    ik_test.move_iw_general(STEP_TYPE.STEP, 0, 1, 0) # left
+    ik_test.move_iw_general(STEP_TYPE.STEP, 0, -1, 0) # right 
     
-    # print(Fore.CYAN+"--------------------- PLACE ---------------------")
-    # move_iw_general(STEP_TYPE.PLACE, 1, 0, 2) # forward 1, 2 and 0 blocks high
-    # move_iw_general(STEP_TYPE.PLACE, -1, 0, 2) # backwards 1, 2 and 0 blocks high
-    # move_iw_general(STEP_TYPE.PLACE, 0, 1, 2) # left 0, 1, 2 blocks high
-    # move_iw_general(STEP_TYPE.PLACE, 0, -1, 2) # right 0, 1, 2 blocks high
+    print(Fore.CYAN+"--------------------- PLACE ---------------------")
+    ik_test.move_iw_general(STEP_TYPE.PLACE, 1, 0, 0) # forward 1, 2 and 0 blocks high
+    ik_test.move_iw_general(STEP_TYPE.PLACE, -1, 0, 0) # backwards 1, 2 and 0 blocks high
+    ik_test.move_iw_general(STEP_TYPE.PLACE, 0, 1, 0) # left 0, 1, 2 blocks high
+    ik_test.move_iw_general(STEP_TYPE.PLACE, 0, -1, 0) # right 0, 1, 2 blocks high
 
-    # print(Fore.CYAN+"--------------------- GRAB ---------------------")
-    # move_iw_general(STEP_TYPE.GRAB, 1, 0, 0) # forward
-    # move_iw_general(STEP_TYPE.GRAB, -1, 0, 0) # backwards # it can't do this
-    # move_iw_general(STEP_TYPE.GRAB, 0, 1, 0) # left
-    # move_iw_general(STEP_TYPE.GRAB, 0, -1, 0) # right 
+    print(Fore.CYAN+"--------------------- GRAB ---------------------")
+    ik_test.move_iw_general(STEP_TYPE.GRAB, 1, 0, 0) # forward
+    ik_test.move_iw_general(STEP_TYPE.GRAB, -1, 0, 0) # backwards 
+    ik_test.move_iw_general(STEP_TYPE.GRAB, 0, 1, 0) # left
+    ik_test.move_iw_general(STEP_TYPE.GRAB, 0, -1, 0) # right 
+
 
     print(Fore.CYAN+"--------------------- STEP W/ BLOCK ---------------------")
-    # move_iw_general(STEP_TYPE.STEP_W_BLOCK, 1, 0, 0) # forward
-    # move_iw_general(STEP_TYPE.STEP_W_BLOCK, -1, 0, 0) # backwards
-    # move_iw_general(STEP_TYPE.STEP_W_BLOCK, 0, 1, 0) # left
-    move_iw_general(STEP_TYPE.STEP_W_BLOCK, 0, -1, 0) # right 
+    ik_test.move_iw_general(STEP_TYPE.STEP_W_BLOCK, 1, 0, 0) # forward
+    ik_test.move_iw_general(STEP_TYPE.STEP_W_BLOCK, -1, 0, 0) # backwards
+    ik_test.move_iw_general(STEP_TYPE.STEP_W_BLOCK, 0, 1, 0) # left
+    ik_test.move_iw_general(STEP_TYPE.STEP_W_BLOCK, 0, -1, 0) # right 
