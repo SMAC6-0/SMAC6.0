@@ -77,6 +77,7 @@ class Inchworm:
 
         # Path planning relevant vars
         self.paths = [] # the list of coords
+        self.temp_path = []
         self.goal = [] # goal coord
         self.goal_progress_index = 0
         self.num_steps = 0
@@ -144,6 +145,7 @@ class Inchworm:
             elif self.goal == [-9, -9, -9]:
                 print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
                 path = []
+                self.goal = self.leading_foot_loc
                 return
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                 self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
@@ -202,7 +204,7 @@ class Inchworm:
         if self.step_num > self.num_steps: 
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
-            if self.goal_progress_index > 0:
+            if self.goal_progress_index > 0 and self.step_instructions:
                 step_str = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
 
@@ -591,9 +593,10 @@ class Inchworm:
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+        self.temp_path = [self.leading_foot_loc, self.lagging_foot_loc]
         if not SIMULATION:
             # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
-            self.paths = [self.leading_foot_loc, self.lagging_foot_loc]
+            self.paths = self.temp_path
             self.send_IW_path_to_block(self.clear_path_com, self.paths)
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
@@ -601,8 +604,8 @@ class Inchworm:
         self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
         # For simulation. If no path is available, save the path as its own location 
-        if self.paths == []:
-            self.paths = [self.leading_foot_loc, self.lagging_foot_loc]
+        if SIMULATION and self.paths == []:
+            self.paths = self.temp_path
 
     def handle_no_blocks_to_place(self): 
         self.state = IW_STATE.STRUCTURE_COMPLETE
@@ -639,9 +642,11 @@ class Inchworm:
 
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
+        self.step_instructions = []
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
         self.holding_block = False
+        self.goal = self.leading_foot_loc
 
         print(Fore.BLUE + f"IW{self.id}: Reset the path")
 
@@ -696,8 +701,9 @@ class Inchworm:
             return self.inchworm_gets_map()
     
     def is_Path_Available(self):
-        print(Fore.BLUE + f"IW{self.id}: Checking path availability... ")
-        if self.paths and self.goal:
+        print(Fore.BLUE + f"IW{self.id}: Checking path availability... {self.paths}")
+        print(self.paths != self.temp_path)
+        if self.paths and self.goal and self.paths != self.temp_path:
             return True
         else: 
             return False
