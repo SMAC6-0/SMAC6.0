@@ -260,10 +260,10 @@ class IkTest(Node):
         Testing variety of basic positions to tune IK
         """
         # positions
-        goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
-        above_goal = copy.deepcopy(goal)
-        above_goal[2] += 0.5
-        
+        # goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
+        # above_goal = copy.deepcopy(goal)
+        # above_goal[2] += 0.5
+
         z_test = [1, 0, 1, EE_direction.DOWN.value]
 
         # Start moving leading foot 
