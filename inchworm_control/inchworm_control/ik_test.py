@@ -468,11 +468,11 @@ class IkTest(Node):
         self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
-        self.move_to(current_pos, z_test, BLOCK_INTERFACING_TIME, pivot_foot) 
+        self.move_to(current_pos, z_test, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(z_test, x_test, BLOCK_INTERFACING_TIME, pivot_foot) 
+        self.move_to(z_test, x_test, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x_test, z_test2, BLOCK_INTERFACING_TIME, pivot_foot) 
+        self.move_to(x_test, z_test2, TRAVEL_TIME, pivot_foot)
 
         # # Move forward and hover over the goal position 
         # self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
