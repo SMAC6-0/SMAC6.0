@@ -568,7 +568,7 @@ class IkTest(Node):
         pivot_foot = 1 # the pivot foot 
 
         # turn 2 blocks on the left, this is from the perspective of pivot foot. Depending on the pivot foot it could be +/-2
-        leading_foot_goal = [0, 2, 0, EE_direction.DOWN.value] 
+        leading_foot_goal = [1, 1, 0, EE_direction.DOWN.value] 
         above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
         above_leading_foot_goal[2] += 0.5
 

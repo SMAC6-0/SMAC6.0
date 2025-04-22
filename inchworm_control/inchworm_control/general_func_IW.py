@@ -147,7 +147,7 @@ class IkTest:
             following_foot_home = [deltaX + 1, 0, deltaZ, down]
             if deltaY < 0: # turn right
                 print("Turn Right")
-                following_foot_goal = [deltaX + 1, - deltaY, deltaZ, down]
+                following_foot_goal = [deltaX, - deltaY, deltaZ, down]
             else: # turn left
                 print("Turn Left")
                 following_foot_goal = [deltaX + 1, - deltaY, deltaZ, EE_direction.DOWN.value]
@@ -232,8 +232,8 @@ class IkTest:
 if __name__ == "__main__":
     ik_test = IkTest()
     print(Fore.CYAN+"--------------------- STEP ---------------------")
-    ik_test.move_iw_general(STEP_TYPE.STEP, 1, 0, 0) # forward
-    ik_test.move_iw_general(STEP_TYPE.STEP, -1, 0, 0) # backwards
+    # ik_test.move_iw_general(STEP_TYPE.STEP, 1, 0, 0) # forward
+    # ik_test.move_iw_general(STEP_TYPE.STEP, -1, 0, 0) # backwards
     ik_test.move_iw_general(STEP_TYPE.STEP, 0, 1, 0) # left
     ik_test.move_iw_general(STEP_TYPE.STEP, 0, -1, 0) # right 
     
