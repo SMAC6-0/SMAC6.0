@@ -202,6 +202,7 @@ class IkTest(Node):
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
         if (current_pos[0]==final_pos[0] & current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
             fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
+            print("Fixing EE")
         else: 
             fix_EE_orientation = False # rotate the EE (motors 1 or 5)
 
@@ -613,7 +614,7 @@ class IkTest(Node):
         self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
 
         # Move down to the leading goal position
-        Print("Dropping down lead foot")
+        print("Dropping down lead foot")
         self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("-------------- Front leg is in place")
