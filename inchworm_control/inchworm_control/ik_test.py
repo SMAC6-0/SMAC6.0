@@ -200,13 +200,9 @@ class IkTest(Node):
         # This conditional makes it so that the EE does NOT rotate when the EE is moving straight up/down.  
         # This check is essential to make sure that the wires do not get tangled as the inchworm turns. 
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
-        print(f"Current pos X {current_pos[0]} Final pos X {final_pos[0]}")
-        print(f"Current pos Y {current_pos[1]} Final pos Y {final_pos[1]}")
         if (current_pos[0]==final_pos[0] and current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
             fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
-            print("Fixing EE")
         else:
-            print("Free rotate EE")
             fix_EE_orientation = False # rotate the EE (motors 1 or 5)
 
         current_pos = np.transpose(np.asarray(current_pos))
@@ -611,24 +607,21 @@ class IkTest(Node):
         self.latch_detach(pivot_foot) 
         
         # Leading foot moves straight up from board to "safe" location above the home position
-        print("Moving to Above Home")
         self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
         
         # Move from above the home position and turn 2 blocks on the left (hover)
-        # print("Moving to turn")
-        # self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
+        self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
 
         # Move down to the leading goal position
-        # print("Dropping down lead foot")
-        # self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
+        self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("-------------- Front leg is in place")
         sleep(1)
         
         # At this point, leading foot is back on the ground, with 1 grid cell between it and the other foot 
         # Next, the following foot moves 
-        # pivot_foot = 5 # now the pivot foot is 5
-        # self.latch_detach(pivot_foot)
+        pivot_foot = 5 # now the pivot foot is 5
+        self.latch_detach(pivot_foot)
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
@@ -638,15 +631,13 @@ class IkTest(Node):
 
         # lift the back foot from the board       
         # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
-        # print("Moving leg up")
-        # self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
+        self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
         
         # rotate the back feet while coming to the home position (hover)
-        # print("Turning")
-        # self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
+        self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
         
         # put the back feet on the board
-        # self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
+        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("movement complete: STEP_LEFT")
 
