@@ -220,6 +220,32 @@ class IkTest(Node):
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, pivot_foot, fix_EE_orientation)
     
+    def move_joints_fixEE(self, joint_angles, time):
+        """
+        Move motors to specified angles over a given time duration.
+
+        Args:
+            joint_angles(list): theta1, theta2, theta3, theta4, theta5 in degrees
+            time (float): Duration to reach the target angles (in seconds).
+        """
+        [theta1, theta2, theta3, theta4, theta5] = joint_angles
+        # self.motor_1.move_time_write(theta1, time)
+        self.motor_2.move_time_write(theta2, time)
+        self.motor_3.move_time_write(theta3, time)
+        self.motor_4.move_time_write(theta4, time)
+        # self.motor_5.move_time_write(theta5, time)
+
+        # Pause the program to allow the motors to finish moving. 
+        sleep(time)
+
+        print("----------------After Motor Angles-----------------------")
+        print(self.motor_1.pos_read(), 
+            self.motor_2.pos_read(), 
+            self.motor_3.pos_read(), 
+            self.motor_4.pos_read(), 
+            self.motor_5.pos_read())
+
+
     def move_joints(self, joint_angles, time):
         """
         Move motors to specified angles over a given time duration.
@@ -229,10 +255,10 @@ class IkTest(Node):
             time (float): Duration to reach the target angles (in seconds).
         """
         [theta1, theta2, theta3, theta4, theta5] = joint_angles
+        self.motor_1.move_time_write(theta1, time)
         self.motor_2.move_time_write(theta2, time)
         self.motor_3.move_time_write(theta3, time)
         self.motor_4.move_time_write(theta4, time)
-        self.motor_1.move_time_write(theta1, time)
         self.motor_5.move_time_write(theta5, time)
 
         # Pause the program to allow the motors to finish moving. 
@@ -269,7 +295,10 @@ class IkTest(Node):
             # running the inverseKinematics to get the joint angles
             joint_ang = inverseKinematics(x, y, z, alpha, pivot_foot, fix_EE_orientation) # the joint angles
             
-            self.move_joints(joint_ang, 0.5) # running the motors to get to the point
+            if fix_EE_orientation:
+                self.move_joints_fixEE(joint_ang, 0.5)
+            else:
+                self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
             sleep(1/10)
             toc = time.perf_counter()
