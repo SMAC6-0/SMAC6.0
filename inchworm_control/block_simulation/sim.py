@@ -53,12 +53,12 @@ key_g_pressed = False
 key_t_pressed = False  
 key_n_pressed = False 
 key_p_pressed, key_l_pressed = False, False
-key_k_pressed = False
+key_k_pressed, key_o_pressed = False, False
 key = None
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed
+    global key_g_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed, key_o_pressed
 
 
     # Generate the pyramid coordinates
@@ -116,23 +116,25 @@ def update():
     if held_keys["n"] and not key_n_pressed: 
         sim_data.detect_IW_collision()
         for inchworm in sim_data.existing_inchworms:  
-
-            if inchworm.paths:  # If there is a path, make the inchworm step through it
+             
+            if inchworm.paths and inchworm.leading_foot_loc != inchworm.paths[-1]:  # If there is a path, make the inchworm step through it
+                # print(f"the supposed path for IW{inchworm.id} (loc {inchworm.leading_foot_loc}): {inchworm.paths}")
                 x, y, z = inchworm.get_next_step() 
             else:               # Otherwise, just show the current location
                 x, y, z = inchworm.leading_foot_loc         
             simulate_leading_foot(inchworm, x, y, z)
             
-            IW_is_at_goal = sim_data.send_map_to_IW(inchworm)
-            if IW_is_at_goal: # clear the path visually before 
-                vis_IW_paths(inchworm, clear_path=True)
+            # If the IW reaches the structure, send map to IW 
+            sim_data.send_map_to_IW(inchworm)
 
             inchworm.update_state()
-            # Cheap hack to make inchworm not communicate with the structure twice
-            # if inchworm.state.value == 3: 
-            #     inchworm.update_state()
+            # Important: Update the state again after a path is found, so that it is communicated before the next IW comes along
+            if inchworm.state.value == 3: 
+                inchworm.update_state()
 
-            if sim_data.new_IW_paths_received(inchworm):
+
+            if sim_data.paths_rm_add(inchworm):
+                vis_IW_paths(inchworm, clear_path=True)
                 vis_IW_paths(inchworm)
 
         key_n_pressed = True
@@ -150,13 +152,47 @@ def update():
             inchworm.update_state()
             vis_IW_paths(inchworm)
 
+    prev_textures = {}
+    if held_keys["o"] and not key_o_pressed:
+        # Visualize what data the structure sees 
+        print("Pressed o")
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                if sim_data.current_map[x][y][0] > 10:
+                    already_placed_block = None
+                    for e in scene.entities:
+                        if hasattr(e, 'position') and e.position == Vec3(x, 0, y):
+                            already_placed_block = e
+                            break
+                        try: 
+                            prev_textures[(x,y,0)] = already_placed_block.texture
+                        except:
+                            print(f"trouble at cell {x,y}")
+                            print(f"Unexpected texture in path visualization: {already_placed_block.texture}")  # Debugging line
+                        delete_cube([x, y, 0])
+                        spawn_cube([x, y, 0], incoming_path_texture, color.hsv(1, 1, 1))
+                        print("modifying the textures")
+
+        key_o_pressed = True
+    
+    if not held_keys["o"] and key_o_pressed:
+        for coord, texture in prev_textures:
+            delete_cube(coord)
+            spawn_cube(coord, texture, color.hsv(1, 1, 1))
+
+        key_o_pressed = False
+
 def show_structure_map(): 
     """Show how the structure views the map. """
     pass
 
 def vis_IW_paths(inchworm, clear_path=False):
     """Visualize the IW's path, or clear it"""
-    for cell in inchworm.paths: #step in range(len(inchworm.paths)-1): 
+    if clear_path:
+        path = inchworm.clear_path_com
+    else:
+        path = inchworm.paths
+    for cell in path: #step in range(len(inchworm.paths)-1): 
         # cell = inchworm.paths[step]
 
         already_placed_block = None
@@ -199,7 +235,7 @@ def vis_IW_paths(inchworm, clear_path=False):
             block_texture = transition[already_placed_block.texture]
         except:
             print("trouble at cell ", cell)
-            print(f"Unexpected texture in path visualization: {already_placed_block.texture}")  # Debugging line
+            print(f"Unexpected texture in path visualization: {already_placed_block.texture} when clear_path = {clear_path}")  # Debugging line
         delete_cube(cell)
         spawn_cube(cell, block_texture, block_color)
 
@@ -310,9 +346,7 @@ def simulate_leading_foot(inchworm, x, y, z):
         # Checks for visuals at goal location
         if [already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z] == inchworm.goal:
             # IW reaches goal coords & places block 
-            pass
-            # last_block_original_texture = smart_block_texture
-            # new_texture = smart_block_texture 
+            new_texture = smart_block_texture 
         else:
             # The inchworm is not yet at the goal
             new_texture = check_block_color(already_placed_block.position.x, already_placed_block.position.y, already_placed_block.position.z)
@@ -427,8 +461,8 @@ if not SIMULATION:
         for x in range(6): 
             voxel = Voxel(position = (x, 0, z))
 else:
-    for z in range(21): # 5
-        for x in range(21): # 6 
+    for z in range(GRID_SIZE): # 5
+        for x in range(GRID_SIZE): # 6 
             voxel = Voxel(position = (x, 0, z))
     # spawn seed block & supply depot
     spawn_cube(SEED_BK, seed_block_texture)

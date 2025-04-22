@@ -32,7 +32,7 @@ class SimData:
         
         self.existing_inchworms = []
         self.initialized_inchworms = []
-        self.cleared_path_flags = {}
+        self.map_sent_flag = {} # Extra security to ensure paths are sent once, if map was sent first 
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
@@ -43,47 +43,46 @@ class SimData:
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
 
         # TODO: save self.final_structure to a file
-        print("Saving map in the json file")
+        print(Fore.GREEN + f"Saving map in the json file")
         with open("Final_Structure.json", "w") as final_map_file:
             json.dump(self.final_structure, final_map_file)
-    
+        
     def send_map_to_IW(self, inchworm): 
         """
-        If the IW is at its goal, structure removes the IW path from its map and sends the IW a map snapshot
+        If the IW is at its goal, structure sends the IW a map snapshot
         """
         x, y, z = inchworm.leading_foot_loc
-        # TODO: far future: check if IW is adjacent to blocks (use map_data.set_neighbors)
-        # If yes, get newly placed block's coords from iw 
+        if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 3 or inchworm.state.value == 6):
+            if ((self.current_map[x][y][z] != map_data.GridStatus.NOT_WALKABLE.value) or (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
+                # Update current_map w new block 
+                if inchworm.goal != SEED_BK:
+                    self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
+                # Send current_map to IW 
+                inchworm.current_map = copy.deepcopy(self.current_map)
 
-        # Structure verifies that block is in correct location 
-        if (inchworm.leading_foot_loc == inchworm.goal and inchworm.paths) or inchworm.state.value == 3: 
-            if (self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value):
-                # Update current_map by clearing the iw path 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=inchworm.id)
+                self.map_sent_flag[inchworm.id] = True
+                x, y, z = inchworm.goal
+                print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
+                return True
+
+    def paths_rm_add(self, inchworm): 
+        """Removes the IW's previous path and sends the new one. """
+        if inchworm.clear_path_com and self.map_sent_flag[inchworm.id]:
+            if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and (inchworm.state.value == 4 or inchworm.state.value == 3):
+                x, y, z = inchworm.leading_foot_loc
+                # Update current_map by clearing the previous iw path 
+                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.clear_path_com, iw_id=inchworm.id)
                 # Update current_map w new block 
                 self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
-
-            # Send current_map to IW 
-            inchworm.current_map = copy.deepcopy(self.current_map)
-
-            print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
-            self.cleared_path_flags[inchworm.id] = True # Path is cleared flag, meaning struct is set to receive updates with a new path 
-            return True
-
-    def new_IW_paths_received(self, inchworm): 
-        # Make sure the previous path is cleared at least once before this
-        if self.cleared_path_flags[inchworm.id] and inchworm.paths:  #inchworm.paths and inchworm.leading_foot_loc == inchworm.goal: 
-            self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
-            x, y, z = inchworm.goal
-            self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, [x, y, z], map_data.GridStatus.INCOMING_BLOCK.value)
-            print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
-            self.cleared_path_flags[inchworm.id] = False # This IW's paths now exist on the struct's map again
-            return True
-        else: 
-            # print("struct did not receive new IW path")
-            return False
-        # get path & new incoming block from iw - DIFFERENT FUNC 
-        # update current map with incoming block and paths 
+                # Add the new path to the struct's map
+                self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, inchworm.paths, inchworm.id)
+                x, y, z = inchworm.goal
+                if inchworm.goal != SEED_BK:
+                    self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, inchworm.goal, map_data.GridStatus.INCOMING_BLOCK.value)
+                self.map_sent_flag[inchworm.id] = False
+                x, y, z = inchworm.goal
+                print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
+                return True
 
     def detect_IW_collision(self): 
         """Raises an error if any of the inchworm feet are in the location of the other inchworms."""
@@ -103,9 +102,8 @@ class SimData:
             self.existing_inchworms[i].current_map = map_data.update_grid_status(self.existing_inchworms[i].current_map, SEED_BK)
 
             # For however many IWs exist, store flag in dictionary 
-            self.cleared_path_flags[i+1] = False # The key is i+1 to correspond to the IW ID
-        # print(Fore.GREEN + "inchworms spawned")
-        print(Fore.GREEN + f"existing inchworms: {self.existing_inchworms}")
+            self.map_sent_flag[i+1] = False # The key is i+1 to correspond to the IW ID
+        print(Fore.GREEN + f"{num_inchworms} inchworms successfully spawned")
 
     def get_next_steps(self): 
         """
