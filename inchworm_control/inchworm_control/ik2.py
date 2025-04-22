@@ -72,41 +72,179 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
         """
         if (pivot_foot == 1):
             # Here we go!
-            if goal_X <= 1:
-                inputX = CUBE_WIDTH * goal_X + 1.7
-            elif goal_X <= 2:
-                inputX = CUBE_WIDTH * 0.98 * goal_X + 1.2
-            else:
-                inputX = CUBE_WIDTH * 0.98 * goal_X + 1.2
+            # Doing steps forward first
+            if goal_Y == 0:
+                if goal_X == 1:
+                    if goal_Z == 0:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 1:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 1.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 2.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 3.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    else:
+                        print(f"Position not included Z: {goal_Z}")
+                elif goal_X == 2:
+                    if goal_Z == 0:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 1:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 1.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 2:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 2.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 3:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 3.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    else:
+                        print(f"Position not included Z: {goal_Z}")
+                else:
+                    print(f"Position not included X: {goal_X}")
 
-            if goal_Y <= 1:
-                inputY = CUBE_WIDTH * 1.2595 * goal_Y + 0.0249
-            elif goal_Y <= 2:
-                inputY = CUBE_WIDTH * 1.2595 * goal_Y + 0.0249
-            else:
-                inputY = CUBE_WIDTH * 1.2595 * goal_Y + 0.0249
+                inputY = CUBE_WIDTH * goal_Y + 0
 
-            if goal_Z <= 1:
-                inputZ = CUBE_WIDTH * goal_Z + 0.8
-            elif goal_Z <= 2:
-                inputZ = CUBE_WIDTH * 1.0786 * goal_Z - 0.0432
-            else:
-                inputZ = CUBE_WIDTH * 1.0786 * goal_Z - 0.0432
+            # Here are the turns
+            elif goal_Y == -1:
+                if goal_Z == 0:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 1:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 1.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                else:
+                    print(f"Position not included Z: {goal_Z}")
+                
+                inputX = CUBE_WIDTH * goal_X + 0 
             
+            elif goal_Y == 1:
+                if goal_Z == 0:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 1:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 1.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                else:
+                    print(f"Position not included Z: {goal_Z}")
+                
+                inputX = CUBE_WIDTH * goal_X + 0 
+            
+            else:
+                print(f"Position not included Y: {goal_Y}")
             
             
         elif (pivot_foot == 5):
-            inputX = CUBE_WIDTH * 1.0158 * goal_X - 0.0059
-            inputY = CUBE_WIDTH * 1.0101 * goal_Y - 0.0204
-            inputZ = (-0.0233 * (CUBE_WIDTH * goal_Z)**2) + (CUBE_WIDTH * 1.2747 * goal_Z) + 0.4137
-        # if (pivot_foot == 1):
-        #     inputX = CUBE_WIDTH * goal_X + 1.2
-        #     inputY = CUBE_WIDTH * goal_Y
-        #     inputZ = CUBE_WIDTH * goal_Z + 1.6
-        # elif (pivot_foot == 5):
-        #     inputX = CUBE_WIDTH * goal_X
-        #     inputY = CUBE_WIDTH * goal_Y
-        #     inputZ = CUBE_WIDTH * goal_Z
+            # Doing steps forward first
+            if goal_Y == 0:
+                if goal_X == 1:
+                    if goal_Z == -1:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == -0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    else:
+                        print(f"Position not included Z: {goal_Z}")
+                elif goal_X == 2:
+                    if goal_Z == -1:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == -0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    elif goal_Z == 0.5:
+                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 0
+                    else:
+                        print(f"Position not included Z: {goal_Z}")
+                else:
+                    print(f"Position not included X: {goal_X}")
+
+                inputY = CUBE_WIDTH * goal_Y + 0
+
+            # Here are the turns
+            elif goal_Y == -1:
+                if goal_Z == -1:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == -0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                else:
+                    print(f"Position not included Z: {goal_Z}")
+                
+                inputX = CUBE_WIDTH * goal_X + 0 
+            
+            elif goal_Y == 1:
+                if goal_Z == -1:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == -0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                elif goal_Z == 0.5:
+                    inputY = CUBE_WIDTH * goal_Y + 0
+                    inputZ = CUBE_WIDTH * goal_Z + 0
+                else:
+                    print(f"Position not included Z: {goal_Z}")
+                
+                inputX = CUBE_WIDTH * goal_X + 0 
+            
+            else:
+                print(f"Position not included Y: {goal_Y}")
         
         return [inputX, inputY, inputZ]
         
