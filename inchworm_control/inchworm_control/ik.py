@@ -168,9 +168,12 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
             theta5 = 0
         else: 
             if Py > 0: # Y value is positive aka turning left
+                print("Im hereeeee Turning left")
                 theta5 = theta1 + 45
-            else: 
+            elif (Py < 0): 
                 theta5 = theta1 - 45
+            else: 
+                theta5 = theta1
 
     elif pivot_foot == 5:
         #theta 5
