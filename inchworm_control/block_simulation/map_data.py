@@ -142,7 +142,8 @@ def update_grid_status(grid, coord, status: GridStatus=GridStatus.NOT_WALKABLE.v
         if status == GridStatus.INCOMING_BLOCK.value:
             grid[x][y][z] = GridStatus.INCOMING_BLOCK.value
             if z - 1 >= 0:
-                grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
+                if grid[x][y][z - 1] != 2:
+                    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
         elif status == GridStatus.SUPPLY_DEPOT.value:
             grid[x][y][z] = GridStatus.WALKABLE.value
             if z - 1 >= 0:
@@ -349,19 +350,25 @@ def is_valid_start_goal_3d(grid, start, goal, iw_id):
     Returns:
         (boolean): A boolean confirming or denying a coordinate. 
     """
+    # is_valid_start_bottom = is_valid_goal_bottom = True
+
     sx, sy, sz = start
     is_valid_start = ((grid[sx][sy][sz] == GridStatus.WALKABLE.value or 
                        grid[sx][sy][sz] == GridStatus.INCOMING_BLOCK.value or
                        grid[sx][sy][sz] == GridStatus.SUPPLY_DEPOT.value or
                        iw_id == GridStatus.which_inchworm(grid[sx][sy][sz])) and
                       is_valid_position_3d(grid, start))
+    # if sz - 1 >= 0:
+    #     is_valid_start_bottom = (grid[sx][sy][sz - 1] == GridStatus.NOT_WALKABLE.value)
     gx, gy, gz = goal
     is_valid_goal = ((grid[gx][gy][gz] == GridStatus.WALKABLE.value or 
                       grid[gx][gy][gz] == GridStatus.INCOMING_BLOCK.value or
                       grid[gx][gy][gz] == GridStatus.SUPPLY_DEPOT.value or
                       iw_id == GridStatus.which_inchworm(grid[gx][gy][gz])) and
                      is_valid_position_3d(grid, goal))
-    return is_valid_start and is_valid_goal
+    # if gz - 1 >= 0:
+    #     is_valid_goal_bottom = (grid[sx][sy][gz - 1] == GridStatus.NOT_WALKABLE.value)
+    return is_valid_start and is_valid_goal #and is_valid_goal_bottom and is_valid_start_bottom 
             
     
 def start_bfs_3d(grid, start, goal):

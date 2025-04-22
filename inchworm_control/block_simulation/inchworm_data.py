@@ -139,7 +139,7 @@ class Inchworm():
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
-        
+        print(f"IW1's grid status at [7,6,2] is {self.current_map[7][6][2]}")
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
             self.goal, priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
@@ -182,7 +182,7 @@ class Inchworm():
                     return
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-1], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
                 self.holding_block = False
                 if goal_path == []: 
                     return
@@ -205,6 +205,8 @@ class Inchworm():
             # Save the step instructions 
             self.step_instructions = step_instructions
             print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            x, y,z = self.goal
+            print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
             
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
@@ -216,7 +218,7 @@ class Inchworm():
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             step_type = ""
-            if self.goal_progress_index > 0:
+            if self.goal_progress_index > 0 and self.step_instructions:
                 step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
@@ -230,7 +232,9 @@ class Inchworm():
                 transform = orientation_transforms[self.orientation]
                 transformed_vector = transform(*step_change)
                 transformed_vector = list(map(int, transformed_vector))
-                print(f"change in world frame: {transformed_vector}")
+
+                prev_leading = self.leading_foot_loc
+                # print(f"change in world frame: {transformed_vector}")
                 self.leading_foot_loc = [self.leading_foot_loc[i] + transformed_vector[i] for i in range(len(transformed_vector))]  
                 # Update Inchworm Orientation with each step
                 self.orientation = map_data.get_orientation(step_change, self.orientation)
@@ -240,7 +244,7 @@ class Inchworm():
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
                     # If the inchworm is stepping up 
                     if step_change[2] > 0: 
-                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
+                        self.lagging_foot_loc[2] = (prev_leading[2] - self.leading_foot_loc[2]) if (prev_leading[2] - self.leading_foot_loc[2]) >= 0 else 0
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
@@ -255,7 +259,7 @@ class Inchworm():
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print(Fore.BLUE + f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            print( f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):
@@ -561,7 +565,9 @@ class Inchworm():
         if new_state != self.state:
             self.prev_state = self.state
             self.state = new_state
-            print(Fore.BLUE + f"IW{self.id}: State changed from {self.prev_state} to {self.state}")
+            print(Fore.BLUE + f"IW{self.id}: State changed from {self.prev_state.name} to {self.state.name}")
+        else: 
+            print(Fore.RED + f"IW{self.id} tried to change from {self.prev_state.name} to {self.state.name}")
     
     ##### Checkers and Handlers
 
@@ -650,8 +656,7 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-
-        self.set_state(IW_STATE.TRANSPORTING_BLOCK)
+        self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
@@ -733,7 +738,7 @@ class Inchworm():
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
-                self.holding_block = True
+                # self.holding_block = True
                 return True 
         return False
 
@@ -752,7 +757,7 @@ class Inchworm():
 
         if self.leading_foot_loc == self.goal: 
             print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
-            self.holding_block = False
+            # self.holding_block = False
             return True 
         else: 
             return False
