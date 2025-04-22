@@ -187,7 +187,7 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
         theta2 = - round(-theta4 + theta3 - alpha - math.pi/2, 2)
 
         # Joint 1 doesn't affect the pose 
-        if (not fix_EE_orientation): 
+        if (fix_EE_orientation): 
             theta1 = 0
         else: 
             if Py < 0: # Y value is negative aka turning left
