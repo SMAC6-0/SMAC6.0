@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from enum import Enum
 import copy
-from inchworm_control.config import *
+from config import *
 import map_data
 import blueprint as bp
 from time import sleep
