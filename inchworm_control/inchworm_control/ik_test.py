@@ -635,7 +635,7 @@ class IkTest(Node):
         self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
         
         # put the back feet on the board
-        self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
+        # self.move_to(ABOVE_HOME, HOME_POSITION, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("movement complete: STEP_LEFT")
 
