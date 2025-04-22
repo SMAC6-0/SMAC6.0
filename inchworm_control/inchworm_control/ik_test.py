@@ -201,9 +201,9 @@ class IkTest(Node):
         # This check is essential to make sure that the wires do not get tangled as the inchworm turns. 
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
         if (current_pos[0]==final_pos[0] & current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
-            fix_EE_orientation = False # do not rotate the EE (motors 1 or 5)
+            fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
         else: 
-            fix_EE_orientation = True # rotate the EE (motors 1 or 5)
+            fix_EE_orientation = False # rotate the EE (motors 1 or 5)
 
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
