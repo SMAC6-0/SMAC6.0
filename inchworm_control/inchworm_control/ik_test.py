@@ -45,7 +45,7 @@ PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value]
 
 
 BLOCK_INTERFACING_TIME = 1 # sec 
-TRAVEL_TIME = 4
+TRAVEL_TIME = 6
     
 class IkTest(Node):
     def __init__(self):
