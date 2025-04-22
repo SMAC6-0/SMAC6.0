@@ -79,19 +79,19 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
                         inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z - 0.3
                     elif goal_Z == 0.5:
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z + 0
                     elif goal_Z == 1:
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z + 0
                     elif goal_Z == 1.5:
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z + 0
                     elif goal_Z == 2.5:
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z + 0
                     elif goal_Z == 3.5:
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 0.4
                         inputZ = CUBE_WIDTH * goal_Z + 0
                     else:
                         print(f"Position not included Z: {goal_Z}")
