@@ -77,7 +77,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
                 if goal_X == 1:
                     if goal_Z == 0:
                         inputX = CUBE_WIDTH * goal_X + 0.5
-                        inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputZ = CUBE_WIDTH * goal_Z - 0.2
                     elif goal_Z == 0.5:
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
