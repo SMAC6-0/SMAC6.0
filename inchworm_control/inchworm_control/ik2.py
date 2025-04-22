@@ -71,6 +71,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, pivot_foot: in
             list: 3x1 list 
         """
         if (pivot_foot == 1):
+            print(f"Goals x: {goal_X} y: {goal_Y} z: {goal_Z}")
             # Here we go!
             # Doing steps forward first
             if goal_Y > -0.5 and goal_Y <= 0.5: # y = 1
