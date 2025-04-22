@@ -594,7 +594,7 @@ class IkTest(Node):
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
+        following_foot_goal = [-1, 1, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         above_following_foot_goal = copy.deepcopy(following_foot_goal)
         above_following_foot_goal[2] += 0.5
 
