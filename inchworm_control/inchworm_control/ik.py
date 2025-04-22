@@ -164,7 +164,7 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
         theta4 = round(theta2 + theta3 - alpha - math.pi/2, 2) 
 
         # Joint 5 doesn't affect the pose 
-        if (fix_EE_orientation): 
+        if fix_EE_orientation: 
             theta5 = 0
         else: 
             if Py > 0: # Y value is positive aka turning left
@@ -192,11 +192,11 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
         else: 
             if Py < 0: # Y value is negative aka turning left
                 print("Turning left")
-                theta1 = theta5 + (math.pi/2)
+                theta1 = theta5 - (math.pi/2)
                 print(f"Theta1: {math.degrees(theta1)} and Theta5: {math.degrees(theta1)}")
             elif (Py > 0): 
                 print("Turning right")
-                theta1 = theta5 - (math.pi/2)
+                theta1 = theta5 + (math.pi/2)
             else: 
                 print("Do nothing")
                 theta1 = theta5

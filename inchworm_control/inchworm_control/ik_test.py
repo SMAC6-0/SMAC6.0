@@ -605,12 +605,15 @@ class IkTest(Node):
         self.latch_detach(pivot_foot) 
         
         # Leading foot moves straight up from board to "safe" location above the home position
+        print("Moving to Above Home")
         self.move_to(HOME_POSITION, ABOVE_HOME, BLOCK_INTERFACING_TIME, pivot_foot) 
         
         # Move from above the home position and turn 2 blocks on the left (hover)
+        print("Moving to turn")
         self.move_to(ABOVE_HOME, above_leading_foot_goal, TRAVEL_TIME, pivot_foot)
 
         # Move down to the leading goal position
+        Print("Dropping down lead foot")
         self.move_to(above_leading_foot_goal, leading_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("-------------- Front leg is in place")
@@ -629,9 +632,11 @@ class IkTest(Node):
 
         # lift the back foot from the board       
         # EE moves straight up from just above the goal position as this is from the persepective of pivot foot 5 (aka, the following feet is 1 block away)
+        print("Moving leg up")
         self.move_to(following_foot_goal, above_following_foot_goal, BLOCK_INTERFACING_TIME, pivot_foot) 
         
         # rotate the back feet while coming to the home position (hover)
+        print("Turning")
         self.move_to(above_following_foot_goal, ABOVE_HOME, TRAVEL_TIME, pivot_foot)
         
         # put the back feet on the board
