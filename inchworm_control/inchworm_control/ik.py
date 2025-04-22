@@ -192,8 +192,10 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
         else: 
             if Py < 0: # Y value is negative aka turning left
                 theta1 = theta5 - (math.pi/2)
-            else: 
+            elif (Py > 0): 
                 theta1 = theta5 + (math.pi/2)
+            else: 
+                theta1 = theta5
 
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
