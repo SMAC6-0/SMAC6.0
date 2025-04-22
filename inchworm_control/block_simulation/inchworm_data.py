@@ -145,7 +145,7 @@ class Inchworm():
             self.goal, priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             print(Fore.MAGENTA + f"IW{self.id}: goal: {self.goal}")
             if self.goal == [-1, -1, -1]:
-                print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
+                print(Fore.MAGENTA + f"Other IWs finished the structure while IW{self.id} was looking for a path")
                 return
             elif self.goal == [-9, -9, -9]:
                 print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
@@ -771,21 +771,7 @@ class Inchworm():
             pass
     
     def is_structure_complete(self, curr_map, final_map):
-        print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-        curr_map = np.array(curr_map)
-        final_map = np.array(final_map)
-        
-        map_complete = True
-
-        for z in range(curr_map.shape[2]):
-            for x in range(curr_map.shape[0]):
-                for y in range(curr_map.shape[1]):
-                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
-                        if curr_map[x, y, z] != 2: 
-                            print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
-                            map_complete = False
-
-        print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
+        map_complete = map_data.is_structure_complete(curr_map, final_map)
         return map_complete
     
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------

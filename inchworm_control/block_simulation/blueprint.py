@@ -2,6 +2,7 @@ import numpy as np
 from collections import defaultdict
 from config import SEED_BK
 import json
+import map_data 
 
 # x: row in array (7 rows)
 # y: layer (6 layers)
@@ -50,7 +51,8 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
 
     elif curr_map.size == final_map.size:
         # The structure is complete
-        if np.array_equal(curr_map, final_map):
+        # if np.array_equal(curr_map, final_map):
+        if map_data.is_structure_complete(curr_map, final_map):
             return [-1,-1,-1], build_queue
         
         # TODO: implement prioritization of found structures

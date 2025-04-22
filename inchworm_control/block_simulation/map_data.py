@@ -369,7 +369,21 @@ def is_valid_start_goal_3d(grid, start, goal, iw_id):
     # if gz - 1 >= 0:
     #     is_valid_goal_bottom = (grid[sx][sy][gz - 1] == GridStatus.NOT_WALKABLE.value)
     return is_valid_start and is_valid_goal #and is_valid_goal_bottom and is_valid_start_bottom 
-            
+
+def is_structure_complete(curr_map, final_map):
+        curr_map = np.array(curr_map)
+        final_map = np.array(final_map)
+        
+        map_complete = True
+
+        for z in range(curr_map.shape[2]):
+            for x in range(curr_map.shape[0]):
+                for y in range(curr_map.shape[1]):
+                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
+                        if curr_map[x, y, z] != 2: 
+                            map_complete = False
+
+        return map_complete        
     
 def start_bfs_3d(grid, start, goal):
     """
