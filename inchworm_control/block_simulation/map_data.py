@@ -451,7 +451,7 @@ def determine_helper_blocks(grid, path_start, path_end, iw_id):
     # else:
     #     return path_coords
 
-def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int, priority_queue):
+def initiate_find_path(grid, leading_foot_loc, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int, priority_queue):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 

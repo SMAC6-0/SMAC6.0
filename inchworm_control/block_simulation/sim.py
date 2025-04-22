@@ -59,7 +59,7 @@ key = None
 
 # Updates every frame
 def update():
-    global key_g_pressed, key_h_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed
+    global key_g_pressed, key_h_pressed, key_l_pressed, key_t_pressed, key_p_pressed, key_n_pressed, key_k_pressed, key_o_pressed
 
 
     # Generate the pyramid coordinates

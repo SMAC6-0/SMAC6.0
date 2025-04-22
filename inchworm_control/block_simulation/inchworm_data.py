@@ -205,6 +205,7 @@ class Inchworm():
             # Save the step instructions 
             self.step_instructions = step_instructions
             print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
@@ -608,8 +609,7 @@ class Inchworm():
             self.send_IW_path_to_block(self.clear_path_com, self.paths)
         # TODO !!!!! 
         print(Fore.BLUE + f"IW{self.id}: Travelling to the supply")
-        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
-        print(Fore.BLUE + f"Current inchworm state: {self.state}")
+        self.set_state(IW_STATE.TRAVELLING_TO_SUPPLY)
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
@@ -639,8 +639,7 @@ class Inchworm():
             self.send_block_location()
             # pause so that the block has enough time to process the info
         
-        self.state = IW_STATE.TRANSPORTING_BLOCK
-        print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
+        self.set_state(IW_STATE.TRANSPORTING_BLOCK)
 
     def handle_transported_block(self):
         if not SIMULATION:
@@ -651,10 +650,7 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-        
 
-        # print(Fore.BLUE + "Travelling to the block location")
-        # IW begins travelling to block location
         self.set_state(IW_STATE.TRANSPORTING_BLOCK)
 
     def IW_clear_path(self):
@@ -670,27 +666,19 @@ class Inchworm():
 
         print(Fore.BLUE + f"IW{self.id}: Reset the path")
         
-        self.set_state(IW_STATE.PLACING_BLOCK)
+        # self.set_state(IW_STATE.PLACING_BLOCK)
 
     def handle_error(self):
         print(Fore.BLUE + f"IW{self.id}: OHHH NOOO, ERROR ERROR")
-
-        print(Fore.BLUE + f"IW{self.id}: Stop Inchworm")
-        # stop the inchworm
-        
-        print(Fore.BLUE + f"IW{self.id}: flash red LED")
-        # flash red Led 
+        print(Fore.BLUE + f"IW{self.id}: Stop Inchworm") # stop the inchworm
+        print(Fore.BLUE + f"IW{self.id}: flash red LED") # flash red Led 
 
         self.set_state(IW_STATE.IDLE)
     
     def handle_structure_complete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is complete YIppeee")
-
-        # stop the iW
-        print(Fore.BLUE + f"IW{self.id}: IW Stopped")
-        
-        # flash green light
-        print(Fore.BLUE + f"IW{self.id}: flash Green LED")
+        print(Fore.BLUE + f"IW{self.id}: IW Stopped") # stop the iW
+        print(Fore.BLUE + f"IW{self.id}: flash Green LED") # flash green light
 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
 
@@ -871,8 +859,6 @@ if not SIMULATION:
             feedback = feedback_msg.feedback
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
 
-
-
 def main(args=None):
     if not SIMULATION:
         rclpy.init(args=args)
@@ -892,4 +878,3 @@ def main(args=None):
 if __name__ == "__main__":
     main()
    
-
