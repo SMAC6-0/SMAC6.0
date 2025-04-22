@@ -202,7 +202,7 @@ class IkTest(Node):
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
         print(f"Current pos X {current_pos[0]} Final pos X {final_pos[0]}")
         print(f"Current pos Y {current_pos[1]} Final pos Y {final_pos[1]}")
-        if (current_pos[0]==final_pos[0] & current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
+        if (current_pos[0]==final_pos[0] and current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
             fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
             print("Fixing EE")
         else:
