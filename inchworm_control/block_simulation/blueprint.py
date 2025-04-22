@@ -93,9 +93,9 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
             return [-9, -9, -9], build_queue
                 
         # print(sorted_coords)  
-        print(f" Queue: {build_queue}")              
-        next_block = build_queue[0]
-        print(f"next block: {next_block} for queue {build_queue}")
+        # print(f" Queue: {build_queue}")              
+        next_block = build_queue[0] # This also pops from the build_queue
+        # print(f"next block: {next_block} for queue {build_queue}")
 
         if last_block == next_block:
             repeat_count += 1
@@ -112,7 +112,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
             print(f"block: {last_block} count: {repeat_count}")
         
         build_queue.pop(0) # get rid of next block for other iws
-        print(f"Selected block: {next_block}, Queue: {build_queue}")
+        # print(f"Selected block: {next_block}, Queue: {build_queue}")
         return list(next_block), build_queue
     return [-9, -9, -9]
 

@@ -139,11 +139,11 @@ class Inchworm():
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
-        print(f"IW1's grid status at [7,6,2] is {self.current_map[7][6][2]}")
+        print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - start of plan_path()")
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
             self.goal, priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            
+            print(Fore.MAGENTA + f"IW{self.id}: goal: {self.goal}")
             if self.goal == [-1, -1, -1]:
                 print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
                 return
@@ -152,11 +152,6 @@ class Inchworm():
                 path = []
                 self.goal = self.leading_foot_loc
                 return
-                
-            if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
-                self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
-                # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
             is_traveling = True
             self.goal = next_goal
@@ -166,7 +161,7 @@ class Inchworm():
 
         # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
-        
+        print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - bleh")
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -180,6 +175,13 @@ class Inchworm():
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
                 if bd_path == []: 
                     return
+                
+                print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - before incoming")
+                if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
+                    self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
+                    # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
+                    self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
+                print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - after incoming")
                 
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
@@ -567,7 +569,7 @@ class Inchworm():
             self.state = new_state
             print(Fore.BLUE + f"IW{self.id}: State changed from {self.prev_state.name} to {self.state.name}")
         else: 
-            print(Fore.RED + f"IW{self.id} tried to change from {self.prev_state.name} to {self.state.name}")
+            print(Fore.BLUE + f"IW{self.id} *tried* to change from {self.state.name} to the inputted {new_state.name}")
     
     ##### Checkers and Handlers
 
@@ -597,9 +599,7 @@ class Inchworm():
 
         else: # this happens first 
             # Find & path plan to seed block 
-            self.plan_path(SEED_BK)
-
-        
+            self.plan_path(SEED_BK)        
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")

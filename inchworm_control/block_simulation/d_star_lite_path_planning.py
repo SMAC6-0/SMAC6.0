@@ -149,7 +149,7 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    # print(Fore.CYAN + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
+                    print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
                     if neighbor.g + neighbor.cost < min_cost:
                         min_cost = neighbor.g + neighbor.cost
                         next_cell = neighbor
