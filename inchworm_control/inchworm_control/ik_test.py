@@ -255,11 +255,11 @@ class IkTest(Node):
             time (float): Duration to reach the target angles (in seconds).
         """
         [theta1, theta2, theta3, theta4, theta5] = joint_angles
-        self.motor_1.move_time_write(theta1, time)
-        self.motor_2.move_time_write(theta2, time)
-        self.motor_3.move_time_write(theta3, time)
-        self.motor_4.move_time_write(theta4, time)
-        self.motor_5.move_time_write(theta5, time)
+        self.motor_1.move_time_write(theta1, time, False)
+        self.motor_2.move_time_write(theta2, time, False)
+        self.motor_3.move_time_write(theta3, time, False)
+        self.motor_4.move_time_write(theta4, time, False)
+        self.motor_5.move_time_write(theta5, time, False)
 
         # Pause the program to allow the motors to finish moving. 
         sleep(time)
