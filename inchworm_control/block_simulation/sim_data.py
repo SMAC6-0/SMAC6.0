@@ -68,7 +68,7 @@ class SimData:
     def paths_rm_add(self, inchworm): 
         """Removes the IW's previous path and sends the new one. """
         if inchworm.clear_path_com and self.map_sent_flag[inchworm.id]:
-            if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and inchworm.state.value == 4:
+            if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and (inchworm.state.value == 4 or inchworm.state.value == 3):
                 x, y, z = inchworm.leading_foot_loc
                 # Update current_map by clearing the previous iw path 
                 self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, inchworm.clear_path_com, iw_id=inchworm.id)

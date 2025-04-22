@@ -517,7 +517,7 @@ class Inchworm:
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
                     self.IW_clear_path()
-                    if self.is_structure_complete(): # structure is complete
+                    if self.is_structure_complete(self.current_map, self.final_structure): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
                         self.handle_structure_incomplete()
@@ -578,7 +578,7 @@ class Inchworm:
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-        self.temp_path = [self.leading_foot_loc, self.lagging_foot_loc]
+        self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
         if not SIMULATION:
             # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
             self.paths = self.temp_path
@@ -586,11 +586,12 @@ class Inchworm:
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
-        self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
+        self.IW_clear_path()
         self.plan_path()
         # For simulation. If no path is available, save the path as its own location 
         if SIMULATION and self.paths == []:
             self.paths = self.temp_path
+        # print(self.current_map)
 
     def handle_no_blocks_to_place(self): 
         self.state = IW_STATE.STRUCTURE_COMPLETE
@@ -738,10 +739,10 @@ class Inchworm:
         else: 
             pass
     
-    def is_structure_complete(self):
+    def is_structure_complete(self, curr_map, final_map):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-        curr_map = np.array(self.current_map)
-        final_map = np.array(self.final_structure)
+        curr_map = np.array(curr_map)
+        final_map = np.array(final_map)
         
         map_complete = True
 
