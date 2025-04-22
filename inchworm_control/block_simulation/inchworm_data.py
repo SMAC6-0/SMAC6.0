@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from enum import Enum
 import copy
 from config import *
@@ -6,34 +7,38 @@ import blueprint as bp
 from time import sleep
 import serial
 import struct
+import json
 from colorama import Fore, init
+import numpy as np
 init(autoreset=True)
+if not SIMULATION:
+    import rclpy
+    from rclpy.action import ActionClient
+    from rclpy.node import Node
+    from actions_messages.action import Inchwormpath
+    from actions_messages.msg import Step
 
 ###### UART stuff
 UART_BAUD = 9600 # config
 
-# Pins 
-# GPIO 15, pin 8 = RX green wire 
-# GPIO 14, pin 10 = TX yellow wire
-# ground = Pin 14
-# test 
+INCHWORM_MOVED = True # setting this to True so it can bypass all the movements for debugging 
+
+test_path_delete = [[5, 1, 0], [4, 1, 0], [3, 1, 0], [2, 1, 0], [1, 1, 0],]
 
 class UART_CODES(Enum):
     StartByte=0xAA 
     Initialization=0xFA
     BeingPlaced=0xFB 
     MapSnapshot=0xFC
-    NewBlock=0xFD
+
     Changes=0xFE
     Failed=0xFF
+    NewInchworm=0xEF
 
-class BLOCK_STATUS(Enum): # holds the status of the block 
-    Unplaced = 0
-    Placing = 2
-
-next_block_location = [2, 3, 2] # location of next block, need to change this with blueprint algo dummy valueeee
 IW_identifier = 1 # this is the idenifier that goes infornt of the message to be sent to the block 
-IW_message_counter = 0 # this is the messgae counter for sending data, IK's message counter increases
+
+
+dummy_block_location = [1, 0, 1] # testing value #TODO: change this later
 
 # Inchworm states
 class IW_STATE(Enum):
@@ -46,7 +51,8 @@ class IW_STATE(Enum):
     ERROR = 7
     STRUCTURE_COMPLETE = 8
 
-PATH_PLANNING_TIMER = 3
+PATH_PLANNING_TIMER = 5
+COMMUNICATION_TIMER = 0.5 # DO NOT CHANGE THIS ANY LESS THAN 0.4
 
 lagging_transform = {
     InchwormOrientation.NORTH: lambda x, y, z: (x, y - 1, z),  
@@ -55,7 +61,7 @@ lagging_transform = {
     InchwormOrientation.WEST: lambda x, y, z: (x + 1, y, z) 
 }
 
-class Inchworm:
+class Inchworm():
     next_id = 1
     inchworm_list = []
     
@@ -78,12 +84,17 @@ class Inchworm:
 
         # Path planning relevant vars
         self.paths = [] # the list of coords
+        self.temp_path = []
         self.goal = [] # goal coord
         self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
+        self.next_block_loc = [] # stores the location of next block
         # self.found_structures = []
         # self.misc_blocks = []
+        self.iw_path_id = map_data.GridStatus.inchworm_path(self.id) 
+        self.clear_path_com = [] # stores the list of path to send to the blocks to clear from the map 
+        self.IW_message_counter = 1 # this is the messgae counter for sending data, IW's message counter increases
 
         # Leg locations for the inchworm. 
         self.leading_foot_loc = location
@@ -92,9 +103,8 @@ class Inchworm:
         # pertaining to the state machine 
         self.prev_state = None
         self.state = IW_STATE.INITIALIZATION
-        self.initilization_flag = True
         self.print_flag = True
-        self.seed_block_flag = True
+        self.iw_reached_seed_block_flag = False # flag to make sure IW reached the seed block and can now request map
 
         
         Inchworm.next_id += 1
@@ -106,21 +116,26 @@ class Inchworm:
         else: 
             # These are vars that the simulation uses to simulate each of the inchworm feet
             self.last_cell, self.last_bk_og_texture, self.last_cell_2, self.last_bk_og_texture_2, self.spawned, self.prev_held_block_loc = None, None, None, None, False, [0,0,0]
-    
+
     def __del__(self):
         """
         Deletion of inchworm in the list of inchworms.
         """
         Inchworm.inchworm_list = [iw for iw in Inchworm.inchworm_list if iw.id != self.id]
-
-    def send_my_next_steps(self): 
-        """ Send IW path and the corresponding incoming block to the structure. """ 
-        if not SIMULATION: 
-            # TODO @ SAKSHI & MO: UART COMMUNICATION
-            pass
     
+    def dummy_IW_move(self):
+        make_IW_move = input("Make IW move? (y/n) \n")
+        if make_IW_move.lower() == 'y':
+            self.get_next_step()
+            return True
+        elif make_IW_move.lower() == 'n':
+            return False
+        else:
+            print("Invalid input. Please answer with 'yes' or 'no'.")
+
     def plan_path(self, next_goal: tuple[int, int, int] = None): 
-        """ Plan path from current location to specified goal. """
+        """ Plan path from current location to specified goal. 
+            Path planning typically starts from the pivot foot to avoid unnecessary walking on the structure"""
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
@@ -135,9 +150,11 @@ class Inchworm:
             elif self.goal == [-9, -9, -9]:
                 print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
                 path = []
+                self.goal = self.leading_foot_loc
                 return
                 
             if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
+                self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                 # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
@@ -154,10 +171,10 @@ class Inchworm:
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id, priority_snapshot)
+                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id, priority_snapshot)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id, priority_snapshot)
+                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id, priority_snapshot)
                 # self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
@@ -165,8 +182,8 @@ class Inchworm:
                     return
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
-                # self.holding_block = False
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-1], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
+                self.holding_block = False
                 if goal_path == []: 
                     return
                 goal_path.pop(0) # Remove repeat coord
@@ -186,76 +203,58 @@ class Inchworm:
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
             
             # Save the step instructions 
-            step_getter(step_instructions)
-            if SIMULATION: # Avoid unnecessary data usage by only saving step instructions twice in simulation. 
-                # Saving the step instructions like this enables the step instructions to be stored for *each* simulated inchworm, rather than just one at a time 
-                # (Storing the step instructions to a separate file is a limited to just one IW if running simulation.) 
-                # TODO: determine if storing to steps.txt is really necessary? 
-                self.step_instructions = step_instructions
-                print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            self.step_instructions = step_instructions
+            print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
-
-    def get_next_point(self): 
-        """ 
-        Returns the set of the next points of inchworm travel. Used for stepping through path for sim.
-        """
-        if self.goal_progress_index > 0:
-            self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point
-            self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-
-            # self.lagging_foot_loc = self.paths[self.goal_progress_index - 1]
-        
-        x, y, z = self.leading_foot_loc
-        self.goal_progress_index += 1
-        
-        if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-            self.holding_block = True
-        elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            self.holding_block = False
-        
-        if self.holding_block and [x, y, z] != self.goal:
-            z = z + 1
-        return x, y, z
     
     def get_next_step(self):
         """Returns the leading foot location as is used for the simulation"""
         if self.step_num > self.num_steps: 
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
+            step_type = ""
             if self.goal_progress_index > 0:
-                if SIMULATION: 
-                    step_str = self.step_instructions[self.step_num-1]
-                else: 
-                    file = open('steps.txt') 
-                    content = file.readlines() 
-                    step_str = content[self.step_num-1]
-                print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
-
+                step = self.step_instructions[self.step_num-1]
+                print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
+                step_type = step[0]
+                step_change = step[1]
+                orientation_transforms = {
+                    InchwormOrientation.NORTH: lambda x, y, z: [-y,  x, z],  
+                    InchwormOrientation.SOUTH: lambda x, y, z: [ y, -x, z],
+                    InchwormOrientation.EAST:  lambda x, y, z: [ x,  y, z],  
+                    InchwormOrientation.WEST:  lambda x, y, z: [-x, -y, z],  
+                }
+                transform = orientation_transforms[self.orientation]
+                transformed_vector = transform(*step_change)
+                transformed_vector = list(map(int, transformed_vector))
+                print(f"change in world frame: {transformed_vector}")
+                self.leading_foot_loc = [self.leading_foot_loc[i] + transformed_vector[i] for i in range(len(transformed_vector))]  
                 # Update Inchworm Orientation with each step
-                self.orientation = map_data.get_orientation(step_str, self.orientation)
-                prev_leading = self.leading_foot_loc
-                # print(f"prev_leading: {prev_leading}")
+                self.orientation = map_data.get_orientation(step_change, self.orientation)
 
-                self.leading_foot_loc = self.paths[self.goal_progress_index]  # Get the next point # step_num
-                if "PLACE" not in step_str:
+                # If the IW is NOT placing a block right now
+                if "PLACE" not in step_type:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
-                    if "UP" in step_str:
-                        self.lagging_foot_loc[2] = (prev_leading[2] - 1) if (prev_leading[2] - 1) >= 0 else 0
+                    # If the inchworm is stepping up 
+                    if step_change[2] > 0: 
+                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
             self.goal_progress_index += 1
             
-            if ([x, y, z] == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
+            # If the IW is grabbing a block, holding_block becomes true
+            if "GRAB" in step_type:
                 self.holding_block = True
-            # elif self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
-            #     self.holding_block = False
+            # Then, if placing a block, IW is no longer holding the block
+            elif "PLACE" in step_type: #self.holding_block & ([x, y, z] == [self.goal[0], self.goal[1], self.goal[2]-1]):
+                self.holding_block = False
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print(f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            print(Fore.BLUE + f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):
@@ -279,30 +278,27 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        for c in next_block_location:
+        # TODO replace this with self.goal
+        for c in self.next_block_loc:
             block_change += struct.pack('B', c)
 
-        block_change += struct.pack('B', BLOCK_STATUS.Unplaced.value) + struct.pack('B', IW_message_counter)
-
-        print(Fore.RED + "Block change", block_change)
+        block_change += struct.pack('B', map_data.GridStatus.NOT_WALKABLE.value) + struct.pack('B', self.IW_message_counter)
+        self.IW_message_counter += 1
 
         # calculate message length and checksum
-
-        msg_len = len(block_change).to_bytes(2,'little')
+        msg_len = (len(block_change) + 2).to_bytes(2,'little') # account for the checksum and end byte
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print(Fore.RED + "msg_len", msg_len)
-        print(Fore.RED + "checksum", checksum)
-
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
-
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
+        print(Fore.CYAN + f"Block location buffer {buffer}")
         self.IW_SERIAL.write(buffer)
-        print(Fore.RED + "block data sent!!")
-        # TODO: handle transmission error
+
+        sleep(COMMUNICATION_TIMER)
+        print(Fore.CYAN + f"block data sent!!")
 
     def send_block_being_placed(self):
         """
@@ -311,37 +307,191 @@ class Inchworm:
         buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
         # block_change is the data that needs to be sent
-        block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
 
-        for c in next_block_location:
-            block_change += struct.pack('B', c)
+        block_change += struct.pack('B', self.IW_message_counter)
+        self.IW_message_counter += 1
 
-        block_change += struct.pack('B', BLOCK_STATUS.Placing.value) + struct.pack('B', IW_message_counter)
-
-        print(Fore.RED + "Block change", block_change)
-
-        # calculate message length and checksum
-
-        msg_len = len(block_change).to_bytes(2,'little')
+        msg_len = (len(block_change)+2).to_bytes(2,'little')
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
-        print(Fore.RED + "msg_len", msg_len)
-        print(Fore.RED + "checksum", checksum)
-
-        # append msg_len, block_change, checksum, ending_code(enum) to buffer
-
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
+        print(Fore.CYAN + f"Being placed buffer: {buffer}")
 
         self.IW_SERIAL.write(buffer)
+        sleep(COMMUNICATION_TIMER)
 
-        print(Fore.RED + "Indicated block is in placing status!!")
+        print(Fore.CYAN + f"Indicated block is in placing status!!")
         # TODO: handle transmission error
 
     def received_block_confirmation(self): 
-        print(Fore.RED + "We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
-        pass
+        print(Fore.CYAN + f"We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
+        return True
+    
+    def send_IW_path_to_block(self, clear_path_com, iw_path):
+        """
+        Sends the IW path to the structure one grid at a time 
 
+        Args: 
+            clear_path_com [list[list]]: the path of the inchworm to be removed from the structure
+            iw_path [list[list]]: the path of the inchworm 
+        """
+        # TODO: IW_path is in X, Y, Z format!!
+        # iterate through the iw_path
 
+        # TODO: replace this
+        # print(Fore.CYAN + "length of clear IW path", len(clear_path_com))
+        for grid_cell in clear_path_com:
+            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+            # block_change is the data that needs to be sent
+            block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+            
+            for c in grid_cell:
+                block_change += struct.pack('B', c)
+
+            reverted_id = map_data.revert_status(self.current_map,grid_cell[0], grid_cell[1], grid_cell[2])
+            block_change += struct.pack('B', reverted_id) + struct.pack('B', self.IW_message_counter)
+            self.IW_message_counter += 1
+
+            msg_len = (len(block_change)+2).to_bytes(2,'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
+
+            # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+            print(Fore.CYAN + f"Clear Path Buffer {buffer}")
+
+            self.IW_SERIAL.write(buffer)
+
+            # delay to make sure all the data is transmitted 
+            sleep(COMMUNICATION_TIMER)
+
+        sleep(COMMUNICATION_TIMER)
+        print(Fore.CYAN + f"-------------------- actually send the path --------------------")
+        # print(Fore.CYAN + f"length of path: {len(iw_path)}")
+
+        for grid_cell in iw_path:
+            buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+            # block_change is the data that needs to be sent
+            block_change = struct.pack('B', IW_identifier) # indicate that an inchworm is sending this message
+
+            for c in grid_cell:
+                block_change += struct.pack('B', c)
+
+            block_change += struct.pack('B', self.iw_path_id) + struct.pack('B', self.IW_message_counter)
+            self.IW_message_counter += 1
+
+            msg_len = (len(block_change)+2).to_bytes(2,'little')
+            checksum = Inchworm.crc16(block_change).to_bytes(2, 'little')
+
+            # append msg_len, block_change, checksum, ending_code(enum) to buffer
+
+            buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
+            print(Fore.CYAN + f"IW Path Buffer: {buffer}")
+
+            self.IW_SERIAL.write(buffer)
+
+            # delay to make sure all the data is transmitted 
+            sleep(COMMUNICATION_TIMER)
+
+    def inchworm_gets_map(self):
+        print(Fore.CYAN + f"Getting the map RAHHHHHHHHHHH")
+
+        # Receiving Map Snapshot from Structure
+        buffer = []
+        msgLenBytes = []
+        msgLen = 0
+        msgLenCollected = True
+        msgLenReceivedCounter = 0
+        bytesRead = 0
+        collecting_data = False
+        while True:
+            # print(Fore.CYAN + self.IW_SERIAL.read(1))
+            byte = self.IW_SERIAL.read(1)           #read serial port
+
+            if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)): # and not collecting_data:  # Start byte detected
+                buffer = []  
+                bytesRead = 0
+                msgLenCollected = False
+                msgLenBytes = []
+                msgLenReceivedCounter = 0
+                
+            elif not msgLenCollected and msgLenReceivedCounter < 2: # Collecting Message Length
+                msgLenBytes.append(byte[0])
+                msgLenReceivedCounter += 1
+                if msgLenReceivedCounter == 2:
+                    # Convert collected bytes to integer (assuming big-endian format)
+                    msgLen = int.from_bytes(bytes(msgLenBytes), 'little')
+                    msgLenCollected = True
+                    collecting_data = True
+
+            elif byte == bytearray(struct.pack('B', UART_CODES.MapSnapshot.value)) and  bytesRead >= msgLen: # Receiving Map Snapshot from Structure
+                if collecting_data:
+                    buffer = b''.join(buffer) # convert to bytes object
+                    checksum = Inchworm.get_checksum(buffer)
+                    calculated_check_sum = []
+                    calculated_check_sum += Inchworm.crc16(buffer[:-2]).to_bytes(2, 'little')
+                    calculated_check_sum = int.from_bytes(bytes(calculated_check_sum), 'big')
+
+                    if checksum == calculated_check_sum:
+                        self.current_map = Inchworm.process_received_map_snapshot(buffer)
+                        return True
+                    else:
+                        print(Fore.CYAN + "CHECKSUM DID NOT MATCH")
+                        self.state = IW_STATE.ERROR
+                        return False
+
+                collecting_data = False
+            
+            elif collecting_data:
+                buffer.append(byte) # Append bytes to buffer if between start and end delimiters
+                bytesRead += 1
+    
+    @staticmethod
+    def process_received_map_snapshot(map_data):
+        print(Fore.CYAN + f"Processing map data")
+        # TODO: CHANGE THISSS PLSSS make generic instead of using JUST NUMBERS
+        layers, rows, cols = 8, 8, 4
+        array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
+        index = 0
+        for l in range(layers):
+            for r in range(rows):
+                for c in range(cols):
+                    if index < len(map_data):
+                        array[l][r][c] = map_data[index]
+                        index += 1
+        # print(Fore.CYAN + f"Received 3D Array: {array}")
+        return array  
+        
+
+    def request_map_snapshot(self):
+        print(Fore.CYAN + f"Gimme map plsss")
+        """
+        IW sends the Hex code to the block requesting the map
+        """
+        buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
+
+        # block_change is the data that needs to be sent
+        block_change = struct.pack('B', self.id) # indicate that an inchworm is sending this message
+
+        msg_len = len(block_change).to_bytes(2,'little')
+
+        buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
+
+        print(Fore.CYAN + f"Request Map Buffer: {buffer}")
+        self.IW_SERIAL.write(buffer)
+    
+    # Checksum protocol for the IW and Block communication
+    @staticmethod
+    def get_checksum(buffer): # Get checksum from buffer
+        checksum =[]
+        checksum += buffer[-2:]
+
+        checksum = int.from_bytes(bytes(checksum), 'big')
+        return checksum
+    
     # Checksum protocol for the IW and Block communication
     @staticmethod
     def crc16(data: bytes, poly=0x8408):
@@ -374,10 +524,10 @@ class Inchworm:
             case IW_STATE.IDLE:
                 self.handle_idle()
             case IW_STATE.INITIALIZATION:
-                if self.initilization_flag:
-                    self.handle_initilization()
-                if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                    self.handle_IW_gets_Map()
+                self.handle_initilization()
+                if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
+                    if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                        self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
@@ -396,7 +546,8 @@ class Inchworm:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    if self.is_structure_complete(): # structure is complete
+                    self.IW_clear_path()
+                    if self.is_structure_complete(self.current_map, self.final_structure): # structure is complete
                         self.handle_structure_complete()
                     else: # structure is incomplete
                         self.handle_structure_incomplete()
@@ -428,19 +579,14 @@ class Inchworm:
         print(Fore.BLUE + f"IW{self.id}: MOVINGGG TO SEED BLOCK: press n to step")
         if self.paths: # this happens second 
             # move IW in sim
-            if self.goal_progress_index >= len(self.paths): 
-                print(Fore.BLUE + f"IW{self.id}: Touching the seed block")
-                self.initilization_flag = False 
-                self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
-                self.paths = [] # Reset current path 
-                self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
-                self.step_num = 1
+            if MANUAL_TESTING:
+                self.dummy_IW_move()
+            if self.leading_foot_loc == self.goal: 
+                print(Fore.BLUE + "Touching the seed block")    
+                
+                # self.IW_clear_path()
 
-                print(Fore.BLUE + f"IW{self.id}: Reset the path. Transferring the block data")
-                # transfer the block location data 
-                # TODO: MOOO help 
-                # send a 1D array ended with the Initialization enum OxFA 
-                # flash block that it's in unplaced location
+                self.iw_reached_seed_block_flag = True
 
         else: # this happens first 
             # Find & path plan to seed block 
@@ -450,6 +596,7 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
+        self.IW_clear_path()
         self.plan_path()
         self.set_state(IW_STATE.PATH_PLANNING)
 
@@ -457,18 +604,29 @@ class Inchworm:
         # MOOOO HELPPP 
         print(Fore.BLUE + f"IW{self.id}: Path found. Sending the IW path to the structure")
         # IW sends it's path to the structure 
-        self.send_my_next_steps()
+        if not SIMULATION:
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
         # TODO !!!!! 
         print(Fore.BLUE + f"IW{self.id}: Travelling to the supply")
-        self.set_state(IW_STATE.TRAVELLING_TO_SUPPLY)
+        self.state = IW_STATE.TRAVELLING_TO_SUPPLY
+        print(Fore.BLUE + f"Current inchworm state: {self.state}")
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
+        self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
         if not SIMULATION:
+            # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
+            self.paths = self.temp_path
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         # or stay here until the IW gets a new map!!
         # MOOO HELPPP
+        self.IW_clear_path()
         self.plan_path()
+        # For simulation. If no path is available, save the path as its own location 
+        if SIMULATION and self.paths == []:
+            self.paths = self.temp_path
+        # print(self.current_map)
 
     def handle_no_blocks_to_place(self): 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
@@ -480,8 +638,12 @@ class Inchworm:
             print(Fore.BLUE + f"IW{self.id}: IW flashes block with it's location")
             self.send_block_location()
             # pause so that the block has enough time to process the info
-            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+        
+        self.state = IW_STATE.TRANSPORTING_BLOCK
+        print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
 
+    def handle_transported_block(self):
+        if not SIMULATION:
             if self.received_block_confirmation():
                 print(Fore.BLUE + f"IW{self.id}: IW sends a messgae indicating block is being placed")
                 # IW sends a messgae indicating block is being placed
@@ -489,20 +651,22 @@ class Inchworm:
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-
+        
 
         # print(Fore.BLUE + "Travelling to the block location")
         # IW begins travelling to block location
         self.set_state(IW_STATE.TRANSPORTING_BLOCK)
 
-    def handle_transported_block(self):
-        # print(f"current map {self.current_map}")
+    def IW_clear_path(self):
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
-        # print(f"after clearing {self.current_map}")
+
+        self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
+        self.step_instructions = []
         self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
-        # self.holding_block = False
+        self.holding_block = False
+        self.goal = self.leading_foot_loc
 
         print(Fore.BLUE + f"IW{self.id}: Reset the path")
         
@@ -530,10 +694,13 @@ class Inchworm:
 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
 
+        if not SIMULATION:
+            self.get_logger().info("Operation complete. Shutting down ROS.")
+            rclpy.shutdown()
+
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
-        # TODO: SEND PATH TO STRUCTURE
 
         self.set_state(IW_STATE.PATH_PLANNING)
 
@@ -544,42 +711,18 @@ class Inchworm:
         # return true if the IW got the map snapshot
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
-                x, y, z = self.leading_foot_loc
-                # if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
                 print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
                 return True
             return False
-        else:             
-            if self.seed_block_flag: # skip the seed block since Mo has to implement this in the block communication
-                got_map_snapshot = input("Did the inchworm get the map? (seed block) (yes/no): \n")
-                if got_map_snapshot.lower() == 'yes':
-                    self.seed_block_flag = False
-                    return True
-                elif got_map_snapshot.lower() == 'no':
-                    return False
-                else:
-                    print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
-            else:
-                # blah blah low level language 
-                # TODO: ask Mo for help when the IW gets the map SnapShot back 
-                # return true if the IW got the map snapshot
-                received_data = self.IW_SERIAL.read()              #read serial port
-                sleep(0.03)
-                data_left = self.IW_SERIAL.inWaiting()             #check for remaining byte
-                received_data += self.IW_SERIAL.read(data_left)
-                print (received_data)                   #print received data
-
-                # verify if it's a map?? 
-                is_a_map = True
-                if is_a_map:
-                    # call the update map
-                    # self.current_map = map_data.update_grid_status(self.current_map, coord)
-                    pass
-                # return is_a_map
+        else:                
+            # request the map
+            if self.state == IW_STATE.INITIALIZATION:
+                self.request_map_snapshot()
+            return self.inchworm_gets_map()
     
     def is_Path_Available(self):
-        print(Fore.BLUE + f"IW{self.id}: Checking path availability... ")
-        if self.paths and self.goal:
+        print(Fore.BLUE + f"IW{self.id}: Checking path availability... {self.paths}")
+        if self.paths and self.goal and self.paths != self.temp_path:
             return True
         else: 
             return False
@@ -591,6 +734,14 @@ class Inchworm:
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
         print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
         print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
+        if not SIMULATION:
+            if MANUAL_TESTING: 
+                self.dummy_IW_move()
+            # if INCHWORM_MOVED and MANUAL_TESTING:
+            #     IW_in_supply = input("Is iW in supply location? (yes/no) \n")
+            #     if IW_in_supply.lower() == 'yes':
+            #         self.get_next_step()
+        # TODO: Replace with actual implementation
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
@@ -598,10 +749,18 @@ class Inchworm:
                 return True 
         return False
 
-
     def is_IW_in_block(self):
         """return true if the IW is in the block location (check the flag and compare the current IW  location through dead reckoning and the block location)"""
         print(Fore.BLUE + f"IW{self.id}: Checking if at block location...")
+        # print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
+        # TODO: Replace with actual implementation
+        if not SIMULATION:
+            if MANUAL_TESTING: 
+                self.dummy_IW_move()
+            # if INCHWORM_MOVED and MANUAL_TESTING:
+            #     IW_in_supply = input("Is iW in block location? (yes/no) \n")
+            #     if IW_in_supply.lower() == 'yes':
+            #         self.get_next_step() 
 
         if self.leading_foot_loc == self.goal: 
             print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
@@ -609,13 +768,6 @@ class Inchworm:
             return True 
         else: 
             return False
-        # IW_in_block = input("Is iW in block location? (yes/no) \n")
-        # if IW_in_block.lower() == 'yes':
-        #     return True
-        # elif IW_in_block.lower() == 'no':
-        #     return False
-        # else:
-        #     print("Invalid input. Please answer with 'yes' or 'no'.")
 
     def incorrect_block_location(self):
         """ return true if the IW gets "incorrectly placed block" from the structure """
@@ -623,44 +775,121 @@ class Inchworm:
         if SIMULATION: 
             return not self.leading_foot_loc == self.goal 
         else: 
-            incorrect_block = input("IW got error 'Incorrectly Placed Block'? (yes/no) \n")
-            if incorrect_block.lower() == 'yes':
-                return True
-            elif incorrect_block.lower() == 'no':
-                return False
-            else:
-                print(Fore.BLUE + "Invalid input. Please answer with 'yes' or 'no'.")
             pass
     
-    def is_structure_complete(self):
+    def is_structure_complete(self, curr_map, final_map):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
+        curr_map = np.array(curr_map)
+        final_map = np.array(final_map)
+        
+        map_complete = True
 
-        # compare the current map and the blueprint
-        # return true if structure is complete and false otherwise
-        return self.current_map == self.final_structure
-        # structure_complete = input("Is structure complete? (yes/no) \n")
-        # if structure_complete.lower() == 'yes':
-        #     return True
-        # elif structure_complete.lower() == 'no':
-        #     return False
-        # else:
-        #     print("Invalid input. Please answer with 'yes' or 'no'.")
-        # pass
+        for z in range(curr_map.shape[2]):
+            for x in range(curr_map.shape[0]):
+                for y in range(curr_map.shape[1]):
+                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
+                        if curr_map[x, y, z] != 2: 
+                            print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
+                            map_complete = False
 
-def step_getter(step_instructions):
-    """
-    Write the steps to steps.txt
-    """
-    complete_steps = copy.deepcopy(step_instructions)
-    file_path = "steps.txt"
-    with open(file_path, 'w') as file:
-        for step in complete_steps:
-            file.write(f"{step}\n")
+        print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
+        return map_complete
+    
+## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
 
+if not SIMULATION:
+    class InchwormNode(Node): 
+        def __init__(self): 
+            # Initialize the ROS node the inchworm uses 
+            super().__init__('inchworm_node')
+            # Initialize the inchworm (state machine)
+            with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
+                final_structure = json.load(final_map_file)
+            self.inchworm = Inchworm(IW_1_ORIENTATION, final_structure, IW_1_LOC)
+
+            # Every second, update the state
+            self.create_timer(1, self.update_state)
+
+            # Set up the the inchworm node (state machine) as the client for the action of stepping
+            self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
+            self.get_logger().info("Inchworm Node Initialized")
+        
+        def update_state(self): 
+            """Update the inchworm state machine & send an existing set of step instructions to the motors """
+            self.inchworm.update_state()
+
+            if self.inchworm.step_instructions != []: 
+                self.send_goal(self.inchworm.step_instructions)
+                # Clear the step instructions so that the state continues updating, 
+                # but the instructions are not resent 
+                self.inchworm.step_instructions = []
+
+        def send_goal(self, all_steps):
+            """Send an action request for the 'inchworm_moving' action"""
+            # Initialize action goal message 
+            goal_msg = Inchwormpath.Goal()
+            goal_msg.all_steps = []
+
+            # Since steps contain complex data, split the step instructions 
+            for step_type, step_change in all_steps: 
+                # Create a Step msg to be put in a list
+                step_msg = Step(step_type=step_type, step_change=step_change)
+                goal_msg.all_steps.append(step_msg)
+
+            # Return error if the action server times out 
+            if not self._action_client.wait_for_server(timeout_sec=5.0):
+                self.get_logger().error("Action server (execute_path.py) not available")
+                return
+
+            # Asynchronously send goal msg. While it's running, receive feedback in this node through feedback_callback
+            self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+            # Upon successful receival of the action command, run the goal_response_callback
+            self._send_goal_future.add_done_callback(self.goal_response_callback)
+
+        def goal_response_callback(self, future):
+            """Runs upon successful receival of the goal command"""
+            goal_handle = future.result()
+            if not goal_handle.accepted:
+                self.get_logger().info('Goal rejected :(')
+                return
+
+            self.get_logger().info('Goal accepted :)')
+
+            # Asynchronously receive the result of the action
+            self._get_result_future = goal_handle.get_result_async()
+            # Upon successful completion of the action command, run the goal_result_callback
+            self._get_result_future.add_done_callback(self.get_result_callback)
+
+        def get_result_callback(self, future):
+            """Runs upon successful completion of the action"""
+            result = future.result().result
+            self.get_logger().info(f'Result: Completed? {result.completion_status}')
+            # rclpy.shutdown()
+
+        def feedback_callback(self, feedback_msg):
+            """Runs repeeatedly as the action runs, providing feedback"""
+            feedback = feedback_msg.feedback
+            self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
+
+
+
+def main(args=None):
+    if not SIMULATION:
+        rclpy.init(args=args)
+        inchworm_node = InchwormNode()
+        rclpy.spin(inchworm_node)
+    elif MANUAL_TESTING:
+        with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
+            final_structure = json.load(final_map_file)
+        inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
+        try:
+            inchworm.run()
+        except KeyboardInterrupt:
+            print(Fore.GREEN + "Stopping the inchworm system.") 
+        inchworm_node.destroy_node()
+    # rclpy.shutdown()
 
 if __name__ == "__main__":
-    inchworm = Inchworm(1, IW_1_ORIENTATION, None, None, IW_1_LOC)
-    try:
-        inchworm.run()
-    except KeyboardInterrupt:
-        print(Fore.GREEN + "Stopping the inchworm system.") 
+    main()
+   
+

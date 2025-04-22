@@ -109,13 +109,15 @@ def mark_depot_and_seed(grid):
     for i in range(len(BD_LOCS)):
         x, y, z = BD_LOCS[i]
         if is_valid_position_3d(grid, BD_LOCS[i]):
-            grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value
+            if z - 1 >= 0:
+                grid[x][y][z - 1] = GridStatus.SUPPLY_DEPOT.value #cell below
             grid[x][y][z] = GridStatus.WALKABLE.value
         else:
             raise ValueError(f"Error: depot location {BD_LOCS[i]} is out of bounds") 
         
     x, y, z = SEED_BK
-    grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value
+    if z - 1 >= 0:
+        grid[x][y][z - 1] = GridStatus.NOT_WALKABLE.value #cell below
     grid[x][y][z] = GridStatus.WALKABLE.value
     return grid
     
@@ -181,12 +183,10 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
         inchworm_path (list): A list of coordinates that an inchworm is taking
         iw_id: A specific inchworm ID. This determines what value GridStatus.inchworm_path() will be
     Returns:
-        grid (list): An updated 3D list (grid) of the current map snapshot.
-    """       
-    # If there is an inchworm path, remove the path status for every cell along the path except the goal cell
+        grid (list): An updated 3D list (grid) of the current map snapshot. 
+    """      
     if inchworm_path is not None:
-        targets = inchworm_path[:-1]  
-    # If no inchworm path is specified, clear the inchworm path from the whole grid 
+        targets = inchworm_path[:-1]  # Avoid last point as before
     else:
         targets = [
             (x, y, z)
@@ -198,7 +198,6 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
     for x, y, z in targets:
         value = grid[x][y][z]
         if GridStatus.is_inchworm_path(value):
-            # Revert status of inchworm path cells if it matches the IW ID whose path is being cleared. 
             if iw_id is None or GridStatus.which_inchworm(value) == iw_id:
                 grid[x][y][z] = revert_status(grid, x, y, z)
 
@@ -206,7 +205,7 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
 
 def revert_status(grid, x, y, z):
     """Revert the status of the grid cell at the specified location. """
-    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot 
+    # For effective path planning, the cell beneath the real supply depot is the one actually marked as the supply depot  
     if [x, y, z + 1] == BD_1_LOC: 
         return GridStatus.SUPPLY_DEPOT.value
     elif grid[x][y][z + 1] == GridStatus.INCOMING_BLOCK.value:
@@ -216,7 +215,7 @@ def revert_status(grid, x, y, z):
         return GridStatus.WALKABLE.value
     else: 
         return GridStatus.NOT_WALKABLE.value
-    
+
 def set_neighbors(allow_adjacent=True, allow_vertical=True, allow_vert_diagonal=True, allow_horz_diagonal=False, allow_alls_diagonal=False, allow_large_build=False):    
     """
     Sets the neighbors for use in (search) algorithms.
@@ -480,9 +479,12 @@ def initiate_find_path(grid, path_start, path_end, curr_orientation: InchwormOri
 
     steps = []
     # goes through each coordinate in path and retrieves the step to go from the current location to the next location
-    if path_coords:
+    if path_coords: 
         for i in range(len(path_coords) - 1):
             current_coord = path_coords[i]
+            if i == 0:
+                # The start of the path will be from the leading foot, but based on the possibilities from the lagging foot
+                current_coord = leading_foot_loc
             next_coord = path_coords[i + 1]
                 
             end_flag = bool(next_coord == path_end) # if it is done basically
@@ -501,56 +503,60 @@ def convert_coordinate_to_steps(current_coord, next_coord, orientation, holding_
         2: {1: "UP",        -1: "DOWN" }    #Z
     }
     
+    # dx -> left/right 
+    # dy -> forward/back 
+    # dz -> up/down
+    # These directions are based on the inchworm frame, which has the x axis pointing forwards 
+    # Transform world frame -> inchworm frame
     orientation_transforms = {
-        InchwormOrientation.NORTH: lambda x, y, z: [ x,  y, z],  
-        InchwormOrientation.SOUTH: lambda x, y, z: [-x, -y, z],
-        InchwormOrientation.EAST:  lambda x, y, z: [-y,  x, z],  
-        InchwormOrientation.WEST:  lambda x, y, z: [ y, -x, z],  
+        InchwormOrientation.NORTH: lambda x, y, z: [ y, -x, z],  
+        InchwormOrientation.SOUTH: lambda x, y, z: [-y,  x, z],
+        InchwormOrientation.EAST:  lambda x, y, z: [ x,  y, z],  
+        InchwormOrientation.WEST:  lambda x, y, z: [-x, -y, z],  
     }
     
-    # create instruction
-    instructions = [] 
+    # create a vector representing a change in leading foot position, relative to the inchworm's leading foot
     transform = orientation_transforms[orientation]
     transformed_vector = transform(*movement_vector)
+    transformed_vector = list(map(int, transformed_vector))
 
-    for axis in [2, 1, 0]: # prioritize Z, then Y, then X according to direction_mappings
-        # If there is change on this axis: 
-        if transformed_vector[axis] != 0:
-            coord_change = transformed_vector[axis]
-            direction_step = direction_mappings[axis][int(np.sign(coord_change))]
-            instructions.append(direction_step)
-            if coord_change > 1 or coord_change < -1:
-                instructions.append(str(coord_change))
-            # print(f"coord_change: {coord_change} for {axis} axis for Transition between {current_coord} & {next_coord} while {orientation.name}. resulting step: {direction_step}")
     # Determine the orientation based on the recent axis change
-    new_orientation = get_orientation(direction_step, orientation)
-    all_instructions = "_".join(instructions)
-    # print(f"transformed vector: {transformed_vector}")
-    # print(f"orientation: {updated_orientation}")
-    
+    new_orientation = get_orientation(transformed_vector, orientation)
+
+    step_type = ""
     #TODO: handle any block depot'
     if holding_block:
-        all_instructions = f"{all_instructions}_BLOCK"
+        step_type = f"{step_type}_W_BLOCK"
     
     # for bd_loc in BD_LOCS:
     if (next_coord == [BD_1_LOC[0], BD_1_LOC[1], BD_1_LOC[2]-1]):
-        all_instructions = f"GRAB_{all_instructions}"
+        step_type = f"GRAB" #{all_instructions}"
     elif holding_block and end_flag:
-        all_instructions = f"PLACE_{all_instructions}"
+        step_type = f"PLACE" #{all_instructions}"
     else:
-        all_instructions = f"STEP_{all_instructions}"
-    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {all_instructions} going {new_orientation.name}")
-    return [all_instructions], new_orientation
+        step_type = f"STEP{step_type}"
+    
+    # Debug print
+    # print(f"Transition between {current_coord} & {next_coord} while {orientation.name} --> {step_type} {transformed_vector} going {new_orientation.name}")
+    
+    return [(step_type, transformed_vector)], new_orientation
 
-def get_orientation(movement: str, orientation: InchwormOrientation):
-    if "RIGHT" in movement: 
-        return orientation.rotate(1)
-    elif "LEFT" in movement: 
-        return orientation.rotate(-1)
-    elif "BACK" in movement: 
+def get_orientation(transformed_vector, orientation: InchwormOrientation):
+    delta_x, delta_y = transformed_vector[0], transformed_vector[1]
+    if delta_y != 0: 
+        return orientation.rotate(-delta_y)
+    elif delta_x < 0: 
         return orientation.rotate(2)
-    else:
+    else: 
         return orientation
+    # if "RIGHT" in movement: 
+    #     return orientation.rotate(1)
+    # elif "LEFT" in movement: 
+    #     return orientation.rotate(-1)
+    # elif "BACK" in movement: 
+    #     return orientation.rotate(2)
+    # else:
+    #     return orientation
     
 def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
     """

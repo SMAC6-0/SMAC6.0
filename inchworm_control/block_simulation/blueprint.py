@@ -1,6 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from config import SEED_BK
+import json
 
 # x: row in array (7 rows)
 # y: layer (6 layers)
@@ -41,10 +42,11 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
                
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
-    # arrays are not the same size
-    if curr_map.size != final_map.size:
-        print("Arrays don't match sizes") 
-        return [-9,-9,-9], build_queue # error value
+    map_complete = True
+
+    if curr_map.shape != final_map.shape:
+        print("Arrays don't match shape") 
+        return [-9,-9,-9] # error value
 
     elif curr_map.size == final_map.size:
         # The structure is complete

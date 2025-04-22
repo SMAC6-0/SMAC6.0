@@ -2,8 +2,11 @@
 from inchworm_control.ik import inverseKinematics
 from inchworm_control.trajectory_planning import quintic_trajectory 
 import rclpy
+from rclpy.action import ActionServer
 from rclpy.node import Node
 from std_msgs.msg import Float32, String
+from actions_messages.action import Inchwormpath
+from actions_messages.msg import Step
 # for servo
 import RPi.GPIO as GPIO
 GPIO.setwarnings(False)
@@ -35,7 +38,7 @@ PIVOT_ON_BLOCK_ABOVE_HOME = [1, 0, -0.5, EE_direction.DOWN.value]
 BLOCK_INTERFACING_TIME = 1 # sec 
 TRAVEL_TIME = 2
     
-class IkTest(Node):
+class PathProgression(Node):
     def __init__(self):
         """
         Initialization method for the motor controller node.
@@ -43,7 +46,12 @@ class IkTest(Node):
         Initializes ROS2 publisher, subscriber, GPIO pins, motor angles, and step actions for the inchworm robot.
         """
         # Initialize the ROS2 node with the name 'ik_test'
-        super().__init__('ik_test')
+        super().__init__('execute_path')
+        self._action_server = ActionServer(
+            self,
+            Inchwormpath,
+            'inchworm_moving',
+            self.execute_callback)
 
         # Create a publisher for the 'step_status' topic, which sends Float32 messages
         self.publisher_ = self.create_publisher(Float32, 'step_status', 10)
@@ -115,7 +123,47 @@ class IkTest(Node):
             # place block
         }      
 
+    def execute_callback(self, goal_handle):
+        """Callback function as an action server"""
+        self.get_logger().info('Executing goal...')
 
+        # Extract info from request 
+        # .path corresponds to the name of the request as defined in the action file 
+        all_steps = goal_handle.request.all_steps
+
+        # Establish feedback message (sends updates before path is complete)
+        feedback_msg = Inchwormpath.Feedback()
+        feedback_msg.step_num = 0
+        feedback_msg.total_steps = len(all_steps)
+
+        # Iterate through each step in the path - begin the moving process ! 
+        for step in all_steps: 
+            feedback_msg.step_num += 1
+            self.get_logger().info(f'Feedback: Step {feedback_msg.step_num} / {feedback_msg.total_steps}')
+            goal_handle.publish_feedback(feedback_msg)
+            time.sleep(1)
+            # Perform the step
+            try:
+                print(f"Imagine me doing a step olay")
+                # # Get the step action from the step_actions dictionary based on the received message
+                # action = self.step_actions.get(step)
+
+                # if action:
+                #     # If a valid action (step) is found, execute the action with pivot_foot (1 for this case)
+                #     action()
+                # else:
+                #     # Log a warning if the action is not recognized
+                #     self.get_logger().warn('Unknown command: %s' % step)
+                # sleep(1)
+                
+            except Exception as e:
+                self.get_logger().error('Failed to move servo: "%s"' % str(e))
+
+        # Indicate successful completion of the goal, of the path
+        goal_handle.succeed()
+        result = Inchwormpath.Result()
+        result.completion_status = True
+        return result
 
     def listener_callback(self, msg):
         """
@@ -716,10 +764,10 @@ def release_servo(servo_id):
 
 def main(args=None):
     rclpy.init(args=args)
-    ik_test = IkTest()
-    rclpy.spin(ik_test)
-    ik_test.destroy_node()
-    rclpy.shutdown()
+    path_progression_server = PathProgression()
+    rclpy.spin(path_progression_server)
+    # path_progression_server.destroy_node()
+    # rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
