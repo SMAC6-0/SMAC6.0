@@ -41,9 +41,9 @@ IW_2_ORIENTATION = InchwormOrientation.WEST
 IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
 
 # if the simulation is for the demo, set this to True
-SIMULATION = True
+SIMULATION = False
 LARGE_BUILD = False
-MANUAL_TESTING = False
+MANUAL_TESTING = True
 
 # have inchworm starting inline with BD 
 # column should not be in line with BD

@@ -111,7 +111,7 @@ class Inchworm():
         Inchworm.inchworm_list.append(self)
 
         # UART stuff
-        if not SIMULATION: 
+        if MANUAL_TESTING and not SIMULATION: 
             self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
         else: 
             # These are vars that the simulation uses to simulate each of the inchworm feet
@@ -864,7 +864,7 @@ def main(args=None):
         rclpy.init(args=args)
         inchworm_node = InchwormNode()
         rclpy.spin(inchworm_node)
-    elif MANUAL_TESTING:
+    elif MANUAL_TESTING and not SIMULATION:
         with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
             final_structure = json.load(final_map_file)
         inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
