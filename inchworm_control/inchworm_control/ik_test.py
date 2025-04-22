@@ -408,6 +408,7 @@ class IkTest(Node):
 
         # attach detach the feeties based on holding block and pivot foot 
         print(Fore.RED + f"[Attach/Detach] pivot foot = {pivot_foot},holding block = {holding_block}, step = {step_type}")
+        self.latch_detach(pivot_foot,holding_block)
         sleep(BLOCK_INTERFACING_TIME)
 
         # Account for the fact that the IW is holding a block
