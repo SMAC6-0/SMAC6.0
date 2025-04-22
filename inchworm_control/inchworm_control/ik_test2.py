@@ -482,7 +482,7 @@ class IkTest2(Node):
 
         self.move_to(x_test, x_test_next, TRAVEL_TIME, pivot_foot)
 
-        activate_servo(self.motor_2)
+        activate_servo(self.servo2)
 
         self.move_to(x_test_next, z_test_next, TRAVEL_TIME, pivot_foot)
 
