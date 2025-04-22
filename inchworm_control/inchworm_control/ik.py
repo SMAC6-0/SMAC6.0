@@ -168,9 +168,9 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
             theta5 = 0
         else: 
             if Py > 0: # Y value is positive aka turning left
-                theta5 = theta1 - 45
-            else: 
                 theta5 = theta1 + 45
+            else: 
+                theta5 = theta1 - 45
 
     elif pivot_foot == 5:
         #theta 5
@@ -189,9 +189,9 @@ def inverseKinematics(Px, Py, Pz, alpha, pivot_foot: int, fix_EE_orientation: bo
             theta1 = 0
         else: 
             if Py < 0: # Y value is negative aka turning left
-                theta1 = theta5 + 45
-            else: 
                 theta1 = theta5 - 45
+            else: 
+                theta1 = theta5 + 45
 
     else:
         raise ValueError('ERROR: please choose either leg 5 or leg 1')
