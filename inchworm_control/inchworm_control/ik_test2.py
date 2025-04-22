@@ -461,6 +461,8 @@ class IkTest2(Node):
 
         x_test = [2, 0, 1.5, EE_direction.DOWN.value]
 
+        x_test2 = [3, 0, 1.5, EE_direction.DOWN.value]
+
         z_test2 = [2, 0, 0.9, EE_direction.DOWN.value]
 
         y_test = [2, 1, 1, EE_direction.DOWN.value]
@@ -474,7 +476,7 @@ class IkTest2(Node):
 
         self.move_to(z_test, x_test, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x_test, z_test2, TRAVEL_TIME, pivot_foot)
+        self.move_to(x_test, x_test2, TRAVEL_TIME, pivot_foot)
 
         # # Move forward and hover over the goal position 
         # self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
