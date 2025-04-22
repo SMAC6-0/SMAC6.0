@@ -32,7 +32,6 @@ def blueprint(curr_map, final_map) -> list:
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
     map_complete = True
-    print("BLUEprint was called")
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
@@ -51,8 +50,6 @@ def blueprint(curr_map, final_map) -> list:
                 for x in range(curr_map.shape[0]): #iterate 0-7
                     for y in range(curr_map.shape[1]): #iterate 0-7
                         if curr_map[x, y, z] != 2: 
-                            if [x, y, z] == [6, 6, 2]:
-                                print(f"BLUEPRINT: curr map at 6,6,2 is {curr_map[x, y, z]}")
                             is_different = curr_map[x, y, z] != final_map[x, y, z]
                             final_is_walkable = final_map[x, y, z] == 0
                             lowest_z = z
@@ -65,15 +62,12 @@ def blueprint(curr_map, final_map) -> list:
                             
                             if is_different and final_is_walkable:
                                 for zz in range(lowest_z + 1, z + 1):
-                                    print(f"adding block: {(x, y, zz)}")
                                     priority_queue.append((x, y, zz))
             
             priority_queue.sort(key=lambda coord:(coord[2], coord[0], coord[1]))
             
             if priority_queue:
-                print(f"priority queue stuff: {list(priority_queue)} ")
                 first_bk = priority_queue.pop(0)
-                print(f"popped: {first_bk}")
                 return list(first_bk)
     return [-9, -9, -9]
 

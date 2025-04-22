@@ -43,7 +43,7 @@ class SimData:
             self.final_structure = map_data.update_grid_status(self.final_structure, (block[0], block[1], block[2]))
 
         # TODO: save self.final_structure to a file
-        print("Saving map in the json file")
+        print(Fore.GREEN + f"Saving map in the json file")
         with open("Final_Structure.json", "w") as final_map_file:
             json.dump(self.final_structure, final_map_file)
         
@@ -52,9 +52,8 @@ class SimData:
         If the IW is at its goal, structure sends the IW a map snapshot
         """
         x, y, z = inchworm.leading_foot_loc
-        if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 6):
-            if ((self.current_map[x][y][z] == map_data.GridStatus.INCOMING_BLOCK.value) or (self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value) or 
-                (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
+        if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 3 or inchworm.state.value == 6):
+            if ((self.current_map[x][y][z] != map_data.GridStatus.NOT_WALKABLE.value) or (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
                 # Update current_map w new block 
                 if inchworm.goal != SEED_BK:
                     self.current_map == map_data.update_grid_status(self.current_map, [x, y, z])
@@ -63,8 +62,6 @@ class SimData:
 
                 self.map_sent_flag[inchworm.id] = True
                 x, y, z = inchworm.goal
-                print(f"struct's real grid status at [6, 6, 1], [6, 6, 2] is {self.current_map[6][6][1]}, {self.current_map[6][6][2]}")
-                print(f"IW{inchworm.id}'s real grid status at [6, 6, 1], [6, 6, 2] is {inchworm.current_map[6][6][1]}, {inchworm.current_map[6][6][2]}")
                 print(Fore.GREEN + f"Struct should have sent its map to IW {inchworm.id}")
                 return True
 
@@ -84,8 +81,6 @@ class SimData:
                     self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, inchworm.goal, map_data.GridStatus.INCOMING_BLOCK.value)
                 self.map_sent_flag[inchworm.id] = False
                 x, y, z = inchworm.goal
-                print(f"struct's real grid status at [6, 6, 1], [6, 6, 2] is {self.current_map[6][6][1]}, {self.current_map[6][6][2]}")
-                print(f"IW{inchworm.id}'s real grid status at goal {inchworm.goal} is {self.current_map[x][y][z]}")
                 print(Fore.GREEN + f"struct's map updated w new IW {inchworm.id} path")
                 return True
 
@@ -108,7 +103,6 @@ class SimData:
 
             # For however many IWs exist, store flag in dictionary 
             self.map_sent_flag[i+1] = False # The key is i+1 to correspond to the IW ID
-        # print(Fore.GREEN + "inchworms spawned")
         print(Fore.GREEN + f"{num_inchworms} inchworms successfully spawned")
 
     def get_next_steps(self): 

@@ -135,10 +135,7 @@ class Inchworm:
             # print(Fore.MAGENTA + "(PP) current_map: ", self.current_map)
             # print(Fore.MAGENTA + "(PP) final_map: ", self.final_structure)
             self.goal = blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            x, y, z = self.goal
-            if self.goal != [-1, -1, -1] and self.goal != [-9, -9, -9]:
-                print(f"IW{self.id}: own grid status at goal {self.goal} is {self.current_map[x][y][z]}")
-
+            
             if self.goal == [-1, -1, -1]: # structure is complete!!
                 print(Fore.MAGENTA + f"IW{self.id}: Structure is complete")
                 return
@@ -206,7 +203,6 @@ class Inchworm:
         else: 
             if self.goal_progress_index > 0 and self.step_instructions:
                 step_str = self.step_instructions[self.step_num-1]
-                print(Fore.BLUE + f"IW{self.id}: Next step: {step_str}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
 
                 # Update Inchworm Orientation with each step
                 self.orientation = map_data.get_orientation(step_str, self.orientation)
@@ -228,7 +224,7 @@ class Inchworm:
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print(f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            print(Fore.BLUE + f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):
@@ -268,11 +264,11 @@ class Inchworm:
         # append msg_len, block_change, checksum, ending_code(enum) to buffer
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Initialization.value)
 
-        print("Block location buffer", buffer)
+        print(Fore.CYAN + f"Block location buffer {buffer}")
         self.IW_SERIAL.write(buffer)
 
         sleep(COMMUNICATION_TIMER)
-        print(Fore.RED + "block data sent!!")
+        print(Fore.CYAN + f"block data sent!!")
 
     def send_block_being_placed(self):
         """
@@ -290,16 +286,16 @@ class Inchworm:
         checksum = self.crc16(block_change).to_bytes(2, 'little')
 
         buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.BeingPlaced.value)
-        print("Being placed buffer: ", buffer)
+        print(Fore.CYAN + f"Being placed buffer: {buffer}")
 
         self.IW_SERIAL.write(buffer)
         sleep(COMMUNICATION_TIMER)
 
-        print(Fore.RED + "Indicated block is in placing status!!")
+        print(Fore.CYAN + f"Indicated block is in placing status!!")
         # TODO: handle transmission error
 
     def received_block_confirmation(self): 
-        print(Fore.RED + "We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
+        print(Fore.CYAN + f"We're trying to confirm the block's existence & ability to communicate, but we haven't been implemented yet D:")
         return True
     
     def send_IW_path_to_block(self, clear_path_com, iw_path):
@@ -314,7 +310,7 @@ class Inchworm:
         # iterate through the iw_path
 
         # TODO: replace this
-        # print("length of clear IW path", len(clear_path_com))
+        # print(Fore.CYAN + "length of clear IW path", len(clear_path_com))
         for grid_cell in clear_path_com:
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
 
@@ -334,7 +330,7 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print("Clear Path Buffer", buffer)
+            print(Fore.CYAN + f"Clear Path Buffer {buffer}")
 
             self.IW_SERIAL.write(buffer)
 
@@ -342,8 +338,8 @@ class Inchworm:
             sleep(COMMUNICATION_TIMER)
 
         sleep(COMMUNICATION_TIMER)
-        print("-------------------- actually send the path --------------------")
-        # print("length of path: ", len(iw_path))
+        print(Fore.CYAN + f"-------------------- actually send the path --------------------")
+        # print(Fore.CYAN + f"length of path: {len(iw_path)}")
 
         for grid_cell in iw_path:
             buffer = bytearray(struct.pack('B', UART_CODES.StartByte.value)) # universal start code
@@ -363,7 +359,7 @@ class Inchworm:
             # append msg_len, block_change, checksum, ending_code(enum) to buffer
 
             buffer += msg_len + block_change + checksum + struct.pack('B', UART_CODES.Changes.value)
-            print("IW Path Buffer: ", buffer)
+            print(Fore.CYAN + f"IW Path Buffer: {buffer}")
 
             self.IW_SERIAL.write(buffer)
 
@@ -371,7 +367,7 @@ class Inchworm:
             sleep(COMMUNICATION_TIMER)
 
     def inchworm_gets_map(self):
-        print("Getting the map RAHHHHHHHHHHH")
+        print(Fore.CYAN + f"Getting the map RAHHHHHHHHHHH")
 
         # Receiving Map Snapshot from Structure
         buffer = []
@@ -382,7 +378,7 @@ class Inchworm:
         bytesRead = 0
         collecting_data = False
         while True:
-            # print(self.IW_SERIAL.read(1))
+            # print(Fore.CYAN + self.IW_SERIAL.read(1))
             byte = self.IW_SERIAL.read(1)           #read serial port
 
             if byte == bytearray(struct.pack('B', UART_CODES.StartByte.value)): # and not collecting_data:  # Start byte detected
@@ -413,7 +409,7 @@ class Inchworm:
                         self.current_map = Inchworm.process_received_map_snapshot(buffer)
                         return True
                     else:
-                        print("CHECKSUM DID NOT MATCH")
+                        print(Fore.CYAN + "CHECKSUM DID NOT MATCH")
                         self.state = IW_STATE.ERROR
                         return False
 
@@ -425,7 +421,7 @@ class Inchworm:
     
     @staticmethod
     def process_received_map_snapshot(map_data):
-        print("Processing map data")
+        print(Fore.CYAN + f"Processing map data")
         # TODO: CHANGE THISSS PLSSS make generic instead of using JUST NUMBERS
         layers, rows, cols = 8, 8, 4
         array = [[[0 for _ in range(cols)] for _ in range(rows)] for _ in range(layers)]
@@ -436,12 +432,12 @@ class Inchworm:
                     if index < len(map_data):
                         array[l][r][c] = map_data[index]
                         index += 1
-        # print("Received 3D Array:", array)
+        # print(Fore.CYAN + f"Received 3D Array: {array}")
         return array  
         
 
     def request_map_snapshot(self):
-        print("Gimme map plsss")
+        print(Fore.CYAN + f"Gimme map plsss")
         """
         IW sends the Hex code to the block requesting the map
         """
@@ -454,7 +450,7 @@ class Inchworm:
 
         buffer += msg_len + block_change + struct.pack('B', UART_CODES.NewInchworm.value)
 
-        print("Request Map Buffer: ", buffer)
+        print(Fore.CYAN + f"Request Map Buffer: {buffer}")
         self.IW_SERIAL.write(buffer)
     
     # Checksum protocol for the IW and Block communication
@@ -520,10 +516,6 @@ class Inchworm:
                 if self.incorrect_block_location(): # block is placed in the wrong location
                     self.handle_error()
                 elif self.IW_gets_Map_Snapshot(): # assume that the block is placed in the correct location
-                    # if SIMULATION and self.paths == []: 
-                    #     print(Fore.BLUE + f"Simulation, breaking")
-                    #     return
-                    # else: 
                     self.IW_clear_path()
                     if self.is_structure_complete(): # structure is complete
                         self.handle_structure_complete()
@@ -569,14 +561,7 @@ class Inchworm:
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
-        # self.IW_clear_path()
-        # If simulation, break to allow simulated communication
-        # if SIMULATION and self.clear_path_com == []: 
-        #     print(Fore.BLUE + f"Simulation, breaking")
-        #     return
-        # else: 
         self.IW_clear_path()
-        # self.clear_path_com = copy.deepcopy(self.paths) # Save the previous path before path planning so IW can remove this path in the structure
         self.plan_path()
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"Current inchworm state: {self.state}")
@@ -677,7 +662,6 @@ class Inchworm:
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
-        # TODO: SEND PATH TO STRUCTURE
 
         self.state = IW_STATE.PATH_PLANNING
         print(Fore.BLUE + f"IW{self.id}: Current inchworm state: {self.state}")
@@ -689,8 +673,6 @@ class Inchworm:
         # return true if the IW got the map snapshot
         if SIMULATION: 
             if self.leading_foot_loc == self.goal: 
-                # x, y, z = self.leading_foot_loc
-                # if self.current_map[x][y][z] == map_data.GridStatus.WALKABLE.value:
                 print(Fore.BLUE + f"IW{self.id}: IW got map snapshot")
                 return True
             return False
@@ -702,7 +684,6 @@ class Inchworm:
     
     def is_Path_Available(self):
         print(Fore.BLUE + f"IW{self.id}: Checking path availability... {self.paths}")
-        print(self.paths != self.temp_path)
         if self.paths and self.goal and self.paths != self.temp_path:
             return True
         else: 
@@ -759,11 +740,8 @@ class Inchworm:
     
     def is_structure_complete(self):
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-        # print("current map: ", curr_map)
-        # print("Final map: ", final_map)
         curr_map = np.array(self.current_map)
         final_map = np.array(self.final_structure)
-        # self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
         
         map_complete = True
 
@@ -772,10 +750,10 @@ class Inchworm:
                 for y in range(curr_map.shape[1]):
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
                         if curr_map[x, y, z] != 2: 
-                            print(f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
+                            print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
                             map_complete = False
 
-        print("IS MAP COMPLETE: ", map_complete)
+        print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
         return map_complete
   
 if __name__ == "__main__":
