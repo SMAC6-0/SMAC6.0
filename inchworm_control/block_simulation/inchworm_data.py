@@ -810,7 +810,7 @@ if not SIMULATION:
                 self.send_goal(self.inchworm.step_instructions)
                 # Clear the step instructions so that the state continues updating, 
                 # but the instructions are not resent 
-                self.inchworm.step_instructions = []
+                # self.inchworm.step_instructions = []
 
         def send_goal(self, all_steps):
             """Send an action request for the 'inchworm_moving' action"""
