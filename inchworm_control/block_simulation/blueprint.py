@@ -37,7 +37,7 @@ repeat_count = 0
 def seed_distance(x, y):
     return abs(x - SEED_BK[0]) ** 2 + (y - SEED_BK[1]) ** 2
 
-def blueprint(curr_map, final_map, repeat_threshold=2) -> list: 
+def blueprint(curr_map, final_map, repeat_threshold=2): 
     global build_queue, last_block, repeat_count
                
     curr_map = np.array(curr_map)
