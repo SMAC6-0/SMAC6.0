@@ -43,10 +43,13 @@ class DStarLite:
             
         if not is_goal and self.structure_queue:
             cell.cost = 1
-            for block in self.structure_queue:
-                if coords == tuple(block):
-                    cell.cost += 100 + 10 * z
-                    break
+            neighbors = map_data.set_neighbors(allow_vertical=False, allow_vert_diagonal=False)
+            for bx, by, bz in self.structure_queue:
+                for nx, ny, nz in neighbors:
+                    block_neighbor = bx + nx, by + ny, bz + nz
+                    if coords == block_neighbor:
+                        cell.cost += 100 + 10 * z
+                        break
             
         return cell
         
@@ -110,7 +113,7 @@ class DStarLite:
 
                         self.update_rhs(neighbor)
 
-def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
+def find_path(grid, start, goal, iw_id, holding_block, structure_queue, bypass_flag):
     """
     Perform D* Lite search in a 3D grid. 
 
@@ -131,8 +134,10 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
     goal_status = (grid[goal[0]][goal[1]][goal[2]])
     print(Fore.MAGENTA + f"D* Lite called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
     
-    if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
-        raise RuntimeError(f"Invalid start {start} or goal {goal} position")    
+    if not bypass_flag:
+        if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
+            raise RuntimeError(f"Invalid start {start} or goal {goal} position")    
+        
     d_star = DStarLite(grid, start, goal, structure_queue) # snapshot of what we have searched and found
     d_star.compute_shortest_path()
     current_cell = d_star.start
@@ -149,7 +154,7 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
+                    # print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
                     if neighbor.g + neighbor.cost < min_cost:
                         min_cost = neighbor.g + neighbor.cost
                         next_cell = neighbor

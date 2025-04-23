@@ -2,7 +2,7 @@ import map_data
 from colorama import Fore, init
 init(autoreset=True)
 
-def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
+def find_path(grid, start, goal, iw_id, holding_block, bypass_flag) -> list[int]:
     """
     Perform modified BFS in a 3D grid.
     
@@ -24,10 +24,10 @@ def find_path(grid, start, goal, iw_id, holding_block) -> list[int]:
     
     neighbor_directions = map_data.set_neighbors(allow_large_build=True)
         
-    if map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
-        goal_cell, visited, frontier = map_data.start_bfs_3d(grid, start, goal)
-    else:
-        raise RuntimeError(f"Invalid start {start} or goal {goal} position")
+    if not bypass_flag:
+        if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
+            raise RuntimeError(f"Invalid start {start} or goal {goal} position")
+    goal_cell, visited, frontier = map_data.start_bfs_3d(grid, start, goal)
 
     # if holding_block:
     #     frontier[0].z -= 1

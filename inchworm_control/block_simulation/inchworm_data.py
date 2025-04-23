@@ -50,6 +50,7 @@ class IW_STATE(Enum):
     PLACING_BLOCK = 6
     ERROR = 7
     STRUCTURE_COMPLETE = 8
+    YIELDING = 9
 
 PATH_PLANNING_TIMER = 5
 COMMUNICATION_TIMER = 0.5 # DO NOT CHANGE THIS ANY LESS THAN 0.4
@@ -105,7 +106,8 @@ class Inchworm():
         self.state = IW_STATE.INITIALIZATION
         self.print_flag = True
         self.iw_reached_seed_block_flag = False # flag to make sure IW reached the seed block and can now request map
-
+        self.yield_cooldown_timer = 0
+        self.YIELD_COOLDOWN_LIMIT = 5
         
         Inchworm.next_id += 1
         Inchworm.inchworm_list.append(self)
@@ -133,7 +135,7 @@ class Inchworm():
         else:
             print("Invalid input. Please answer with 'yes' or 'no'.")
 
-    def plan_path(self, next_goal: tuple[int, int, int] = None): 
+    def plan_path(self, next_goal: tuple[int, int, int] = None, bypass_flag=False): 
         """ Plan path from current location to specified goal. 
             Path planning typically starts from the pivot foot to avoid unnecessary walking on the structure"""
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
@@ -159,17 +161,17 @@ class Inchworm():
                 print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
-        # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
+        print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
         print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - bleh")
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
                 # Find one path, to travel to the specified goal
-                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id, priority_snapshot)
+                path, steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, self.goal, self.orientation, self.holding_block, self.id, priority_snapshot, bypass_flag)
             else:
                 # Find path to block depot 
-                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id, priority_snapshot)
+                bd_path, bd_steps, new_orientation = map_data.initiate_find_path(self.current_map, self.leading_foot_loc, self.lagging_foot_loc, BD_1_LOC, self.orientation, self.holding_block, self.id, priority_snapshot, bypass_flag)
                 # self.holding_block = True
 
                 # If it doesn't find a path to the supply depot, just return, don't bother trying to path plan further
@@ -184,7 +186,7 @@ class Inchworm():
                 print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - after incoming")
                 
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot, bypass_flag)
                 self.holding_block = False
                 if goal_path == []: 
                     return
@@ -527,6 +529,9 @@ class Inchworm():
             self.update_state()
 
     def update_state(self):
+        if self.yield_cooldown_timer > 0:
+            self.yield_cooldown_timer -= 1
+            
         match self.state:
             case IW_STATE.IDLE:
                 self.handle_idle()
@@ -540,6 +545,8 @@ class Inchworm():
                     self.path_exists()
                 elif self.no_blocks_left():
                     self.handle_no_blocks_to_place()
+                elif self.is_stuck_or_blocking():
+                    self.handle_yielding()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
@@ -562,6 +569,8 @@ class Inchworm():
                 self.handle_error()
             case IW_STATE.STRUCTURE_COMPLETE:
                 self.handle_structure_complete()
+            case IW_STATE.YIELDING:
+                self.handle_yielding()
                 
     def set_state(self, new_state):
         if new_state != self.state:
@@ -580,7 +589,6 @@ class Inchworm():
         if self.print_flag:
             print(Fore.BLUE + "IDLINGGG....")
             self.print_flag = False
-
     
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
     # and transfer the block location to the seed block
@@ -599,7 +607,7 @@ class Inchworm():
 
         else: # this happens first 
             # Find & path plan to seed block 
-            self.plan_path(SEED_BK)        
+            self.plan_path(SEED_BK)     
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
@@ -619,20 +627,23 @@ class Inchworm():
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-        self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
-        if not SIMULATION:
-            # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
-            self.paths = self.temp_path
-            self.send_IW_path_to_block(self.clear_path_com, self.paths)
-            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
-        # or stay here until the IW gets a new map!!
-        # MOOO HELPPP
-        self.IW_clear_path()
-        self.plan_path()
-        # For simulation. If no path is available, save the path as its own location 
-        if SIMULATION and self.paths == []:
-            self.paths = self.temp_path
-        # print(self.current_map)
+        if self.is_stuck_or_blocking():
+            self.handle_yielding()
+        else:
+            self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
+            if not SIMULATION:
+                # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
+                self.paths = self.temp_path
+                self.send_IW_path_to_block(self.clear_path_com, self.paths)
+                sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+            # or stay here until the IW gets a new map!!
+            # MOOO HELPPP
+            self.IW_clear_path()
+            self.plan_path()
+            # For simulation. If no path is available, save the path as its own location 
+            if SIMULATION and self.paths == []:
+                self.paths = self.temp_path
+            # print(self.current_map)
 
     def handle_no_blocks_to_place(self): 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
@@ -696,6 +707,31 @@ class Inchworm():
         self.plan_path()
 
         self.set_state(IW_STATE.PATH_PLANNING)
+        
+    def handle_yielding(self):
+        """ step out of the way if inchworm is in another's path """
+        print(Fore.BLUE + f"IW{self.id}: YIELDING!!! GOTTA GET OUTTA DA WAY")
+        
+        adjacent_directions = map_data.set_neighbors(allow_adjacent=True, allow_vertical=False)
+        for dx, dy, dz in adjacent_directions:
+            px, py, pz = self.leading_foot_loc[0] + dx, self.leading_foot_loc[1] + dy, self.leading_foot_loc[2] + dz
+            
+            if not map_data.is_valid_position_3d(self.current_map, [px, py, pz]):
+                continue
+            
+            p_status = self.current_map[px][py][pz]
+            if p_status == map_data.GridStatus.WALKABLE.value:
+                print(Fore.BLUE + f"MOOOOVING OUT OF THE WAY")
+                self.goal = [px, py, pz]
+                self.IW_clear_path()
+                self.plan_path([px, py, pz], bypass_flag=True)
+                self.set_state(IW_STATE.TRAVELLING_TO_SUPPLY)
+                self.yield_cooldown_timer = self.YIELD_COOLDOWN_LIMIT
+                self.set_state(IW_STATE.PATH_PLANNING)
+        print(Fore.BLUE + f"IW{self.id}: stuck and cannot get out of way, waiting for updates")
+        sleep(PATH_PLANNING_TIMER)
+        
+        self.set_state(IW_STATE.YIELDING)
 
     # Checkers
     def IW_gets_Map_Snapshot(self):
@@ -769,9 +805,37 @@ class Inchworm():
             return not self.leading_foot_loc == self.goal 
         else: 
             pass
+        
+    def is_stuck_or_blocking(self):
+        """ return true if the IW is stuck at the start or is currently in another iw's path"""
+        if self.yield_cooldown_timer > 0:
+            print("nuh uh uh cannot yield yet")
+            return False # cool down bucko
+        
+        def other_iw_at(loc):
+            try:
+                status = self.current_map[loc[0]][loc[1]][loc[2]]
+                if map_data.GridStatus.is_inchworm_path(status):
+                    iw_id = map_data.GridStatus.which_inchworm(status)
+                    if iw_id is not None and iw_id != self.id:
+                        return iw_id
+            except IndexError:
+                pass
+            return None
+        
+        lead_blocker = other_iw_at(self.leading_foot_loc)
+        lag_blocker = other_iw_at(self.lagging_foot_loc)
+        # print(f"lead: {lead_blocker} and lag: {lag_blocker}")
+        
+        if lead_blocker or lag_blocker:
+            other_iw = lead_blocker or lag_blocker
+            print(Fore.YELLOW + f"IW{self.id} is blocking IW{other_iw}!")
+            return True
+        print("no need for yields")
+        return False
     
     def is_structure_complete(self, curr_map, final_map):
-        print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
+        # print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
         curr_map = np.array(curr_map)
         final_map = np.array(final_map)
         
@@ -782,10 +846,10 @@ class Inchworm():
                 for y in range(curr_map.shape[1]):
                     if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
                         if curr_map[x, y, z] != 2: 
-                            print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
+                            # print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
                             map_complete = False
 
-        print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
+        # print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
         return map_complete
     
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
