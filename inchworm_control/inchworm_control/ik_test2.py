@@ -523,6 +523,7 @@ class IkTest2(Node):
 
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
+        print("MOVING TO 2.5 RNNNNNNN")
         self.move_to(x1z1, x1z2_5, TRAVEL_TIME, pivot_foot)
 
         print("Movement complete: TEST_STEP")
