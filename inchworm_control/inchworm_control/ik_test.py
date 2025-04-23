@@ -480,37 +480,95 @@ class IkTest(Node):
         """
         Testing variety of basic positions to tune IK
         """
-        # positions
-        # goal = [2, 0, 0, EE_direction.DOWN.value] # step 2 blocks forward 
-        # above_goal = copy.deepcopy(goal)
-        # above_goal[2] += 0.5
 
         current_pos = [1, 0, 0, EE_direction.DOWN.value]
 
-        z_test = [1, 0, 1.5, EE_direction.DOWN.value]
+        # Step Tests (y = 0)
+        # Pivot Foot 1
+        # x = 1
+        x1z0   = [1, 0, 0, EE_direction.DOWN.value]
+        x1z0_5 = [1, 0, 0.5, EE_direction.DOWN.value]
+        x1z1   = [1, 0, 1, EE_direction.DOWN.value]
+        x1z1_5 = [1, 0, 1.5, EE_direction.DOWN.value]
+        x1z2_5 = [1, 0, 2.5, EE_direction.DOWN.value]
+        x1z3_5 = [1, 0, 3.5, EE_direction.DOWN.value]
 
-        x_test = [2, 0, 1.5, EE_direction.DOWN.value]
+        # x = 2
+        x2z0   = [2, 0, 0, EE_direction.DOWN.value]
+        x2z0_5 = [2, 0, 0.5, EE_direction.DOWN.value]
+        x2z1   = [2, 0, 1, EE_direction.DOWN.value]
+        x2z1_5 = [2, 0, 1.5, EE_direction.DOWN.value]
+        x2z2_5 = [2, 0, 2.5, EE_direction.DOWN.value]
+        x2z3_5 = [2, 0, 3.5, EE_direction.DOWN.value]
 
-        z_test2 = [2, 0, 0.9, EE_direction.DOWN.value]
+        # Pivot Foot 5
+        # x = 1
+        x1z_1   = [1, 0, -1, EE_direction.DOWN.value]
+        x1z_0_5 = [1, 0, -0.5, EE_direction.DOWN.value]
+        #x1z0 (Already defined)
+        #x1z0_5
 
-        y_test = [2, 1, 1, EE_direction.DOWN.value]
+        # x = 2
+        x2z_1   = [2, 0, -1, EE_direction.DOWN.value]
+        x2z_0_5 = [2, 0, -0.5, EE_direction.DOWN.value]
+        #x2z0 (Already defined)
+        #x2z0_5
+
+
+        # Turn Tests (x = 1)
+        # Pivot Foot 1
+        # y = -1
+        y_1z0   = [-1, 1, 0, EE_direction.DOWN.value]
+        y_1z0_5 = [-1, 1, 0.5, EE_direction.DOWN.value]
+        y_1z1   = [-1, 1, 1, EE_direction.DOWN.value]
+        y_1z1_5 = [-1, 1, 1.5, EE_direction.DOWN.value]
+
+        # y = 1
+        y1z0   = [1, 1, 0, EE_direction.DOWN.value]
+        y1z0_5 = [1, 1, 0.5, EE_direction.DOWN.value]
+        y1z1   = [1, 1, 1, EE_direction.DOWN.value]
+        y1z1_5 = [1, 1, 1.5, EE_direction.DOWN.value]
+
+        # Pivot Foot 5
+        # y = -1
+        y_1z_1   = [-1, 1, -1, EE_direction.DOWN.value]
+        y_1z_0_5 = [-1, 1, -0.5, EE_direction.DOWN.value]
+        #y_1z0
+        #y_1z0_5
+
+        # y = 1
+        y1z_1   = [1, 1, -1, EE_direction.DOWN.value]
+        y1z_0_5 = [1, 1, -0.5, EE_direction.DOWN.value]
+        #y1z0
+        #y1z0_5
 
         # Start moving leading foot 
         pivot_foot = 1 
         self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
-        self.move_to(current_pos, z_test, TRAVEL_TIME, pivot_foot)
+        # Pivot Foot 1 x = 1
+        # Gradual
+        self.move_to(x1z0, x1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(z_test, x_test, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x_test, z_test2, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
-        # # Move forward and hover over the goal position 
-        # self.move_to(ABOVE_HOME, above_goal, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
+
+        # self.move_to(x1z2_5, x1z3_5, TRAVEL_TIME, pivot_foot)
+
+        # Direct
+        # self.move_to(x1z0, x1z2_5, TRAVEL_TIME, pivot_foot)
+
+        # Pivot Foot 1 x = 2
+        # Gradual
+        # self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
+
+        # Direct
         
-        # # Move from above goal to the goal position
-        # self.move_to(above_goal, goal, BLOCK_INTERFACING_TIME, pivot_foot)
 
         print("Movement complete: TEST_STEP")
 
