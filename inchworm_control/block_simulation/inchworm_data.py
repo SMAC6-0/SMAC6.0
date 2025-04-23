@@ -111,7 +111,7 @@ class Inchworm():
         Inchworm.inchworm_list.append(self)
 
         # UART stuff
-        if MANUAL_TESTING and not SIMULATION: 
+        if not SIMULATION: 
             self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
         else: 
             # These are vars that the simulation uses to simulate each of the inchworm feet
@@ -809,7 +809,7 @@ if not SIMULATION:
             self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                if self.runtime > 1:
+                if self.runtime > 0:
                     self.send_goal(self.inchworm.step_instructions)
             self.runtime += 1
 
@@ -860,6 +860,8 @@ if not SIMULATION:
             """Runs repeeatedly as the action runs, providing feedback"""
             feedback = feedback_msg.feedback
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
+            # TODO: there is probably a better way to do this, without using get_next_step...
+            # especially bc get_next_step does not necessarily align with what's happening in the action
             if feedback.step_num - self.prev_step_num > 0 and not MANUAL_TESTING:
                 self.inchworm.get_next_step()
 
