@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict
-from config import SEED_BK
+from block_simulation.config import SEED_BK
 import json
 
 # x: row in array (7 rows)
