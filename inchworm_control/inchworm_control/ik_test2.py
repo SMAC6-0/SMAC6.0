@@ -597,9 +597,14 @@ class IkTest2(Node):
 
         # Movements Pivot Foot 1
         # Step Forward
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z0_5, x2z0, TRAVEL_TIME, pivot_foot)
+
+        # Turn Right
         self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x2z0_5, x2z0, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
 
 
         print("Movement complete: TEST_STEP")
