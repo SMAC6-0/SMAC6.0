@@ -46,7 +46,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2):
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
-        return [-9,-9,-9] # error value
+        return [-9,-9,-9], build_queue # error value
 
     elif curr_map.size == final_map.size:
         # The structure is complete
