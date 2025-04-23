@@ -807,7 +807,7 @@ def release_servo_newEE(servo_id):
         servo_id: The servo motor object to be released. 
     """
     # Set duty cycle to move servo to 80° position
-    servo_id.ChangeDutyCycle(2+(60/18))
+    servo_id.ChangeDutyCycle(2+(90/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
