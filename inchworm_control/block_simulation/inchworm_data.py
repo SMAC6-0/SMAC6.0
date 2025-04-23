@@ -216,7 +216,7 @@ class Inchworm():
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             step_type = ""
-            if self.goal_progress_index > 0:
+            if self.goal_progress_index > 0 and self.step_instructions:
                 step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
