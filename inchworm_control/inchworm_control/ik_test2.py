@@ -468,7 +468,9 @@ class IkTest2(Node):
         x2z0_5 = [2, 0, 0.5, EE_direction.DOWN.value]
         x2z1   = [2, 0, 1, EE_direction.DOWN.value]
         x2z1_5 = [2, 0, 1.5, EE_direction.DOWN.value]
+        x2z2   = [2, 0, 2, EE_direction.DOWN.value]
         x2z2_5 = [2, 0, 2.5, EE_direction.DOWN.value]
+        x2z3   = [2, 0, 3, EE_direction.DOWN.value]
         x2z3_5 = [2, 0, 3.5, EE_direction.DOWN.value]
 
         # Pivot Foot 5
@@ -532,16 +534,25 @@ class IkTest2(Node):
         # Direct
         # self.move_to(x1z0, x1z2_5, TRAVEL_TIME, pivot_foot)
 
+
         # Pivot Foot 1 x = 2
         # Gradual
-        # self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z0_5, x2z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0_5, x2z1, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z1, x2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z1, x2z1_5, TRAVEL_TIME, pivot_foot)
+
+        self.move_to(x2z1_5, x2z2, TRAVEL_TIME, pivot_foot)
+
+        # self.move_to(x2z2, x2z2_5, TRAVEL_TIME, pivot_foot)
+
+        # self.move_to(x2z2_5, x2z3, TRAVEL_TIME, pivot_foot)
+
+        # self.move_to(x2z2_5, x2z3_5, TRAVEL_TIME, pivot_foot)
 
         # Direct
-        self.move_to(x2z0, x2z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z0, x2z1_5, TRAVEL_TIME, pivot_foot)
         
 
         print("Movement complete: TEST_STEP")
