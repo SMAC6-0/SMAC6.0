@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from enum import Enum
 import copy
-from config import *
-import map_data
-import blueprint as bp
+from block_simulation.config import *
+import block_simulation.map_data as map_data
+import block_simulation.blueprint as bp
 from time import sleep
 import serial
 import struct
