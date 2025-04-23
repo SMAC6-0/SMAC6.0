@@ -520,10 +520,10 @@ class IkTest(Node):
         # Turn Tests (x = 1)
         # Pivot Foot 1
         # y = -1 (Right turns)
-        y_1z0   = [-1, 1, 0, EE_direction.DOWN.value]
-        y_1z0_5 = [-1, 1, 0.5, EE_direction.DOWN.value]
-        y_1z1   = [-1, 1, 1, EE_direction.DOWN.value]
-        y_1z1_5 = [-1, 1, 1.5, EE_direction.DOWN.value]
+        y_1z0   = [1, -1, 0, EE_direction.DOWN.value]
+        y_1z0_5 = [1, -1, 0.5, EE_direction.DOWN.value]
+        y_1z1   = [1, -1, 1, EE_direction.DOWN.value]
+        y_1z1_5 = [1, -1, 1.5, EE_direction.DOWN.value]
 
         # y = 1 (Left turns)
         y1z0   = [1, 1, 0, EE_direction.DOWN.value]
@@ -533,8 +533,8 @@ class IkTest(Node):
 
         # Pivot Foot 5
         # y = -1 (Right turns)
-        y_1z_1   = [-1, 1, -1, EE_direction.DOWN.value]
-        y_1z_0_5 = [-1, 1, -0.5, EE_direction.DOWN.value]
+        y_1z_1   = [1, -1, -1, EE_direction.DOWN.value]
+        y_1z_0_5 = [1, -1, -0.5, EE_direction.DOWN.value]
         #y_1z0
         #y_1z0_5
 
