@@ -500,6 +500,8 @@ class IkTest(Node):
         x2z1_5 = [2, 0, 1.5, EE_direction.DOWN.value]
         x2z2_5 = [2, 0, 2.5, EE_direction.DOWN.value]
         x2z3_5 = [2, 0, 3.5, EE_direction.DOWN.value]
+        x2z2 = [2, 0, 2, EE_direction.DOWN.value]
+        x2z3 = [2, 0, 3, EE_direction.DOWN.value]
 
         # Pivot Foot 5
         # x = 1
