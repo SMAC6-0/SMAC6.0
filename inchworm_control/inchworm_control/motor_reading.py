@@ -18,12 +18,13 @@ if int(mode) == 1:
         sleep(0.5)
 
 elif int(mode) == 2:
+    motor_id = input("What motor's position would you like to move?")
     motor_pos = input("What position would you like to move the motor to?")
 
     currTime = time()
-    servo_bus.move_time_write(5, int(motor_pos), 1)
+    servo_bus.move_time_write(motor_id, int(motor_pos), 1)
     while(time() - currTime < 1.0):
-        print(servo_bus.pos_read(5))
+        print(servo_bus.pos_read(motor_id))
         sleep(0.1)
 
 # print(servo_bus.id_read())
