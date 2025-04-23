@@ -72,7 +72,6 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
         """
         if (pivot_foot == 1):
             adjustedAlpha = False
-            adjustedY = False
             print(f"Goals x: {goal_X} y: {goal_Y} z: {goal_Z}")
             # Here we go!
             # Doing steps forward first
@@ -142,8 +141,6 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     elif goal_Z > 2.25 and goal_Z <= 2.75: # z = 2.5
                         inputX = CUBE_WIDTH * goal_X + 0.8
                         inputZ = CUBE_WIDTH * goal_Z + 0.7
-                        inputY = CUBE_WIDTH * goal_Y - 0.2
-                        adjustedY = True
                         inputAlpha = alpha - 8
                         adjustedAlpha = True
                     elif goal_Z > 2.75 and goal_Z <= 3.25: # z = 3
@@ -161,8 +158,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                 else:
                     print(f"Position not included X: {goal_X}")
 
-                if not adjustedY:
-                    inputY = CUBE_WIDTH * goal_Y + 0
+                inputY = CUBE_WIDTH * goal_Y + 0
 
             # Here are the turns
             elif goal_Y <= -0.5: # y = -1 Turn Right
