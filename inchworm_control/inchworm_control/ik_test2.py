@@ -519,6 +519,8 @@ class IkTest2(Node):
         # EE moves straight up from board to just above the home
         self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
 
+        self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
+
         print("Movement complete: TEST_STEP")
 
     def move_motors(self, movements, positions, pivot_foot, holding_block, step_type):
