@@ -601,10 +601,15 @@ class IkTest2(Node):
         # self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x2z0_5, x2z0, TRAVEL_TIME, pivot_foot)
 
+        # Grab Block
+        self.move_to(x1z0, x1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
+
         # Turn Right
-        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
 
 
         print("Movement complete: TEST_STEP")
