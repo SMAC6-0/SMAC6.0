@@ -802,14 +802,14 @@ if not SIMULATION:
             # Set up the the inchworm node (state machine) as the client for the action of stepping
             self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
             self.get_logger().info("Inchworm Node Initialized")
-            self.prev_step_num = 0
+            # self.prev_step_num = 0
         
         def update_state(self): 
             """Update the inchworm state machine & send an existing set of step instructions to the motors """
             self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                if self.runtime > 0:
+                if self.runtime > 1:
                     self.send_goal(self.inchworm.step_instructions)
             self.runtime += 1
 
@@ -853,7 +853,7 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
-            self.prev_step_num = 0
+            # self.prev_step_num = 0
             # rclpy.shutdown()
 
         def feedback_callback(self, feedback_msg):
@@ -862,7 +862,7 @@ if not SIMULATION:
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
             # TODO: there is probably a better way to do this, without using get_next_step...
             # especially bc get_next_step does not necessarily align with what's happening in the action
-            if feedback.step_num - self.prev_step_num > 0 and not MANUAL_TESTING:
+            if not MANUAL_TESTING:
                 self.inchworm.get_next_step()
 
 def main(args=None):
