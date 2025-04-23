@@ -139,7 +139,7 @@ class Inchworm():
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
-        print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - start of plan_path()")
+
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
             self.goal, priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
@@ -161,7 +161,7 @@ class Inchworm():
 
         # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
-        print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - bleh")
+
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -176,12 +176,10 @@ class Inchworm():
                 if bd_path == []: 
                     return
                 
-                print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - before incoming")
                 if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                     self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                     # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                     self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
-                print(f"IW{self.id}'s grid status at [6,7,0] = {self.current_map[6][7][0]} - after incoming")
                 
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
@@ -208,7 +206,7 @@ class Inchworm():
             self.step_instructions = step_instructions
             print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
             x, y,z = self.goal
-            print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
+            # print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
             
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
