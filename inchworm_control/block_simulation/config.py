@@ -16,7 +16,7 @@ SEED_BK = [6, 6, 1]
 # - LOCATIONS - #
 NUM_INCHWORMS = 2
 IW_1_LOC = [6, 7, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-IW_2_LOC = [12, 12, 0]
+IW_2_LOC = [1, 1, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
