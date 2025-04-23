@@ -1,4 +1,4 @@
-import map_data
+import block_simulation.map_data as map_data
 from colorama import Fore, init
 init(autoreset=True)
 
