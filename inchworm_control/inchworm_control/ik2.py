@@ -144,7 +144,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                         inputAlpha = alpha - 8
                         adjustedAlpha = True
                     elif goal_Z > 3.25 and goal_Z <= 3.6: # z = 3.5
-                        inputX = CUBE_WIDTH * goal_X + 0.2
+                        inputX = CUBE_WIDTH * goal_X + 0.1
                         inputZ = CUBE_WIDTH * goal_Z + 0.7
                         inputAlpha = alpha - 8
                         adjustedAlpha = True
