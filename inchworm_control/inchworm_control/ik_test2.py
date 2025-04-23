@@ -547,7 +547,7 @@ class IkTest2(Node):
 
         # Start moving leading foot 
         pivot_foot = 1 
-        self.latch_detach(pivot_foot)
+        # self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
         # Pivot Foot 1 x = 1
