@@ -28,6 +28,6 @@ elif mode == 2:
         sleep(0.1)
 
 elif mode == 3:
-    print(servo_bus.angle_limit_read(4))
+    print(servo_bus.angle_limit_write(4, 0, 240))
 
 # print(servo_bus.id_read())
