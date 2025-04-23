@@ -537,15 +537,15 @@ class IkTest2(Node):
 
         # Pivot Foot 1 x = 2
         # Gradual
-        # self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z0_5, x2z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0_5, x2z1, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z1, x2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z1, x2z1_5, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z1_5, x2z2, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z1_5, x2z2, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x2z2, x2z2_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z2, x2z2_5, TRAVEL_TIME, pivot_foot)
 
         # self.move_to(x2z2_5, x2z3, TRAVEL_TIME, pivot_foot)
 
