@@ -843,6 +843,7 @@ if not SIMULATION:
                 return
 
             self.get_logger().info('Goal accepted :)')
+            self.inchworm.get_next_step()
 
             # Asynchronously receive the result of the action
             self._get_result_future = goal_handle.get_result_async()
