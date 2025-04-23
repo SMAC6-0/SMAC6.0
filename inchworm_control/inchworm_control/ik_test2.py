@@ -202,10 +202,10 @@ class IkTest2(Node):
         # This conditional makes it so that the EE does NOT rotate when the EE is moving straight up/down.  
         # This check is essential to make sure that the wires do not get tangled as the inchworm turns. 
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
-        if (current_pos[0]==final_pos[0] & current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
-            fix_EE_orientation = False # do not rotate the EE (motors 1 or 5)
-        else: 
-            fix_EE_orientation = True # rotate the EE (motors 1 or 5)
+        if (current_pos[0]==final_pos[0] and current_pos[1]==final_pos[1]): # if the start&end x&y positions are the same, then the movement must be vertical 
+            fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
+        else:
+            fix_EE_orientation = False # rotate the EE (motors 1 or 5)
 
         current_pos = np.transpose(np.asarray(current_pos))
         final_pos = np.transpose(np.asarray(final_pos))
@@ -222,6 +222,33 @@ class IkTest2(Node):
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, pivot_foot, fix_EE_orientation)
     
+    def move_joints_fixEE(self, joint_angles, time):
+        """
+        Move motors to specified angles over a given time duration.
+
+        Args:
+            joint_angles(list): theta1, theta2, theta3, theta4, theta5 in degrees
+            time (float): Duration to reach the target angles (in seconds).
+        """
+        [theta1, theta2, theta3, theta4, theta5] = joint_angles
+        motor_1_pos = self.motor_1.pos_read()
+        motor_5_pos = self.motor_5.pos_read()
+        self.motor_1.move_time_write(motor_1_pos, time)
+        self.motor_2.move_time_write(theta2, time)
+        self.motor_3.move_time_write(theta3, time)
+        self.motor_4.move_time_write(theta4, time)
+        self.motor_5.move_time_write(motor_5_pos, time)
+
+        # Pause the program to allow the motors to finish moving.
+        sleep(time)
+
+        print("----------------After Motor Angles-----------------------")
+        print(self.motor_1.pos_read(),
+            self.motor_2.pos_read(),
+            self.motor_3.pos_read(),
+            self.motor_4.pos_read(),
+            self.motor_5.pos_read()) 
+
     def move_joints(self, joint_angles, time):
         """
         Move motors to specified angles over a given time duration.
@@ -271,7 +298,10 @@ class IkTest2(Node):
             # running the inverseKinematics to get the joint angles
             joint_ang = inverseKinematics(x, y, z, alpha, pivot_foot, fix_EE_orientation) # the joint angles
             
-            self.move_joints(joint_ang, 0.5) # running the motors to get to the point
+            if fix_EE_orientation:
+                self.move_joints_fixEE(joint_ang, 0.5)
+            else:
+                self.move_joints(joint_ang, 0.5) # running the motors to get to the point
 
             sleep(1/10)
             toc = time.perf_counter()
@@ -410,6 +440,7 @@ class IkTest2(Node):
 
         # attach detach the feeties based on holding block and pivot foot 
         print(Fore.RED + f"[Attach/Detach] pivot foot = {pivot_foot},holding block = {holding_block}, step = {step_type}")
+        self.latch_detach(pivot_foot,holding_block)
         sleep(BLOCK_INTERFACING_TIME)
 
         # Account for the fact that the IW is holding a block
@@ -647,7 +678,7 @@ class IkTest2(Node):
         pivot_foot = 1 # the pivot foot 
 
         # turn 2 blocks on the left, this is from the perspective of pivot foot. Depending on the pivot foot it could be +/-2
-        leading_foot_goal = [0, 2, 0, EE_direction.DOWN.value] 
+        leading_foot_goal = [1, 1, 0, EE_direction.DOWN.value] 
         above_leading_foot_goal = copy.deepcopy(leading_foot_goal)
         above_leading_foot_goal[2] += 0.5
 
@@ -673,7 +704,7 @@ class IkTest2(Node):
 
         # Now, since the origin and axes for the inverse kinematics have flipped to be w.r.t. the other foot, 
         # goal must be adjusted. 
-        following_foot_goal = [2, 0, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
+        following_foot_goal = [1, -1, 0, EE_direction.DOWN.value] # in the world frame, this is the same exact location as leading_foot_goal
         above_following_foot_goal = copy.deepcopy(following_foot_goal)
         above_following_foot_goal[2] += 0.5
 
