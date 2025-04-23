@@ -519,26 +519,26 @@ class IkTest(Node):
 
         # Turn Tests (x = 1)
         # Pivot Foot 1
-        # y = -1
+        # y = -1 (Right turns)
         y_1z0   = [-1, 1, 0, EE_direction.DOWN.value]
         y_1z0_5 = [-1, 1, 0.5, EE_direction.DOWN.value]
         y_1z1   = [-1, 1, 1, EE_direction.DOWN.value]
         y_1z1_5 = [-1, 1, 1.5, EE_direction.DOWN.value]
 
-        # y = 1
+        # y = 1 (Left turns)
         y1z0   = [1, 1, 0, EE_direction.DOWN.value]
         y1z0_5 = [1, 1, 0.5, EE_direction.DOWN.value]
         y1z1   = [1, 1, 1, EE_direction.DOWN.value]
         y1z1_5 = [1, 1, 1.5, EE_direction.DOWN.value]
 
         # Pivot Foot 5
-        # y = -1
+        # y = -1 (Right turns)
         y_1z_1   = [-1, 1, -1, EE_direction.DOWN.value]
         y_1z_0_5 = [-1, 1, -0.5, EE_direction.DOWN.value]
         #y_1z0
         #y_1z0_5
 
-        # y = 1
+        # y = 1 (Left turns)
         y1z_1   = [1, 1, -1, EE_direction.DOWN.value]
         y1z_0_5 = [1, 1, -0.5, EE_direction.DOWN.value]
         #y1z0
@@ -589,8 +589,8 @@ class IkTest(Node):
         
         # Pivot Foot 1 x = 1
         # Turns
-        self.move_to(x1z0, x1z_0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z_0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
 
         print("Movement complete: TEST_STEP")
