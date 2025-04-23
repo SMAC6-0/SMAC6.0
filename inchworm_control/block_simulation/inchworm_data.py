@@ -797,20 +797,21 @@ if not SIMULATION:
 
             # Every second, update the state
             self.create_timer(1, self.update_state)
+            self.runtime = 0
 
             # Set up the the inchworm node (state machine) as the client for the action of stepping
             self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
             self.get_logger().info("Inchworm Node Initialized")
+            self.prev_step_num = 0
         
         def update_state(self): 
             """Update the inchworm state machine & send an existing set of step instructions to the motors """
             self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                self.send_goal(self.inchworm.step_instructions)
-                # Clear the step instructions so that the state continues updating, 
-                # but the instructions are not resent 
-                # self.inchworm.step_instructions = []
+                if self.runtime > 1:
+                    self.send_goal(self.inchworm.step_instructions)
+            self.runtime += 1
 
         def send_goal(self, all_steps):
             """Send an action request for the 'inchworm_moving' action"""
@@ -852,12 +853,15 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
+            self.prev_step_num = 0
             # rclpy.shutdown()
 
         def feedback_callback(self, feedback_msg):
             """Runs repeeatedly as the action runs, providing feedback"""
             feedback = feedback_msg.feedback
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
+            if feedback.step_num - self.prev_step_num > 0 and not MANUAL_TESTING:
+                self.inchworm.get_next_step()
 
 def main(args=None):
     if not SIMULATION:
