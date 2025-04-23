@@ -141,7 +141,7 @@ class PathProgression(Node):
             feedback_msg.step_num += 1
             self.get_logger().info(f'Feedback: Step {feedback_msg.step_num} / {feedback_msg.total_steps}')
             goal_handle.publish_feedback(feedback_msg)
-            time.sleep(1)
+            time.sleep(2)
             # Perform the step
             try:
                 print(f"Imagine me doing a step olay")
@@ -158,6 +158,10 @@ class PathProgression(Node):
                 
             except Exception as e:
                 self.get_logger().error('Failed to move servo: "%s"' % str(e))
+                goal_handle.abort()
+                result = Inchwormpath.Result()
+                result.completion_status = False
+                return result
 
         # Indicate successful completion of the goal, of the path
         goal_handle.succeed()
