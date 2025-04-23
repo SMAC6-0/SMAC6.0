@@ -610,15 +610,16 @@ class IkTest2(Node):
         # activate_servo(self.servo2)
 
         # Step Forward With Block
-        activate_servo(self.servo2)
-        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
+        # activate_servo(self.servo2)
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
 
         # Place Block 1 High
-        # self.move_to(x1z1, x1z2_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z2_5, x2z2_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x2z2_5, x2z2, TRAVEL_TIME, pivot_foot)
+        activate_servo(self.servo2)
+        self.move_to(x1z1, x1z2_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z2_5, x2z2_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z2_5, x2z2, TRAVEL_TIME, pivot_foot)
 
         # Place Block 2 High
         # self.move_to(x1z1, x1z3_5, 4, pivot_foot)
