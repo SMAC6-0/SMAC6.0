@@ -123,12 +123,12 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                         inputZ = CUBE_WIDTH * goal_Z + 0.58
                         inputAlpha = alpha - 8
                         adjustedAlpha = True
-                    elif goal_Z > 1.05 and goal_Z <= 1.25: # z = 1.25 (Tilt When moving block)
+                    elif goal_Z > 1.05 and goal_Z <= 1.45: # z = 1.25 (Tilt When moving block)
                         inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0.58
                         inputAlpha = alpha + 10
                         adjustedAlpha = True
-                    elif goal_Z > 1.25 and goal_Z <= 1.75: # z = 1.5
+                    elif goal_Z > 1.45 and goal_Z <= 1.75: # z = 1.5
                         inputX = CUBE_WIDTH * goal_X + 1.2
                         inputZ = CUBE_WIDTH * goal_Z + 0.4
                         inputAlpha = alpha - 8
@@ -180,13 +180,13 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     inputZ = CUBE_WIDTH * goal_Z + 0.5
                     inputAlpha = alpha - 8
                     adjustedAlpha = True
-                elif goal_Z > 1.05 and goal_Z <= 1.25: # z = 1.25 (Tilt when moving block)
+                elif goal_Z > 1.05 and goal_Z <= 1.45: # z = 1.25 (Tilt when moving block)
                     inputX = CUBE_WIDTH * goal_X + 0.8
                     inputY = CUBE_WIDTH * goal_Y - 0.8
                     inputZ = CUBE_WIDTH * goal_Z + 0.5
                     inputAlpha = alpha + 10
                     adjustedAlpha = True
-                elif goal_Z > 1.25 and goal_Z <= 1.75: # z = 1.5
+                elif goal_Z > 1.45 and goal_Z <= 1.75: # z = 1.5
                     inputX = CUBE_WIDTH * goal_X + 0.8
                     inputY = CUBE_WIDTH * goal_Y - 0.8
                     inputZ = CUBE_WIDTH * goal_Z + 0.5
