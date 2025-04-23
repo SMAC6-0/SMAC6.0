@@ -517,19 +517,27 @@ class IkTest2(Node):
         self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
+        # Pivot Foot 1 x = 1
         # Gradual
-        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z2_5, x1z3_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z2_5, x1z3_5, TRAVEL_TIME, pivot_foot)
 
         # Direct
         # self.move_to(x1z0, x1z2_5, TRAVEL_TIME, pivot_foot)
+
+        # Pivot Foot 1 x = 2
+        # Gradual
+        self.move_to(x2z0, x2z0, TRAVEL_TIME, pivot_foot)
+
+        # Direct
+        
 
         print("Movement complete: TEST_STEP")
 
