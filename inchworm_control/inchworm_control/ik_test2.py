@@ -518,16 +518,18 @@ class IkTest2(Node):
         
         # EE moves straight up from board to just above the home
         # Gradual
-        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
-        # self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
+
+        self.move_to(x1z2_5, x1z3_5, TRAVEL_TIME, pivot_foot)
 
         # Direct
-        self.move_to(x1z0, x1z2_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z2_5, TRAVEL_TIME, pivot_foot)
 
         print("Movement complete: TEST_STEP")
 
