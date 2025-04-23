@@ -109,7 +109,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2):
             print(f"block: {last_block} count: {repeat_count}")
         
         build_queue.pop(0) # get rid of next block for other iws
-        # print(f"Selected block: {next_block}, Queue: {build_queue}")
+        print(f"Selected block: {next_block}, Queue: {build_queue}")
         return list(next_block), build_queue
     return [-9, -9, -9]
 
