@@ -588,7 +588,7 @@ class IkTest2(Node):
 
         # Pivot Foot 1 y = -1
         # Gradual
-        self.move_to(y_1z0, y_1z0, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0, y_1z0, TRAVEL_TIME, pivot_foot)
         
 
         print("Movement complete: TEST_STEP")
