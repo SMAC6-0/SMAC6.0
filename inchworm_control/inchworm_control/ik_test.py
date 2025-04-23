@@ -579,13 +579,13 @@ class IkTest(Node):
         # self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
 
         #place block z = 1
-        self.move_to(x2z1_5, x2z2_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x2z2_5, x2z2, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z1_5, x2z2_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z2_5, x2z2, TRAVEL_TIME, pivot_foot)
 
         # place block z = 2
         # self.move_to(x2z2_5, x2z3, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x2z3, x2z3_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x2z3_5, x2z3, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z3, x2z3_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z3_5, x2z3, TRAVEL_TIME, pivot_foot)
         
 
         print("Movement complete: TEST_STEP")
