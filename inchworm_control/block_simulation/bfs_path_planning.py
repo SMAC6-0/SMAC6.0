@@ -2,7 +2,7 @@ import map_data
 from colorama import Fore, init
 init(autoreset=True)
 
-def find_path(grid, start, goal, iw_id, holding_block, bypass_flag) -> list[int]:
+def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_block, bypass_flag) -> list[int]:
     """
     Perform modified BFS in a 3D grid.
     
@@ -18,6 +18,7 @@ def find_path(grid, start, goal, iw_id, holding_block, bypass_flag) -> list[int]
     Returns:
         path (list[int]): A list of coordinates of the path.
     """
+    start = lagging_foot_loc
     start_status = (grid[start[0]][start[1]][start[2]])
     goal_status = (grid[goal[0]][goal[1]][goal[2]])
     print(Fore.MAGENTA + f"BFS called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")

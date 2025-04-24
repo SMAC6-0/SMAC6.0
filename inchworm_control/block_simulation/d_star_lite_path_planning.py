@@ -22,7 +22,7 @@ class DStarLite:
         self.start = self.get_cell(start, is_start=True)
         
         self.goal.rhs = 0
-        self.goal.g = self.start.g = float('inf')
+        self.goal.g = self.start.g = 0#float('inf')
         self.cell_map[self.goal.to_tuple()] = self.goal
         self.insert(self.goal, self.calculate_key(self.goal))
         
@@ -62,7 +62,7 @@ class DStarLite:
                     for nx, ny, nz in self.neighbors:
                         block_neighbor = bx + nx, by + ny, bz + nz
                         if coords == block_neighbor and not is_start:
-                            cell.cost += 10 * z
+                            cell.cost += 5 * z
                             break
             if self.bypass_flag and coords == self.lagging_foot or coords == self.leading_foot: # penalize both feet locations to find new location
                 cell.cost = 999
@@ -82,7 +82,8 @@ class DStarLite:
                 neighbor_coord = nx, ny, nz
                 if map_data.is_valid_position_3d(self.grid, neighbor_coord):
                     if ((self.grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or
-                            self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value)):
+                         self.grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
+                         neighbor_coord == self.goal.to_tuple())):
                         neighbor = self.get_cell(neighbor_coord)
                         min_rhs = min(min_rhs, neighbor.g + neighbor.cost)
             cell.rhs = min_rhs
@@ -146,6 +147,8 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
     start_status = (grid[start[0]][start[1]][start[2]])
     goal_status = (grid[goal[0]][goal[1]][goal[2]])
     print(Fore.MAGENTA + f"D* Lite called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
+    below_goal_status = (grid[goal[0]][goal[1]][goal[2]-1])
+    # print(Fore.CYAN + f"below goal: {[goal[0], goal[1], goal[2] - 1]} (status: {below_goal_status})")
     
     if not bypass_flag:
         if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
@@ -163,26 +166,28 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
             if map_data.is_valid_position_3d(grid, (neighbor_coord)):
-                if iw_id == 2:
-                    print(Fore.LIGHTMAGENTA_EX + f"{neighbor_coord}")
-                    print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}\nincoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}\nmy path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
+                # if iw_id == 2:
+                #     print(Fore.LIGHTMAGENTA_EX + f"{neighbor_coord}")
+                #     print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}\nincoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}\nmy path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
                 if ((grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or 
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    if iw_id == 2:
-                        print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
+                    # if iw_id == 2:
+                    #     print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord} (status: {grid[nx][ny][nz]}): g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
                     total_cost = neighbor.rhs#d_star.calculate_key(neighbor)[0]
                     if total_cost < min_cost:
                         min_cost = total_cost
                         next_cell = neighbor
                         
         if next_cell is None:
+            # print(Fore.MAGENTA + f"mappity map: \n{grid}")
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
             return []
 
         next_cell.parent = current_cell
         current_cell = next_cell
+        
     path = map_data.reverse_path_3d(current_cell, holding_block)
     print(Fore.MAGENTA + f"Path found: {path}")
     return path

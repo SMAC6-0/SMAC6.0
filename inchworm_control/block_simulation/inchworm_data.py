@@ -566,8 +566,6 @@ class Inchworm():
                     self.path_exists()
                 elif self.no_blocks_left():
                     self.handle_no_blocks_to_place()
-                elif self.is_stuck_or_blocking():
-                    self.handle_yielding()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
@@ -620,10 +618,7 @@ class Inchworm():
             if MANUAL_TESTING:
                 self.dummy_IW_move()
             if self.leading_foot_loc == self.goal: 
-                print(Fore.BLUE + "Touching the seed block")    
-                
-                # self.IW_clear_path()
-
+                print(Fore.BLUE + "Touching the seed block")
                 self.iw_reached_seed_block_flag = True
 
         else: # this happens first 
@@ -634,7 +629,10 @@ class Inchworm():
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
         self.IW_clear_path()
         self.plan_path()
-        self.set_state(IW_STATE.PATH_PLANNING)
+        if self.is_stuck_or_blocking():
+            self.set_state(IW_STATE.YIELDING)
+        if self.is_Path_Available():
+            self.set_state(IW_STATE.PATH_PLANNING)
 
     def path_exists(self):
         # MOOOO HELPPP 
@@ -648,24 +646,19 @@ class Inchworm():
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
-        if self.is_stuck_or_blocking():
-            self.IW_clear_path()
-            self.handle_yielding()
-        else:
-            self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
-            if not SIMULATION:
-                # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
-                self.paths = self.temp_path
-                self.send_IW_path_to_block(self.clear_path_com, self.paths)
-                sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
-            # or stay here until the IW gets a new map!!
-            # MOOO HELPPP
-            self.IW_clear_path()
-            self.plan_path()
-            # For simulation. If no path is available, save the path as its own location 
-            if SIMULATION and self.paths == []:
-                self.paths = self.temp_path
-            # print(self.current_map)
+        self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
+        if not SIMULATION:
+            # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
+            self.paths = self.temp_path
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
+            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
+        # or stay here until the IW gets a new map!!
+        # MOOO HELPPP
+        self.plan_path()
+        # For simulation. If no path is available, save the path as its own location 
+        if SIMULATION and self.paths == []:
+            self.paths = self.temp_path
+        # print(self.current_map)
 
     def handle_no_blocks_to_place(self): 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
@@ -702,7 +695,7 @@ class Inchworm():
         self.holding_block = False
         self.goal = self.leading_foot_loc
 
-        print(Fore.BLUE + f"IW{self.id}: Reset the path")
+        print(Fore.RED + f"IW{self.id}: Reset the path")
         
         # self.set_state(IW_STATE.PLACING_BLOCK)
 
@@ -727,23 +720,23 @@ class Inchworm():
     def handle_structure_incomplete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is incomplete. Updated IW's map with placed block. Finding new path...")
         self.plan_path()
-
         self.set_state(IW_STATE.PATH_PLANNING)
         
     def handle_yielding(self):
         """ step out of the way if inchworm is in another's path """
         print(Fore.BLUE + f"IW{self.id}: YIELDING!!! GOTTA GET OUTTA DA WAY")
-        self.IW_clear_path()
         px, py, pz = self.find_nearest_structure()
         self.goal = [px, py, pz]
-        self.plan_path([px, py, pz], bypass_flag=True)
+        if self.goal != self.leading_foot_loc:
+            self.plan_path([px, py, pz], bypass_flag=True)
+        else:
+            self.plan_path(bypass_flag=True)
         
         if not self.is_Path_Available():
-            self.request_map_snapshot()
             self.yield_cooldown_timer = self.YIELD_COOLDOWN_LIMIT
             print(Fore.BLUE + f"IW{self.id}: stuck and cannot get out of way, waiting for updates")
             sleep(PATH_PLANNING_TIMER)
-            self.set_state(self.prev_state)
+            self.set_state(IW_STATE.YIELDING)
         else:
             print("we moved and we chillll")
             self.plan_path()
