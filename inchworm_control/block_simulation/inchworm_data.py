@@ -794,11 +794,11 @@ if not SIMULATION:
 
             # Every second, update the state
             self.create_timer(1, self.update_state)
-            self.runtime = 0
 
             # Set up the the inchworm node (state machine) as the client for the action of stepping
             self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
             self.get_logger().info("Inchworm Node Initialized")
+            self.goal_flag = True
             # self.prev_step_num = 0
         
         def update_state(self): 
@@ -806,9 +806,9 @@ if not SIMULATION:
             self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                if self.runtime > 1:
+                if self.goal_flag:
                     self.send_goal(self.inchworm.step_instructions)
-            self.runtime += 1
+                    self.goal_flag = False
 
         def send_goal(self, all_steps):
             """Send an action request for the 'inchworm_moving' action"""
@@ -856,6 +856,7 @@ if not SIMULATION:
                 self.inchworm.step_instructions = []
             else: 
                 self.inchworm.set_state(IW_STATE.ERROR)
+            self.goal_flag = True 
             # self.prev_step_num = 0
             # rclpy.shutdown()
 
