@@ -2,6 +2,7 @@ import numpy as np
 from collections import defaultdict
 from block_simulation.config import SEED_BK
 import json
+import map_data 
 
 # x: row in array (7 rows)
 # y: layer (6 layers)
@@ -30,19 +31,20 @@ sample_stacked_final = [[[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0,
                         [[1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]], 
                         [[0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1]]]
         
-build_queue = []
 last_block = None
 repeat_count = 0
 
 def seed_distance(x, y):
     return abs(x - SEED_BK[0]) ** 2 + (y - SEED_BK[1]) ** 2
 
-def blueprint(curr_map, final_map, repeat_threshold=2): 
-    global build_queue, last_block, repeat_count
+def blueprint(curr_map, final_map, repeat_threshold=2) -> list: 
+    global last_block, repeat_count
+
                
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
     map_complete = True
+    build_queue = []
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
@@ -52,7 +54,8 @@ def blueprint(curr_map, final_map, repeat_threshold=2):
 
     elif curr_map.size == final_map.size:
         # The structure is complete
-        if np.array_equal(curr_map, final_map):
+        # if np.array_equal(curr_map, final_map):
+        if map_data.is_structure_complete(curr_map, final_map):
             return [-1,-1,-1], build_queue
         
         # TODO: implement prioritization of found structures
@@ -61,6 +64,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2):
         for z in range((curr_map.shape[2])): #iterate 0-7
             for x in range(curr_map.shape[0]): #iterate 0-7
                 for y in range(curr_map.shape[1]): #iterate 0-7
+                    if curr_map[x, y, z] != 2:
                         is_different = curr_map[x, y, z] != final_map[x, y, z]
                         final_is_walkable = final_map[x, y, z] == 0
                         lowest_z = z
@@ -93,8 +97,10 @@ def blueprint(curr_map, final_map, repeat_threshold=2):
         if not build_queue:
             return [-9, -9, -9], build_queue
                 
-        # print(sorted_coords)                
-        next_block = build_queue[0]
+        # print(sorted_coords)  
+        # print(f" Queue: {build_queue}")              
+        next_block = build_queue[0] # This also pops from the build_queue
+        # print(f"next block: {next_block} for queue {build_queue}")
 
         if last_block == next_block:
             repeat_count += 1
