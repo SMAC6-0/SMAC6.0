@@ -875,6 +875,7 @@ if not SIMULATION:
             if not MANUAL_TESTING:
                 self.inchworm.get_next_step()
 
+            print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num-1 != self.inchworm.step_num}")
             # If the feedback is not right, something is wrong. cancel the action
             if ((feedback.step_num != self.inchworm.step_num and MANUAL_TESTING)
                 or (feedback.step_num-1 != self.inchworm.step_num and not MANUAL_TESTING)
