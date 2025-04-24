@@ -86,7 +86,6 @@ class Inchworm():
         self.paths = [] # the list of coords
         self.temp_path = []
         self.goal = [] # goal coord
-        self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
         self.next_block_loc = [] # stores the location of next block
@@ -218,7 +217,7 @@ class Inchworm():
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             step_type = ""
-            if self.goal_progress_index > 0 and self.step_instructions:
+            if self.step_instructions:
                 step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
@@ -248,7 +247,6 @@ class Inchworm():
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
-            self.goal_progress_index += 1
             
             # If the IW is grabbing a block, holding_block becomes true
             if "GRAB" in step_type:
@@ -662,7 +660,6 @@ class Inchworm():
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
         self.step_instructions = []
-        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
         self.holding_block = False
         self.goal = self.leading_foot_loc
