@@ -175,11 +175,6 @@ class Inchworm():
                 if bd_path == []: 
                     return
                 
-                if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
-                    self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
-                    # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                    self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
-                
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
                 self.holding_block = False
@@ -207,6 +202,13 @@ class Inchworm():
             x, y,z = self.goal
             # print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
             
+            print(f"befor sdlhgoisdj")
+            if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
+                self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
+                # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
+                print(f"updating goal as incoming")
+                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
+
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
             return
@@ -656,9 +658,13 @@ class Inchworm():
         self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
-        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
+        if self.leading_foot_loc == SEED_BK:
+            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.id)
+        else: 
+            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
 
         self.clear_path_com = copy.deepcopy(self.paths)
+        print(f"clear com: {self.clear_path_com}")
         self.paths = [] # Reset current path 
         self.step_instructions = []
         self.step_num = 1
