@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict
-from block_simulation.config import SEED_BK
+from config import SEED_BK
 import json
 import map_data 
 
@@ -39,7 +39,6 @@ def seed_distance(x, y):
 
 def blueprint(curr_map, final_map, repeat_threshold=2) -> list: 
     global last_block, repeat_count
-
                
     curr_map = np.array(curr_map)
     final_map = np.array(final_map)
@@ -48,9 +47,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
 
     if curr_map.shape != final_map.shape:
         print("Arrays don't match shape") 
-        print("curr_map shape: ", curr_map.shape)
-        print("final_map shape: ", final_map.shape)
-        return [-9,-9,-9], build_queue # error value
+        return [-9,-9,-9] # error value
 
     elif curr_map.size == final_map.size:
         # The structure is complete
@@ -117,7 +114,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
             print(f"block: {last_block} count: {repeat_count}")
         
         build_queue.pop(0) # get rid of next block for other iws
-        print(f"Selected block: {next_block}, Queue: {build_queue}")
+        # print(f"Selected block: {next_block}, Queue: {build_queue}")
         return list(next_block), build_queue
     return [-9, -9, -9]
 
