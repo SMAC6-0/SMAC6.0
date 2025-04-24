@@ -227,7 +227,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                         inputAlpha = alpha -2
                     elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
                         inputX = CUBE_WIDTH * goal_X + 0
-                        inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputZ = CUBE_WIDTH * goal_Z + 1
                     else:
                         print(f"Position not included Z: {goal_Z}")
                 elif goal_X > 1.5 and goal_X <= 2.1: # x = 2
