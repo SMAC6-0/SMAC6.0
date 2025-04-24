@@ -1257,7 +1257,7 @@ def activate_servo(servo_id):
     # Set duty cycle to move servo to 30° position
     servo_id.ChangeDutyCycle(2+(30/18))
     # Pause to allow servo to reach position
-    time.sleep(1)
+    time.sleep(0.5)
     # Stop sending signal to servo
     servo_id.ChangeDutyCycle(0)
 
