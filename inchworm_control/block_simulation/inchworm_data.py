@@ -653,6 +653,7 @@ class Inchworm():
         self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
+        print("Current Map before clearing: ", self.current_map)
         if self.goal != SEED_BK: 
             print(Fore.MAGENTA + f"IW{self.id}: Goal was not seed block. Setting IW's prev goal to be walkable")
             self.current_map = map_data.update_grid_status(self.current_map, self.goal) # updates map for next_goal to be incoming_block
@@ -672,6 +673,7 @@ class Inchworm():
         self.holding_block = False
         self.goal = self.leading_foot_loc
 
+        print("Current Map after clearing: ", self.current_map)
         print(Fore.BLUE + f"IW{self.id}: Reset the path")
         
         # self.set_state(IW_STATE.PLACING_BLOCK)
