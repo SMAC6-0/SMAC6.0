@@ -86,6 +86,7 @@ class Inchworm():
         self.paths = [] # the list of coords
         self.temp_path = []
         self.goal = [] # goal coord
+        self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
         self.next_block_loc = [] # stores the location of next block
@@ -217,7 +218,7 @@ class Inchworm():
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             step_type = ""
-            if self.step_instructions:
+            if self.goal_progress_index > 0 and self.step_instructions:
                 step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
@@ -247,6 +248,7 @@ class Inchworm():
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
+            self.goal_progress_index += 1
             
             # If the IW is grabbing a block, holding_block becomes true
             if "GRAB" in step_type:
@@ -660,6 +662,7 @@ class Inchworm():
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
         self.step_instructions = []
+        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
         self.holding_block = False
         self.goal = self.leading_foot_loc
@@ -829,6 +832,7 @@ if not SIMULATION:
                 return
 
             self.get_logger().info('Goal accepted :)')
+            self.inchworm.get_next_step()
 
             # Asynchronously receive the result of the action
             self._get_result_future = goal_handle.get_result_async()
@@ -839,11 +843,6 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
-            # If the inchworm successfully reaches the end of the path, clear step instructions
-            if result.completion_status == True:
-                self.inchworm.step_instructions = []
-            else: 
-                self.inchworm.set_state(IW_STATE.ERROR)
             # self.prev_step_num = 0
             # rclpy.shutdown()
 
@@ -851,27 +850,10 @@ if not SIMULATION:
             """Runs repeeatedly as the action runs, providing feedback"""
             feedback = feedback_msg.feedback
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
-
             # TODO: there is probably a better way to do this, without using get_next_step...
             # especially bc get_next_step does not necessarily align with what's happening in the action
             if not MANUAL_TESTING:
                 self.inchworm.get_next_step()
-
-            # If the feedback is not right, something is wrong. cancel the action
-            if feedback.step_num != self.inchworm.step_num or feedback.total_steps != self.inchworm.num_steps: 
-                print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
-                future = self._goal_handle.cancel_goal_async()
-                future.add_done_callback(self.cancel_path_nav)
-                
-        
-        def cancel_path_nav(self, future):
-            """Cancels the action."""
-            cancel_response = future.result()
-            if len(cancel_response.goals_canceling) > 0:
-                self.get_logger().info('Goal successfully canceled')
-            else:
-                self.get_logger().info('Goal failed to cancel')
-            # rclpy.shutdown() #TODO: maybe remove shutting down here
 
 def main(args=None):
     if not SIMULATION:
