@@ -766,12 +766,12 @@ class IkTest2(Node):
         pivot_foot = 1
         self.latch_detach(pivot_foot)
         self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
         pivot_foot = 5
         self.latch_detach(pivot_foot)
         self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
         self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
 
