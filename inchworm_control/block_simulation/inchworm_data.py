@@ -86,7 +86,6 @@ class Inchworm():
         self.paths = [] # the list of coords
         self.temp_path = []
         self.goal = [] # goal coord
-        self.goal_progress_index = 0
         self.num_steps = 0
         self.step_num = 1
         self.next_block_loc = [] # stores the location of next block
@@ -139,24 +138,19 @@ class Inchworm():
         # print(Fore.MAGENTA + f"IW{self.id}, leading: {self.leading_foot_loc}, lagging foot loc: {self.lagging_foot_loc}")
         priority_snapshot = None
         is_traveling = False # assumes that if not specified, objective is to travel, not place
-        
+
         if next_goal == None:
             print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
             self.goal, priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
-            
+            print(Fore.MAGENTA + f"IW{self.id}: goal: {self.goal}")
             if self.goal == [-1, -1, -1]:
-                print(Fore.MAGENTA + f"IW{self.id}: erm blueprint done in the wrong place")
+                print(Fore.MAGENTA + f"Other IWs finished the structure while IW{self.id} was looking for a path")
                 return
             elif self.goal == [-9, -9, -9]:
                 print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
                 path = []
                 self.goal = self.leading_foot_loc
                 return
-                
-            if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
-                self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
-                # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
         else:
             is_traveling = True
             self.goal = next_goal
@@ -166,7 +160,7 @@ class Inchworm():
 
         # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
-        
+
         try: 
             step_instructions, steps, path = [], [], []
             if is_traveling or self.holding_block:
@@ -181,8 +175,13 @@ class Inchworm():
                 if bd_path == []: 
                     return
                 
+                if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
+                    self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
+                    # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
+                    self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
+                
                 # Find path to where the next block will be placed
-                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-1], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
+                goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
                 self.holding_block = False
                 if goal_path == []: 
                     return
@@ -205,6 +204,8 @@ class Inchworm():
             # Save the step instructions 
             self.step_instructions = step_instructions
             print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            x, y,z = self.goal
+            # print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
             
         except RuntimeError as e:
             print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
@@ -216,7 +217,7 @@ class Inchworm():
             ValueError(Fore.BLUE + f"Erm we're on step {self.step_num} but there should be {self.num_steps} steps")
         else: 
             step_type = ""
-            if self.goal_progress_index > 0:
+            if self.step_instructions:
                 step = self.step_instructions[self.step_num-1]
                 print(Fore.BLUE + f"IW{self.id}: Next step: {step}. This is step {self.step_num}/{self.num_steps} for path of length {len(self.paths)}")
                 step_type = step[0]
@@ -230,7 +231,9 @@ class Inchworm():
                 transform = orientation_transforms[self.orientation]
                 transformed_vector = transform(*step_change)
                 transformed_vector = list(map(int, transformed_vector))
-                print(f"change in world frame: {transformed_vector}")
+
+                prev_leading = self.leading_foot_loc
+                # print(f"change in world frame: {transformed_vector}")
                 self.leading_foot_loc = [self.leading_foot_loc[i] + transformed_vector[i] for i in range(len(transformed_vector))]  
                 # Update Inchworm Orientation with each step
                 self.orientation = map_data.get_orientation(step_change, self.orientation)
@@ -240,11 +243,10 @@ class Inchworm():
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
                     # If the inchworm is stepping up 
                     if step_change[2] > 0: 
-                        self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
+                        self.lagging_foot_loc[2] = (prev_leading[2] - self.leading_foot_loc[2]) if (prev_leading[2] - self.leading_foot_loc[2]) >= 0 else 0
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
-            self.goal_progress_index += 1
             
             # If the IW is grabbing a block, holding_block becomes true
             if "GRAB" in step_type:
@@ -255,7 +257,7 @@ class Inchworm():
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print(Fore.BLUE + f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            print( f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):
@@ -561,7 +563,9 @@ class Inchworm():
         if new_state != self.state:
             self.prev_state = self.state
             self.state = new_state
-            print(Fore.BLUE + f"IW{self.id}: State changed from {self.prev_state} to {self.state}")
+            print(Fore.BLUE + f"IW{self.id}: State changed from {self.prev_state.name} to {self.state.name}")
+        else: 
+            print(Fore.BLUE + f"IW{self.id} *tried* to change from {self.state.name} to the inputted {new_state.name}")
     
     ##### Checkers and Handlers
 
@@ -591,9 +595,7 @@ class Inchworm():
 
         else: # this happens first 
             # Find & path plan to seed block 
-            self.plan_path(SEED_BK)
-
-        
+            self.plan_path(SEED_BK)        
         
     def handle_IW_gets_Map(self):
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
@@ -650,8 +652,7 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-
-        self.set_state(IW_STATE.TRANSPORTING_BLOCK)
+        self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
@@ -659,7 +660,6 @@ class Inchworm():
         self.clear_path_com = copy.deepcopy(self.paths)
         self.paths = [] # Reset current path 
         self.step_instructions = []
-        self.goal_progress_index = 0 # TODO: May be good to move to handle_IW_gets_Map or clear_my_path
         self.step_num = 1
         self.holding_block = False
         self.goal = self.leading_foot_loc
@@ -733,7 +733,7 @@ class Inchworm():
         for bd_loc in BD_LOCS:
             if [bd_loc[0], bd_loc[1], bd_loc[2]-1] == self.leading_foot_loc: 
                 print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the supply depot")
-                self.holding_block = True
+                # self.holding_block = True
                 return True 
         return False
 
@@ -752,7 +752,7 @@ class Inchworm():
 
         if self.leading_foot_loc == self.goal: 
             print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
-            self.holding_block = False
+            # self.holding_block = False
             return True 
         else: 
             return False
@@ -766,21 +766,7 @@ class Inchworm():
             pass
     
     def is_structure_complete(self, curr_map, final_map):
-        print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
-        curr_map = np.array(curr_map)
-        final_map = np.array(final_map)
-        
-        map_complete = True
-
-        for z in range(curr_map.shape[2]):
-            for x in range(curr_map.shape[0]):
-                for y in range(curr_map.shape[1]):
-                    if curr_map[x, y, z] < 10 and curr_map[x, y, z] != final_map[x, y, z]:
-                        if curr_map[x, y, z] != 2: 
-                            print(Fore.BLUE + f"WRONFG THING STUPOIDA {curr_map[x, y, z]} at {x, y, z}" )
-                            map_complete = False
-
-        print(Fore.BLUE + "IS MAP COMPLETE: ", map_complete)
+        map_complete = map_data.is_structure_complete(curr_map, final_map)
         return map_complete
     
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
