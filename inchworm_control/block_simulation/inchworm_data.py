@@ -877,7 +877,7 @@ if not SIMULATION:
             if feedback.step_num != self.inchworm.step_num or feedback.total_steps != self.inchworm.num_steps: 
                 print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
                 future = self._goal_handle.cancel_goal_async()
-                future.add_done_callback(self.cancel_done)
+                future.add_done_callback(self.cancel_path_nav)
                 
         
         def cancel_path_nav(self, future):
