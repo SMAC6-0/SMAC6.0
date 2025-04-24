@@ -760,7 +760,7 @@ class IkTest2(Node):
         self.move_to(y_1z_06, y_1z0, TRAVEL_TIME + 3, pivot_foot)
         self.move_to_noTP(y_1z0, x1z0, TRAVEL_TIME, pivot_foot)
         # self.move_to_noTP(y_1z_06, x1z_085, TRAVEL_TIME + 6, pivot_foot)
-        self.move_to_noTP(x1z0, x1z_085, TRAVEL_TIME - 1, pivot_foot)
+        self.move_to_noTP(x1z0, x1z_085, TRAVEL_TIME - 1.25, pivot_foot)
         # self.move_to(x1z_085, x1z_1, TRAVEL_TIME - 1, pivot_foot)
 
         # Turn Right
