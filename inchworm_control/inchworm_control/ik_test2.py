@@ -717,6 +717,7 @@ class IkTest2(Node):
         # Turn Left Block
         pivot_foot = 1
         self.latch_detach(pivot_foot)
+        activate_servo(self.servo2)
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(x1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y1z1_5, y1z0, TRAVEL_TIME, pivot_foot)
