@@ -628,11 +628,10 @@ class IkTest(Node):
 
         # left 
 
-        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z0, y1z0, TRAVEL_TIME, pivot_foot)
 
 
 
