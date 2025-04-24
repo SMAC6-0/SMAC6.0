@@ -585,7 +585,7 @@ def get_orientation(transformed_vector, orientation: InchwormOrientation):
     # else:
     #     return orientation
     
-def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
+def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool=True, lagging_foot=None):
     """
     To avoid collisions, buffers the inchworm paths of *other* IWs. 
     Args: 
@@ -634,6 +634,12 @@ def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
     
     grid = update_grid_status(grid, SEED_BK)
     grid = update_grid_status(grid, BD_1_LOC, GridStatus.SUPPLY_DEPOT.value)
+
+    if lagging_foot:
+        lx, ly, lz = lagging_foot
+        for dx, dy, dz in neighbor_directions:
+            nx, ny, nz = lx + dx, ly + dy, lz + dz
+            grid = update_grid_status(grid, lagging_foot, GridStatus.WALKABLE.value)
     
     return grid
 

@@ -106,8 +106,6 @@ class Inchworm():
         self.state = IW_STATE.INITIALIZATION
         self.print_flag = True
         self.iw_reached_seed_block_flag = False # flag to make sure IW reached the seed block and can now request map
-        self.yield_cooldown_timer = 0
-        self.YIELD_COOLDOWN_LIMIT = 5
         
         Inchworm.next_id += 1
         Inchworm.inchworm_list.append(self)
@@ -546,9 +544,6 @@ class Inchworm():
             self.update_state()
 
     def update_state(self):
-        if self.yield_cooldown_timer > 0:
-            self.yield_cooldown_timer -= 1
-            
         match self.state:
             case IW_STATE.IDLE:
                 self.handle_idle()
@@ -556,12 +551,17 @@ class Inchworm():
                 self.handle_initilization()
                 if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
                     if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
+                        # if self.is_stuck_or_blocking():
+                        #     self.handle_IW_blocked()
+                        # else:
                         self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
                 elif self.no_blocks_left():
                     self.handle_no_blocks_to_place()
+                elif self.is_stuck_or_blocking():
+                    self.handle_IW_blocked()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
@@ -625,10 +625,7 @@ class Inchworm():
         print(Fore.BLUE + f"IW{self.id}: Map snapshot successful. Now path planning...")
         self.IW_clear_path()
         self.plan_path()
-        if self.is_stuck_or_blocking():
-            self.set_state(IW_STATE.YIELDING)
-        if self.is_Path_Available():
-            self.set_state(IW_STATE.PATH_PLANNING)
+        self.set_state(IW_STATE.PATH_PLANNING)
 
     def path_exists(self):
         # MOOOO HELPPP 
@@ -639,6 +636,13 @@ class Inchworm():
         # TODO !!!!! 
         print(Fore.BLUE + f"IW{self.id}: Travelling to the supply")
         self.set_state(IW_STATE.TRAVELLING_TO_SUPPLY)
+
+    def handle_IW_blocked(self):
+        print(Fore.BLUE + f"IW{self.id}: YIELDING!!! GOTTA GET OUTTA DA WAY")
+        px, py, pz = self.find_nearest_structure()
+        self.goal = [px, py, pz]
+        if self.goal != self.leading_foot_loc:
+            self.plan_path(bypass_flag=True)
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
@@ -719,16 +723,7 @@ class Inchworm():
         
     def handle_yielding(self):
         """ step out of the way if inchworm is in another's path """
-        print(Fore.BLUE + f"IW{self.id}: YIELDING!!! GOTTA GET OUTTA DA WAY")
-        px, py, pz = self.find_nearest_structure()
-        self.goal = [px, py, pz]
-        if self.goal != self.leading_foot_loc:
-            self.plan_path([px, py, pz], bypass_flag=True)
-        else:
-            self.plan_path(bypass_flag=True)
-        
         if not self.is_Path_Available():
-            self.yield_cooldown_timer = self.YIELD_COOLDOWN_LIMIT
             print(Fore.BLUE + f"IW{self.id}: stuck and cannot get out of way, waiting for updates")
             sleep(PATH_PLANNING_TIMER)
             self.set_state(IW_STATE.YIELDING)
@@ -812,9 +807,9 @@ class Inchworm():
         
     def is_stuck_or_blocking(self):
         """ return true if the IW is stuck at the start or is currently in another iw's path"""
-        if self.yield_cooldown_timer > 0:
-            print("nuh uh uh cannot yield yet")
-            return False # cool down bucko
+        # if self.yield_cooldown_timer > 0:
+        #     print("nuh uh uh cannot yield yet")
+        #     return False # cool down bucko
         
         def other_iw_at(loc):
             try:
@@ -832,7 +827,10 @@ class Inchworm():
         # print(f"lead: {lead_blocker} and lag: {lag_blocker}")
         
         if lead_blocker or lag_blocker:
-            other_iw = lead_blocker or lag_blocker
+            if lag_blocker:
+                other_iw = lag_blocker
+            else:
+                other_iw = lead_blocker
             print(Fore.YELLOW + f"IW{self.id} is blocking or blocked by IW{other_iw}!")
             return True
         print("no need for yields")

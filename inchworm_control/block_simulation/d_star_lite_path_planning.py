@@ -166,15 +166,15 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
             if map_data.is_valid_position_3d(grid, (neighbor_coord)):
-                # if iw_id == 2:
-                #     print(Fore.LIGHTMAGENTA_EX + f"{neighbor_coord}")
-                #     print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}\nincoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}\nmy path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
+                if nz == 2:
+                    print(Fore.LIGHTMAGENTA_EX + f"{neighbor_coord}")
+                    print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}\nincoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}\nmy path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
                 if ((grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or 
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    # if iw_id == 2:
-                    #     print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord} (status: {grid[nx][ny][nz]}): g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
+                    if nz == 2:
+                        print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord} (status: {grid[nx][ny][nz]}): g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
                     total_cost = neighbor.rhs#d_star.calculate_key(neighbor)[0]
                     if total_cost < min_cost:
                         min_cost = total_cost
