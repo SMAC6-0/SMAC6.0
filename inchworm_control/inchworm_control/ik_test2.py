@@ -558,6 +558,7 @@ class IkTest2(Node):
 
         # Pivot Foot 5
         # y = -1
+        y0z0     = [1, -0.000000001, 0, EE_direction.DOWN.value]
         y_1z_1   = [1, -1, -1, EE_direction.DOWN.value]
         y_1z_075 = [1, -1, -0.75, EE_direction.DOWN.value]
         y_1z_06  = [1, -1, -0.6, EE_direction.DOWN.value]
@@ -760,7 +761,7 @@ class IkTest2(Node):
         self.move_to(y_1z0, x1z0, TRAVEL_TIME, pivot_foot)
         # self.move_to_noTP(y_1z_06, x1z_085, TRAVEL_TIME + 6, pivot_foot)
         
-        self.move_to(x1z0, x1z_1, 1, pivot_foot)
+        self.move_to(y0z0, x1z_1, 1, pivot_foot)
 
         # Turn Right
         # pivot_foot = 1
