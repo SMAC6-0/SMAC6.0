@@ -844,6 +844,7 @@ if not SIMULATION:
             self._goal_handle = goal_handle
 
             self.get_logger().info('Goal accepted :)')
+            self.inchworm.step_instructions = []
 
             # Asynchronously receive the result of the action
             self._get_result_future = goal_handle.get_result_async()
@@ -857,7 +858,8 @@ if not SIMULATION:
             print(f"goal flag: {self.goal_flag}")
             # If the inchworm successfully reaches the end of the path, clear step instructions
             if result.completion_status == True:
-                self.inchworm.step_instructions = []
+                pass
+                # self.inchworm.step_instructions = []
             else: 
                 self.inchworm.set_state(IW_STATE.ERROR)
             self.goal_flag = True 
