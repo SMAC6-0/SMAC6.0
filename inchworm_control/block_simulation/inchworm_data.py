@@ -875,10 +875,10 @@ if not SIMULATION:
             if not MANUAL_TESTING:
                 self.inchworm.get_next_step()
 
-            print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num-1 != self.inchworm.step_num}")
+            print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num != self.inchworm.step_num-1}")
             # If the feedback is not right, something is wrong. cancel the action
             if ((feedback.step_num != self.inchworm.step_num and MANUAL_TESTING)
-                or (feedback.step_num-1 != self.inchworm.step_num and not MANUAL_TESTING)
+                or (feedback.step_num != self.inchworm.step_num-1 and not MANUAL_TESTING)
                 or feedback.total_steps != self.inchworm.num_steps): 
                 print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
                 future = self._goal_handle.cancel_goal_async()
