@@ -16,7 +16,7 @@ SEED_BK = [6, 6, 1]
 # - LOCATIONS - #
 NUM_INCHWORMS = 2
 IW_1_LOC = [6, 7, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-IW_2_LOC = [12, 12, 0]
+IW_2_LOC = [1, 1, 0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
@@ -43,7 +43,7 @@ IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
 # if the simulation is for the demo, set this to True
 SIMULATION = True
 LARGE_BUILD = False
-MANUAL_TESTING = True
+MANUAL_TESTING = False
 
 # have inchworm starting inline with BD 
 # column should not be in line with BD
