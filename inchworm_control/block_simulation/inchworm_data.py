@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from enum import Enum
 import copy
-from config import *
-import map_data
-import blueprint as bp
+from block_simulation.config import *
+import block_simulation.map_data as map_data
+import block_simulation.blueprint as bp
 from time import sleep
 import serial
 import struct
@@ -652,6 +652,7 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
+
         self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
@@ -767,6 +768,10 @@ class Inchworm():
     
     def is_structure_complete(self, curr_map, final_map):
         map_complete = map_data.is_structure_complete(curr_map, final_map)
+        curr_map = np.array(curr_map)
+        final_map = np.array(final_map)
+        print(f"curr map: {curr_map}")
+        print(f"final map: {final_map}")
         return map_complete
     
 ## ROS 2 FUNCTIONALITY -------------------------------------------------------------------
@@ -787,16 +792,22 @@ if not SIMULATION:
             # Set up the the inchworm node (state machine) as the client for the action of stepping
             self._action_client = ActionClient(self, Inchwormpath, 'inchworm_moving')
             self.get_logger().info("Inchworm Node Initialized")
+            self.goal_flag = True
+            # self.prev_step_num = 0
         
         def update_state(self): 
             """Update the inchworm state machine & send an existing set of step instructions to the motors """
             self.inchworm.update_state()
+            if self.inchworm.state.value == 3: 
+                self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                self.send_goal(self.inchworm.step_instructions)
-                # Clear the step instructions so that the state continues updating, 
-                # but the instructions are not resent 
-                self.inchworm.step_instructions = []
+                # print(f"goal flag: {self.goal_flag}")
+                if self.goal_flag:
+                    self.send_goal(self.inchworm.step_instructions)
+                    self.goal_flag = False
+            if self.goal_flag: 
+                print(f"IW state: {self.inchworm.state.name}")
 
         def send_goal(self, all_steps):
             """Send an action request for the 'inchworm_moving' action"""
@@ -826,8 +837,10 @@ if not SIMULATION:
             if not goal_handle.accepted:
                 self.get_logger().info('Goal rejected :(')
                 return
+            self._goal_handle = goal_handle
 
             self.get_logger().info('Goal accepted :)')
+            # self.inchworm.step_instructions = []
 
             # Asynchronously receive the result of the action
             self._get_result_future = goal_handle.get_result_async()
@@ -838,6 +851,14 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
+            # print(f"goal flag: {self.goal_flag}")
+            # If the inchworm successfully reaches the end of the path, clear step instructions
+            if result.completion_status == True:
+                pass
+                # self.inchworm.step_instructions = []
+            else: 
+                self.inchworm.set_state(IW_STATE.ERROR)
+            # self.prev_step_num = 0
             # rclpy.shutdown()
 
         def feedback_callback(self, feedback_msg):
@@ -845,12 +866,40 @@ if not SIMULATION:
             feedback = feedback_msg.feedback
             self.get_logger().info(f'Feedback: Step {feedback.step_num} / {feedback.total_steps}')
 
+            # TODO: there is probably a better way to do this, without using get_next_step...
+            # especially bc get_next_step does not necessarily align with what's happening in the action
+            if not MANUAL_TESTING:
+                self.inchworm.get_next_step()
+
+            # print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num != self.inchworm.step_num-1}")
+            # If the feedback is not right, something is wrong. cancel the action
+            if ((feedback.step_num != self.inchworm.step_num and MANUAL_TESTING)
+                or (feedback.step_num != self.inchworm.step_num-1 and not MANUAL_TESTING)
+                or feedback.total_steps != self.inchworm.num_steps): 
+                print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
+                future = self._goal_handle.cancel_goal_async()
+                future.add_done_callback(self.cancel_path_nav)
+            
+            if feedback.step_num == feedback.total_steps: 
+                self.goal_flag = True 
+                print(f"set goal flag to true inside feeback callback")
+                
+        
+        def cancel_path_nav(self, future):
+            """Cancels the action."""
+            cancel_response = future.result()
+            if len(cancel_response.goals_canceling) > 0:
+                self.get_logger().info('Goal successfully canceled')
+            else:
+                self.get_logger().info('Goal failed to cancel')
+            # rclpy.shutdown() #TODO: maybe remove shutting down here
+
 def main(args=None):
     if not SIMULATION:
         rclpy.init(args=args)
         inchworm_node = InchwormNode()
         rclpy.spin(inchworm_node)
-    elif MANUAL_TESTING:
+    elif MANUAL_TESTING and not SIMULATION:
         with open("/home/smac/robot_ws/src/SMAC6.0/Final_Structure.json", "r") as final_map_file:
             final_structure = json.load(final_map_file)
         inchworm = Inchworm(orientation=IW_ORIENTATIONS[0], final_structure=final_structure, location=IW_LOCS[0], holding_block=False)
