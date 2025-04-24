@@ -546,7 +546,7 @@ class IkTest(Node):
 
         # Start moving leading foot 
         pivot_foot = 1 
-        holding_block = True
+        holding_block = False
         self.latch_detach(pivot_foot, holding_block)
         
         # EE moves straight up from board to just above the home
