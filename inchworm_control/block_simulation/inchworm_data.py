@@ -659,7 +659,7 @@ class Inchworm():
 
     def IW_clear_path(self):
         if self.leading_foot_loc == SEED_BK:
-            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.id)
+            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
         else: 
             self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
 
