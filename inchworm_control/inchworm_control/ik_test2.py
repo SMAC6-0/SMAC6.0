@@ -782,16 +782,16 @@ class IkTest2(Node):
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(x1z1_5, y_1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y_1z1_5, y_1z1, TRAVEL_TIME, pivot_foot)
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y1z_1, y1z_075, TRAVEL_TIME, pivot_foot)
-        # activate_servo(self.servo1)
-        # self.move_to(y1z_075, y1z_06, TRAVEL_TIME + 1.5, pivot_foot)
-        # release_servo(self.servo1)
-        # self.move_to(y1z_06, y1z0, TRAVEL_TIME + 3, pivot_foot)
-        # self.move_to_noTP(y1z0, x1z0, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
-        # activate_servo(self.servo1)
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+        self.move_to(y1z_1, y1z_075, TRAVEL_TIME, pivot_foot)
+        activate_servo(self.servo1)
+        self.move_to(y1z_075, y1z_06, TRAVEL_TIME + 1.5, pivot_foot)
+        release_servo(self.servo1)
+        self.move_to(y1z_06, y1z0, TRAVEL_TIME + 3, pivot_foot)
+        self.move_to_noTP(y1z0, x1z0, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
+        activate_servo(self.servo1)
 
 
         print("Movement complete: TEST_STEP")
