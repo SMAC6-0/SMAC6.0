@@ -154,9 +154,6 @@ class Inchworm():
         else:
             is_traveling = True
             self.goal = next_goal
-            if self.goal != SEED_BK: 
-                print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
-                self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
         # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
         # print(Fore.MAGENTA + f"(PP) final_map: \n{self.final_structure}")
@@ -652,18 +649,22 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-        self.current_map = map_data.update_grid_status(self.current_map, self.goal)
         print("IW updated own map to have this place walkable")
         self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
+        if self.goal != SEED_BK: 
+            print(Fore.MAGENTA + f"IW{self.id}: Goal was not seed block. Setting IW's prev goal to be walkable")
+            self.current_map = map_data.update_grid_status(self.current_map, self.goal) # updates map for next_goal to be incoming_block
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
 
         self.clear_path_com = copy.deepcopy(self.paths)
         x, y, z = SEED_BK
-        if map_data.GridStatus.which_inchworm(self.current_map[x][y][z] == self.id):
+        print(f"inchworm at seed bk is: { map_data.GridStatus.which_inchworm(self.current_map[x][y][z])}")
+        if map_data.GridStatus.which_inchworm(self.current_map[x][y][z]) == self.id:
             self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, [SEED_BK], iw_id=self.id)
             self.clear_path_com.insert(0, SEED_BK)
+            print(f"added seed block to the clear path com ")
         print(f"clear com: {self.clear_path_com}")
         self.paths = [] # Reset current path 
         self.step_instructions = []
