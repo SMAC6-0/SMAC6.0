@@ -804,6 +804,8 @@ if not SIMULATION:
         def update_state(self): 
             """Update the inchworm state machine & send an existing set of step instructions to the motors """
             self.inchworm.update_state()
+            if self.inchworm.state.value == 3: 
+                self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
                 print(f"goal flag: {self.goal_flag}")
@@ -874,7 +876,9 @@ if not SIMULATION:
                 self.inchworm.get_next_step()
 
             # If the feedback is not right, something is wrong. cancel the action
-            if feedback.step_num != self.inchworm.step_num or feedback.total_steps != self.inchworm.num_steps: 
+            if ((feedback.step_num != self.inchworm.step_num and MANUAL_TESTING)
+                or (feedback.step_num-1 != self.inchworm.step_num and not MANUAL_TESTING)
+                or feedback.total_steps != self.inchworm.num_steps): 
                 print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
                 future = self._goal_handle.cancel_goal_async()
                 future.add_done_callback(self.cancel_path_nav)
