@@ -168,12 +168,11 @@ def set_inchworm_path_to_grid(grid, inchworm_path, iw_id):
     Returns:
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """ 
-    for step in range(len(inchworm_path) - 1): 
-        if step != BD_1_LOC:
-            x, y, z = inchworm_path[step]
-            grid[x][y][z] = GridStatus.inchworm_path(iw_id)
-        else:
-            continue
+    for coord in inchworm_path[:-1]: 
+        # if coord == BD_1_LOC:
+        #     continue
+        x, y, z = coord
+        grid[x][y][z] = GridStatus.inchworm_path(iw_id)
     return grid
 
 def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
@@ -461,7 +460,7 @@ def determine_helper_blocks(grid, path_start, path_end, iw_id):
     # else:
     #     return path_coords
 
-def initiate_find_path(grid, leading_foot_loc, path_start, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int, priority_queue, bypass_flag=False):
+def initiate_find_path(grid, leading_foot_loc, lagging_foot_loc, path_end, curr_orientation: InchwormOrientation, holding_block: bool, iw_id: int, priority_queue, bypass_flag=False):
     """
     Converts the list of coordinates from a path planning algorithm into inchworm movesets
 
@@ -477,8 +476,12 @@ def initiate_find_path(grid, leading_foot_loc, path_start, path_end, curr_orient
     Returns:
         grid: (list): An updated 3D list (grid) of the current map shapshot. 
     """ 
-    c_space_grid = buffer_iw_paths(grid, iw_id)
-    path_coords = d_star_lite_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, priority_queue, bypass_flag) # get the path
+    if bypass_flag:
+        c_space_grid = grid
+    else:
+        c_space_grid = buffer_iw_paths(grid, iw_id)
+    
+    path_coords = d_star_lite_path_planning.find_path(c_space_grid, leading_foot_loc, lagging_foot_loc, path_end, iw_id, holding_block, priority_queue, bypass_flag) # get the path
     # path_coords = bfs_path_planning.find_path(c_space_grid, path_start, path_end, iw_id, holding_block, bypass_flag) # get the path
 
 
@@ -581,7 +584,7 @@ def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
-    neighbor_directions = set_neighbors(allow_horz_diagonal=True)
+    neighbor_directions = set_neighbors()
     path_count = []
 
     # Iterate through the grid
@@ -604,7 +607,7 @@ def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool = True):
                             # If this neighboring cell is walkable or incoming, it should be buffered 
                             if (n_status == GridStatus.WALKABLE.value or n_status == GridStatus.INCOMING_BLOCK.value) and buffer_flag:
                                 path_count.append((nx, ny, nz, cell_status))
-                    if (len(path_count) > 3):
+                    if (len(path_count) > 1):
                         # print(Fore.MAGENTA + f"Path count: ", path_count)
                         for new_info in path_count:
                             buffer_list.append(new_info)
