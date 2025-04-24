@@ -806,6 +806,7 @@ if not SIMULATION:
             self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
+                print(f"goal flag: {self.goal_flag}")
                 if self.goal_flag:
                     self.send_goal(self.inchworm.step_instructions)
                     self.goal_flag = False
@@ -851,12 +852,14 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
+            print(f"goal flag: {self.goal_flag}")
             # If the inchworm successfully reaches the end of the path, clear step instructions
             if result.completion_status == True:
                 self.inchworm.step_instructions = []
             else: 
                 self.inchworm.set_state(IW_STATE.ERROR)
             self.goal_flag = True 
+            print(f"goal flag: {self.goal_flag}")
             # self.prev_step_num = 0
             # rclpy.shutdown()
 
