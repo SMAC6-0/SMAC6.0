@@ -546,7 +546,7 @@ class IkTest(Node):
 
         # Start moving leading foot 
         pivot_foot = 1 
-        holding_block = True
+        holding_block = False
         self.latch_detach(pivot_foot, holding_block)
         
         # EE moves straight up from board to just above the home
@@ -610,9 +610,23 @@ class IkTest(Node):
         # self.move_to(x1z0_5, y1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
 
-        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z1_5, y1z1, TRAVEL_TIME, pivot_foot)
+        # turn left w/ block
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z1_5, y1z1, TRAVEL_TIME, pivot_foot)
+
+        # pivot 5
+        # without the block
+        pivot_foot = 5
+        self.move_to(x2z0, x2z0, TRAVEL_TIME, pivot_foot)
+        holding_block = False
+        self.latch_detach(pivot_foot, holding_block)
+
+        
+
+
+
+
 
 
         print("Movement complete: TEST_STEP")
