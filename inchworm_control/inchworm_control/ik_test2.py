@@ -539,8 +539,8 @@ class IkTest2(Node):
         y_1z_1   = [1, -1, -1, EE_direction.DOWN.value]
         y_1z_075 = [1, -1, -0.75, EE_direction.DOWN.value]
         y_1z_0_5 = [1, -1, -0.5, EE_direction.DOWN.value]
-        y0z_0_5  = [1, 0.0005, -0.5, EE_direction.DOWN.value]
-        y0z_1    = [1, 0.0005, -1, EE_direction.DOWN.value]
+        y0z_0_5  = [1, 0.000000005, -0.5, EE_direction.DOWN.value]
+        y0z_1    = [1, 0.000000005, -1, EE_direction.DOWN.value]
         #y_1z0
         #y_1z0_5
 
