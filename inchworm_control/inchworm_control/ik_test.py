@@ -589,9 +589,9 @@ class IkTest(Node):
         
         # Pivot Foot 1 x = 1
         # Right Turn
-        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
         
         # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
         # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
@@ -600,11 +600,9 @@ class IkTest(Node):
         # self.move_to(y_1z1_5, y_1z1, TRAVEL_TIME, pivot_foot)
 
         # with block
-        # self.move_to(x1z0, x1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z1_5, x1z1, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z1_5, y_1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y_1z1_5, y_1z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
 
         # Left turns
         # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
@@ -633,9 +631,12 @@ class IkTest(Node):
         # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
         # right 
-        self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+
+        # move forward w/ blocks 
+
         
         # self.move_to(x1z0, y1z0, TRAVEL_TIME, pivot_foot)
 
