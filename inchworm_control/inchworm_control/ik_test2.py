@@ -221,6 +221,25 @@ class IkTest2(Node):
 
         # run trajectory for task space
         self.run_trajectory(q_t, travelTime, pivot_foot, fix_EE_orientation)
+
+    def move_to_noTP(self, current_pos: list, final_pos: list, travelTime: float, pivot_foot: int): 
+        """
+        Move the robot end effector between one location and another using quintic trajectory. 
+        The 1x4 vectors are in the format [x, y, z, EE_angle] (block coords in IW frame & deg from horizontal in world frame).
+
+        Args:
+            current_pos (list): the current position of the EE as a 1x4 vector
+            final_pos (list): the final location of the EE as a 1x4 vector
+            travelTime (float): the time taken for the movement
+            pivot_foot (int): Motor identifier (1 or 5) corresponding to the foot.
+        """
+        joint_ang = inverseKinematics(final_pos[0], final_pos[1], final_pos[2], final_pos[3], pivot_foot, False)
+        
+        self.move_joints(joint_ang, travelTime) # running the motors to get to the point
+
+        sleep(1/10)
+        
+
     
     def move_joints_fixEE(self, joint_angles, time):
         """
@@ -732,7 +751,7 @@ class IkTest2(Node):
         pivot_foot = 5
         self.latch_detach(pivot_foot)
         self.move_to(y_1z_1, y_1z_0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y_1z_0_5, y0z_0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y_1z_0_5, y0z_0_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y0z_0_5, y0z_1, TRAVEL_TIME, pivot_foot)
 
         # Turn Right
