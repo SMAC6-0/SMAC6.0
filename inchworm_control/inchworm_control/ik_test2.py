@@ -557,7 +557,7 @@ class IkTest2(Node):
         # y = -1
         y_1z_1   = [1, -1, -1, EE_direction.DOWN.value]
         y_1z_075 = [1, -1, -0.75, EE_direction.DOWN.value]
-        y_1z_07 = [1, -1, -0.7, EE_direction.DOWN.value]
+        y_1z_06 = [1, -1, -0.6, EE_direction.DOWN.value]
         y_1z_0_5 = [1, -1, -0.5, EE_direction.DOWN.value]
         y0z_0_5  = [1, 0.000000005, -0.5, EE_direction.DOWN.value]
         y0z_1    = [1, 0.000000005, -1, EE_direction.DOWN.value]
@@ -753,7 +753,7 @@ class IkTest2(Node):
         self.latch_detach(pivot_foot)
         self.move_to(y_1z_1, y_1z_075, TRAVEL_TIME + 1, pivot_foot)
         activate_servo(self.servo1)
-        self.move_to(y_1z_075, y_1z_07, TRAVEL_TIME + 2, pivot_foot)
+        self.move_to(y_1z_075, y_1z_06, TRAVEL_TIME + 2, pivot_foot)
         release_servo(self.servo1)
         self.move_to_noTP(y_1z_0_5, y0z_0_5, TRAVEL_TIME + 4, pivot_foot)
         # self.move_to(y0z_0_5, y0z_1, TRAVEL_TIME, pivot_foot)
