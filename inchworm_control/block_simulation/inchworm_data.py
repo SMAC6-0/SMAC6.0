@@ -828,6 +828,7 @@ if not SIMULATION:
                 return
 
             self.get_logger().info('Goal accepted :)')
+            self.inchworm.step_instructions = []
 
             # Asynchronously receive the result of the action
             self._get_result_future = goal_handle.get_result_async()
@@ -845,6 +846,8 @@ if not SIMULATION:
                 # self.inchworm.step_instructions = []
             else: 
                 self.inchworm.set_state(IW_STATE.ERROR)
+            self.goal_flag = True 
+            print(f"goal flag: {self.goal_flag}")
             # self.prev_step_num = 0
             # rclpy.shutdown()
 
@@ -866,10 +869,6 @@ if not SIMULATION:
                 print(Fore.RED + f"Stepping misaligned. Canceling this goal and shutting down.")
                 future = self._goal_handle.cancel_goal_async()
                 future.add_done_callback(self.cancel_path_nav)
-            
-            if feedback.step_num == feedback.total_steps: 
-                self.goal_flag = True 
-                print(f"set goal flag to true inside feeback callback")
                 
         
         def cancel_path_nav(self, future):
