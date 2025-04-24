@@ -643,6 +643,7 @@ class IkTest2(Node):
 
         # Step Forward (Run like step forward first and then reverse to be normal step forward)
         self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x2z0_5, x2z0, TRAVEL_TIME, pivot_foot)
 
