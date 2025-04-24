@@ -730,8 +730,8 @@ class IkTest2(Node):
         pivot_foot = 5
         self.latch_detach(pivot_foot)
         self.move_to(y_1z_1, y_1z_0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y_1z_0_5, x1z_0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z_0_5, x1z_1, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z_0_5, x1z_0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z_0_5, x1z_1, TRAVEL_TIME, pivot_foot)
 
         # Turn Right
         # pivot_foot = 1
