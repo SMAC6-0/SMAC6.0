@@ -214,7 +214,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                         if fix_EE_orientation:
                             inputAlpha = alpha + 30
                         else:
-                            inputAlpha = alpha + 3
+                            inputAlpha = alpha + 2
                     elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0.85
                         inputZ = CUBE_WIDTH * goal_Z + 0.05
@@ -260,7 +260,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     inputX = CUBE_WIDTH * goal_X + 0.4
                     inputY = CUBE_WIDTH * goal_Y - 0.6
                     inputZ = CUBE_WIDTH * goal_Z + 0
-                    inputAlpha = alpha + 20
+                    inputAlpha = alpha + 10
                 elif goal_Z > -0.65 and goal_Z <= -0.25: # z = -0.5
                     inputX = CUBE_WIDTH * goal_X + 0.4
                     inputY = CUBE_WIDTH * goal_Y - 0.6
