@@ -547,7 +547,7 @@ class IkTest(Node):
         # Start moving leading foot 
         pivot_foot = 1 
         holding_block = False
-        self.latch_detach(pivot_foot, holding_block)
+        # self.latch_detach(pivot_foot, holding_block)
         
         # EE moves straight up from board to just above the home
         # Pivot Foot 1 x = 1
@@ -622,7 +622,9 @@ class IkTest(Node):
         self.latch_detach(pivot_foot, holding_block)
 
 
-        self.move_to(x2z0, x2z0, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
 
 
