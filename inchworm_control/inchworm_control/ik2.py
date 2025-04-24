@@ -200,6 +200,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
             
             
         elif (pivot_foot == 5):
+            print(f"Goals x: {goal_X} y: {goal_Y} z: {goal_Z}")
             # Doing steps forward first
             if goal_Y > -0.5 and goal_Y <= 0.5: # y = 0
                 if goal_X > 0.9 and goal_X <= 1.5: # x = 1
