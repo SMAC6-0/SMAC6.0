@@ -858,7 +858,7 @@ if not SIMULATION:
             print(f"goal flag: {self.goal_flag}")
             # If the inchworm successfully reaches the end of the path, clear step instructions
             if result.completion_status == True:
-                self.goal_flag = True
+                pass
                 # self.inchworm.step_instructions = []
             else: 
                 self.inchworm.set_state(IW_STATE.ERROR)
