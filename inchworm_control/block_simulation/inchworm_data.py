@@ -808,10 +808,12 @@ if not SIMULATION:
                 self.inchworm.update_state()
 
             if self.inchworm.step_instructions != []: 
-                print(f"goal flag: {self.goal_flag}")
+                # print(f"goal flag: {self.goal_flag}")
                 if self.goal_flag:
                     self.send_goal(self.inchworm.step_instructions)
                     self.goal_flag = False
+            if self.goal_flag: 
+                print(f"IW state: {self.inchworm.state.name}")
 
         def send_goal(self, all_steps):
             """Send an action request for the 'inchworm_moving' action"""
@@ -855,7 +857,7 @@ if not SIMULATION:
             """Runs upon successful completion of the action"""
             result = future.result().result
             self.get_logger().info(f'Result: Completed? {result.completion_status}')
-            print(f"goal flag: {self.goal_flag}")
+            # print(f"goal flag: {self.goal_flag}")
             # If the inchworm successfully reaches the end of the path, clear step instructions
             if result.completion_status == True:
                 pass
@@ -875,7 +877,7 @@ if not SIMULATION:
             if not MANUAL_TESTING:
                 self.inchworm.get_next_step()
 
-            print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num != self.inchworm.step_num-1}")
+            # print(f"feeback stuffs: iw step {self.inchworm.step_num}, msg step {feedback.step_num}, cond {feedback.step_num != self.inchworm.step_num-1}")
             # If the feedback is not right, something is wrong. cancel the action
             if ((feedback.step_num != self.inchworm.step_num and MANUAL_TESTING)
                 or (feedback.step_num != self.inchworm.step_num-1 and not MANUAL_TESTING)
