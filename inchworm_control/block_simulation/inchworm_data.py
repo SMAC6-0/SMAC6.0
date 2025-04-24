@@ -175,11 +175,9 @@ class Inchworm():
                 if bd_path == []: 
                     return
                 
-                print(f"befor sdlhgoisdj")
                 if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                     self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                     # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                    print(f"updating goal as incoming")
                     self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
                 # Find path to where the next block will be placed
@@ -654,16 +652,18 @@ class Inchworm():
                 self.send_block_being_placed()
             else: 
                 self.handle_error()
-
+        self.current_map = map_data.update_grid_status(self.current_map, self.goal)
+        print("IW updated own map to have this place walkable")
         self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
-        if self.leading_foot_loc == SEED_BK:
-            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, iw_id=self.id)
-        else: 
-            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
+        self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
 
         self.clear_path_com = copy.deepcopy(self.paths)
+        x, y, z = SEED_BK
+        if map_data.GridStatus.which_inchworm(self.current_map[x][y][z] == self.id):
+            self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, [SEED_BK], iw_id=self.id)
+            self.clear_path_com.insert(0, SEED_BK)
         print(f"clear com: {self.clear_path_com}")
         self.paths = [] # Reset current path 
         self.step_instructions = []
