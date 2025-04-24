@@ -649,7 +649,7 @@ class Inchworm():
             else: 
                 self.handle_error()
 
-        self.set_state(IW_STATE.TRANSPORTING_BLOCK)
+        self.set_state(IW_STATE.PLACING_BLOCK)
 
     def IW_clear_path(self):
         self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, self.paths, self.id)
