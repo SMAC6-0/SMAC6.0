@@ -618,11 +618,13 @@ class IkTest(Node):
         # pivot 5
         # without the block
         pivot_foot = 5
-        self.move_to(x2z0, x2z0, TRAVEL_TIME, pivot_foot)
         holding_block = False
         self.latch_detach(pivot_foot, holding_block)
 
-        
+
+        self.move_to(x1z0, x1z0, TRAVEL_TIME, pivot_foot)
+
+
 
 
 
