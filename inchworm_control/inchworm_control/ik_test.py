@@ -558,8 +558,7 @@ class IkTest(Node):
 
         # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
-        # grab block movement done
-        # self.move_to(x1z1_5, x1z1, TRAVEL_TIME, pivot_foot)
+        # grab block movement done 
 
         # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
 
