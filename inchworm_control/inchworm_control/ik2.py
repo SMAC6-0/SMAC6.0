@@ -202,7 +202,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
         elif (pivot_foot == 5):
             print(f"Goals x: {goal_X} y: {goal_Y} z: {goal_Z}")
             # Doing steps forward first
-            if goal_Y > -0.5 and goal_Y <= 0.5: # y = 0
+            if goal_Y == 0: # y = 0
                 if goal_X > 0.9 and goal_X <= 1.5: # x = 1
                     if goal_Z > -1.1 and goal_Z <= -0.85: # z = -1
                         inputX = CUBE_WIDTH * goal_X + 0.4
@@ -234,11 +234,11 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     elif goal_Z > -0.25 and goal_Z <= 0.35: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0.5
                         inputZ = CUBE_WIDTH * goal_Z + 0.2
-                        inputAlpha = alpha - 10
+                        inputAlpha = alpha - 20
                     elif goal_Z > 0.35 and goal_Z <= 0.75: # z = 0.5
                         inputX = CUBE_WIDTH * goal_X + 0.9
                         inputZ = CUBE_WIDTH * goal_Z + 0.7
-                        inputAlpha = alpha - 8
+                        inputAlpha = alpha - 15
                     else:
                         print(f"Position not included Z: {goal_Z}")
                 else:
@@ -247,7 +247,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                 inputY = CUBE_WIDTH * goal_Y + 0
 
             # Here are the turns
-            elif goal_Y <= -0.5: # y = -1 Finish Turn Left
+            elif goal_Y < 0: # y = -1 Finish Turn Left
                 if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
                     inputX = CUBE_WIDTH * goal_X + 0.6
                     inputY = CUBE_WIDTH * goal_Y - 0.6
@@ -271,7 +271,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                 else:
                     print(f"Position not included Z: {goal_Z}")
             
-            elif goal_Y > 0.5: # y = 1 Finish Turn Right
+            elif goal_Y > 0: # y = 1 Finish Turn Right
                 if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
                     inputX = CUBE_WIDTH * goal_X + 1
                     inputY = CUBE_WIDTH * goal_Y + 0.5
