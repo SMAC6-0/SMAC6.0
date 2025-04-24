@@ -204,13 +204,13 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
             if goal_Y > -0.5 and goal_Y <= 0.5: # y = 0
                 if goal_X > 0.9 and goal_X <= 1.5: # x = 1
                     if goal_Z > -1.1 and goal_Z <= -0.85: # z = -1
-                        inputX = CUBE_WIDTH * goal_X + 1
+                        inputX = CUBE_WIDTH * goal_X + 0.8
                         inputZ = CUBE_WIDTH * goal_Z + 0.3
                         inputAlpha = alpha - 5
                     elif goal_Z > -0.85 and goal_Z <= -0.25: # z = -0.5
                         inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0.2
-                        inputAlpha = alpha + 10
+                        inputAlpha = alpha - 10
                     elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0.9
                         inputZ = CUBE_WIDTH * goal_Z + 0.05
@@ -225,11 +225,11 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
                         inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0.5
-                        inputAlpha = alpha + 20
+                        inputAlpha = alpha - 20
                     elif goal_Z > -0.75 and goal_Z <= -0.25: # z = -0.5
                         inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0.2
-                        inputAlpha = alpha + 20
+                        inputAlpha = alpha - 20
                     elif goal_Z > -0.25 and goal_Z <= 0.35: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0.5
                         inputZ = CUBE_WIDTH * goal_Z + 0.2
