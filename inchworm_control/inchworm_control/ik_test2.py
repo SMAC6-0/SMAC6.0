@@ -644,8 +644,8 @@ class IkTest2(Node):
 
 
         # Movements Pivot Foot 5
-        pivot_foot = 5
-        self.latch_detach(pivot_foot)
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
 
         # Step Forward (Run like step forward first and then reverse to be normal step forward)
         # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
@@ -670,8 +670,8 @@ class IkTest2(Node):
 
 
         # Turn Right
-        self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
         # self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
@@ -713,6 +713,18 @@ class IkTest2(Node):
         # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+
+        # Turn Right
+        pivot_foot = 1
+        self.latch_detach(pivot_foot)
+        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+        self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
 
         print("Movement complete: TEST_STEP")
