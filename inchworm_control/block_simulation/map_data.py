@@ -187,7 +187,7 @@ def rm_inchworm_path_from_grid(grid, inchworm_path=None, iw_id=None):
         grid (list): An updated 3D list (grid) of the current map snapshot. 
     """      
     if inchworm_path is not None:
-        targets = inchworm_path[:-1]  # Avoid last point as before
+        targets = inchworm_path#[:-1]  # Avoid last point as before
     else:
         targets = [
             (x, y, z)
