@@ -612,6 +612,7 @@ class IkTest(Node):
 
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(x1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y1z1_5, y1z1, TRAVEL_TIME, pivot_foot)
 
 
         print("Movement complete: TEST_STEP")
