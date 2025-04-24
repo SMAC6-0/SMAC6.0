@@ -588,6 +588,7 @@ class IkTest2(Node):
 
         # Movements Pivot Foot 1
         pivot_foot = 1
+        self.latch_detach(pivot_foot)
         # Step Forward
         # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
