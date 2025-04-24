@@ -202,7 +202,7 @@ class IkTest2(Node):
         # This conditional makes it so that the EE does NOT rotate when the EE is moving straight up/down.  
         # This check is essential to make sure that the wires do not get tangled as the inchworm turns. 
         # It also makes sure that it doesn't turn when it is touching the board or a block, causing it to get stuck. 
-        if (current_pos[1]==final_pos[1]): # if the start&end y positions are the same, then the movement must be vertical or straight (no EE rotation)
+        if (current_pos[0]==final_pos[0] and current_pos[1]==final_pos[1]): # if the start&end y positions are the same, then the movement must be vertical or straight (no EE rotation)
             fix_EE_orientation = True # do not rotate the EE (motors 1 or 5)
         else:
             fix_EE_orientation = False # rotate the EE (motors 1 or 5)
