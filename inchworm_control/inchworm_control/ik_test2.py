@@ -507,12 +507,14 @@ class IkTest2(Node):
         # Pivot Foot 5
         # x = 1
         x1z_1   = [1, 0, -1, EE_direction.DOWN.value]
+        x1z_075   = [1, 0, -0.75, EE_direction.DOWN.value]
         x1z_0_5 = [1, 0, -0.5, EE_direction.DOWN.value]
         #x1z0 (Already defined)
         #x1z0_5
 
         # x = 2
         x2z_1   = [2, 0, -1, EE_direction.DOWN.value]
+        x2z_075   = [2, 0, -0.75, EE_direction.DOWN.value]
         x2z_0_5 = [2, 0, -0.5, EE_direction.DOWN.value]
         #x2z0 (Already defined)
         #x2z0_5
@@ -650,9 +652,12 @@ class IkTest2(Node):
         # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
         
         # Step Forward with Block (Forward and reversed)
-        self.move_to(x1z_1, x1z_0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z_1, x1z_0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z_0_5, x2z_0_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x2z_0_5, x2z_1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z_1, x2z_075, TRAVEL_TIME, pivot_foot)
+        self.move_to(x2z_075, x1z_075, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z_075, x1z_1, TRAVEL_TIME, pivot_foot)
 
 
         # FULL MOVEMENTS
