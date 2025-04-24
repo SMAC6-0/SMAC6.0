@@ -617,8 +617,8 @@ class IkTest(Node):
         # pivot 5
         # without the block
         pivot_foot = 5
-        holding_block = True
-        self.latch_detach(pivot_foot, holding_block)
+        holding_block_PV5 = False
+        self.latch_detach(pivot_foot, holding_block_PV5)
 
         # move follwoing leg (forward)
         # self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
