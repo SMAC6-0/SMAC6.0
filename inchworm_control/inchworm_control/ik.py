@@ -180,7 +180,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
             
             elif goal_Y > 0.5: # y = 1
                 if goal_Z > -0.1 and goal_Z <= 0.25: # z = 0
-                    inputX = CUBE_WIDTH * goal_X - 2.9
+                    inputX = CUBE_WIDTH * goal_X + 1
                     inputY = CUBE_WIDTH * goal_Y - 0.4
                     inputZ = CUBE_WIDTH * goal_Z - 0.7
                 elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
@@ -190,12 +190,13 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
                 elif goal_Z > 1.25 and goal_Z <= 1.75: # z = 1.5
+                    inputX = CUBE_WIDTH * goal_X - 2.9
                     inputY = CUBE_WIDTH * goal_Y + 1
                     inputZ = CUBE_WIDTH * goal_Z + 0
                 else:
                     print(f"Position not included Z: {goal_Z}")
                 
-                inputX = CUBE_WIDTH * goal_X + 1
+                    inputX = CUBE_WIDTH * goal_X + 1
             
             else:
                 print(f"Position not included Y: {goal_Y}")
@@ -260,7 +261,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                 else:
                     print(f"Position not included Z: {goal_Z}")
                 
-                inputX = CUBE_WIDTH * goal_X + 0 
+                    inputX = CUBE_WIDTH * goal_X + 0 
             
             elif goal_Y > 0.5: # y = 1
                 if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
@@ -278,7 +279,7 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                 else:
                     print(f"Position not included Z: {goal_Z}")
                 
-                inputX = CUBE_WIDTH * goal_X + 0 
+                    inputX = CUBE_WIDTH * goal_X + 0 
             
             else:
                 print(f"Position not included Y: {goal_Y}")
