@@ -546,20 +546,16 @@ class IkTest2(Node):
         #y1z0_5
 
         # Start moving leading foot 
-        pivot_foot = 1 
-        self.latch_detach(pivot_foot)
+        # pivot_foot = 1 
+        # self.latch_detach(pivot_foot)
         
         # EE moves straight up from board to just above the home
         # Pivot Foot 1 x = 1
         # Gradual
         # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x1z0_5, x1z1, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x1z1_5, x1z2_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x1z2_5, x1z3_5, TRAVEL_TIME, pivot_foot)
 
         # Direct
@@ -569,17 +565,11 @@ class IkTest2(Node):
         # Pivot Foot 1 x = 2
         # Gradual
         # self.move_to(x2z0, x2z0_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z0_5, x2z1, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z1, x2z1_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z1_5, x2z2, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z2, x2z2_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z2_5, x2z3, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(x2z3, x2z3_5, TRAVEL_TIME, pivot_foot)
 
         # Direct
@@ -589,11 +579,8 @@ class IkTest2(Node):
         # Pivot Foot 1 y = -1
         # Gradual
         # self.move_to(x1z0, y_1z0, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(y_1z0_5, y_1z1, TRAVEL_TIME, pivot_foot)
-
         # self.move_to(y_1z1, y_1z1_5, TRAVEL_TIME, pivot_foot)
         
 
@@ -641,15 +628,23 @@ class IkTest2(Node):
 
 
         # Turn Left
-        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, y1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, y1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
 
         # Turn Left With Block
         # activate_servo(self.servo2)
         # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(x1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
         # self.move_to(y1z1_5, y1z1, TRAVEL_TIME, pivot_foot)
+
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+
+        # Step Forward (Run like step forward first and then reverse to be normal step forward)
+        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x2z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z0_5, x2z0, TRAVEL_TIME, pivot_foot)
 
 
         print("Movement complete: TEST_STEP")

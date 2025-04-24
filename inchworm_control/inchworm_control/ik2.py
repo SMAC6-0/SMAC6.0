@@ -200,37 +200,44 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
             
             
         elif (pivot_foot == 5):
-            adjustedAlpha = False
             # Doing steps forward first
             if goal_Y > -0.5 and goal_Y <= 0.5: # y = 0
                 if goal_X > 0.9 and goal_X <= 1.5: # x = 1
                     if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > -0.75 and goal_Z <= -0.25: # z = -0.5
-                        inputX = CUBE_WIDTH * goal_X + 0
+                        inputX = CUBE_WIDTH * goal_X + 1
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     else:
                         print(f"Position not included Z: {goal_Z}")
                 elif goal_X > 1.5 and goal_X <= 2.1: # x = 2
                     if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > -0.75 and goal_Z <= -0.25: # z = -0.5
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
                         inputX = CUBE_WIDTH * goal_X + 0
                         inputZ = CUBE_WIDTH * goal_Z + 0
+                        inputAlpha = alpha - 0
                     else:
                         print(f"Position not included Z: {goal_Z}")
                 else:
@@ -241,45 +248,54 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
             # Here are the turns
             elif goal_Y <= -0.5: # y = -1
                 if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > -0.75 and goal_Z <= -0.25: # z = -0.5
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 else:
                     print(f"Position not included Z: {goal_Z}")
-                
-                inputX = CUBE_WIDTH * goal_X + 0 
             
             elif goal_Y > 0.5: # y = 1
                 if goal_Z > -1.1 and goal_Z <= -0.75: # z = -1
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > -0.75 and goal_Z <= -0.25: # z = -0.5
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > -0.25 and goal_Z <= 0.25: # z = 0
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 elif goal_Z > 0.25 and goal_Z <= 0.75: # z = 0.5
+                    inputX = CUBE_WIDTH * goal_X + 0
                     inputY = CUBE_WIDTH * goal_Y + 0
                     inputZ = CUBE_WIDTH * goal_Z + 0
+                    inputAlpha = alpha - 0
                 else:
                     print(f"Position not included Z: {goal_Z}")
-                
-                inputX = CUBE_WIDTH * goal_X + 0 
             
             else:
                 print(f"Position not included Y: {goal_Y}")
-            
-            if not adjustedAlpha:
-                inputAlpha = alpha
         
         return [inputX, inputY, inputZ, inputAlpha]
         
