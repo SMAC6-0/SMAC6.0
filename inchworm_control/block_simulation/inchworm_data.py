@@ -766,6 +766,8 @@ class Inchworm():
         print(Fore.BLUE + f"IW{self.id}: Checking if structure is complete")
         curr_map = np.array(curr_map)
         final_map = np.array(final_map)
+        print(f"curr map: {curr_map}")
+        print(f"final map: {final_map}")
         
         map_complete = True
 
