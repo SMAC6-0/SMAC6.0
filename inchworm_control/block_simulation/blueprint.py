@@ -1,6 +1,8 @@
 import numpy as np
 from collections import defaultdict
 from config import SEED_BK
+from colorama import Fore, init
+init(autoreset=True)
 import json
 import map_data 
 
@@ -37,7 +39,7 @@ repeat_count = 0
 def seed_distance(x, y):
     return abs(x - SEED_BK[0]) ** 2 + (y - SEED_BK[1]) ** 2
 
-def blueprint(curr_map, final_map, repeat_threshold=2) -> list: 
+def blueprint(curr_map, final_map, repeat_threshold=1) -> list: 
     global last_block, repeat_count
                
     curr_map = np.array(curr_map)
@@ -86,7 +88,7 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
         sorted_queue = []
         for z in sorted(z_groups.keys()):
             sorted_walkable_xy = sorted(z_groups[z], key=lambda xy: (
-                curr_map[xy[0]][xy[1]][z] == 0, # prioritize walkable
+                curr_map[xy[0]][xy[1]][z] < 10, # prioritize non-inchworm paths
                 seed_distance(xy[0], xy[1]) # prioritize closest to seed block
             ))
             for x, y in sorted_walkable_xy:
@@ -96,29 +98,26 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
         
         if not build_queue:
             return [-9, -9, -9], build_queue
-                
-        # print(sorted_coords)  
-        # print(f" Queue: {build_queue}")              
-        next_block = build_queue[0] # This also pops from the build_queue
-        # print(f"next block: {next_block} for queue {build_queue}")
 
-        if last_block == next_block:
+        sorted_buffer = build_queue.copy()
+
+        if last_block == sorted_buffer[0]:
             repeat_count += 1
         else:
             repeat_count = 0
-            last_block = next_block
+            last_block = sorted_buffer[0]
 
-        if repeat_count >= repeat_threshold and len(build_queue) > 1:
+        if repeat_count >= repeat_threshold and len(sorted_buffer) > 1:
             print(f"repeat threshold exceeded {repeat_threshold}, new block time!!!")
-            build_queue.insert(1, build_queue.pop(0))
-            next_block = build_queue[0]
+            next_block = sorted_buffer[1]
             last_block = next_block
             repeat_count = 0
-            print(f"block: {last_block} count: {repeat_count}")
-        
-        build_queue.pop(0) # get rid of next block for other iws
-        # print(f"Selected block: {next_block}, Queue: {build_queue}")
-        return list(next_block), build_queue
+        else:
+            next_block = sorted_buffer[0]
+
+        remaining_queue = [b for b in sorted_buffer if b != next_block]
+        print(Fore.LIGHTBLUE_EX + f"next block: {next_block} (status: {curr_map[next_block[0]][next_block[1]][next_block[2]]}) for queue {build_queue}")
+        return list(next_block), remaining_queue
     return [-9, -9, -9]
 
 # bp = BlueprintAlgorithm()

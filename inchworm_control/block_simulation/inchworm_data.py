@@ -551,17 +551,17 @@ class Inchworm():
                 self.handle_initilization()
                 if self.iw_reached_seed_block_flag: # Did IW reach the seed block flag
                     if self.IW_gets_Map_Snapshot(): # IW got the mapsnap shot 
-                        # if self.is_stuck_or_blocking():
-                        #     self.handle_IW_blocked()
-                        # else:
-                        self.handle_IW_gets_Map()
+                        if self.is_stuck_or_blocking():
+                            self.handle_IW_blocked()
+                        else:
+                            self.handle_IW_gets_Map()
             case IW_STATE.PATH_PLANNING:
                 if self.is_Path_Available(): # Path exists!
                     self.path_exists()
                 elif self.no_blocks_left():
                     self.handle_no_blocks_to_place()
-                # elif self.is_stuck_or_blocking():
-                #     self.handle_IW_blocked()
+                elif self.is_stuck_or_blocking():
+                    self.handle_IW_blocked()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
