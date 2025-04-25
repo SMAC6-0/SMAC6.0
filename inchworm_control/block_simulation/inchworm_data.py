@@ -665,7 +665,7 @@ class Inchworm():
         print(f"inchworm at seed bk is: { map_data.GridStatus.which_inchworm(self.current_map[x][y][z])}")
         if map_data.GridStatus.which_inchworm(self.current_map[x][y][z]) == self.id:
             self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, [SEED_BK], iw_id=self.id)
-            self.clear_path_com.insert(0, SEED_BK)
+            # self.clear_path_com.insert(0, SEED_BK)
             print(f"added seed block to the clear path com ")
         print(f"clear com: {self.clear_path_com}")
         self.paths = [] # Reset current path 
