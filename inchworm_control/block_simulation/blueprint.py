@@ -85,8 +85,11 @@ def blueprint(curr_map, final_map, repeat_threshold=2) -> list:
 
         sorted_queue = []
         for z in sorted(z_groups.keys()):
-            sorted_xy = sorted(z_groups[z], key=lambda xy: seed_distance(xy[0], xy[1]))
-            for x, y in sorted_xy:
+            sorted_walkable_xy = sorted(z_groups[z], key=lambda xy: (
+                curr_map[xy[0]][xy[1]][z] == 0, # prioritize walkable
+                seed_distance(xy[0], xy[1]) # prioritize closest to seed block
+            ))
+            for x, y in sorted_walkable_xy:
                 sorted_queue.append((x, y, z))
                 
         build_queue = sorted_queue

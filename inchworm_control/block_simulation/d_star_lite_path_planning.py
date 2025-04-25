@@ -12,22 +12,23 @@ class DStarLite:
         self.lagging_foot = start
         self.neighbors = map_data.set_neighbors(allow_large_build=True)
         
-        # cell memory map
+        # instantiate
         self.cell_map = {}
         self.priority_queue = []
         self.km = 0 # changes in environment
         
-        # initialize and populate
+        # find start, goal,
         self.goal = self.get_cell(goal, is_goal=True)
         self.start = self.get_cell(start, is_start=True)
         
+        # cost mapping
         self.goal.rhs = 0
-        self.goal.g = self.start.g = 0#float('inf')
-        self.cell_map[self.goal.to_tuple()] = self.goal
-        self.insert(self.goal, self.calculate_key(self.goal))
-        
+        # self.goal.g = self.start.rhs = self.start.g = float('inf')
         self.cell_map[self.start.to_tuple()] = self.start
-        self.update_rhs(self.start)
+        self.cell_map[self.goal.to_tuple()] = self.goal
+
+        self.insert(self.goal, self.calculate_key(self.goal))
+
         for dx, dy, dz in self.neighbors:
             nx, ny, nz = self.start.x + dx, self.start.y + dy, self.start.z + dz
             neighbor_coord = nx, ny, nz
@@ -37,7 +38,7 @@ class DStarLite:
         
     def calculate_key(self, cell):
         """calculates the priority key for a cell"""
-        g_rhs = min(cell.g, cell.rhs) #takes the minimum of the estimated cost and the one look ahead cost
+        g_rhs = min(cell.g, cell.rhs) # takes the minimum of the estimated cost and the one look ahead cost
         h = map_data.heuristic(self.start, cell)
         return(g_rhs + h + self.km, g_rhs)
     
@@ -87,14 +88,17 @@ class DStarLite:
                         neighbor = self.get_cell(neighbor_coord)
                         min_rhs = min(min_rhs, neighbor.g + neighbor.cost)
             cell.rhs = min_rhs
+
+        # if cell in self.priority_queue:
         self.remove(cell)
+            
         if cell.g != cell.rhs:
             self.insert(cell, self.calculate_key(cell))
             
     def compute_shortest_path(self):
         iteration = 0
         while self.priority_queue and (self.priority_queue[0][0] < self.calculate_key(self.start) or self.start.rhs != self.start.g):
-            # iteration += 1
+            iteration += 1
             # print(f"\n--- Iteration {iteration} ---")
             # print(f"Start g: {self.start.g}, rhs: {self.start.rhs}")
             # print(f"Top key: {self.priority_queue[0][0]}, Start key: {self.calculate_key(self.start)}")
@@ -155,37 +159,45 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
             raise RuntimeError(f"Invalid start {start} or goal {goal} position")
         
     d_star = DStarLite(grid, start, goal, structure_queue, leading_foot_loc, bypass_flag) # snapshot of what we have searched and found
+    # if goal == [3, 3, 1]:
+    #     print("before d star stuff")
     d_star.compute_shortest_path()
+    # if goal == [3, 3, 1]:
+    #     print("after compute_shortest_path")
     current_cell = d_star.start
-    
+    # if goal == [3, 3, 1]:
+    #     print(f"before while loop. current cell: {current_cell.to_tuple()}. goal: {d_star.goal.to_tuple()}")
     while current_cell.to_tuple() != d_star.goal.to_tuple(): # Explore frontier 
         min_cost = float('inf')
         next_cell = None
-        
+        # if goal == [3, 3, 1]:
+            # print("in w/hile loop")
         for dx, dy, dz in d_star.neighbors:
             nx, ny, nz = current_cell.x + dx, current_cell.y + dy, current_cell.z + dz
             neighbor_coord = nx, ny, nz
             if map_data.is_valid_position_3d(grid, (neighbor_coord)):
-                if nz == 2:
-                    print(Fore.LIGHTMAGENTA_EX + f"{neighbor_coord}")
-                    print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}\nincoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}\nmy path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
                 if ((grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or 
                      grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
-                    if nz == 2:
-                        print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord} (status: {grid[nx][ny][nz]}): g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
                     total_cost = neighbor.rhs#d_star.calculate_key(neighbor)[0]
+                    # if goal == [3, 3, 1]:
+                    #     print(f"valid position, ok status. total cost: {total_cost}, min_cost {min_cost}")
                     if total_cost < min_cost:
                         min_cost = total_cost
                         next_cell = neighbor
-                        
+                        # if goal == [3, 3, 1]:
+                        #     print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord} (status: {grid[nx][ny][nz]}): g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}-------------------------------")
+                        #     print(Fore.LIGHTRED_EX + f"walkable? {grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value}, incoming? {grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value}, my path? {iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz])}")
+        # if goal == [3, 3, 1]:
+        #     print("after while loop ")
         if next_cell is None:
             # print(Fore.MAGENTA + f"mappity map: \n{grid}")
             print(Fore.MAGENTA + f"No path found with D* Lite >:(")
             return []
 
         next_cell.parent = current_cell
+    
         current_cell = next_cell
         
     path = map_data.reverse_path_3d(current_cell, holding_block)

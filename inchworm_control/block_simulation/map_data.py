@@ -598,7 +598,7 @@ def buffer_iw_paths(grid, iw_id: int, buffer_flag: bool=True, lagging_foot=None)
     
     # check all of grid for inchworm paths
     buffer_list = [] # list of coords that need to be updated for buffering
-    neighbor_directions = set_neighbors()
+    neighbor_directions = set_neighbors(allow_vertical=False)
     path_count = []
 
     # Iterate through the grid

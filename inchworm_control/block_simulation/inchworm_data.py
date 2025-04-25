@@ -560,8 +560,8 @@ class Inchworm():
                     self.path_exists()
                 elif self.no_blocks_left():
                     self.handle_no_blocks_to_place()
-                elif self.is_stuck_or_blocking():
-                    self.handle_IW_blocked()
+                # elif self.is_stuck_or_blocking():
+                #     self.handle_IW_blocked()
                 else: # Path doesn't exist!
                     print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
@@ -639,10 +639,18 @@ class Inchworm():
 
     def handle_IW_blocked(self):
         print(Fore.BLUE + f"IW{self.id}: YIELDING!!! GOTTA GET OUTTA DA WAY")
+        self.temp_path = [self.lagging_foot_loc, self.leading_foot_loc]
+        if not SIMULATION:
+            # If no path is available, set the path as the inchworm's location, so other IWs still know to avoid it
+            self.paths = self.temp_path
+            self.send_IW_path_to_block(self.clear_path_com, self.paths)
+            sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         px, py, pz = self.find_nearest_structure()
         self.goal = [px, py, pz]
         if self.goal != self.leading_foot_loc:
             self.plan_path(bypass_flag=True)
+        if SIMULATION and self.paths == []:
+            self.paths = self.temp_path
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
