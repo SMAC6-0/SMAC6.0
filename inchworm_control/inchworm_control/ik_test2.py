@@ -734,16 +734,16 @@ class IkTest2(Node):
         # self.move_to(x1z_075, x1z_1, TRAVEL_TIME, pivot_foot)
 
         # Turn Left
-        pivot_foot = 1
-        self.latch_detach(pivot_foot)
-        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to_noTP(x1z0_5, y1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
-        pivot_foot = 5
-        self.latch_detach(pivot_foot)
-        self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+        # pivot_foot = 1
+        # self.latch_detach(pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(x1z0_5, y1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z0_5, y1z0, TRAVEL_TIME, pivot_foot)
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
+        # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
         # Turn Left Block
         # pivot_foot = 1
@@ -766,16 +766,16 @@ class IkTest2(Node):
         # activate_servo(self.servo1)
 
         # Turn Right
-        # pivot_foot = 1
-        # self.latch_detach(pivot_foot)
-        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+        pivot_foot = 1
+        self.latch_detach(pivot_foot)
+        self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+        self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
         # Turn Right Block
         # pivot_foot = 1
