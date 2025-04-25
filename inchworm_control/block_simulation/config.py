@@ -8,16 +8,16 @@ GRID_SIZE = 8  # Define the size of your grid in one direction
 GRID_HEIGHT = 4
 
 ### BLOCK DEPOTS & SEED BLOCK ###
-BD_1_LOC = [4, 4, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
+BD_1_LOC = [3, 1, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
 BD_LOCS = [BD_1_LOC] # The locations of all block depots (if there are multiple)
-SEED_BK = [6, 6, 1]
+SEED_BK = [5, 3, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
 NUM_INCHWORMS = 2
-IW_1_LOC = [6, 7, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-# IW_2_LOC = [1, 1, 0]
-IW_LOCS = [IW_1_LOC] # , IW_2_LOC]
+IW_1_LOC = [5, 1, 0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
+IW_2_LOC = [6, 6, 0]
+IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
 # Define the possible orientations of the inchworm relative to the world
@@ -36,9 +36,9 @@ class InchwormOrientation(Enum):
         new_value = (self.value + steps) % len(InchwormOrientation)
         return InchwormOrientation(new_value)
         
-IW_1_ORIENTATION = InchwormOrientation.EAST
-IW_2_ORIENTATION = InchwormOrientation.WEST
-IW_ORIENTATIONS = [IW_1_ORIENTATION] #, IW_2_ORIENTATION]
+IW_1_ORIENTATION = InchwormOrientation.NORTH
+IW_2_ORIENTATION = InchwormOrientation.SOUTH
+IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
 
 # if the simulation is for the demo, set this to True
 SIMULATION = False
