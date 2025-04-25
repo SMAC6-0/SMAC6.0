@@ -636,10 +636,15 @@ class IkTest(Node):
         # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
 
         # move forward w/ blocks 
-        forward_block_time = 1
-        self.move_to(x2z_1, x2z_0_5, forward_block_time, pivot_foot)
-        self.move_to(x2z_0_5, x1z_0_5, forward_block_time, pivot_foot)
-        self.move_to(x1z_0_5, x1z_1, forward_block_time, pivot_foot)
+        block_travel_time = 1
+        # self.move_to(x2z_1, x2z_0_5, block_travel_time, pivot_foot)
+        # self.move_to(x2z_0_5, x1z_0_5, block_travel_time, pivot_foot)
+        # self.move_to(x1z_0_5, x1z_1, block_travel_time, pivot_foot)
+
+        # right turn w/ blocks
+        # self.move_to(y1z_1, y1z_0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z_0_5, x1z_0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z_0_5, x1z_1, TRAVEL_TIME, pivot_foot)
 
 
 
