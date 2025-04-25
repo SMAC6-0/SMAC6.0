@@ -175,7 +175,7 @@ class Inchworm():
                 if [self.goal[0], self.goal[1], self.goal[2]+1] != SEED_BK:
                     self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                     # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
-                    self.current_map = map_data.update_grid_status(self.current_map, self.next_block_loc, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
+                    self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
                     print("Current map in plan path", self.current_map)
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
@@ -665,7 +665,7 @@ class Inchworm():
         print(f"inchworm at seed bk is: { map_data.GridStatus.which_inchworm(self.current_map[x][y][z])}")
         if map_data.GridStatus.which_inchworm(self.current_map[x][y][z]) == self.id:
             self.current_map = map_data.rm_inchworm_path_from_grid(self.current_map, [SEED_BK], iw_id=self.id)
-            # self.clear_path_com.insert(0, SEED_BK)
+            self.clear_path_com.insert(0, SEED_BK)
             print(f"added seed block to the clear path com ")
         print(f"clear com: {self.clear_path_com}")
         self.paths = [] # Reset current path 
