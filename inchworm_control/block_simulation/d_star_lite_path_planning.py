@@ -146,7 +146,7 @@ def find_path(grid, start, goal, iw_id, holding_block, structure_queue):
             neighbor_coord = nx, ny, nz
             if map_data.is_valid_position_3d(grid, (neighbor_coord)):
                 if ((grid[nx][ny][nz] == map_data.GridStatus.WALKABLE.value or 
-                     grid[nx][ny][nz] == map_data.GridStatus.INCOMING_BLOCK.value or
+                     grid[nx][ny][nz-1] == map_data.GridStatus.INCOMING_BLOCK.value or
                      iw_id == map_data.GridStatus.which_inchworm(grid[nx][ny][nz]))):
                     neighbor = d_star.get_cell(neighbor_coord)
                     # print(Fore.YELLOW + f"Evaluating neighbor {neighbor_coord}: g={neighbor.g}, cost={neighbor.cost}, total={neighbor.g + neighbor.cost}")
