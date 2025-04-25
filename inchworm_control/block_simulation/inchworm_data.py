@@ -647,10 +647,14 @@ class Inchworm():
             sleep(PATH_PLANNING_TIMER) # TODO: Decide if we need a  sleep here because we want to have a non blocking code
         px, py, pz = self.find_nearest_structure()
         self.goal = [px, py, pz]
+        
         if self.goal != self.leading_foot_loc:
             self.plan_path(bypass_flag=True)
+            self.set_state(IW_STATE.YIELDING)
+            
         if SIMULATION and self.paths == []:
             self.paths = self.temp_path
+            self.set_state(IW_STATE.YIELDING)
     
     def retry_path(self):
         # Question: Is it ok for the IW to sleep?!! cuz then it doesn't get active data yk 
@@ -734,11 +738,10 @@ class Inchworm():
         if not self.is_Path_Available():
             print(Fore.BLUE + f"IW{self.id}: stuck and cannot get out of way, waiting for updates")
             sleep(PATH_PLANNING_TIMER)
-            self.set_state(IW_STATE.YIELDING)
         else:
             print("we moved and we chillll")
             self.plan_path()
-            self.set_state(IW_STATE.PATH_PLANNING)
+        self.set_state(IW_STATE.PATH_PLANNING)
 
     # Checkers
     def IW_gets_Map_Snapshot(self):

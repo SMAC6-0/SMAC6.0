@@ -51,7 +51,8 @@ class SimData:
         If the IW is at its goal, structure sends the IW a map snapshot
         """
         x, y, z = inchworm.leading_foot_loc
-        if (inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 3 or inchworm.state.value == 6):
+        print(Fore.GREEN + f"yield? {inchworm.state.value == 9}")
+        if ((inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 3 or inchworm.state.value == 6)) or inchworm.state.value == 9: # for now, whenever yielding, assume it is updating
             if ((self.current_map[x][y][z] != map_data.GridStatus.NOT_WALKABLE.value) or (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
                 # print(Fore.GREEN + f"Before updating, status of [6,7,0] = {self.current_map[6][7][0]}")
                 # Update current_map w new block 
