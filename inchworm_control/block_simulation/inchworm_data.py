@@ -176,7 +176,7 @@ class Inchworm():
                     self.next_block_loc = [self.goal[0], self.goal[1], self.goal[2]-1]
                     # print(Fore.MAGENTA + f"IW{self.id}: Setting IW's goal to be incoming block")
                     self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
-
+                    print("Current map in plan path", self.current_map)
                 # Find path to where the next block will be placed
                 goal_path, goal_steps, new_orientation = map_data.initiate_find_path(self.current_map, bd_path[-1], bd_path[-2], self.goal, new_orientation, self.holding_block, self.id, priority_snapshot)
                 self.holding_block = False
@@ -197,6 +197,7 @@ class Inchworm():
 
             # Update the inchworm's internal map with the step it will take 
             self.current_map = map_data.set_inchworm_path_to_grid(self.current_map, self.paths, self.id) # Update IW's map with the path
+            print("Current map in plan path after IW path", self.current_map)
             
             # Save the step instructions 
             self.step_instructions = step_instructions
