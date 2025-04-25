@@ -358,7 +358,7 @@ def is_valid_start_goal_3d(grid, start, goal, iw_id):
     is_valid_start = ((grid[sx][sy][sz] == GridStatus.WALKABLE.value or 
                        grid[sx][sy][sz] == GridStatus.INCOMING_BLOCK.value or
                        grid[sx][sy][sz] == GridStatus.SUPPLY_DEPOT.value or
-                       iw_id == GridStatus.which_inchworm(grid[sx][sy][sz])) and
+                       grid[sx][sy][sz] == GridStatus.inchworm_path(iw_id)) and
                       is_valid_position_3d(grid, start))
     # if sz - 1 >= 0:
     #     is_valid_start_bottom = (grid[sx][sy][sz - 1] == GridStatus.NOT_WALKABLE.value)
@@ -366,10 +366,8 @@ def is_valid_start_goal_3d(grid, start, goal, iw_id):
     is_valid_goal = ((grid[gx][gy][gz] == GridStatus.WALKABLE.value or 
                       grid[gx][gy][gz] == GridStatus.INCOMING_BLOCK.value or
                       grid[gx][gy][gz] == GridStatus.SUPPLY_DEPOT.value or
-                      iw_id == GridStatus.which_inchworm(grid[gx][gy][gz])) and
+                      grid[gx][gy][gz] == GridStatus.inchworm_path(iw_id)) and
                      is_valid_position_3d(grid, goal))
-    # if gz - 1 >= 0:
-    #     is_valid_goal_bottom = (grid[sx][sy][gz - 1] == GridStatus.NOT_WALKABLE.value)
     return is_valid_start and is_valid_goal #and is_valid_goal_bottom and is_valid_start_bottom 
 
 def is_structure_complete(curr_map, final_map):
