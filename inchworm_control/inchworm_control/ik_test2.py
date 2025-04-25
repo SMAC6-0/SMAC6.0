@@ -760,7 +760,9 @@ class IkTest2(Node):
         release_servo(self.servo1)
         self.move_to(y_1z_06, y_1z0, TRAVEL_TIME + 3, pivot_foot)
         self.move_to_noTP(y_1z0, x1z0, TRAVEL_TIME, pivot_foot)
-        self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
+        # self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
+        pivot_foot = 1
+        self.move_to_noTP()
         activate_servo(self.servo1)
 
         # Turn Right
