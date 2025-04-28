@@ -148,6 +148,11 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
 
             # Here are the turns
             elif goal_Y <= -0.5: # y = -1 Turn Right
+                if goal_X > 1.5: # x = 2 (Turning with block only)
+                    inputX = CUBE_WIDTH * goal_X + 1
+                    inputY = CUBE_WIDTH * goal_Y + 0.6
+                    inputZ = CUBE_WIDTH * goal_Z - 0.1
+                    inputAlpha = alpha - 8
                 if goal_Z > -0.1 and goal_Z <= 0.25: # z = 0
                     inputX = CUBE_WIDTH * goal_X + 0.4
                     inputY = CUBE_WIDTH * goal_Y - 1.0
@@ -172,6 +177,11 @@ def adjust_positions(goal_X: float, goal_Y: float, goal_Z: float, alpha: float, 
                     print(f"Position not included Z: {goal_Z}")
             
             elif goal_Y > 0.5: # y = 1 Turn Left
+                if goal_X > 1.5: # x = 2 (Turning with block only)
+                    inputX = CUBE_WIDTH * goal_X + 1
+                    inputY = CUBE_WIDTH * goal_Y + 0.6
+                    inputZ = CUBE_WIDTH * goal_Z - 0.1
+                    inputAlpha = alpha - 8
                 if goal_Z > -0.1 and goal_Z <= 0.25: # z = 0
                     inputX = CUBE_WIDTH * goal_X + 1
                     inputY = CUBE_WIDTH * goal_Y + 0.6
