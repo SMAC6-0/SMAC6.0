@@ -790,6 +790,7 @@ class IkTest2(Node):
         self.latch_detach(pivot_foot)
         self.move_to(x1z0, x1z1_5, TRAVEL_TIME + 1, pivot_foot)
         self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
+        self.latch_detach(pivot_foot)
         self.move_to(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
         activate_servo(self.servo2)
             # Drag lagging foot over
