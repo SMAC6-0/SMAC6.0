@@ -555,8 +555,8 @@ class IkTest2(Node):
         y1z0_5 = [1, 1, 0.5, EE_direction.DOWN.value]
         y1z1   = [1, 1, 1, EE_direction.DOWN.value]
         y1z1_5 = [1, 1, 1.5, EE_direction.DOWN.value]
-        x2y1z1   = [2, 1, 1, EE_direction.DOWN.value]
-        x2y1z1_5 = [2, 1, 1.5, EE_direction.DOWN.value]
+        y2z1   = [1, 2, 1, EE_direction.DOWN.value]
+        y2z1_5 = [1, 2, 1.5, EE_direction.DOWN.value]
 
         # Pivot Foot 5
         # y = -1
@@ -773,11 +773,11 @@ class IkTest2(Node):
         self.latch_detach(pivot_foot)
         activate_servo(self.servo2)
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z1_5, x2y1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x2y1z1_5, x2y1z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
         release_servo_newEE(self.servo2)
-        self.move_to(x2y1z1, x2y1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x2y1z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y1z1_5, y1z0, TRAVEL_TIME, pivot_foot)
             # Turning lagging foot to be straight
         # pivot_foot = 5
