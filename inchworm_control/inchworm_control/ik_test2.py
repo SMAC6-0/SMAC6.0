@@ -773,7 +773,7 @@ class IkTest2(Node):
         self.latch_detach(pivot_foot)
         activate_servo(self.servo2)
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME + 2, pivot_foot)
         self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
         release_servo_newEE(self.servo2)
         self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
