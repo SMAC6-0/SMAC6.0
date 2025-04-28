@@ -780,11 +780,11 @@ class IkTest2(Node):
         self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
         self.move_to(y1z1_5, y1z0, TRAVEL_TIME + 2, pivot_foot)
             # Turning lagging foot to be straight
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+        self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
         #     # Grab onto block again
         # pivot_foot = 1
         # self.latch_detach(pivot_foot)
