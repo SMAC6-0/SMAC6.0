@@ -793,7 +793,7 @@ def release_servo(servo_id):
         servo_id: The servo motor object to be released. 
     """
     # Set duty cycle to move servo to 150° position
-    servo_id.ChangeDutyCycle(2+(150/18))
+    servo_id.ChangeDutyCycle(2+(160/18))
     # Pause to allow servo to reach position
     time.sleep(1)
     # Stop sending signal to servo
