@@ -769,22 +769,22 @@ class IkTest2(Node):
 
         # Turn Left Block V2
             # Placing block then putting foot on board
-        # pivot_foot = 1
-        # self.latch_detach(pivot_foot)
-        # activate_servo(self.servo2)
-        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME + 2, pivot_foot)
-        # self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
-        # release_servo_newEE(self.servo2)
-        # self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y1z1_5, y1z0, TRAVEL_TIME + 2, pivot_foot)
-        #     # Turning lagging foot to be straight
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+        pivot_foot = 1
+        self.latch_detach(pivot_foot)
+        activate_servo(self.servo2)
+        self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME + 2, pivot_foot)
+        self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
+        release_servo_newEE(self.servo2)
+        self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y1z1_5, y1z0, TRAVEL_TIME + 2, pivot_foot)
+            # Turning lagging foot to be straight
+        pivot_foot = 5
+        self.latch_detach(pivot_foot)
+        self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
             # Grab onto block again
         pivot_foot = 1
         self.latch_detach(pivot_foot)
