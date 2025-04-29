@@ -51,7 +51,7 @@ class SimData:
         If the IW is at its goal, structure sends the IW a map snapshot
         """
         x, y, z = inchworm.leading_foot_loc
-        print(Fore.GREEN + f"yield? {inchworm.state.value == 9}")
+        # print(Fore.GREEN + f"yield? {inchworm.state.value == 9}")
         if ((inchworm.leading_foot_loc == inchworm.goal) and (inchworm.state.value == 2 or inchworm.state.value == 3 or inchworm.state.value == 6)) or inchworm.state.value == 9: # for now, whenever yielding, assume it is updating
             if ((self.current_map[x][y][z] != map_data.GridStatus.NOT_WALKABLE.value) or (inchworm.leading_foot_loc == SEED_BK)): # Edge case handling. If the block above is incoming before the IW gets there
                 # print(Fore.GREEN + f"Before updating, status of [6,7,0] = {self.current_map[6][7][0]}")
@@ -67,7 +67,7 @@ class SimData:
 
     def paths_rm_add(self, inchworm): 
         """Removes the IW's previous path and sends the new one. """
-        print(Fore.GREEN + f"clear path com {inchworm.clear_path_com}\n map sent flag {self.map_sent_flag[inchworm.id]}\n path {bool(inchworm.paths)}\n foot loc {inchworm.leading_foot_loc}\n state {inchworm.state.value}")
+        # print(Fore.GREEN + f"clear path com {inchworm.clear_path_com}\n map sent flag {self.map_sent_flag[inchworm.id]}\n path {bool(inchworm.paths)}\n foot loc {inchworm.leading_foot_loc}\n state {inchworm.state.value}")
         if inchworm.clear_path_com and self.map_sent_flag[inchworm.id]:
             if inchworm.paths and inchworm.leading_foot_loc == inchworm.clear_path_com[-1] and (inchworm.state.value == 4 or inchworm.state.value == 3):
                 x, y, z = inchworm.leading_foot_loc
@@ -90,7 +90,7 @@ class SimData:
                 # print(Fore.GREEN + f"{inchworm.leading_foot_loc} status: {self.current_map[x][y][z]}")
                 x, y, z = inchworm.goal
                 if inchworm.goal != SEED_BK:
-                    print(f"my goal is {inchworm.goal}")
+                    # print(f"my goal is {inchworm.goal}")
                     self.current_map[x][y][z] == map_data.update_grid_status(self.current_map, inchworm.goal, map_data.GridStatus.INCOMING_BLOCK.value)
                 self.map_sent_flag[inchworm.id] = False
                 # print(Fore.GREEN + f"After incoming, status of [6,7,0] = {self.current_map[6][7][0]}")

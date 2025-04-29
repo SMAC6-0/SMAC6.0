@@ -108,7 +108,7 @@ def blueprint(curr_map, final_map, repeat_threshold=1) -> list:
             last_block = sorted_buffer[0]
 
         if repeat_count >= repeat_threshold and len(sorted_buffer) > 1:
-            print(f"repeat threshold exceeded {repeat_threshold}, new block time!!!")
+            # print(f"repeat threshold exceeded {repeat_threshold}, new block time!!!")
             next_block = sorted_buffer[1]
             last_block = next_block
             repeat_count = 0
@@ -116,7 +116,7 @@ def blueprint(curr_map, final_map, repeat_threshold=1) -> list:
             next_block = sorted_buffer[0]
 
         remaining_queue = [b for b in sorted_buffer if b != next_block]
-        print(Fore.CYAN + f"next block: {next_block} (status: {curr_map[next_block[0]][next_block[1]][next_block[2]]}) for queue {build_queue}")
+        # print(Fore.CYAN + f"next block: {next_block} (status: {curr_map[next_block[0]][next_block[1]][next_block[2]]}) for queue {build_queue}")
         return list(next_block), remaining_queue
     return [-9, -9, -9]
 

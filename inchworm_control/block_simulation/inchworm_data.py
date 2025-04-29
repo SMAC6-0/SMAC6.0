@@ -131,7 +131,7 @@ class Inchworm():
         elif make_IW_move.lower() == 'n':
             return False
         else:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
+            print(" Invalid input. Please answer with 'yes' or 'no'.")
 
     def plan_path(self, next_goal: tuple[int, int, int] = None, bypass_flag=False): 
         """ Plan path from current location to specified goal. 
@@ -140,14 +140,14 @@ class Inchworm():
         is_traveling = False # assumes that if not specified, objective is to travel, not place
 
         if next_goal == None:
-            print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
+            # print(Fore.MAGENTA + f"IW{self.id}: goal not given... finding goal now")            
             self.goal, self.priority_snapshot = bp.blueprint(self.current_map, self.final_structure) # gets goal from blueprint if none is given
             print(Fore.MAGENTA + f"IW{self.id}: goal: {self.goal}")
             if self.goal == [-1, -1, -1]:
-                print(Fore.MAGENTA + f"Other IWs finished the structure while IW{self.id} was looking for a path")
+                # print(Fore.MAGENTA + f"Other IWs finished the structure while IW{self.id} was looking for a path")
                 return
             elif self.goal == [-9, -9, -9]:
-                print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
+                # print(Fore.MAGENTA + f"IW{self.id}: Erm... No goal was given... No structure was found...")
                 path = []
                 self.goal = self.leading_foot_loc
                 return
@@ -155,7 +155,7 @@ class Inchworm():
             is_traveling = True
             self.goal = next_goal
             if self.goal != SEED_BK: 
-                print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
+                # print(Fore.MAGENTA + f"IW{self.id}: Goal is not seed block. Setting IW's goal to be incoming block")
                 self.current_map = map_data.update_grid_status(self.current_map, self.goal, map_data.GridStatus.INCOMING_BLOCK.value) # updates map for next_goal to be incoming_block
 
         # print(Fore.MAGENTA + f"IW{self.id}'s current_map: \n{self.current_map}")
@@ -203,12 +203,12 @@ class Inchworm():
             
             # Save the step instructions 
             self.step_instructions = step_instructions
-            print(Fore.BLUE + f"IW{self.id}: step instructions: {self.step_instructions}")
+            print(Fore.BLUE + f" IW{self.id}: step instructions: {self.step_instructions}")
             x, y,z = self.goal
-            print( f"IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
+            print( f" IW{self.id}: chosen goal {self.goal} has status {self.current_map[x][y][z]}. underneath, {[x, y, z-1]}, has status {self.current_map[x][y][z-1]}")
             
         except RuntimeError as e:
-            print(Fore.MAGENTA + f"IW{self.id}: Error: {e}. No path found, try again later.")
+            print(Fore.MAGENTA + f" IW{self.id}: {e}. No path found, try again later.")
             return
     
     def get_next_step(self):
@@ -243,7 +243,22 @@ class Inchworm():
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
                     # If the inchworm is stepping up 
                     if step_change[2] > 0: 
-                        self.lagging_foot_loc[2] = (prev_leading[2] - self.leading_foot_loc[2]) if (prev_leading[2] - self.leading_foot_loc[2]) >= 0 else 0
+                        print(f"{prev_leading[2]}")
+                        print(f"{self.leading_foot_loc[2]}")
+                        # self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
+                        for zz in range(GRID_HEIGHT):
+                            curr_is_walkable = self.current_map[self.lagging_foot_loc[0]][self.lagging_foot_loc[1]][zz]
+                            if curr_is_walkable:
+                                lowest_z = zz
+                                break
+                        self.lagging_foot_loc[2] = lowest_z
+                elif "PLACE" in step_type:
+                    for zz in range(GRID_HEIGHT):
+                        curr_is_walkable = self.current_map[self.lagging_foot_loc[0]][self.lagging_foot_loc[1]][zz]
+                        if curr_is_walkable:
+                            lowest_z = zz
+                            break
+                    self.lagging_foot_loc[2] = lowest_z
                 self.step_num += 1
        
             x, y, z = self.leading_foot_loc
@@ -257,7 +272,7 @@ class Inchworm():
             
             if self.holding_block and [x, y, z] != self.goal:
                 z = z + 1
-            print( f"IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
+            print( f" IW{self.id}: foot locs: {[x, y, z]}, {self.lagging_foot_loc}")
             return x, y, z
     
     def get_total_inchworms(cls):
@@ -563,7 +578,7 @@ class Inchworm():
                 elif self.is_stuck_or_blocking():
                     self.handle_IW_blocked()
                 else: # Path doesn't exist!
-                    print(Fore.MAGENTA + f"IW{self.id}: Retrying path planning after waiting")
+                    print(Fore.MAGENTA + f" IW{self.id}: Retrying path planning after waiting")
                     self.retry_path() 
             case IW_STATE.TRAVELLING_TO_SUPPLY:
                 if self.is_IW_in_supply():
@@ -602,7 +617,7 @@ class Inchworm():
     # added this func incase we need it in the future
     def handle_idle(self):
         if self.print_flag:
-            print(Fore.BLUE + "IDLINGGG....")
+            # print(Fore.BLUE + "IDLINGGG....")
             self.print_flag = False
     
     # during the initiliaztion phase the inchworm should lift up it's gripper and touch the seed block
@@ -614,7 +629,7 @@ class Inchworm():
             if MANUAL_TESTING:
                 self.dummy_IW_move()
             if self.leading_foot_loc == self.goal: 
-                print(Fore.BLUE + "Touching the seed block")
+                print(Fore.BLUE + " Touching the seed block")
                 self.iw_reached_seed_block_flag = True
 
         else: # this happens first 
@@ -634,7 +649,7 @@ class Inchworm():
         if not SIMULATION:
             self.send_IW_path_to_block(self.clear_path_com, self.paths)
         # TODO !!!!! 
-        print(Fore.BLUE + f"IW{self.id}: Travelling to the supply")
+        print(Fore.BLUE + f" IW{self.id}: Travelling to the supply")
         self.set_state(IW_STATE.TRAVELLING_TO_SUPPLY)
 
     def handle_IW_blocked(self):
@@ -679,7 +694,7 @@ class Inchworm():
         print(Fore.BLUE + f"IW{self.id}: Touching the new block (move)")
         # touch the new block
         if not SIMULATION: 
-            print(Fore.BLUE + f"IW{self.id}: IW flashes block with it's location")
+            print(Fore.BLUE + f" IW{self.id}: IW flashes block with its location")
             self.send_block_location()
             # pause so that the block has enough time to process the info
         
@@ -712,15 +727,15 @@ class Inchworm():
 
     def handle_error(self):
         print(Fore.BLUE + f"IW{self.id}: OHHH NOOO, ERROR ERROR")
-        print(Fore.BLUE + f"IW{self.id}: Stop Inchworm") # stop the inchworm
-        print(Fore.BLUE + f"IW{self.id}: flash red LED") # flash red Led 
+        print(Fore.BLUE + f" IW{self.id}: Stop Inchworm") # stop the inchworm
+        print(Fore.RED + f" IW{self.id}: flash red LED") # flash red Led 
 
         self.set_state(IW_STATE.IDLE)
     
     def handle_structure_complete(self):
         print(Fore.BLUE + f"IW{self.id}: Structure is complete YIppeee")
-        print(Fore.BLUE + f"IW{self.id}: IW Stopped") # stop the iW
-        print(Fore.BLUE + f"IW{self.id}: flash Green LED") # flash green light
+        print(Fore.BLUE + f" IW{self.id}: IW Stopped") # stop the iW
+        print(Fore.GREEN + f" IW{self.id}: flash Green LED") # flash green light
 
         self.set_state(IW_STATE.STRUCTURE_COMPLETE)
 
@@ -739,7 +754,7 @@ class Inchworm():
             print(Fore.BLUE + f"IW{self.id}: stuck and cannot get out of way, waiting for updates")
             sleep(PATH_PLANNING_TIMER)
         else:
-            print("we moved and we chillll")
+            # print("we moved and we chillll")
             self.plan_path()
         self.set_state(IW_STATE.PATH_PLANNING)
 
@@ -760,7 +775,7 @@ class Inchworm():
             return self.inchworm_gets_map()
     
     def is_Path_Available(self):
-        print(Fore.BLUE + f"IW{self.id}: Checking path availability... {self.paths}")
+        # print(Fore.BLUE + f"IW{self.id}: Checking path availability... {self.paths}")
         if self.paths and self.goal and self.paths != self.temp_path:
             return True
         else: 
@@ -771,8 +786,8 @@ class Inchworm():
 
     def is_IW_in_supply(self):
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
-        print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
-        print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
+        # print(Fore.BLUE + f"IW{self.id}: Checking if at supply location...")
+        # print(Fore.BLUE + f"IW{self.id}: If in sim, press n to step")
         if not SIMULATION:
             if MANUAL_TESTING: 
                 self.dummy_IW_move()
@@ -802,7 +817,7 @@ class Inchworm():
             #         self.get_next_step() 
 
         if self.leading_foot_loc == self.goal: 
-            print(Fore.BLUE + f"IW{self.id}: IW thinks it's at the incoming block loc")
+            print(Fore.BLUE + f" IW{self.id}: IW thinks it's at the incoming block loc")
             # self.holding_block = False
             return True 
         else: 
@@ -842,9 +857,9 @@ class Inchworm():
                 other_iw = lag_blocker
             else:
                 other_iw = lead_blocker
-            print(Fore.YELLOW + f"IW{self.id} is blocking or blocked by IW{other_iw}!")
+            # print(Fore.YELLOW + f"IW{self.id} is blocking or blocked by IW{other_iw}!")
             return True
-        print("no need for yields")
+        # print("no need for yields")
         return False
     
     def is_structure_complete(self, curr_map, final_map):

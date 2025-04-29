@@ -150,13 +150,11 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
     start = lagging_foot_loc
     start_status = (grid[start[0]][start[1]][start[2]])
     goal_status = (grid[goal[0]][goal[1]][goal[2]])
-    print(Fore.MAGENTA + f"D* Lite called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
-    below_goal_status = (grid[goal[0]][goal[1]][goal[2]-1])
-    # print(Fore.CYAN + f"below goal: {[goal[0], goal[1], goal[2] - 1]} (status: {below_goal_status})")
+    print(Fore.MAGENTA + f"IW{iw_id}: D* Lite called with start: {start} (status: {start_status}), goal: {goal} (status: {goal_status})")
     
     if not bypass_flag:
         if not map_data.is_valid_start_goal_3d(grid, start, goal, iw_id):
-            raise RuntimeError(f"Invalid start {start} or goal {goal} position")
+            raise RuntimeError(f"Invalid start or goal position error")
         
     d_star = DStarLite(grid, start, goal, structure_queue, leading_foot_loc, bypass_flag) # snapshot of what we have searched and found
     # if goal == [3, 3, 1]:
@@ -193,7 +191,7 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
         #     print("after while loop ")
         if next_cell is None:
             # print(Fore.MAGENTA + f"mappity map: \n{grid}")
-            print(Fore.MAGENTA + f"No path found with D* Lite >:(")
+            print(Fore.MAGENTA + f" No path found with D* Lite >:(")
             return []
 
         next_cell.parent = current_cell
@@ -201,5 +199,5 @@ def find_path(grid, leading_foot_loc, lagging_foot_loc, goal, iw_id, holding_blo
         current_cell = next_cell
         
     path = map_data.reverse_path_3d(current_cell, holding_block)
-    print(Fore.MAGENTA + f"Path found: {path}")
+    print(Fore.MAGENTA + f" Path found: {path}")
     return path
