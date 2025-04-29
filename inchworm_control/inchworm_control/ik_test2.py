@@ -549,6 +549,8 @@ class IkTest2(Node):
         y_1z0_5 = [1, -1, 0.5, EE_direction.DOWN.value]
         y_1z1   = [1, -1, 1, EE_direction.DOWN.value]
         y_1z1_5 = [1, -1, 1.5, EE_direction.DOWN.value]
+        y_2z1   = [1, -2, 1, EE_direction.DOWN.value]
+        y_2z1_5 = [1, -2, 1.5, EE_direction.DOWN.value]
 
         # y = 1
         y1z0   = [1, 1, 0, EE_direction.DOWN.value]
@@ -769,21 +771,87 @@ class IkTest2(Node):
 
         # Turn Left Block V2
             # Placing block then putting foot on board
+        # pivot_foot = 1
+        # self.latch_detach(pivot_foot)
+        # activate_servo(self.servo2)
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME + 2, pivot_foot)
+        # self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
+        # release_servo_newEE(self.servo2)
+        # self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y1z1_5, y1z0, TRAVEL_TIME + 2, pivot_foot)
+        #     # Turning lagging foot to be straight
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
+        # self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.latch_detach(pivot_foot)
+        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME + 1, pivot_foot)
+        #     # Grab onto block again
+        # pivot_foot = 1
+        # self.latch_detach(pivot_foot)
+        # self.move_to(x1z0, x1z1_5, TRAVEL_TIME + 1, pivot_foot)
+        # self.move_to(x1z1_5, x2z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(x2z1_5, x2z1, TRAVEL_TIME, pivot_foot)
+        # self.latch_detach(pivot_foot)
+        # activate_servo(self.servo2)
+        #     # Drag lagging foot over
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
+        # self.move_to(x2z_1, x2z_075, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x2z_075, x1z_075, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z_075, x1z_1, TRAVEL_TIME, pivot_foot)
+        # activate_servo(self.servo1)
+
+
+        # Turn Right
+        # pivot_foot = 1
+        # self.latch_detach(pivot_foot)
+        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
+        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
+
+        # Turn Right Block (NOT WORKING)
+        # pivot_foot = 1
+        # self.latch_detach(pivot_foot)
+        # activate_servo(self.servo2)
+        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(x1z1_5, y_1z1_5, TRAVEL_TIME, pivot_foot)
+        # self.move_to(y_1z1_5, y_1z1, TRAVEL_TIME, pivot_foot)
+        # pivot_foot = 5
+        # self.latch_detach(pivot_foot)
+        # self.move_to(y1z_1, y1z_075, TRAVEL_TIME, pivot_foot)
+        # # activate_servo(self.servo1)
+        # self.move_to(y1z_075, y1z_06, TRAVEL_TIME + 2, pivot_foot)
+        # # release_servo(self.servo1)
+        # self.move_to(y1z_06, y1z0, TRAVEL_TIME + 3, pivot_foot)
+        # self.move_to_noTP(y1z0, x1z0, TRAVEL_TIME, pivot_foot)
+        # self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
+        # activate_servo(self.servo1)
+
+        # Turn Right Block V2
+            # Placing block then putting foot on board
         pivot_foot = 1
         self.latch_detach(pivot_foot)
         activate_servo(self.servo2)
         self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(x1z1_5, y2z1_5, TRAVEL_TIME + 2, pivot_foot)
-        self.move_to(y2z1_5, y2z1, TRAVEL_TIME, pivot_foot)
+        self.move_to(x1z1_5, y_2z1_5, TRAVEL_TIME + 2, pivot_foot)
+        self.move_to(y_2z1_5, y_2z1, TRAVEL_TIME, pivot_foot)
         release_servo_newEE(self.servo2)
-        self.move_to(y2z1, y2z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y2z1_5, y1z1_5, TRAVEL_TIME, pivot_foot)
-        self.move_to(y1z1_5, y1z0, TRAVEL_TIME + 2, pivot_foot)
+        self.move_to(y_2z1, y_2z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_2z1_5, y_1z1_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y_1z1_5, y_1z0, TRAVEL_TIME + 2, pivot_foot)
             # Turning lagging foot to be straight
         pivot_foot = 5
         self.latch_detach(pivot_foot)
-        self.move_to(y_1z0, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        self.move_to_noTP(y_1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
+        self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
         self.latch_detach(pivot_foot)
         self.move_to(x1z0_5, x1z0, TRAVEL_TIME + 1, pivot_foot)
             # Grab onto block again
@@ -801,37 +869,6 @@ class IkTest2(Node):
         self.move_to(x2z_075, x1z_075, TRAVEL_TIME, pivot_foot)
         self.move_to(x1z_075, x1z_1, TRAVEL_TIME, pivot_foot)
         activate_servo(self.servo1)
-
-
-        # Turn Right
-        # pivot_foot = 1
-        # self.latch_detach(pivot_foot)
-        # self.move_to(x1z0, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(x1z0_5, y_1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y_1z0_5, y_1z0, TRAVEL_TIME, pivot_foot)
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y1z0, y1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(y1z0_5, x1z0_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z0_5, x1z0, TRAVEL_TIME, pivot_foot)
-
-        # Turn Right Block
-        # pivot_foot = 1
-        # self.latch_detach(pivot_foot)
-        # activate_servo(self.servo2)
-        # self.move_to(x1z1, x1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(x1z1_5, y_1z1_5, TRAVEL_TIME, pivot_foot)
-        # self.move_to(y_1z1_5, y_1z1, TRAVEL_TIME, pivot_foot)
-        # pivot_foot = 5
-        # self.latch_detach(pivot_foot)
-        # self.move_to(y1z_1, y1z_075, TRAVEL_TIME, pivot_foot)
-        # # activate_servo(self.servo1)
-        # self.move_to(y1z_075, y1z_06, TRAVEL_TIME + 2, pivot_foot)
-        # # release_servo(self.servo1)
-        # self.move_to(y1z_06, y1z0, TRAVEL_TIME + 3, pivot_foot)
-        # self.move_to_noTP(y1z0, x1z0, TRAVEL_TIME, pivot_foot)
-        # self.move_to_noTP(x1z0, x1z_1, TRAVEL_TIME - 1.7, pivot_foot)
-        # activate_servo(self.servo1)
 
 
         print("Movement complete: TEST_STEP")
