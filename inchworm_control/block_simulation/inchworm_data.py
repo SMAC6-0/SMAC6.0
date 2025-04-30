@@ -242,6 +242,10 @@ class Inchworm():
                 if "PLACE" not in step_type:
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
                     # If the inchworm is stepping up 
+                    # if step_change[2] > 0: 
+                    #     self.lagging_foot_loc[2] = self.leading_foot_loc[2] - prev_leading[2]
+                    # elif step_change[2] < 0: 
+                    #     self.lagging_foot_loc[2] = prev_leading[2] - self.leading_foot_loc[2] 
                     if step_change[2] > 0: 
                         # print(f"{prev_leading[2]}")
                         # print(f"{self.leading_foot_loc[2]}")
@@ -782,7 +786,7 @@ class Inchworm():
             return False
 
     def no_blocks_left(self):
-        return self.goal == [-1, -1, -1]
+        return (self.goal == [-1, -1, -1])
 
     def is_IW_in_supply(self):
         """ return true if the IW is in the supply location (check the flag and compare the current IW  location through dead reckoning and the supply location)"""
