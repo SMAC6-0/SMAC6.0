@@ -130,6 +130,7 @@ def update():
             if inchworm.paths and inchworm.leading_foot_loc != inchworm.paths[-1]:  # If there is a path, make the inchworm step through it
                 # print(f"the supposed path for IW{inchworm.id} (loc {inchworm.leading_foot_loc}): {inchworm.paths}")
                 x, y, z = inchworm.get_next_step() 
+                sim_data.count_steps()
             else:               # Otherwise, just show the current location
                 x, y, z = inchworm.leading_foot_loc         
             simulate_leading_foot(inchworm, x, y, z)

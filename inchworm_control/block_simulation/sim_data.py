@@ -122,14 +122,16 @@ class SimData:
             self.map_sent_flag[i+1] = False # The key is i+1 to correspond to the IW ID
         print(Fore.GREEN + f"{num_inchworms} inchworms successfully spawned")
 
-    def get_next_steps(self): 
+    def count_steps(self): 
         """
         Returns all of the next steps that all inchworms will be taking
         """
-        num_steps += num_steps
-        for inchworm in self.existing_inchworms: 
-            return inchworm.get_next_point() # x, z, y
-        # TODO: return a list of all the next points of travel
+        self.num_steps += 1
+        for inchworm in self.existing_inchworms:
+            inchworm.total_num_steps += 1
+            if all(inchworm.state.value == 8 for inchworm in self.existing_inchworms):
+                print(Fore.GREEN + f"All inchworms have stopped. Total number of steps is {self.num_steps}.") # x, z, y
+                print(Fore.GREEN + f"Inchworm {inchworm.id} has taken {inchworm.total_num_steps} steps in total.")
 
     def generate_demo(self):
         coordinates = []

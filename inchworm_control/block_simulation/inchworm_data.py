@@ -114,6 +114,7 @@ class Inchworm():
         if not SIMULATION: 
             self.IW_SERIAL = serial.Serial ("/dev/ttyAMA0", 9600)    #Open port with baud rate
         else: 
+            self.total_num_steps = 0
             # These are vars that the simulation uses to simulate each of the inchworm feet
             self.last_cell, self.last_bk_og_texture, self.last_cell_2, self.last_bk_og_texture_2, self.spawned, self.prev_held_block_loc = None, None, None, None, False, [0,0,0]
 
