@@ -243,8 +243,8 @@ class Inchworm():
                     self.lagging_foot_loc = list(lagging_transform[self.orientation](*self.leading_foot_loc))
                     # If the inchworm is stepping up 
                     if step_change[2] > 0: 
-                        print(f"{prev_leading[2]}")
-                        print(f"{self.leading_foot_loc[2]}")
+                        # print(f"{prev_leading[2]}")
+                        # print(f"{self.leading_foot_loc[2]}")
                         # self.lagging_foot_loc[2] = self.leading_foot_loc[2] - 1
                         for zz in range(GRID_HEIGHT):
                             curr_is_walkable = self.current_map[self.lagging_foot_loc[0]][self.lagging_foot_loc[1]][zz]

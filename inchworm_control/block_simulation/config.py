@@ -8,15 +8,15 @@ GRID_SIZE = 8  # Define the size of your grid in one direction
 GRID_HEIGHT = 4
 
 ### BLOCK DEPOTS & SEED BLOCK ###
-BD_1_LOC = [3, 1, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
+BD_1_LOC = [4, 3, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, y, z).
 BD_LOCS = [BD_1_LOC] # The locations of all block depots (if there are multiple)
-SEED_BK = [5, 3, 1]
+SEED_BK = [2, 7, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
 NUM_INCHWORMS = 2
-IW_1_LOC = [5, 1, 0]#[3,6,0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
-IW_2_LOC = [6, 6, 0]#[12,6,0]
+IW_1_LOC = [7, 1, 0]#[3,6,0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
+IW_2_LOC = [0, 6, 0]#[12,6,0]
 IW_LOCS = [IW_1_LOC, IW_2_LOC]
 
 # - ORIENTATION - #
@@ -53,4 +53,4 @@ BFS = "BFS"
 D_STAR_LITE = "D_STAR_LITE"
 
 # change algos here:
-PATH_PLANNING = BFS
+PATH_PLANNING = D_STAR_LITE
