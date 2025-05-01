@@ -493,9 +493,9 @@ def initiate_find_path(grid, leading_foot_loc, lagging_foot_loc, path_end, curr_
     else:
         c_space_grid = buffer_iw_paths(grid, iw_id)
     
-    if PATH_PLANNING == BFS:
+    if PATH_PLANNING == D_STAR_LITE:
         path_coords = d_star_lite_path_planning.find_path(c_space_grid, leading_foot_loc, lagging_foot_loc, path_end, iw_id, holding_block, priority_queue, bypass_flag) # get the path
-    elif PATH_PLANNING == D_STAR_LITE:
+    elif PATH_PLANNING == BFS:
         path_coords = bfs_path_planning.find_path(c_space_grid, leading_foot_loc, lagging_foot_loc, path_end, iw_id, holding_block, bypass_flag) # get the path
     else:
         raise ValueError(f"Unknown path planning alg: {PATH_PLANNING}")
