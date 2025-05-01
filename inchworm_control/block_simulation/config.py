@@ -14,10 +14,11 @@ SEED_BK = [5, 3, 1]
 
 ### INCHWORMS ###
 # - LOCATIONS - #
-NUM_INCHWORMS = 2
+NUM_INCHWORMS = 1
 IW_1_LOC = [5, 1, 0]#[3,6,0] # Starting location of the inchworm robot, where the coordinates are represented as (x, y, z).
 IW_2_LOC = [6, 6, 0]#[12,6,0]
-IW_LOCS = [IW_1_LOC, IW_2_LOC]
+IW_3_LOC = [14, 8, 0]
+IW_LOCS = [IW_1_LOC, IW_2_LOC, IW_3_LOC]
 
 # - ORIENTATION - #
 # Define the possible orientations of the inchworm relative to the world
@@ -38,7 +39,8 @@ class InchwormOrientation(Enum):
         
 IW_1_ORIENTATION = InchwormOrientation.NORTH
 IW_2_ORIENTATION = InchwormOrientation.SOUTH
-IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION]
+IW_3_ORIENTATION = InchwormOrientation.EAST
+IW_ORIENTATIONS = [IW_1_ORIENTATION, IW_2_ORIENTATION, IW_3_ORIENTATION]
 
 # if the simulation is for the demo, set this to True
 SIMULATION = True
