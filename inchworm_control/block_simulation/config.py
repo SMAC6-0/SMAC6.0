@@ -2,8 +2,8 @@ from enum import Enum
 
 # this file holds variables that the user can change just in this file before running
 
-BD_LOC = [4, 1, 4] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, z, y).
-CURRENT_LOC = [4, 0, 1] # Starting location of the inchworm robot, where the coordinates are represented as (x, z, y).
+BD_LOC = [3, 1, 1] # The location where new blocks are sourced/placed to then be picked up by the inchworm robot, where the coordinates are represented as (x, z, y).
+CURRENT_LOC = [5, 0, 1] # Starting location of the inchworm robot, where the coordinates are represented as (x, z, y).
 
 # if the simulation is for the demo, set this to True
 DEMO = False

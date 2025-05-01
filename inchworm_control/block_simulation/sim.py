@@ -55,6 +55,7 @@ number = 0
 # Leg locations for the inchworm. Point is the position of the leading leg and prev_point is the position of the second leg
 point = CURRENT_LOC
 prev_point = point
+num_steps = 0
 
 # Updates every frame
 def update():
@@ -113,6 +114,7 @@ def update():
         key_p_pressed = False
 
     if held_keys["n"] and not key_n_pressed and coords_to_spawn:
+        count_steps()
         (point, holding_block) = coords_to_spawn.pop(0)  # Get the next point
         x, z, y = point
         if holding_block:
@@ -180,7 +182,14 @@ def update():
         prev_point = point
         key_n_pressed = False
 
-
+def count_steps(): 
+    """
+    Counts the steps that all inchworms will be taking
+    """
+    global num_steps
+    num_steps += 1
+    print(f"Inchworm has taken {num_steps} steps in total.")
+       
 
 # writes steps to a txt file              
 def step_getter(steps):
