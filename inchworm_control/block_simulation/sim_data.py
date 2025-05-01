@@ -33,7 +33,6 @@ class SimData:
         self.existing_inchworms = []
         self.initialized_inchworms = []
         self.map_sent_flag = {} # Extra security to ensure paths are sent once, if map was sent first 
-        self.num_steps = 0
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
