@@ -33,6 +33,7 @@ class SimData:
         self.existing_inchworms = []
         self.initialized_inchworms = []
         self.map_sent_flag = {} # Extra security to ensure paths are sent once, if map was sent first 
+        self.num_steps =0
         
     def generate_final_structure_map(self, blocks_placed: list[list[int]]): 
         """Convert blocks placed in sim to 3D list parsable everywhere else. Evaluates the seed block as the first 
@@ -121,13 +122,18 @@ class SimData:
             self.map_sent_flag[i+1] = False # The key is i+1 to correspond to the IW ID
         print(Fore.GREEN + f"{num_inchworms} inchworms successfully spawned")
 
-    def get_next_steps(self): 
+    def count_steps(self): 
         """
-        Returns all of the next steps that all inchworms will be taking
+        Counts the steps that all inchworms will be taking
         """
-        for inchworm in self.existing_inchworms: 
-            return inchworm.get_next_point() # x, z, y
-        # TODO: return a list of all the next points of travel
+        self.num_steps += 1
+        for inchworm in self.existing_inchworms:
+            if inchworm.paths and inchworm.leading_foot_loc != inchworm.paths[-1]:
+                inchworm.total_num_steps += 1
+            print(Fore.GREEN + f"Inchworm {inchworm.id} has taken {inchworm.total_num_steps} steps in total.")
+            if all(inchworm.state.value == 8 for inchworm in self.existing_inchworms):
+                print(Fore.GREEN + f"All inchworms have stopped. Total number of steps is {self.num_steps}.") # x, z, y
+                
 
     def generate_demo(self):
         coordinates = []

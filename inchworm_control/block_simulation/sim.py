@@ -125,6 +125,7 @@ def update():
     # Simulates stepping of the leading leg, communication, state machine, etc 
     if held_keys["n"] and not key_n_pressed: 
         sim_data.detect_IW_collision()
+        sim_data.count_steps()
         for inchworm in sim_data.existing_inchworms:  
              
             if inchworm.paths and inchworm.leading_foot_loc != inchworm.paths[-1]:  # If there is a path, make the inchworm step through it

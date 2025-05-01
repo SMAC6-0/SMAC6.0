@@ -2,7 +2,7 @@ from enum import Enum
 
 # this file holds variables that the user can change just in this file before running
 
-GRID_SIZE = 8  # Define the size of your grid in one direction 
+GRID_SIZE = 30  # Define the size of your grid in one direction 
                 # Then, use this dimension to create a 3D list representing the cubical workspace 
                 # where every cell is 0, representing that all those cells are walkable 
 GRID_HEIGHT = 4
